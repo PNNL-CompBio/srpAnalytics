@@ -152,13 +152,19 @@ dose.files <-c(dose.files,paste0(data.dir,'/dose_response_vals_extra_ep.csv'))
 
 
 ##now we check for additional files
-parser = argparse::ArgumentParser('Command line tool to add extract-dose-response data to SRP Analytics Portal')
-parser$add_argument('--bmd',dest='new.bmd',type='string',default='',help='BMD file to add to portal')
-parser$add_argument('--doseResponse',dest='new.dose',type='string',default='',help='Dose response curve points to add to portal')
-parser$add_argument('--coords',dest='new.curv',type='string',default='',help='New curve fit coordinates to plot in SRP analytics portal ')
+parser = argparse::ArgumentParser()#'Command line tool to add extract-dose-response data to SRP Analytics Portal')
+parser$add_argument('--bmd',dest='new.bmd',type='character',default='',help='BMD file to add to portal')
+parser$add_argument('--doseResponse',dest='new.dose',type='character',default='',help='Dose response curve points to add to portal')
+parser$add_argument('--coords',dest='new.curv',type='character',default='',help='New curve fit coordinates to plot in SRP analytics portal ')
 
 
 args=parser$parse_args()
+if(args$new.bmd!="")
+    bmd.files<-c(args$new.bmd,bmd.files)
+if(args$new.dose!="")
+    dose.files<-c(dose.files,args$new.dose)
+if(args$new.curv!="")
+    curv.files<-c(curv.files,args$new.curv)
 
 bmds<-combineChemicalEndpointData(bmd.files)
 curves <-combineChemicalFitData(curv.files)

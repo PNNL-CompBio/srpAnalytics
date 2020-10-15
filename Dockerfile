@@ -1,6 +1,7 @@
 from rocker/tidyverse
 
 RUN apt-get update -qq && apt-get install -y net-tools
+RUN Rscript -e "install.packages('argparse')"
 
 COPY . srpAnalytics
 WORKDIR srpAnalytics
