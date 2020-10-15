@@ -9,7 +9,7 @@ The incoming data will be formatted as a table with schema TBD. Currently we are
 To create a data package, you simply need to add your data to the existing repository by running the following
 
 ```
-    docker pull sgosline/srp-analytics
+docker pull sgosline/srp-analytics
 ```
 
 ```
