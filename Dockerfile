@@ -1,7 +1,7 @@
 from rocker/tidyverse
 
 RUN apt-get update -qq && apt-get install -y net-tools
-RUN Rscript -e "install.packages('argparse')"
+RUN Rscript -e "install.packages('argparse'); install.packages('WikipediR')"
 
 COPY . srpAnalytics
 WORKDIR srpAnalytics

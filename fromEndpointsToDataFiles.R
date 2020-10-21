@@ -4,6 +4,8 @@
 require(dplyr)
 require(readxl)
 require(argparse)
+require(xml2)
+require(WikipediR)
 ##The data release will be comprised of 5 files
 #' 1- list of chemicals nad their information
 #' 2- list of sites, their metadata, and the chemical composition (curated sample data)
@@ -13,7 +15,9 @@ require(argparse)
 
 
 data.dir='/srpAnalytics/data/'
-
+#data.dir='data/'
+out.dir='/tmp/'
+#out.dir='./'
 
 #step 1 - get cas ids to class
 chemMapping<-read.csv(paste0(data.dir,'Chemicals.csv'))%>%
@@ -70,6 +74,7 @@ chemMeta<-readxl::read_xls(paste0(data.dir,
     select(INPUT,DTXSID,PREFERRED_NAME,INCHIKEY,SMILES,MOLECULAR_FORMULA,
            AVERAGE_MASS,PUBCHEM_DATA_SOURCES)%>%
   rename(cas_number='INPUT')%>%
+  mutate(chemDescription='WikipediaDataGoesHere')%>%
   right_join(fullMapping)%>%
     left_join(getNewChemicalClass())%>%
     tidyr::replace_na(list(newClass='Unclassified'))%>%
@@ -92,11 +97,11 @@ combineChemicalEndpointData<-function(bmdfiles){
   full.bmd<-do.call(rbind,files)%>%
 #    filter(!is.null(BMD_Analysis_Flag))%>%
     dplyr::select(Chemical_ID,End_Point,Model,BMD10,BMD50,AUC_Norm,BMD10_Flag,BMD50_Flag)%>%
-    mutate(zf.cid=as.character(Chemical_ID))%>%
+    mutate(zf.cid=as.character(Chemical_ID),endPointLink='')%>%
     left_join(chemMeta)%>%
     rename(ChemicalId='zf.cid')%>%
     left_join(endpointDetails)%>%
-    distinct()
+    distinct()%>%select(-ChemicalId)
 
   return(full.bmd)
 }
@@ -107,13 +112,11 @@ combineChemicalFitData<-function(bmdfiles){
 
   files = lapply(bmdfiles,read.csv)
   full.bmd<-do.call(rbind,files)%>%
-    #filter(!is.null(BMD_Analysis_Flag))%>%
-   # dplyr::select(Chemical_ID,End_Point,Model,BMD10,BMDL,BMD50,AUC,Min_Dose,Max_Dose)%>%
     mutate(zf.cid=as.character(Chemical_ID))%>%
- #   left_join(chemMeta,by='zf.cid')%>%
     rename(ChemicalId='zf.cid')%>%
      left_join(endpointDetails)%>%
-     distinct()
+     distinct()%>%
+    select(-c(`End Point Name`,Description,ChemicalId))
 
   return(full.bmd)
 }
@@ -122,13 +125,10 @@ combineChemicalDoseData<-function(bmdfiles){
 
   files = lapply(bmdfiles,read.csv)
   full.bmd<-do.call(rbind,files)%>%
-    #filter(!is.null(BMD_Analysis_Flag))%>%
-    # dplyr::select(Chemical_ID,End_Point,Model,BMD10,BMDL,BMD50,AUC,Min_Dose,Max_Dose)%>%
     mutate(zf.cid=as.character(Chemical_ID))%>%
-#    left_join(chemMeta,by='zf.cid%>%')%>%
     rename(ChemicalId='zf.cid')%>%
-    left_join(endpointDetails)%>%
-    distinct()
+  #  left_join(endpointDetails)%>%
+    distinct()%>%select(-ChemicalId)
 
   return(full.bmd)
 }
@@ -181,10 +181,10 @@ sampChem <-sampChem%>%left_join(id_mapping)%>%
   dplyr::select(-c(concentration,AVERAGE_MASS,unit))
 
 
-write.csv(bmds,file='/tmp/chemSummaryStats.csv',row.names = FALSE)
-write.csv(curves,file='/tmp/chemXYcoords.csv',row.names = FALSE)
-write.csv(doseReps,file='/tmp/chemdoseResponseVals.csv',row.names = FALSE)
-write.csv(sampChem,file='/tmp/chemicalsByExtractSample.csv',row.names=FALSE)
+write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),row.names = FALSE)
+write.csv(curves,file=paste0(out.dir,'chemXYcoords.csv'),row.names = FALSE)
+write.csv(doseReps,file=paste0(out.dir,'chemdoseResponseVals.csv'),row.names = FALSE)
+write.csv(sampChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
 
 #chemsOnly<-bmds%>%dplyr::select(Chemical_ID,cas_number,PREFERRED_NAME,chemical_class)%>%distinct()
 #write.csv(chemsOnly,'chemsWithEndpoints.csv',row.names=F)
