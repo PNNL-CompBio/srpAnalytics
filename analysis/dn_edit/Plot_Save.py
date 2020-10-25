@@ -38,9 +38,19 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         dose_max = np.nan 
         dose_response_auc_norm = np.nan
     
+    
+    today = datetime.datetime.today()
+    date_based_working_folder = today.strftime('%Y%m%d') + "_" + str(today.hour) \
+                            + "_" + str(today.minute) + "_" + str(today.second)
+    output_folder = os.path.join("output", date_based_working_folder)
+    output_folder_abs_path = os.path.abspath(output_folder)
+    print ("output_folder_abs_path:" + str(output_folder_abs_path))
+    if (os.path.isdir(output_folder_abs_path) == False):
+        os.mkdir(output_folder_abs_path)
+    
     if(not isinstance(chemical_id, str)):
         chemical_id = str(chemical_id)
-    filename = chemical_id + '_' + end_point + '.pdf'
+    filename = os.path.join(output_folder_abs_path, (chemical_id + '_' + end_point + '.pdf'))
     
         
     # Create dictionaries for various flags
@@ -59,12 +69,6 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
     
     if (os.path.isdir("output") == False):
         os.mkdir("output")
-        
-    output_folder = os.path.join("output", date_based_working_folder)
-    output_folder_abs_path = os.path.abspath(output_folder)
-    print ("output_folder_abs_path:" + str(output_folder_abs_path))
-    if (os.path.isdir(output_folder_abs_path) == False):
-        os.mkdir(output_folder_abs_path)
         
     bmd_vals_file_name = os.path.join(output_folder,'bmd_vals.csv')
     dose_response_vals_file_name = os.path.join(output_folder,'dose_response_vals.csv')
@@ -191,7 +195,6 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     if (os.path.isdir(output_folder_abs_path) == False):
         os.mkdir(output_folder_abs_path)
         
-    #filename = chemical_id + '_' + end_point + '.pdf'
     filename = os.path.join(output_folder_abs_path, (chemical_id + '_' + end_point + '.pdf'))
     model_preds = model_preds.round(3)
     
