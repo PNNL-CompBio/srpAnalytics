@@ -3,7 +3,7 @@
 
 # In[1]:
 
-
+import datetime
 import numpy as np
 import pandas as pd
 import os
@@ -73,14 +73,22 @@ if(test_data_sim == 0):
 
 # In[10]:
 
-
+today = datetime.datetime.today()
+date_based_working_folder = today.strftime('%Y%m%d') + "_" + str(today.hour) \
+                            + "_" + str(today.minute) + "_" + str(today.second)
+output_folder = os.path.join("output", date_based_working_folder)
+output_folder_abs_path = os.path.abspath(output_folder)
+print ("output_folder_abs_path:" + str(output_folder_abs_path))
+if (os.path.isdir(output_folder_abs_path) == False):
+    os.mkdir(output_folder_abs_path)
+    
 # Specify end_point and chemical of interest
 # *********************************************
 # Perform a check of the existence of "essential" column labels
 # *********************************************
 #end_points = ['ANY24','ANY120','TOT_MORT','ANY_MORT','BRN_','CRAN','EDEM','LTKR','MUSC','SKIN','TCHR']
-#end_points = ['AXIS','NC__','MO24','DP24','SM24','MORT']
-end_points = ['ANY24']
+end_points = ['AXIS','NC__','MO24','DP24','SM24','MORT']
+#end_points = ['ANY24']
 #for chemical_id in np.unique(morphological_data['chemical.id']):
 for chemical_id in [53, 54]:
     print(chemical_id)
@@ -101,7 +109,7 @@ for chemical_id in [53, 54]:
         if(qc_flag in [0, 1]):
             # No BMD analysis required. Generate report and exit
             print ("qc_flag in [0, 1]")
-            ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, None)
+            ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, output_folder_abs_path, None)
         else:
             # Fit dose response models
             model_predictions = bmdest.analyze_dose_response_data(test_dose_response)
@@ -112,17 +120,17 @@ for chemical_id in [53, 54]:
             if(unique_model_flag == 0):
                 # Generate report
                 print(test_dose_response.dose[-1:])
-                ps.save_results_good_data_unique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
+                ps.save_results_good_data_unique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), output_folder_abs_path, end_point)
             else:
                 bmd_analysis_flag = selected_model_params['model_select_flag']
                 if(bmd_analysis_flag == 1):
                     print ("bmd_analysis_flag = 1")
                     exit(1)
-                    ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, selected_model_params)
+                    ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, output_folder_abs_path, selected_model_params)
                 else:
                     print ("save_results_good_data_nounique_model")
                     exit(1)
-                    ps.save_results_good_data_nounique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
+                    ps.save_results_good_data_nounique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), output_folder_abs_path, end_point)
 
 
 # In[ ]:

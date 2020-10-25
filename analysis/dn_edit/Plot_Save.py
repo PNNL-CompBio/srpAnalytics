@@ -16,7 +16,7 @@ from astropy import stats as astrostats
 import BMD_Analysis_Functions as baf
 import os
     
-def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemical_id, end_point, selected_models = None):
+def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemical_id, end_point, output_folder_abs_path, selected_models = None):
     # Create the PdfPages object to which we will save the pages:
     # The with statement makes sure that the PdfPages object is closed properly at
     # the end of the block, even if an Exception occurs.
@@ -37,17 +37,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         dose_min = np.nan
         dose_max = np.nan 
         dose_response_auc_norm = np.nan
-    
-    
-    today = datetime.datetime.today()
-    date_based_working_folder = today.strftime('%Y%m%d') + "_" + str(today.hour) \
-                            + "_" + str(today.minute) + "_" + str(today.second)
-    output_folder = os.path.join("output", date_based_working_folder)
-    output_folder_abs_path = os.path.abspath(output_folder)
-    print ("output_folder_abs_path:" + str(output_folder_abs_path))
-    if (os.path.isdir(output_folder_abs_path) == False):
-        os.mkdir(output_folder_abs_path)
-    
+        
     if(not isinstance(chemical_id, str)):
         chemical_id = str(chemical_id)
     filename = os.path.join(output_folder_abs_path, (chemical_id + '_' + end_point + '.pdf'))
@@ -62,17 +52,10 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
                          5 : 'Negative correlation detected in dose-response data.' + '\n' + 'Caution advised.' }
 
     # Filenames for csv files containing the results of analysis
-    today = datetime.datetime.today()
-    print ("today:" + str(today))
-    date_based_working_folder = today.strftime('%Y%m%d') + "_" + str(today.hour) \
-                            + "_" + str(today.minute) + "_" + str(today.second)
-    
-    if (os.path.isdir("output") == False):
-        os.mkdir("output")
         
-    bmd_vals_file_name = os.path.join(output_folder,'bmd_vals.csv')
-    dose_response_vals_file_name = os.path.join(output_folder,'dose_response_vals.csv')
-    fit_vals_file_name = os.path.join(output_folder,'fit_vals.csv')
+    bmd_vals_file_name = os.path.join(output_folder_abs_path,'bmd_vals.csv')
+    dose_response_vals_file_name = os.path.join(output_folder_abs_path,'dose_response_vals.csv')
+    fit_vals_file_name = os.path.join(output_folder_abs_path,'fit_vals.csv')
 
     
     # Generate text for report
@@ -166,7 +149,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         d['CreationDate'] = datetime.datetime.today()
 
 
-def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds, selected_models, chemical_id, end_point):
+def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds, selected_models, chemical_id, output_folder_abs_path, end_point):
     # Create the PdfPages object to which we will save the pages:
     # The with statement makes sure that the PdfPages object is closed properly at
     # the end of the block, even if an Exception occurs.
@@ -185,15 +168,6 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     
     if(not isinstance(chemical_id, str)):
         chemical_id = str(chemical_id)
-    
-    today = datetime.datetime.today()
-    date_based_working_folder = today.strftime('%Y%m%d') + "_" + str(today.hour) \
-                            + "_" + str(today.minute) + "_" + str(today.second)
-    output_folder = os.path.join("output", date_based_working_folder)
-    output_folder_abs_path = os.path.abspath(output_folder)
-    print ("output_folder_abs_path:" + str(output_folder_abs_path))
-    if (os.path.isdir(output_folder_abs_path) == False):
-        os.mkdir(output_folder_abs_path)
         
     filename = os.path.join(output_folder_abs_path, (chemical_id + '_' + end_point + '.pdf'))
     model_preds = model_preds.round(3)
@@ -233,9 +207,9 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     unique_model_flag = selected_models['no_unique_model_found_flag']
     
     # Filenames for csv files containing the results of analysis
-    bmd_vals_file_name = os.path.join(output_folder,'bmd_vals.csv')
-    dose_response_vals_file_name = os.path.join(output_folder,'dose_response_vals.csv')
-    fit_vals_file_name = os.path.join(output_folder,'fit_vals.csv')
+    bmd_vals_file_name = os.path.join(output_folder_abs_path,'bmd_vals.csv')
+    dose_response_vals_file_name = os.path.join(output_folder_abs_path,'dose_response_vals.csv')
+    fit_vals_file_name = os.path.join(output_folder_abs_path,'fit_vals.csv')
     
     text_for_report = data_qc_flag_vals[qc_flag]
     
@@ -409,7 +383,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         d['CreationDate'] = datetime.datetime.today()
         
         
-def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_preds, selected_models, chemical_id, end_point):
+def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_preds, selected_models, chemical_id, output_folder_abs_path, end_point):
     # Create the PdfPages object to which we will save the pages:
     # The with statement makes sure that the PdfPages object is closed properly at
     # the end of the block, even if an Exception occurs.
@@ -428,15 +402,6 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     
     if(not isinstance(chemical_id, str)):
         chemical_id = str(chemical_id)
-    
-    today = datetime.datetime.today()
-    date_based_working_folder = today.strftime('%Y%m%d') + "_" + str(today.hour) \
-                            + "_" + str(today.minute) + "_" + str(today.second)
-    output_folder = os.path.join("output", date_based_working_folder)
-    output_folder_abs_path = os.path.abspath(output_folder)
-    print ("output_folder_abs_path:" + str(output_folder_abs_path))
-    if (os.path.isdir(output_folder_abs_path) == False):
-        os.mkdir(output_folder_abs_path)
     
     filename = os.path.join(output_folder_abs_path, (chemical_id + '_' + end_point + '.pdf'))
     filename = chemical_id + '_' + end_point + '.pdf'
@@ -477,9 +442,9 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     unique_model_flag = selected_models['no_unique_model_found_flag']
     
     # Filenames for csv files containing the results of analysis
-    bmd_vals_file_name = os.path.join(output_folder,'bmd_vals.csv')
-    dose_response_vals_file_name = os.path.join(output_folder,'dose_response_vals.csv')
-    fit_vals_file_name = os.path.join(output_folder,'fit_vals.csv')
+    bmd_vals_file_name = os.path.join(output_folder_abs_path,'bmd_vals.csv')
+    dose_response_vals_file_name = os.path.join(output_folder_abs_path,'dose_response_vals.csv')
+    fit_vals_file_name = os.path.join(output_folder_abs_path,'fit_vals.csv')
     
     # Generate text for report
     text_for_report = data_qc_flag_vals[qc_flag]
