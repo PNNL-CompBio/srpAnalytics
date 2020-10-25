@@ -40,3 +40,5 @@ vignettes/*.pdf
 
 *.~
 analysis/dn_edit/output
+__pycache__
+.ipynb_checkpoints
