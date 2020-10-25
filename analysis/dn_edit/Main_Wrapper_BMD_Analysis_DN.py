@@ -24,7 +24,7 @@ warnings.filterwarnings('ignore')
 os.getcwd()
 
 #complete_file_path = '/Users/kimd999/Dropbox/script/python/toxicology/DN_try/Phase_I_II.csv'
-complete_file_path = '/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/run_w_py/Phase_I_II.csv'
+complete_file_path = '/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/dn_edit/Phase_I_II.csv'
 
 morphological_data = pd.read_csv(complete_file_path, header = 0)
 #display(morphological_data.head())

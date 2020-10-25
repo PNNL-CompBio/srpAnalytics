@@ -1,7 +1,7 @@
 just make/enter any conda environment
 for Doonam, it is conda activate tox where some dependencies are installed like statsmodels
 
-then, simply python (v3) Main_Wrapper_BMD_Analysis.py
+then, simply python (v3) Main_Wrapper_BMD_Analysis_DN.py
 
 (confirmed) scipy 1.4.1 runs well but newer version (1.5.x) doesn’t work
 output -> see 'output' folder

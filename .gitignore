@@ -39,3 +39,4 @@ vignettes/*.pdf
 .Renviron
 
 *.~
+analysis/dn_edit/output
