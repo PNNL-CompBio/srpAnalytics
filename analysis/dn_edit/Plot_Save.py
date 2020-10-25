@@ -17,6 +17,8 @@ import BMD_Analysis_Functions as baf
 import os
     
 def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemical_id, end_point, output_folder_abs_path, selected_models = None):
+    print ("output_folder_abs_path:" + str(output_folder_abs_path))
+    
     # Create the PdfPages object to which we will save the pages:
     # The with statement makes sure that the PdfPages object is closed properly at
     # the end of the block, even if an Exception occurs.

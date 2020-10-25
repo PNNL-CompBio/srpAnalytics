@@ -6,7 +6,7 @@
 import datetime
 import numpy as np
 import pandas as pd
-import os
+import csv, os
 from scipy import stats
 from matplotlib import pyplot as plt
 
@@ -31,6 +31,7 @@ morphological_data = pd.read_csv(complete_file_path, header = 0)
 #display(morphological_data.columns)
 #display(np.unique(morphological_data.well))
 
+'''
 ### clear existing result csv files.
 if (os.path.isfile("bmd_vals.csv") == True):
     os.remove("bmd_vals.csv")
@@ -38,7 +39,7 @@ if (os.path.isfile("fit_vals.csv") == True):
     os.remove("fit_vals.csv")
 if (os.path.isfile("dose_response_vals.csv") == True):
     os.remove("dose_response_vals.csv")
-
+'''
 
 # In[3]:
 
@@ -86,9 +87,15 @@ if (os.path.isdir(output_folder_abs_path) == False):
 # *********************************************
 # Perform a check of the existence of "essential" column labels
 # *********************************************
+# Phase_I_II.csv has 22 endpoints
+
 #end_points = ['ANY24','ANY120','TOT_MORT','ANY_MORT','BRN_','CRAN','EDEM','LTKR','MUSC','SKIN','TCHR']
+# 11
+
 end_points = ['AXIS','NC__','MO24','DP24','SM24','MORT']
-#end_points = ['ANY24']
+#6
+
+#end_points = ['NC24']
 #for chemical_id in np.unique(morphological_data['chemical.id']):
 for chemical_id in [53, 54]:
     print(chemical_id)
@@ -109,7 +116,10 @@ for chemical_id in [53, 54]:
         if(qc_flag in [0, 1]):
             # No BMD analysis required. Generate report and exit
             print ("qc_flag in [0, 1]")
-            ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, output_folder_abs_path, None)
+            #ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, output_folder_abs_path, None)
+            if (os.path.isdir("failed") == False):
+                os.mkdir("failed")
+            ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, "failed", None)
         else:
             # Fit dose response models
             model_predictions = bmdest.analyze_dose_response_data(test_dose_response)
