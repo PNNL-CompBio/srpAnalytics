@@ -39,7 +39,10 @@ vignettes/*.pdf
 .Renviron
 
 *.~
-analysis/dn_*/output
+analysis/*/output
+analysis/*/*.csv
+analysis/*/*.pdf
 __pycache__
 .ipynb_checkpoints
 ~*
+#*

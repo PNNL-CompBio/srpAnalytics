@@ -70,6 +70,7 @@ def BMD_feasibility_analysis(dose_response):
         frac_response = dose_response['num_affect']/dose_response['num_embryos']      
         if((frac_response.iloc[-1] + frac_response.iloc[-2])/2.0 < (frac_response.iloc[0] + frac_response.iloc[1])/2.0):
             qc_flag = 1
+            print ("average trend reverted")
         else:
             [t_stat, p_value] = stats.ttest_1samp(np.diff(frac_response),0)
             if(p_value < 0.05):

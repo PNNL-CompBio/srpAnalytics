@@ -5,7 +5,7 @@ Paritosh Pande
 Pacific Northwest National Lab, Richland, WA
 Original created on: May 2020
 """
-
+import os
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -55,6 +55,7 @@ def gen_dose_response(data_ep_cid, end_point):
 
 # Get data QC code
 def BMD_feasibility_analysis(dose_response):
+    final_count = ''
     '''This function performs feasibility analysis
     for dose respone data. The value returned is a 
     flag indicating data quality as defined below:
@@ -70,6 +71,22 @@ def BMD_feasibility_analysis(dose_response):
         frac_response = dose_response['num_affect']/dose_response['num_embryos']      
         if((frac_response.iloc[-1] + frac_response.iloc[-2])/2.0 < (frac_response.iloc[0] + frac_response.iloc[1])/2.0):
             qc_flag = 1
+            if (os.path.isfile("qc_1_1_case.txt") == False):
+                final_count = 0
+                f_out = open("qc_1_1_case.txt", 'w')
+                f_out.write(str(final_count+1)+"\n")
+                f_out.close()
+            else:
+                f_out = open("qc_1_1_case.txt")
+                final_count = 0
+                for line in f_out:
+                    final_count = int(line)
+                f_out.close()
+                
+                f_out = open("qc_1_1_case.txt", 'a+')
+                f_out.write(str(final_count+1)+"\n")
+                f_out.close()
+
         else:
             [t_stat, p_value] = stats.ttest_1samp(np.diff(frac_response),0)
             if(p_value < 0.05):
@@ -86,6 +103,22 @@ def BMD_feasibility_analysis(dose_response):
             #    qc_flag = 1
             else:
                 qc_flag = 1
+                if (os.path.isfile("qc_1_2_case.txt") == False):
+                    final_count = 0
+                    f_out = open("qc_1_2_case.txt", 'w')
+                    f_out.write(str(final_count+1)+"\n")
+                    f_out.close()
+                else:
+                    f_out = open("qc_1_2_case.txt")
+                    final_count = 0
+                    for line in f_out:
+                        final_count = int(line)
+                    f_out.close()
+                    
+                    f_out = open("qc_1_2_case.txt", 'a+')
+                    f_out.write(str(final_count+1)+"\n")
+                    f_out.close()
+                    
     # Perform final check based on correlation
     if(qc_flag!=0 and qc_flag!=1):
         data_corr = stats.pearsonr(np.log10(dose_response['dose']+1e-15), frac_response)
