@@ -59,7 +59,7 @@ def BMD_feasibility_analysis(dose_response):
     for dose respone data. The value returned is a 
     flag indicating data quality as defined below:
     0: Not enough dose groups for BMD analysis. BMD analysis not performed
-    1: No trend detected in dose-response data.. BMD Analysis not performed
+    1: No trend detected in dose-response data. BMD analysis not performed
     2: Good dose-response data
     3: Dose-response data quality poor. BMD analysis might be unreliable
     4: Data resolution poor. BMD analysis might be unreliable
