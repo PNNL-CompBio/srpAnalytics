@@ -9,7 +9,7 @@ The incoming data will be formatted as a table with schema TBD. Currently we are
 If you prefer to build your own docker image, run these commands.
 
 ```
-git clone 
+git clone https://github.com/sgosline/srpAnalytics.git
 docker build . -t srp-analytics
 docker run --volume $PWD:/tmp -ti srp-analytics
 ```
