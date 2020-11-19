@@ -5,7 +5,7 @@ require(dplyr)
 require(readxl)
 require(argparse)
 require(xml2)
-require(WikipediR)
+#require(WikipediR)
 ##The data release will be comprised of 5 files
 #' 1- list of chemicals nad their information
 #' 2- list of sites, their metadata, and the chemical composition (curated sample data)
@@ -16,9 +16,9 @@ require(WikipediR)
 
 #These pathways refer to absolute pathways in the docker image
 data.dir='/srpAnalytics/data/'
-data.dir='data/'
+#data.dir='data/'
 out.dir='/tmp/'
-out.dir='./'
+#out.dir='./'
 
 #step 1 - get cas ids to pre-defined class
 chemMapping<-read.csv(paste0(data.dir,'Chemicals.csv'))%>%
@@ -45,7 +45,8 @@ fullMapping<-readxl::read_xlsx(paste0(data.dir,'OSU_BU_Overlap_Inventory_2020MAR
 #here is our pre-defined dictionary
 endpointDetails<-readxl::read_xlsx(paste0(data.dir,'SuperEndpoint Mapping 2020Sept2.xlsx'),
                                    sheet='Dictionary')%>%
-    rename(End_Point='Abbreviation',`End Point Name`='Simple name (<20char)')
+    rename(End_Point='Abbreviation',`End Point Name`='Simple name (<20char)')%>%
+  rename(endPointLink='Ontology Link')
 
 
 #'getNewChemicalClass
@@ -109,8 +110,8 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE){
   
   mid.bmd<-do.call(rbind,files)%>%
 #    filter(!is.null(BMD_Analysis_Flag))%>%
-    dplyr::select(Chemical_ID,End_Point,Model,BMD10,BMD50,AUC_Norm,BMD10_Flag,BMD50_Flag)%>%
-    mutate(endPointLink='')
+    dplyr::select(Chemical_ID,End_Point,Model,BMD10,BMD50,AUC_Norm,BMD10_Flag,BMD50_Flag)#%>%
+   # mutate(endPointLink='')
     
   
   if(is_extract)
@@ -225,19 +226,22 @@ sampChem <-sampChem%>%left_join(id_mapping)%>%
   dplyr::select(-c(concentration,AVERAGE_MASS,unit))
 
 
+
 ##Final output for the platform team is these 4 files
-write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),row.names = FALSE)
-write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE)
+write.csv(bmds,file=paste0('chemSummaryStats.csv'),row.names = FALSE)
+write.csv(ebmds,file=paste0('envSampSummaryStats.csv'),row.names=FALSE)
 
-write.csv(curves,file=paste0(out.dir,'chemXYcoords.csv'),row.names = FALSE)
-write.csv(ecurves,file=paste0(out.dir,'envSampXYcoords.csv'),row.names = FALSE)
+write.csv(curves,file=paste0('chemXYcoords.csv'),row.names = FALSE)
+write.csv(ecurves,file=paste0('envSampXYcoords.csv'),row.names = FALSE)
 
-write.csv(doseReps,file=paste0(out.dir,'chemdoseResponseVals.csv'),row.names = FALSE)
-write.csv(edrs,file=paste0(out.dir,'envSampdoseResponseVals.csv'),row.names = FALSE)
+write.csv(doseReps,file=paste0('chemdoseResponseVals.csv'),row.names = FALSE)
+write.csv(edrs,file=paste0('envSampdoseResponseVals.csv'),row.names = FALSE)
 
 
 write.csv(sampChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
 
 ##TODO: zip them up into package together with a readme/description for datahub 
-
+allfiles<-c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))])
+print(allfiles)
+tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
 
