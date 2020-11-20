@@ -238,7 +238,7 @@ write.csv(doseReps,file=paste0('chemdoseResponseVals.csv'),row.names = FALSE)
 write.csv(edrs,file=paste0('envSampdoseResponseVals.csv'),row.names = FALSE)
 
 
-write.csv(sampChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
+write.csv(sampChem,file=paste0('chemicalsByExtractSample.csv'),row.names=FALSE)
 
 ##TODO: zip them up into package together with a readme/description for datahub 
 allfiles<-c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))])
