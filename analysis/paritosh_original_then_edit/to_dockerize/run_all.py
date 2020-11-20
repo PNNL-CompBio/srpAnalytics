@@ -10,8 +10,8 @@ import os, sys, time
 if (__name__ == "__main__"):
     args = sys.argv[0:]
     if (len(args) != 2):
-        print ("Specify tall_raw.csv \n")
-        print ("For example, python run_all.py input/7_PAH_zf_morphology_data_2020NOV11_tall.csv\n")
+        print ("Specify <tall_raw.csv> \n")
+        print ("For tutorial, python run_all.py input/7_PAH_zf_morphology_data_2020NOV11_tall.csv\n")
         exit(1)
 
     input_csv_file_name = args[1]
