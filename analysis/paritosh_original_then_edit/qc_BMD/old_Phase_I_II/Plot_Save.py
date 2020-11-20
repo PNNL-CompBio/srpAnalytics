@@ -465,7 +465,6 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
 
     with PdfPages(filename) as pdf:
 
-        
         # Output data summary
         fig, ax = plt.subplots()
         # hide axes
@@ -475,8 +474,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         fig.text(0.1,0.7,' '.join(map(str, text_for_report)), transform=fig.transFigure, size=10, ha="left")
         plt.title('Summary of Analysis')
         pdf.savefig()
-        plt.close()
-        
+        plt.close()        
         
         # Print Model Predictions
         fig, ax = plt.subplots()
@@ -505,11 +503,9 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         fig.tight_layout()
         pdf.savefig()  # saves the current figure into a pdf page
         plt.close()
-
-       
+        
                 
         CI_bounds = np.zeros([2, len(test_dose_response.dose)])
-        
         for index in range(len(test_dose_response.dose)):
             CI = astrostats.binom_conf_interval(test_dose_response.num_affected[index], test_dose_response.total_num[index], confidence_level = 0.95)
             CI = np.abs(CI - test_dose_response.num_affected[index]/test_dose_response.total_num[index])

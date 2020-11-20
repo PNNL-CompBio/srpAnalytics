@@ -18,7 +18,8 @@ BMR_50 = "global"
 BMR_50 = 0.5
 
 # Maximum iteration limit for BMDL convergence
-bmdl_max_iter = 100
+bmdl_max_iter = 1000
+tol_thresh = 1e-4
 
 def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analysis_flag=1):
     # Setup the dataframe for data reporting
@@ -31,10 +32,10 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                    'probit', 'log_probit', 'multistage_2', 'quantal_linear']
     
    
-    
     # Fit different models
     for model_index, model_name in enumerate(model_names):
         
+        print(model_name)
         # Set flags for model and bmdl_convergence convergence
         model_converge_flag = 1
         bmdl_converge_flag = 1
@@ -44,6 +45,8 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
         if(model_name == 'logistic'):
             model = baf.Logistic(test_dose_response[['dose','num_affected', 'total_num']].copy())
             res = model.fit()
+            
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))
             
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
@@ -60,10 +63,10 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 
                 bmd = np.log((1 + np.exp(-alpha_)*BMR)/(1-BMR))/beta_
                 bmd_50 = np.log((1 + np.exp(-alpha_)*BMR_50)/(1-BMR))/beta_
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
                 
+                print('Fit Paramas:' + str([alpha_,beta_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
             else:
                 pred_vals = np.nan
                 bmd = np.nan
@@ -72,16 +75,17 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/5
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break
                         
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
@@ -99,17 +103,21 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         break
                     
                     bmdl_llv = logistic_bmr_fit.llf
-            
+
                     if((bmdl_llv - bmdl_llv_thresh)>0):
                         bmdl_val_hi = bmdl_mid_val
                     else:
                         bmdl_val_lo = bmdl_mid_val
                 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)
+                    
+                print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
             
         elif(model_name == 'gamma'):
             model = baf.Gamma(test_dose_response[['dose','num_affected', 'total_num']].copy())
             res = model.fit()
+
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))
             
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
@@ -127,32 +135,32 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 # Estimate BMD
                 bmd = stats.gamma.ppf(BMR, alpha_, scale = 1/beta_)
                 bmd_50 = stats.gamma.ppf(BMR_50, alpha_, scale = 1/beta_)
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
-                
+                print('Fit Paramas:' + str([g_,alpha_,beta_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
             else:
                 pred_vals = np.nan
                 bmd = np.nan
                 bmd_50 = np.nan
             
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
-#                print('Estimating BMDL ...')
+                print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/5
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break                    
                 
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
-           
+                               
                     # Examine the sign of (llv at bmdl_mid_val) - bmdl_llv_thresh
                     # and update bmdl_lo and hi values appropriately
                     model_gamma_bmd = baf.Gamma_BMD(test_dose_response[['dose','num_affected', 'total_num']].copy())
@@ -172,12 +180,15 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                     else:
                         bmdl_val_lo = bmdl_mid_val
                 
-                    tol = abs(bmdl_llv - bmdl_llv_thresh)          
-                 
+                    tol = abs(bmdl_llv - bmdl_llv_thresh)                    
+    
+                print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
+                           
         elif(model_name == 'weibull'):
             model = baf.Weibull(test_dose_response[['dose','num_affected', 'total_num']].copy())
             res = model.fit()
-            
+
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))            
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0            
@@ -194,10 +205,9 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 # Estimate BMD
                 bmd = (-np.log(1 - BMR)/beta_)**(1/alpha_)
                 bmd_50 = (-np.log(1 - BMR_50)/beta_)**(1/alpha_)
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
-                
+                print('Fit Paramas:' + str([g_,alpha_,beta_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
             else:
                 pred_vals = np.nan
                 bmd = np.nan
@@ -207,17 +217,18 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/5
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
                     
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break
                     
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
@@ -242,11 +253,13 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
                 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)
+                print('BMDL Convergence: '+ str(not(bool(bmdl_converge_flag))))
                 
         elif(model_name == 'log_logistic'):
             model = baf.Log_Logistic(test_dose_response[['dose','num_affected', 'total_num']].copy())  
             res = model.fit()
-            
+
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))            
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0            
@@ -263,10 +276,9 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 # Estimate BMD
                 bmd = np.exp((np.log(BMR/(1-BMR)) - alpha_)/beta_)
                 bmd_50 = np.exp((np.log(BMR_50/(1-BMR_50)) - alpha_)/beta_)
-                print(res.params)
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
+                print('Fit Paramas:' + str([g_,alpha_,beta_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
                 
             else:
                 pred_vals = np.nan
@@ -276,17 +288,18 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/5
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
                     
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break
                     
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
@@ -311,11 +324,13 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)          
+                print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
 
         elif(model_name == 'probit'):
             model = baf.Probit(test_dose_response[['dose','num_affected', 'total_num']].copy())        
             res = model.fit()
-            
+
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))            
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0            
@@ -334,9 +349,9 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 p_BMD_50 = p_0 + (1 - p_0)*BMR_50
                 bmd = (stats.norm.ppf(p_BMD) - alpha_)/beta_
                 bmd_50 = (stats.norm.ppf(p_BMD_50) - alpha_)/beta_
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
+                print('Fit Paramas:' + str([alpha_,beta_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
                 
             else:
                 pred_vals = np.nan
@@ -346,17 +361,18 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/5
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
 
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break
                     
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
@@ -381,11 +397,13 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)
+                print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
 
         elif(model_name == 'log_probit'):
             model = baf.Log_Probit(test_dose_response[['dose','num_affected', 'total_num']].copy())        
             res = model.fit()
-            
+
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0            
@@ -402,9 +420,9 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 # Estimate BMD
                 bmd = np.exp((stats.norm.ppf(BMR) - alpha_)/beta_)
                 bmd_50 = np.exp((stats.norm.ppf(BMR_50) - alpha_)/beta_)
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
+                print('Fit Paramas:' + str([g_,alpha_,beta_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
                 
             else:
                 pred_vals = np.nan
@@ -415,17 +433,18 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/2
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
 
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break
 
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
@@ -434,7 +453,7 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                     # and update bmdl_lo and hi values appropriately
                     model_log_probit_bmd = baf.Log_Probit_BMD(test_dose_response[['dose','num_affected', 'total_num']].copy())
                     log_probit_bmr_fit = model_log_probit_bmd.profile_ll_fit([g_, alpha_, bmdl_mid_val])
-
+                    
                     # Check model convergence
                     if(log_probit_bmr_fit.mle_retvals['converged'] is True):
                         bmdl_converge_flag = 0
@@ -450,11 +469,13 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)
+                print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
             
         elif(model_name == 'multistage_2'):
             model = baf.Multistage_2(test_dose_response[['dose','num_affected', 'total_num']].copy())        
             res = model.fit()
-            
+
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))            
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0            
@@ -473,9 +494,9 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                        - (4*beta2_*np.log(1 - BMR))))/(2*beta2_)
                 bmd_50 = (-beta1_ + np.sqrt((beta1_**2) \
                        - (4*beta2_*np.log(1 - BMR_50))))/(2*beta2_)
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
+                print('Fit Paramas:' + str([g_,beta1_,beta2_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
                 
             else:
                 pred_vals = np.nan
@@ -485,20 +506,22 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/2
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
 
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break
 
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
+                    print('bmdl_mid_val: ' + str(bmdl_mid_val))
 
                     # Examine the sign of (llv at bmdl_mid_val) - bmdl_llv_thresh
                     # and update bmdl_lo and hi values appropriately
@@ -520,11 +543,13 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)    
+                print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
                 
         elif(model_name == 'quantal_linear'):
             model = baf.Quantal_Linear(test_dose_response[['dose','num_affected', 'total_num']].copy())        
             res = model.fit()
             
+            print('Model Convergence: ' + str(res.mle_retvals['converged']))            
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0            
@@ -540,9 +565,9 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 # Estimate BMD
                 bmd = -np.log(1 - BMR)/beta_
                 bmd_50 = -np.log(1 - BMR_50)/beta_
-                print(model_name)
-                print(bmd)
-                print(bmd_50)
+                print('Fit Paramas:' + str([g_,beta_]))
+                print('BMD 10: ' + str(bmd))
+                print('BMD 50: ' + str(bmd_50))
                 
             else:
                 pred_vals = np.nan
@@ -552,17 +577,18 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 print('Estimating BMDL ...')
                 # Using a bisection method for finding the BMDL value
-                bmdl_val_lo = bmd/2
+                bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
 
                 tol = 1
                 bmdl_iter_count = 0
-                while ((tol > 1e-4) and (bmdl_iter_count < bmdl_max_iter)):
+                while ((tol > tol_thresh) and (bmdl_iter_count < bmdl_max_iter)):
                     bmdl_iter_count+=1
 
                     # If maximum iterations are reached, set convergence flag to False and quit
                     if(bmdl_iter_count == bmdl_max_iter):
                         bmdl_converge_flag = 1
+                        bmdl_mid_val = np.nan
                         break
 
                     bmdl_mid_val = (bmdl_val_lo + bmdl_val_hi)/2
@@ -587,6 +613,7 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)        
+                print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
             
         # Estimate fit statistics
         
@@ -615,6 +642,10 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
 
         if(bmdl_converge_flag):
             bmdl_mid_val = np.nan
+            print('BMDL: ' + 'NaN' + '\n')
+        else:
+            print('BMDL: ' + str(bmdl_mid_val) + '\n')
+                
             
         # Populate data reporting dataframe
         model_predictions.loc[model_index] = [model_name, chi_square, stats.chi2.sf(chi_square, len(test_dose_response.dose) - len(res.params)), \

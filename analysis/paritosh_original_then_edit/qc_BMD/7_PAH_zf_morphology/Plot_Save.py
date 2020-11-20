@@ -39,19 +39,18 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         dose_response_auc_norm = np.nan
     
     if(not isinstance(chemical_id, str)):
-        chemical_id = str(chemical_id)
-        
+        chemical_id = str(chemical_id)    
     filename = chemical_id + '_' + end_point + '.pdf'
     
-        
     # Create dictionaries for various flags
     data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n ' + 'BMD analysis not performed.',
                          1 : 'No trend detected in dose-response data.' + '\n' + 'BMD analysis not performed.',
+                         #11 : 'qc=1-1',
+                         #12 : 'qc=1-2',
                          2 : 'Dose-response data quality very good.',
                          3 : 'Dose-response data quality good.',
                          4 : 'Data resolution poor.' + '\n' + 'Caution advised.',
                          5 : 'Negative correlation detected in dose-response data.' + '\n' + 'Caution advised.' }
-
  
     # Filenames for csv files containing the results of analysis
     bmd_vals_file_name = 'bmd_vals.csv'
@@ -64,13 +63,8 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
     else:
         text_for_report = data_qc_flag_vals[qc_flag]
         
-       
-
     with PdfPages(filename) as pdf:
-
-
         # Output data summary
-            
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
@@ -81,18 +75,14 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         plt.title('Summary of Analysis')
         pdf.savefig()
         plt.close()
-        
-        
-        # Plot dose-response data
-                
+         
+        # Plot dose-response data        
         CI_bounds = np.zeros([2, len(test_dose_response.dose)])
-        
         for index in range(len(test_dose_response.dose)):
             CI = astrostats.binom_conf_interval(test_dose_response.num_affected[index], test_dose_response.total_num[index], confidence_level = 0.95)
             CI = np.abs(CI - test_dose_response.num_affected[index]/test_dose_response.total_num[index])
             CI_bounds[0, index] = CI[0]
             CI_bounds[1, index] = CI[1]
-
         fig, ax = plt.subplots()
         ax.set_xscale("linear")
         ax.errorbar(test_dose_response.dose, test_dose_response.num_affected/test_dose_response.total_num, CI_bounds, marker ='s', mfc='red', fmt='.')
@@ -123,13 +113,29 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         bmd_vals['BMD_Analysis_Flag'] = np.nan
         bmd_vals['BMD_Flag'] = np.nan
         bmd_vals['BMD50_Flag'] = np.nan
-                
-        dose_response_vals['Chemical_ID'] = [chemical_id]*len(test_dose_response.dose)
-        dose_response_vals['End_Point'] = [end_point]*len(test_dose_response.dose)
-        dose_response_vals['Dose'] = test_dose_response.dose
-        dose_response_vals['Response'] = test_dose_response.num_affected/test_dose_response.total_num
-        dose_response_vals['CI_Lo'] = CI_bounds[0, :]
-        dose_response_vals['CI_Hi'] = CI_bounds[1, :]
+        
+        assign_nan = False
+        try: # 53_ANY24
+            print ("test_dose_response.dose[0]:"+str(test_dose_response.dose[0]))
+        except: # 1532_ANY24
+            assign_nan = True
+            # print ("test_dose_response.dose:"+str(test_dose_response.dose))
+            # Series([], Name: dose, dtype: object)
+        
+        if (assign_nan):            
+            dose_response_vals['Chemical_ID'] = [chemical_id]
+            dose_response_vals['End_Point'] = [end_point]
+            dose_response_vals['Dose'] = np.nan    
+            dose_response_vals['Response'] = np.nan
+            dose_response_vals['CI_Lo'] = np.nan
+            dose_response_vals['CI_Hi'] = np.nan
+        else:
+            dose_response_vals['Chemical_ID'] = [chemical_id]*len(test_dose_response.dose)
+            dose_response_vals['End_Point'] = [end_point]*len(test_dose_response.dose)
+            dose_response_vals['Dose'] = test_dose_response.dose
+            dose_response_vals['Response'] = test_dose_response.num_affected/test_dose_response.total_num
+            dose_response_vals['CI_Lo'] = CI_bounds[0, :]
+            dose_response_vals['CI_Hi'] = CI_bounds[1, :]
         
         fit_vals['Chemical_ID'] = [chemical_id]
         fit_vals['End_Point'] = [end_point]
@@ -182,19 +188,16 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     
     # Extract subset of results table 
     model_preds_basic_stats = model_preds[['Model', 'Chi-squared', 'p-val', 'AIC', 'BMD10', 'BMDL10']]
-
     residual_column_names = [('dose'+ str(i)) for i in range(len(test_dose_response['dose']))] 
     model_preds_residuals = pd.DataFrame(columns = ['Model'] + residual_column_names)   
     model_preds_residuals['Model'] = model_preds['Model']
     model_preds_residuals_matrix = np.empty((model_preds['Scaled Residuals'].shape[0],len(test_dose_response['dose'])))
     model_preds_residuals_matrix[:] = np.nan
-    
     model_preds_residuals[residual_column_names] = model_preds_residuals_matrix
     for model_pred_index in range(model_preds['Scaled Residuals'].shape[0]):
         if(not any(np.isnan(model_preds['Scaled Residuals'][model_pred_index]))):
             model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(6)
 
-        
     # Create dictionaries for various flags
     data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n ' + 'BMD analysis not performed.',
                          1 : 'No trend detected in dose-response data.' + '\n' + 'BMD analysis not performed.',
@@ -219,7 +222,6 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     bmd_vals_file_name = 'bmd_vals.csv'
     dose_response_vals_file_name = 'dose_response_vals.csv'
     fit_vals_file_name = 'fit_vals.csv'
-    
     text_for_report = data_qc_flag_vals[qc_flag]
     
     # Generate text for report
@@ -231,20 +233,15 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         # Specify reason for non-uniqueness
         text_for_report = text_for_report + '\n' + unique_model_flag_vals[unique_model_flag] + '\n' + bmd_analysis_flag_vals[bmd_analysis_flag]
       
-       
-
     with PdfPages(filename) as pdf:
-
         # Output data summary
-            
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
         ax.axis('off')
         ax.axis('tight')
         fig.text(0.1,0.7,' '.join(map(str, text_for_report)), transform=fig.transFigure, size=10, ha="left")
-        plt.title('Summary of Analysis')
-        
+        plt.title('Summary of Analysis')   
         pdf.savefig()
         plt.close()
         
@@ -268,15 +265,11 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         fig.patch.set_visible(False)
         ax.axis('off')
         ax.axis('tight')
-
         ax.table(cellText=model_preds_residuals.values, colLabels=model_preds_residuals.columns, loc='center')
-        
         plt.title('Scaled Residuals')
         fig.tight_layout()
         pdf.savefig()  # saves the current figure into a pdf page
         plt.close()
-
-      
         
         # Extract data for best model found and save it for portal
         # and plot fit for selected model
@@ -472,7 +465,6 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
 
     with PdfPages(filename) as pdf:
 
-        
         # Output data summary
         fig, ax = plt.subplots()
         # hide axes
@@ -482,8 +474,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         fig.text(0.1,0.7,' '.join(map(str, text_for_report)), transform=fig.transFigure, size=10, ha="left")
         plt.title('Summary of Analysis')
         pdf.savefig()
-        plt.close()
-        
+        plt.close()        
         
         # Print Model Predictions
         fig, ax = plt.subplots()
@@ -512,11 +503,9 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         fig.tight_layout()
         pdf.savefig()  # saves the current figure into a pdf page
         plt.close()
-
-       
+        
                 
         CI_bounds = np.zeros([2, len(test_dose_response.dose)])
-        
         for index in range(len(test_dose_response.dose)):
             CI = astrostats.binom_conf_interval(test_dose_response.num_affected[index], test_dose_response.total_num[index], confidence_level = 0.95)
             CI = np.abs(CI - test_dose_response.num_affected[index]/test_dose_response.total_num[index])

@@ -47,10 +47,11 @@ class Logistic(GenericLikelihoodModel):
             alpha_0 = -mu_0/s_0
             beta_0 = 1/s_0
             start_params = np.array([alpha_0, beta_0])
+            print('start_params [alpha, beta]: ' + str(start_params))
             
-        return super(Logistic, self).fit(start_params = start_params, maxiter = maxiter, method = 'nm', maxfun = maxfun, **kwds)
+        return super(Logistic, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None, None],[1e-5,None]], disp=0, **kwds)
       
-class Logistic_BMD(GenericLikelihoodModel):         
+class Logistic_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
         super(Logistic_BMD, self).__init__(endog, exog=None, **kwds)
 
@@ -110,9 +111,10 @@ class Gamma(GenericLikelihoodModel):
             beta_0 = self.endog[:,0].flatten().mean()/self.endog[:,0].flatten().var()
             alpha_0 = self.endog[:,0].flatten().mean() * beta_0
             start_params = np.array([g_0, alpha_0, beta_0])
-            
-        return super(Gamma, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None, None],[None, None]], **kwds)
+            print('start_params [g, alpha, beta]: ' + str(start_params))
 
+        return super(Gamma, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[1e-5, None]], **kwds)
+        
 class Gamma_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
         super(Gamma_BMD, self).__init__(endog, exog=None, **kwds)
@@ -136,7 +138,7 @@ class Gamma_BMD(GenericLikelihoodModel):
         return -log_lhood
     
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Gamma_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[start_params[1]/2,start_params[1]*2],[start_params[2],start_params[2]] ],**kwds)
+        return super(Gamma_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[start_params[2],start_params[2]]],**kwds)
     
 # Weibull function
         
@@ -169,11 +171,24 @@ class Weibull(GenericLikelihoodModel):
     def fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
         if start_params is None:
             g_0 = 0.1 
-            alpha_0 = 1.0
-            beta_0 = 1/((self.endog[:,0].flatten().mean())**alpha_0)/np.log(2)
-            start_params = np.array([g_0, alpha_0, beta_0])
             
-        return super(Weibull, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-9,None],[1e-9,None]], **kwds)
+            dose = self.endog[:,0].flatten()
+            num_affected = self.endog[:,1].flatten()
+            num_total = self.endog[:,2].flatten()
+            frac_affected = num_affected/num_total
+
+            X = np.append(np.ones([len(dose[1:]),1]),np.log(np.reshape(dose[1:],(len(dose[1:]),1))),1)
+            Y = np.array(np.reshape(np.log(-np.log(1 - frac_affected[1:])),(len(dose[1:]),1)))
+
+            betas = np.linalg.inv((X.T).dot(X)).dot(X.T).dot(Y)
+            
+            alpha_0 = betas[1]
+            beta_0 = np.exp(betas[0])
+            
+            start_params = np.array([g_0, alpha_0, beta_0])
+            print('start_params [g, alpha, beta]: ' + str(start_params))
+            
+        return super(Weibull, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None],[1e-9,None]], **kwds)
     
 class Weibull_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -197,7 +212,7 @@ class Weibull_BMD(GenericLikelihoodModel):
         return -log_lhood
     
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Weibull_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[start_params[1]/2,start_params[1]*2],[start_params[2],start_params[2]]],**kwds)
+        return super(Weibull_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None],[start_params[2],start_params[2]]],**kwds)
     
 # Log-logistic function
         
@@ -239,6 +254,7 @@ class Log_Logistic(GenericLikelihoodModel):
             alpha_0 = -mu_0/s_0
             beta_0 = 1/s_0
             start_params = np.array([g_0, alpha_0, beta_0])
+            print('start_params [g, alpha, beta]: ' + str(start_params))
             
         return super(Log_Logistic, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None, None],[None, None]], **kwds)
     
@@ -301,8 +317,9 @@ class Probit(GenericLikelihoodModel):
             alpha_0 = stats.norm.ppf(num_affected[0]/num_total[0])
             beta_0 = (stats.norm.ppf(num_affected[-1]/num_total[-1]) - alpha_0)/dose[-1] 
             start_params = np.array([alpha_0, beta_0])
-            
-        return super(Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method='nm', **kwds)
+            print('start_params [alpha, beta]: ' + str(start_params))
+
+        return super(Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None, None],[1e-5,None]], **kwds)
     
 class Probit_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -375,12 +392,13 @@ class Log_Probit(GenericLikelihoodModel):
             betas = np.linalg.inv((X.T).dot(X)).dot(X.T).dot(Y)
             
             alpha_0 = betas[0]
-            beta_0 = betas[1]
+            beta_0 = max(1e-5,betas[1])
             
             dose = self.endog[:,0].flatten()
             start_params = np.array([g_0, alpha_0, beta_0])
+            print('start_params [g, alpha, beta]: ' + str(start_params))
             
-        return super(Log_Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None,None],[None,None]], **kwds)
+        return super(Log_Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None,None],[1e-5,None]], **kwds)
     
 class Log_Probit_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -405,7 +423,7 @@ class Log_Probit_BMD(GenericLikelihoodModel):
         return -log_lhood
     
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Log_Probit_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[start_params[1]/2,start_params[1]*2],[start_params[2],start_params[2]]],**kwds)
+        return super(Log_Probit_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[None,None],[start_params[2],start_params[2]]],**kwds)
     
 # Multistage(degree 2)
         
@@ -437,15 +455,15 @@ class Multistage_2(GenericLikelihoodModel):
     
     def fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
         if start_params is None:
-            g_0 = 0.1
+            g_0 = 0.05
             
             dose = self.endog[:,0].flatten()
             num_affected = self.endog[:,1].flatten()
             num_total = self.endog[:,2].flatten()
             frac_affected = num_affected/num_total
-            X = np.array([[dose[1],dose[1]**2],[dose[-1],dose[-1]**2]])
-            Y = (np.array([-np.log(1 - frac_affected[1]), \
-                           - np.log(1 - frac_affected[-1])])).T
+              
+            X = np.append(np.reshape(dose[1:],(len(dose[1:]),1)),(np.reshape(dose[1:],(len(dose[1:]),1)))**2,1)
+            Y = np.array(-np.log(1 - frac_affected[1:]))            
             
             betas = np.linalg.inv((X.T).dot(X)).dot(X.T).dot(Y)
             
@@ -453,6 +471,7 @@ class Multistage_2(GenericLikelihoodModel):
             beta2_0 = betas[1]
 
             start_params = np.array([g_0, beta1_0, beta2_0])
+            print('start_params [g, beta 1, beta 2]: ' + str(start_params))
             
         return super(Multistage_2, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[1e-9,None],[1e-9,None]], **kwds)
         
@@ -479,7 +498,7 @@ class Multistage_2_BMD(GenericLikelihoodModel):
         return -log_lhood
     
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Multistage_2_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[start_params[1]/5,start_params[1]*5],[start_params[2],start_params[2]]],**kwds)
+        return super(Multistage_2_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[1e-9,None],[start_params[2],start_params[2]]],**kwds)
     
 # Quantal-linear model
         
@@ -512,8 +531,9 @@ class Quantal_Linear(GenericLikelihoodModel):
             g_0 = 0.1
             beta_0 = 1/((self.endog[:,0].flatten().mean()))/np.log(2)
             start_params = np.array([g_0, beta_0])
+            print('start_params [g, beta]: ' + str(start_params))
             
-        return super(Quantal_Linear, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None,None]], **kwds)
+        return super(Quantal_Linear, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None]], **kwds)
     
 class Quantal_Linear_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
