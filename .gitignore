@@ -39,7 +39,10 @@ vignettes/*.pdf
 .Renviron
 
 *.~
-analysis/dn_edit/output
 __pycache__
 .ipynb_checkpoints
 ~*
+#*
+gitignore_DN
+analysis/paritosh_original_then_edit/qc_BMD/old_Phase_I_II/qc*
+analysis/paritosh_original_then_edit/qc_BMD/old_Phase_I_II/report
