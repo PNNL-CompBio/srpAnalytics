@@ -16,13 +16,12 @@ if (__name__ == "__main__"):
 
     input_csv_file_name = args[1]
 
-    command = "python preprocessing/DN_reformat_most_7_PAHs.py " + str(input_csv_file_name)
+    command = "python3 preprocessing/DN_reformat_most_7_PAHs.py " + str(input_csv_file_name)
     print (command)
     os.system(command)
-    
+
     output_complete_file_path = input_csv_file_name[:-4] + "_wide_DNC_0.csv"
-    
-    command = "python qc_BMD/Main_Wrapper_BMD_Analysis_7_PAHs.py " + str(output_complete_file_path)
+
+    command = "python3 qc_BMD/Main_Wrapper_BMD_Analysis_7_PAHs.py " + str(output_complete_file_path)
     print (command)
     os.system(command)
-    
