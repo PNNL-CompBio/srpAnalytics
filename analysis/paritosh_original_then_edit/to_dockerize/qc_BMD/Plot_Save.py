@@ -68,7 +68,8 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
-        ax.axis('off')
+
+        ax.axis('off')        
         ax.axis('tight')
         #fig.text(0.1,0.7,' '.join(map(str, text_for_report)), transform=fig.transFigure, size=10, ha="left")
         fig.text(0.1,0.7,text_for_report, transform=fig.transFigure, size=10, ha="left")
@@ -84,6 +85,11 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
             CI_bounds[0, index] = CI[0]
             CI_bounds[1, index] = CI[1]
         fig, ax = plt.subplots()
+        
+        # Setting the values for all axes.
+        custom_ylim = (0,1)
+        plt.setp(ax, ylim=custom_ylim)
+        
         ax.set_xscale("linear")
         ax.errorbar(test_dose_response.dose, test_dose_response.num_affected/test_dose_response.total_num, CI_bounds, marker ='s', mfc='red', fmt='.')
         
@@ -161,6 +167,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         d = pdf.infodict()
         d['Author'] = 'Paritosh Pande'
         d['CreationDate'] = datetime.datetime.today()
+###### end of save_results_poor_data_or_no_convergence()
 
 
 def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds, selected_models, chemical_id, end_point):
@@ -238,6 +245,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
+        
         ax.axis('off')
         ax.axis('tight')
         fig.text(0.1,0.7,' '.join(map(str, text_for_report)), transform=fig.transFigure, size=10, ha="left")
@@ -249,9 +257,9 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
+        
         ax.axis('off')
         ax.axis('tight')
-
         ax.table(cellText=model_preds_basic_stats.values, colLabels=model_preds_basic_stats.columns, loc='center')
         
         plt.title('Model Predictions')
@@ -263,6 +271,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
+        
         ax.axis('off')
         ax.axis('tight')
         ax.table(cellText=model_preds_residuals.values, colLabels=model_preds_residuals.columns, loc='center')
@@ -285,6 +294,11 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
             CI_bounds[1, index] = CI[1]
 
         fig, ax = plt.subplots()
+
+        # Setting the values for all axes.
+        custom_ylim = (0,1)
+        plt.setp(ax, ylim=custom_ylim)
+
         ax.set_xscale("linear")
         ax.errorbar(test_dose_response.dose, test_dose_response.num_affected/test_dose_response.total_num, CI_bounds, marker ='s', mfc='red', fmt='.')
         
@@ -328,6 +342,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         # Create dataframes to apprend to write to csv files
         bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
         dose_response_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Dose', 'Response', 'CI_Lo', 'CI_Hi'])
+        #fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals', 'Y_vals_diff'])
         fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals'])
         
         # Populate dataframes
@@ -371,17 +386,18 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         fit_vals['End_Point'] = [end_point]*len(dose_x_vals)
         fit_vals['X_vals'] = dose_x_vals
         fit_vals['Y_vals'] = y_vals
+        #fit_vals['Y_vals_diff'] = y_vals
         
         if not os.path.isfile(bmd_vals_file_name):
             bmd_vals.to_csv(bmd_vals_file_name, header='column_names', index=False, na_rep='NULL')
         else: # else it exists so append without writing the header
             bmd_vals.to_csv(bmd_vals_file_name, mode='a', header=False, index=False, na_rep='NULL')
-            
+        
         if not os.path.isfile(dose_response_vals_file_name):
             dose_response_vals.to_csv(dose_response_vals_file_name, header='column_names', index=False, na_rep='NULL')
         else: # else it exists so append without writing the header
             dose_response_vals.to_csv(dose_response_vals_file_name, mode='a', header=False, index=False, na_rep='NULL')
-            
+        
         if not os.path.isfile(fit_vals_file_name):
             fit_vals.to_csv(fit_vals_file_name, header='column_names', index=False, na_rep='NULL')
         else: # else it exists so append without writing the header
@@ -461,14 +477,13 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     # Specify reason for non-unique model
     text_for_report += '\n' + unique_model_flag_vals[unique_model_flag]
     text_for_report += '\n' + bmd_analysis_flag_vals[bmd_analysis_flag]
-          
 
     with PdfPages(filename) as pdf:
-
         # Output data summary
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
+        
         ax.axis('off')
         ax.axis('tight')
         fig.text(0.1,0.7,' '.join(map(str, text_for_report)), transform=fig.transFigure, size=10, ha="left")
@@ -480,9 +495,9 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         fig, ax = plt.subplots()
         # hide axes
         fig.patch.set_visible(False)
+        
         ax.axis('off')
         ax.axis('tight')
-
         ax.table(cellText=model_preds_basic_stats.values, colLabels=model_preds_basic_stats.columns, loc='center')
         
         plt.title('Model Predictions')
@@ -503,7 +518,6 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         fig.tight_layout()
         pdf.savefig()  # saves the current figure into a pdf page
         plt.close()
-        
                 
         CI_bounds = np.zeros([2, len(test_dose_response.dose)])
         for index in range(len(test_dose_response.dose)):
@@ -521,7 +535,6 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         ax.set_title('Dose-response Data')
         pdf.savefig()  # saves the current figure into a pdf page
         plt.close()
-        
         
         # Create dataframes to apprend to write to csv files
         bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
