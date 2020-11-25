@@ -44,5 +44,4 @@ __pycache__
 ~*
 #*
 gitignore_DN
-analysis/paritosh_original_then_edit/qc_BMD/old_Phase_I_II/qc*
-analysis/paritosh_original_then_edit/qc_BMD/old_Phase_I_II/report
+analysis/paritosh_original_then_edit/qc_BMD/Phase_I_II/output

@@ -84,6 +84,14 @@ def gen_dose_response(data_ep_cid, end_point, erased_morphological_data_end_poin
         if((dose_response.iloc[dr_index].num_embryos) < (0.25*(dose_response.iloc[dr_index].tot_wells))):
             dose_response = dose_response[dose_response.index != dr_index_original]
             delete_count+=1
+            
+            write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(end_point) + "\n"
+            print ("write_this:"+str(write_this))
+            erased_morphological_data_end_point_chemical_id_filename_2nd = erased_morphological_data_end_point_chemical_id_filename[:-4] + '_2nd_triage.csv'
+            erased_morphological_data_end_point_chemical_id_file = open(erased_morphological_data_end_point_chemical_id_filename_2nd, "a+")
+            erased_morphological_data_end_point_chemical_id_file.write(write_this)
+            erased_morphological_data_end_point_chemical_id_file.close()
+            
     #'''
     return dose_response
 
