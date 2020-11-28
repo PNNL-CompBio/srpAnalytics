@@ -28,7 +28,9 @@ def gen_dose_response(data_ep_cid, end_point, erased_morphological_data_end_poin
         # it counts # of NaNs as well
         
         num_neg_ctrl_hits = (neg_ctrl_wells[end_point]).sum(axis=0,skipna=True,min_count=1)
+        
         num_nonnan_wells_ctrl = sum(~np.isnan(neg_ctrl_wells[end_point]))
+        # num_ctrl_wells - num_nan_ctrl_wells
          
         print ("data_ep_cid:\n"+str(data_ep_cid))
         '''
@@ -38,13 +40,15 @@ def gen_dose_response(data_ep_cid, end_point, erased_morphological_data_end_poin
         194           54  1.12     12838  A03    0.0
         '''        
         #if(num_neg_ctrl_hits > 0.5*num_neg_ctrl_wells): # old criterion
+        print ("num_neg_ctrl_hits:" + str(num_neg_ctrl_hits))
+        print ("0.5*num_nonnan_wells_ctrl:" + str(0.5*num_nonnan_wells_ctrl))
         if(num_neg_ctrl_hits > 0.5*num_nonnan_wells_ctrl): # new criterion
             # my_list = df.columns.values.tolist()     
             # my_list = data_ep_cid_plate.columns.values.tolist()s
-            write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(plate_id) + "," + str(end_point) + "\n"
-            print ("write_this:"+str(write_this))
+            delete_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(plate_id) + "," + str(end_point) + "\n"
+            print ("delete_this:"+str(delete_this))
             erased_morphological_data_end_point_chemical_id_file = open(erased_morphological_data_end_point_chemical_id_filename, "a+")
-            erased_morphological_data_end_point_chemical_id_file.write(write_this)
+            erased_morphological_data_end_point_chemical_id_file.write(delete_this)
             erased_morphological_data_end_point_chemical_id_file.close()
             
             # Delete all wells corresponding to that plate
@@ -68,23 +72,46 @@ def gen_dose_response(data_ep_cid, end_point, erased_morphological_data_end_poin
     # (number of embryos -> number of wells whose embryos are countable either 0/1)
     
     # First get rid of nan values
+    print ("dose_response:\n" + str(dose_response))
+    '''
+    dose  num_affect  frac_affect  num_embryos  tot_wells
+0   0.0         3.0      0.09375         32.0       32.0
+1   1.0         2.0      0.06250         32.0       32.0
+2   5.0         4.0      0.12500         32.0       32.0
+3  11.2         2.0      0.06250         32.0       32.0
+4  35.6         3.0      0.09375         32.0       32.0
+5  50.0         1.0      0.03125         32.0       32.0
+'''
+    print ("dose_response.shape before dropna:" + str(dose_response.shape))
     dose_response = dose_response.dropna()
     delete_count = 0
+    kept_count = 0
+    print ("dose_response.shape:" + str(dose_response.shape)) # 6,5
+    print ("dose_response.shape[0]:" + str(dose_response.shape[0])) # 6
     for dr_index in range(dose_response.shape[0]):
         dr_index_original = dr_index
         dr_index = dr_index - delete_count
+        print ("\ndr_index:" + str(dr_index))
+        print ("dose_response.iloc[dr_index]:\n" + str(dose_response.iloc[dr_index]))
+        print ("dose_response.iloc[dr_index].num_embryos:" + str(dose_response.iloc[dr_index].num_embryos))
+        print ("0.25*(dose_response.iloc[dr_index].tot_wells:" + str(0.25*(dose_response.iloc[dr_index].tot_wells)))
+        write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(end_point) + "," + str(dose_response.iloc[dr_index].dose) + "\n"
+        print ("write_this:"+str(write_this))
         if((dose_response.iloc[dr_index].num_embryos) < (0.25*(dose_response.iloc[dr_index].tot_wells))):
-            write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(end_point) + "\n"
-            print ("write_this:"+str(write_this))
-            
-            erased_morphological_data_end_point_chemical_id_filename_0p25 = erased_morphological_data_end_point_chemical_id_filename[:-4] + '_0p25.csv'
-            
-            erased_morphological_data_end_point_chemical_id_file_0p25 = open(erased_morphological_data_end_point_chemical_id_filename_0p25, "a+")
-            erased_morphological_data_end_point_chemical_id_file_0p25.write(write_this)
-            erased_morphological_data_end_point_chemical_id_file_0p25.close()
+            erased_morphological_data_end_point_chemical_id_filename_0p25_erased = erased_morphological_data_end_point_chemical_id_filename[:-4] + '_0p25_erased.csv'
+            erased_morphological_data_end_point_chemical_id_file_0p25_erased = open(erased_morphological_data_end_point_chemical_id_filename_0p25_erased, "a+")
+            erased_morphological_data_end_point_chemical_id_file_0p25_erased.write(write_this)
+            erased_morphological_data_end_point_chemical_id_file_0p25_erased.close()
             
             dose_response = dose_response[dose_response.index != dr_index_original]
             delete_count+=1
+        else:
+            erased_morphological_data_end_point_chemical_id_filename_0p25_kept = erased_morphological_data_end_point_chemical_id_filename[:-4] + '_0p25_kept.csv'
+            erased_morphological_data_end_point_chemical_id_file_0p25_kept = open(erased_morphological_data_end_point_chemical_id_filename_0p25_kept, "a+")
+            erased_morphological_data_end_point_chemical_id_file_0p25_kept.write(write_this)
+            erased_morphological_data_end_point_chemical_id_file_0p25_kept.close()
+            kept_count+=1
+    print ("After all, kept_count=" + str(kept_count) + ", delete_count=" + str(delete_count) + "\n")
     return dose_response
 
 
