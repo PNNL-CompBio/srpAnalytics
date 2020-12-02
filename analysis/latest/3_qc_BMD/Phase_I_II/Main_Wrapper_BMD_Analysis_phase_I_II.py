@@ -33,13 +33,15 @@ print (starting_dir)
 # In[3]:
 
 
-complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/wide/344_zf_morphology_data_phase_1_and_2_-_2020JUNE25_wide_DNC_0.csv'
+#complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/wide/344_zf_morphology_data_phase_1_and_2_-_2020JUNE25_wide_DNC_0.csv'
+
+complete_file_path = '/people/kimd999/tox/phase_I_II/input/344_zf_morphology_data_phase_1_and_2_-_2020JUNE25_wide_DNC_0.csv'
 
 morphological_data = pd.read_csv(complete_file_path, header = 0)
-pd.set_option('display.max_columns', None)
-display(morphological_data.head())
-display(morphological_data.columns)
-display(np.unique(morphological_data.well))
+#pd.set_option('print.max_columns', None)
+#print(morphological_data.head())
+#print(morphological_data.columns)
+#print(np.unique(morphological_data.well))
 
 
 # In[4]:
@@ -82,13 +84,13 @@ if(test_data_sim == 0):
 # In[6]:
 
 
-display(morphological_data.head())
+print(morphological_data.head())
 
 
 # In[7]:
 
 
-display(morphological_data.head())
+print(morphological_data.head())
 morphological_data.columns
 
 if (os.path.isdir("output") == False):
@@ -141,13 +143,13 @@ erased_morphological_data_end_point_chemical_id_file_0p25_kept.write(write_this)
 erased_morphological_data_end_point_chemical_id_file_0p25_kept.close()
 
 # full -> 18 (without DNC)
-#end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC__','NC24', 'SKIN','SM24','TCHR','TOT_MORT']
-end_points = ['MORT']
+end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC__','NC24', 'SKIN','SM24','TCHR','TOT_MORT']
+#end_points = ['MORT']
 
 # all 342 chemicals
-#for chemical_id in np.unique(morphological_data['chemical.id']):
+for chemical_id in np.unique(morphological_data['chemical.id']):
     
-for chemical_id in [332]:
+#for chemical_id in [66]:
     print("chemical_id:" + str(chemical_id))
 
     for end_point in end_points:
@@ -211,6 +213,9 @@ time_took = str(round((end_time-start_time), 1)) + " seconds"
 print ("Done, it took:"+str(time_took)) 
 # for all combinations of 342 chemicals and 18 endpoints, 4 minutes took for qc only
 # for all combinations of 342 chemicals and 18 endpoints, 104~165 minutes took for qc and bmd report
+f_time = open('running_time.txt', 'w')
+f_time.write(str(time_took))
+f_time.close()
 
 
 # In[9]:
@@ -235,7 +240,7 @@ os.chdir(starting_dir)
 qc_flag_filename = os.path.join("report", 'qc_flag.csv')
 print ("qc_flag_filename:"+str(qc_flag_filename))
 qc_flag_data = pd.read_csv(qc_flag_filename, index_col=None)
-#display(qc_flag_data.head())
+#print(qc_flag_data.head())
 ds = pd.Series({"Column": qc_flag_data["qc_flag"]})
 plt.figure(figsize=(8,4))
 sns.countplot(x="Column", data=ds)
@@ -250,7 +255,7 @@ plt.show()
 sns.set_theme(style="whitegrid")
 print ("array_filename:"+str(array_filename))
 array_report_data = pd.read_csv(array_filename, index_col=None)
-display(array_report_data.head())
+print(array_report_data.head())
 #ax = sns.barplot(x="end_point", y="len_test_dose_response", data=array_report_data)
 
 ds = pd.Series({"Column": array_report_data["len_test_dose_response"]})
