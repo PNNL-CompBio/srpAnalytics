@@ -6,6 +6,11 @@
 
 # for Phase_I_II data
 
+import sys
+util_path = "/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/latest/3_qc_BMD/util"
+sys.path.insert(0, util_path)
+    
+    
 import numpy as np
 import pandas as pd
 import os, sys, time
