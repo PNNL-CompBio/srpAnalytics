@@ -218,7 +218,11 @@ time_took = str(round((end_time-start_time), 1)) + " seconds"
 print ("Done, it took:"+str(time_took)) 
 # for all combinations of 342 chemicals and 18 endpoints, 4 minutes took for qc only
 # for all combinations of 342 chemicals and 18 endpoints, 104~165 minutes took for qc and bmd report
-f_time = open('running_time.txt', 'w')
+
+os.chdir(output_folder)
+
+time_filename = os.path.join("report", 'running_time.txt')
+f_time = open(time_filename, 'w')
 f_time.write(str(time_took))
 f_time.close()
 
