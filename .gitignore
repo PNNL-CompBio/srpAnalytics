@@ -38,7 +38,7 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-*.~
+*~
 __pycache__
 .ipynb_checkpoints
 ~*
