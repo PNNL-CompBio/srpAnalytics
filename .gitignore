@@ -43,5 +43,5 @@ __pycache__
 .ipynb_checkpoints
 ~*
 #*
-analysis/latest/3_qc_BMD/Phase_I_II/output
-analysis/latest/3_qc_BMD/7_PAH_zf_morphology/output
+analysis/latest/3_bmd_feasibility_BMD/*/output
+
