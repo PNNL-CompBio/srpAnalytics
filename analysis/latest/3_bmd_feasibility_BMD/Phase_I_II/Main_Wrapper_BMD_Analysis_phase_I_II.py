@@ -7,7 +7,7 @@
 # for Phase_I_II data
 
 import sys
-util_path = "/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/latest/3_qc_BMD/util"
+util_path = "/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/latest/3_bmd_feasibility_BMD/util"
 sys.path.insert(0, util_path)
     
     
@@ -17,7 +17,7 @@ import os, sys, time
 from scipy import stats
 from matplotlib import pyplot as plt
 
-#import generate_dose_response_old_for_more_qc_0_1 as gdr
+#import generate_dose_response_old_for_more_bmd_feasibility_0_1 as gdr
 import generate_dose_response_newest_no_avg as gdr
 
 import BMD_BMDL_estimation as bmdest
@@ -121,11 +121,11 @@ morphological_data_file_out.close()
 
 start_time = time.time()
 
-qc_flag_filename = os.path.join("report", 'qc_flag.csv')
-qc_flag_file_out = open(qc_flag_filename, "w")
+bmd_feasibility_flag_filename = os.path.join("report", 'bmd_feasibility_flag.csv')
+bmd_feasibility_flag_file_out = open(bmd_feasibility_flag_filename, "w")
 
-write_this = "qc_flag\n"
-qc_flag_file_out.write(write_this)
+write_this = "bmd_feasibility_flag\n"
+bmd_feasibility_flag_file_out.write(write_this)
 
 erased_morphological_data_end_point_chemical_id_filename = os.path.join("report", 'erased_morphological_data_end_point_chemical_id.csv')
 erased_morphological_data_end_point_chemical_id_file = open(erased_morphological_data_end_point_chemical_id_filename, "w")
@@ -175,9 +175,9 @@ for chemical_id in np.unique(morphological_data['chemical.id']):
                   
         dose_response = gdr.gen_dose_response(morphological_data_end_point_chemical_id, end_point,                                               erased_morphological_data_end_point_chemical_id_filename)
         
-        qc_flag = gdr.BMD_feasibility_analysis(dose_response)
-    #    qc_flag = gdr.BMD_feasibility_analysis_qc_1(dose_response)
-        qc_flag_file_out.write(str(qc_flag)+"\n")
+        bmd_feasibility_flag = gdr.BMD_feasibility_analysis(dose_response)
+    #    bmd_feasibility_flag = gdr.BMD_feasibility_analysis_bmd_feasibility_1(dose_response)
+        bmd_feasibility_flag_file_out.write(str(bmd_feasibility_flag)+"\n")
         
         test_dose_response = gdr.reformat_dose_response(dose_response)
         
@@ -185,14 +185,14 @@ for chemical_id in np.unique(morphological_data['chemical.id']):
  #       print ("write_this:"+str(write_this))
   #      f_out.write(write_this)
     
-        qc_flag_folder = "qc_" + str(qc_flag)
-        if (os.path.isdir(str(qc_flag_folder)) == False):
-            os.mkdir(str(qc_flag_folder))
-        os.chdir(str(qc_flag_folder))
+        bmd_feasibility_flag_folder = "bmd_feasibility_" + str(bmd_feasibility_flag)
+        if (os.path.isdir(str(bmd_feasibility_flag_folder)) == False):
+            os.mkdir(str(bmd_feasibility_flag_folder))
+        os.chdir(str(bmd_feasibility_flag_folder))
 
-        if(qc_flag in [0, 1]):
+        if(bmd_feasibility_flag in [0, 1]):
             # No BMD analysis required. Generate report and exit
-            ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, None)
+            ps.save_results_poor_data_or_no_convergence(test_dose_response, bmd_feasibility_flag, str(chemical_id), end_point, None)
         else:
             # Fit dose response models
             model_predictions = bmdest.analyze_dose_response_data(test_dose_response)
@@ -203,21 +203,21 @@ for chemical_id in np.unique(morphological_data['chemical.id']):
             if(unique_model_flag == 0):
                 # Generate report
                 print(test_dose_response.dose[-1:])
-                ps.save_results_good_data_unique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
+                ps.save_results_good_data_unique_model(test_dose_response, bmd_feasibility_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
             else:
                 bmd_analysis_flag = selected_model_params['model_select_flag']
                 if(bmd_analysis_flag == 1):
-                    ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, selected_model_params)
+                    ps.save_results_poor_data_or_no_convergence(test_dose_response, bmd_feasibility_flag, str(chemical_id), end_point, selected_model_params)
                 else:
-                    ps.save_results_good_data_nounique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
+                    ps.save_results_good_data_nounique_model(test_dose_response, bmd_feasibility_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
 #test_dose_f_out.close()
 #f_out.close()
-qc_flag_file_out.close()
+bmd_feasibility_flag_file_out.close()
 end_time = time.time()
 time_took = str(round((end_time-start_time), 1)) + " seconds"
 print ("Done, it took:"+str(time_took)) 
-# for all combinations of 342 chemicals and 18 endpoints, 4 minutes took for qc only
-# for all combinations of 342 chemicals and 18 endpoints, 104~165 minutes took for qc and bmd report
+# for all combinations of 342 chemicals and 18 endpoints, 4 minutes took for bmd_feasibility only
+# for all combinations of 342 chemicals and 18 endpoints, 104~165 minutes took for bmd_feasibility and bmd report
 
 os.chdir(output_folder)
 
@@ -245,12 +245,12 @@ np.asarray(morphological_data_end_point_chemical_id['plate.id'])
 
 os.chdir(starting_dir)
 
-#qc_flag_filename="/Users/kimd999/research/projects/toxicity/result/old_Phase_I_II/newest_criteria_no_avg/report/qc_flag.csv"
-qc_flag_filename = os.path.join("report", 'qc_flag.csv')
-print ("qc_flag_filename:"+str(qc_flag_filename))
-qc_flag_data = pd.read_csv(qc_flag_filename, index_col=None)
-#print(qc_flag_data.head())
-ds = pd.Series({"Column": qc_flag_data["qc_flag"]})
+#bmd_feasibility_flag_filename="/Users/kimd999/research/projects/toxicity/result/old_Phase_I_II/newest_criteria_no_avg/report/bmd_feasibility_flag.csv"
+bmd_feasibility_flag_filename = os.path.join("report", 'bmd_feasibility_flag.csv')
+print ("bmd_feasibility_flag_filename:"+str(bmd_feasibility_flag_filename))
+bmd_feasibility_flag_data = pd.read_csv(bmd_feasibility_flag_filename, index_col=None)
+#print(bmd_feasibility_flag_data.head())
+ds = pd.Series({"Column": bmd_feasibility_flag_data["bmd_feasibility_flag"]})
 plt.figure(figsize=(8,4))
 sns.countplot(x="Column", data=ds)
 plt.show()
