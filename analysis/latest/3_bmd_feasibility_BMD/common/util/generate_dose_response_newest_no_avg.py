@@ -15,12 +15,12 @@ from scipy import stats
 # data_ep_cid -> morphological_data_end_point_chemical_id
 def gen_dose_response(data_ep_cid, end_point):
     print ("data_ep_cid:\n"+str(data_ep_cid))
-        '''
+    '''
              chemical.id  conc  plate.id well  ANY24
         192           54  5.00     12838  A01    0.0
         193           54  3.56     12838  A02    1.0
         194           54  1.12     12838  A03    0.0
-        ''' 
+    ''' 
         
     erased_since_gt_0p5_1_neg_filename = os.path.join("report", 'erased_since_gt_0p5_1_neg.csv')
     kept_since_lt_0p5_1_neg_filename = os.path.join("report", 'kept_since_lt_0p5_1_neg.csv')

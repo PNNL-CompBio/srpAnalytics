@@ -149,7 +149,7 @@ end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM'
 #end_points = ['CRAN']
 
 # all 342 chemicals
-#for chemical_id in np.unique(morphological_data['chemical.id']):
+for chemical_id in np.unique(morphological_data['chemical.id']):
     
 #for chemical_id in [66]:
     print("chemical_id:" + str(chemical_id))
