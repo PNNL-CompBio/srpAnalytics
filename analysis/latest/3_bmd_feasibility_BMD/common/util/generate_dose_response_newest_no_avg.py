@@ -141,6 +141,7 @@ def BMD_feasibility_analysis(dose_response):
             else:
                 BMD_feasibilitye_flag = 4
     return BMD_feasibilitye_flag
+######### end of def gen_dose_response(data_ep_cid, end_point):
 
 
 # Reformat dose-response data to be compatible with BMD analysis
@@ -153,6 +154,7 @@ def reformat_dose_response(dose_response):
     #test_dose_response.reset_index()
     test_dose_response.reset_index(inplace = True, drop = True) 
     return test_dose_response
+###### end of def reformat_dose_response(dose_response):
 
 
 if (__name__ == "__main__"):
