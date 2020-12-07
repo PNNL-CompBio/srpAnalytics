@@ -16,9 +16,9 @@ require(xml2)
 
 #These pathways refer to absolute pathways in the docker image
 data.dir='/srpAnalytics/data/'
-#data.dir='data/'
+data.dir='data/'
 out.dir='/tmp/'
-#out.dir='./'
+out.dir='./'
 
 #step 1 - get cas ids to pre-defined class
 chemMapping<-read.csv(paste0(data.dir,'Chemicals.csv'))%>%
@@ -92,12 +92,18 @@ chemMeta<-readxl::read_xls(paste0(data.dir,
 
 chemMeta<-mutate(chemMeta,Chemical_ID=unlist(as.character(zf.cid)))
 
+###Environmental sample data
 #These files have the extract information and the mappin gof extracts to chemicals
+#consists of two files really - location data
 sampMeta<-readxl::read_xlsx(paste0(data.dir,'/superfund_location_data.xlsx'))
+
+#chemicals involved
 sampChem<-read.csv(paste0(data.dir,'/curatedSampData.csv'))%>%
     select(chem_lims_num,date_sampled,sample_matrix,technology,Sample_ID='zaap_cid',
            zf_lims_id,measurement_value,unit,cas_number)%>%distinct()%>%
-  rename(SampleNumber='chem_lims_num')%>%left_join(sampMeta)
+  rename(SampleNumber='chem_lims_num')%>%
+  subset(SampleNumber!='None')%>%
+  full_join(sampMeta)
 
 #'combineChemicalEndpointData
 #'@param bmdfiles a list of files that come from the BMD pipeline
@@ -106,11 +112,12 @@ sampChem<-read.csv(paste0(data.dir,'/curatedSampData.csv'))%>%
 ##We will release an 'endpoint file for each condition'
 combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE){
 
-  files = lapply(bmdfiles,read.csv)
-  
+
+  cols <- c("Chemical_ID","End_Point","Model","BMD10","BMD50","AUC_Norm","BMD50_Flag") 
+  files = lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))  
   mid.bmd<-do.call(rbind,files)%>%
 #    filter(!is.null(BMD_Analysis_Flag))%>%
-    dplyr::select(Chemical_ID,End_Point,Model,BMD10,BMD50,AUC_Norm,BMD10_Flag,BMD50_Flag)#%>%
+    dplyr::select(Chemical_ID,End_Point,Model,BMD10,BMD50,AUC_Norm,BMD50_Flag)#%>%
    # mutate(endPointLink='')
     
   
@@ -153,7 +160,6 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE){
 }
 
 combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE){
-
   files = lapply(bmdfiles,read.csv)
   full.bmd<-do.call(rbind,files)%>%
     mutate(zf.cid=as.character(Chemical_ID))%>%
@@ -190,6 +196,10 @@ e.bmd<-paste0(data.dir,'/bmd_vals_extracts_sara.csv')
 e.curv<-paste0(data.dir,'/fit_vals_extracts.csv')
 e.dose<-paste0(data.dir,'/dose_response_vals_extracts.csv')
 
+e.bmd <-c(e.bmd,paste0(data.dir,'/bmd_vals_all_qc.csv'))
+e.curv <-c(e.curv,paste0(data.dir,'/fit_vals_all_qc.csv'))
+e.dose <-c(e.dose,paste0(data.dir,'/dose_response_vals_all_qc.csv'))
+
 
 ##now we check for additional files
 parser = argparse::ArgumentParser()#'Command line tool to add extract-dose-response data to SRP Analytics Portal')
@@ -197,7 +207,7 @@ parser$add_argument('--bmd',dest='new.bmd',type='character',default='',help='BMD
 parser$add_argument('--doseResponse',dest='new.dose',type='character',default='',help='Dose response curve points to add to portal')
 parser$add_argument('--coords',dest='new.curv',type='character',default='',help='New curve fit coordinates to plot in SRP analytics portal ')
 
-
+args<-list(new.bmd='',new.dose='',new.curv='')
 args=parser$parse_args()
 if(args$new.bmd!="")
     bmd.files<-c(args$new.bmd,bmd.files)
@@ -214,6 +224,7 @@ ebmds<-combineChemicalEndpointData(c(e.bmd),TRUE)
 ecurves <- combineChemicalFitData(c(e.curv),TRUE)
 edrs<- combineChemicalDoseData(c(e.dose),TRUE)
 
+
 id_mapping <-bmds%>%select(Chemical_ID,cas_number,AVERAGE_MASS)%>%distinct()
 
 sampChem <-sampChem%>%left_join(id_mapping)%>%
@@ -225,7 +236,9 @@ sampChem <-sampChem%>%left_join(id_mapping)%>%
   mutate(measurement_value=concentration*1000/AVERAGE_MASS)%>%
   dplyr::select(-c(concentration,AVERAGE_MASS,unit))
 
-
+##there are mismatches, so we should figure out where those exists
+missing<-list(zebrafishNoChem=setdiff(ebmds$Sample_ID,as.character(sampChem$Sample_ID)),
+              chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
 
 ##Final output for the platform team is these 4 files
 write.csv(bmds,file=paste0('chemSummaryStats.csv'),row.names = FALSE)
