@@ -43,6 +43,7 @@ def gen_dose_response(data_ep_cid, end_point):
          
 
         write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(plate_id) + "," + str(end_point) + "\n"
+        # Katrina seems not sure whether a new criterion is better because the new criterion may be too harsh?
         #if(num_neg_ctrl_hits > 0.5*num_neg_ctrl_wells): # old criterion
         if(num_neg_ctrl_hits > 0.5*num_nonnan_wells_ctrl): # new criterion
             # my_list = data_ep_cid_plate.columns.values.tolist()
@@ -84,7 +85,12 @@ def gen_dose_response(data_ep_cid, end_point):
 
     # First get rid of nan values
     dose_response = dose_response.dropna()
-    #print ("dose_response (after dropna):\n" + str(dose_response))
+    print ("dose_response (after dropna):\n" + str(dose_response))
+    ''' dose  num_affect  frac_affect  num_embryos  tot_wells
+    0   0.0         0.0     0.000000         26.0       32.0
+    1   0.1         1.0     0.032258         31.0       32.0
+    2   0.5         1.0     0.062500         16.0       32.0
+    '''
     delete_count = 0
    # print ("dose_response.shape[0]:" + str(dose_response.shape[0]))
     #for new 7 PAHs, these are mostly 8 which is number of dose groups
