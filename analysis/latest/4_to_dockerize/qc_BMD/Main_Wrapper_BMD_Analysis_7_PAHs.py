@@ -138,8 +138,10 @@ erased_morphological_data_end_point_chemical_id_file.close()
 
 
 # full -> 17
-end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK', 'MO24','MORT','MUSC','NC__','SKIN','SM24','TCHR','TOT_MORT']
-#end_points = ['ANY24']
+#end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK', 'MO24','MORT','MUSC','NC__','SKIN','SM24','TCHR','TOT_MORT']
+
+# 2 endpoints only for faster testing
+end_points = ['ANY120']
 
 for chemical_id in np.unique(morphological_data['chemical.id']):  
 #for chemical_id in [1532]:
@@ -180,10 +182,10 @@ for chemical_id in np.unique(morphological_data['chemical.id']):
  #       print ("write_this:"+str(write_this))
   #      f_out.write(write_this)
     
-        qc_flag_folder = "qc_" + str(qc_flag)
-        if (os.path.isdir(str(qc_flag_folder)) == False):
-            os.mkdir(str(qc_flag_folder))
-        os.chdir(str(qc_flag_folder))
+        #qc_flag_folder = "qc_" + str(qc_flag)
+        #if (os.path.isdir(str(qc_flag_folder)) == False):
+        #    os.mkdir(str(qc_flag_folder))
+        #os.chdir(str(qc_flag_folder))
 
         
         if(qc_flag in [0, 1]):

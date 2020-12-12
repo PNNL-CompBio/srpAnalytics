@@ -100,7 +100,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         plt.close()
         
         # Create dataframes to apprend to write to csv files
-        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
+        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD10_Flag', 'BMD50_Flag'])
         dose_response_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Dose', 'Response', 'CI_Lo', 'CI_Hi'])
         fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals'])
         
@@ -117,7 +117,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         bmd_vals['Max_Dose'] = dose_max
         bmd_vals['AUC_Norm'] = dose_response_auc_norm
         bmd_vals['BMD_Analysis_Flag'] = np.nan
-        bmd_vals['BMD_Flag'] = np.nan
+        bmd_vals['BMD10_Flag'] = np.nan
         bmd_vals['BMD50_Flag'] = np.nan
         
         assign_nan = False
@@ -340,7 +340,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         plt.close()
         
         # Create dataframes to apprend to write to csv files
-        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
+        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD10_Flag', 'BMD50_Flag'])
         dose_response_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Dose', 'Response', 'CI_Lo', 'CI_Hi'])
         #fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals', 'Y_vals_diff'])
         fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals'])
@@ -360,11 +360,11 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         bmd_vals['BMD_Analysis_Flag'] = bmd_analysis_flag
 
         if(model_preds.loc[model_preds['Model'] == model_name[0], 'BMD10'].values < test_dose_response.dose[1]):
-            bmd_vals['BMD_Flag'] = -1
+            bmd_vals['BMD10_Flag'] = -1
         elif(model_preds.loc[model_preds['Model'] == model_name[0], 'BMD10'].values > test_dose_response.dose.iloc[-1]):
-            bmd_vals['BMD_Flag'] = 1
+            bmd_vals['BMD10_Flag'] = 1
         else:
-            bmd_vals['BMD_Flag'] = 0
+            bmd_vals['BMD10_Flag'] = 0
             
         if(model_preds.loc[model_preds['Model'] == model_name[0], 'BMD50'].values < test_dose_response.dose[1]):
             bmd_vals['BMD50_Flag'] = -1
@@ -538,7 +538,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         plt.close()
         
         # Create dataframes to apprend to write to csv files
-        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
+        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD10_Flag', 'BMD50_Flag'])
         dose_response_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Dose', 'Response', 'CI_Lo', 'CI_Hi'])
         fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals'])
         
@@ -555,7 +555,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         bmd_vals['Max_Dose'] = dose_max
         bmd_vals['AUC_Norm'] = dose_response_auc_norm
         bmd_vals['BMD_Analysis_Flag'] = bmd_analysis_flag
-        bmd_vals['BMD_Flag'] = np.nan
+        bmd_vals['BMD10_Flag'] = np.nan
         bmd_vals['BMD50_Flag'] = np.nan
                 
         dose_response_vals['Chemical_ID'] = [chemical_id]*len(test_dose_response.dose)
