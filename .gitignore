@@ -38,11 +38,11 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-*.~
+*~
 __pycache__
 .ipynb_checkpoints
 ~*
 #*
-gitignore_DN
-analysis/paritosh_original_then_edit/qc_BMD/old_Phase_I_II/qc*
-analysis/paritosh_original_then_edit/qc_BMD/old_Phase_I_II/report
+analysis/latest/3_bmd_feasibility_BMD/*/output
+analysis/latest/3_bmd_feasibility_BMD/*/running_time.txt
+

@@ -1,0 +1,10 @@
+conda activate tox
+(for Doonam, it is conda activate tox where some dependencies are installed like statsmodels)
+
+
+jupyter-lab
+(launching jupyter-lab without activating tox conda environment causes a difficult error)
+(confirmed) scipy 1.4.1 runs well but newer version (1.5.x) doesn’t work
+
+
+To reflect new changes in importing files in wrapper (like generate_dose_response.py), restarting kernel is needed.
