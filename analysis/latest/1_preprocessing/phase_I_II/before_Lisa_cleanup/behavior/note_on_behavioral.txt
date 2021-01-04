@@ -1,0 +1,11 @@
+[How to run behavioral data]
+With Paritosh, ran through LPR data together.
+
+
+
+tall2wide_bevavior_phase_I_II.ipynb
+wide2dicho_behavior_t0_t239.ipynb
+
+
+
+[EPR (24 hrs), LPR (120 hrs)]
