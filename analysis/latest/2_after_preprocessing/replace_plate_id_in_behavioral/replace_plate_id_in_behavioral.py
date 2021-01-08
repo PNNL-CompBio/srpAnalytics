@@ -19,10 +19,10 @@ beha_full_csv = "344_zf_LPR_data_phase_1_and_2_-_2020JUNE25.csv"
 beha_full_in = open (beha_full_csv, "r")
 
 beha_full_csv_after_replacement = beha_full_csv[:-4] + "_replaced.csv"
-beha_full_out = open (beha_full_csv_after_replacement, "w")
+
 
 for line in beha_full_in:
-    
+    beha_full_out = open (beha_full_csv_after_replacement, "a")    
     splited_line = line.split(",")
     bottle_id = splited_line[1]
     #print ("bottle_id:" + str(bottle_id))
@@ -56,9 +56,10 @@ for line in beha_full_in:
     #print ("line:" + str(line))
     #print ("new_line:" + str(new_line))
     beha_full_out.write(new_line)
+    beha_full_out.close()
     
 beha_full_in.close()
-beha_full_out.close()
+
 
 end_time = time.time()
 write_this = show_time("replacement of plate id", start_time, end_time)
