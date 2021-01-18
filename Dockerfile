@@ -14,7 +14,7 @@ RUN pip3 install scipy==1.4.1
 COPY . srpAnalytics
 WORKDIR srpAnalytics
 
-
-CMD ["Rscript","fromEndpointsToDataFiles.R"]
+#CMD ["Rscript","fromEndpointsToDataFiles.R"]
+CMD ["python3.7","dataQcBmd.py"]
 
 VOLUME ["/tmp"]
