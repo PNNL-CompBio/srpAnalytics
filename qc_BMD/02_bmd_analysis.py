@@ -15,11 +15,6 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 
-from datetime import datetime as dt
-
-today = dt.now()  
-time_now_date = today.strftime('%Y_%m_%d')
-
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -90,9 +85,6 @@ morphological_data_end_point_chemical_id = morphological_data.loc[morphological_
 #display(morphological_data.head())
 
 # In[8]:
-
-
-#output_folder_name = "output_ran_at_" + str(time_now_date)
 
 if (os.path.isdir("output") == False):
     os.mkdir("output")
