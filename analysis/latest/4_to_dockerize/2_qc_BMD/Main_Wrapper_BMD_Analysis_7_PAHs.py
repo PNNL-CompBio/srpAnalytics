@@ -97,9 +97,6 @@ morphological_data_end_point_chemical_id = morphological_data.loc[morphological_
 if (os.path.isdir("output") == False):
     os.mkdir("output")
 
-if (os.path.isdir(output_folder_name) == False):
-    os.mkdir(output_folder_name)
-
 output_folder = os.path.join(starting_dir, "output")
 #output_folder = os.path.join(starting_dir, output_folder_name)
 os.chdir(output_folder)
