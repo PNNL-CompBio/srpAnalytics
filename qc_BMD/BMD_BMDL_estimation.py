@@ -1,4 +1,3 @@
-<<<<<<< HEAD:analysis/dn_edit/BMD_BMDL_estimation.py
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -1405,5 +1404,4 @@ def select_model(model_preds):
     selected_model_params['model_select_flag'] = model_select_flag
     selected_model_params['pval_thresh_flag'] = pval_thresh_flag
                            
->>>>>>> 93d5103ae653005638b9126e9865ec11c653de1a:qc_BMD/BMD_BMDL_estimation.py
     return selected_model_params
