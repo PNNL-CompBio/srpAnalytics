@@ -152,9 +152,9 @@ erased_morphological_data_end_point_chemical_id_file_0p25_kept.close()
 end_points = ['ANY24','CRAN']
 
 # all chemicals
-for chemical_id in np.unique(morphological_data['chemical.id']):
+#for chemical_id in np.unique(morphological_data['chemical.id']):
     
-#for chemical_id in [66]:
+for chemical_id in [3756]:
     print("chemical_id:" + str(chemical_id))
 
     for end_point in end_points:

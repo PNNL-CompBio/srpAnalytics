@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
         output_complete_file_path = input_csv_file_name[:-4] + "_wide_DNC_0.csv"
 
-        command = "python3 /srpAnalytics/qc_BMD/02_bmd_analysis.py " + str(output_complete_file_path)
+        command = "python3 /srpAnalytics/qc_BMD/02_bmd_analysis.py " + str(output_complete_file_path) + " full"
         print(command)
         os.system(command)
     #added in Rscript
