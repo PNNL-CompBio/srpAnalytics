@@ -4,7 +4,7 @@
 # In[16]:
 
 
-# To deal with 7_PAH_zf_morphology_data_2020NOV11.csv
+# To deal with 7_PAH_zf_morphology_data
 
 import numpy as np
 import pandas as pd
