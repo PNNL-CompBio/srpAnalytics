@@ -42,6 +42,8 @@ args = sys.argv[0:]
 #complete_file_path = '/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/paritosh_original_then_edit/to_dockerize/data/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
 complete_file_path = args[1]
 
+full_devel = args[2]
+
 morphological_data = pd.read_csv(complete_file_path, header = 0)
 pd.set_option('display.max_columns', None)
 
@@ -74,7 +76,7 @@ if(test_data_sim == 0):
 
 
 # morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == chemical_id,['chemical.id', 'conc', 'plate.id', 'well', end_point]]
-morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == 1532,['chemical.id', 'conc', 'plate.id', 'well', 'ANY24']]
+#morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == 1532,['chemical.id', 'conc', 'plate.id', 'well', 'ANY24']]
 #display(morphological_data_end_point_chemical_id)
 #display(morphological_data.loc[morphological_data[]'chemical.id']==1532)
 #print ("done")
@@ -136,16 +138,21 @@ write_this="chemical_id,end_point,dose\n"
 erased_morphological_data_end_point_chemical_id_file_0p25_kept.write(write_this)
 erased_morphological_data_end_point_chemical_id_file_0p25_kept.close()
 '''
+
 # full -> 17 (without DNC) unlike phase_I_II (18 endpoints), 7_PAH lacks NC24
-#end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC__', 'SKIN','SM24','TCHR','TOT_MORT']
-end_points = ['ANY24','CRAN']
+if (full_devel == "full"):
+    end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC__', 'SKIN','SM24','TCHR','TOT_MORT']
+else: # full_devel = "devel"
+    end_points = ['ANY24','CRAN']
 
 # all chemicals
-for chemical_id in np.unique(morphological_data['chemical.id']):
-    
-#for chemical_id in [66]:
-    print("chemical_id:" + str(chemical_id))
+if (full_devel == "full"):
+    chemical_id_from_here = np.unique(morphological_data['chemical.id'])
+else: # full_devel = "devel"
+    chemical_id_from_here = [3756]
 
+for chemical_id in chemical_id_from_here:
+    print("chemical_id:" + str(chemical_id))
     for end_point in end_points:
         os.chdir(output_folder)
         # subset original dataframe for a user-specified chemical and end_point pair
