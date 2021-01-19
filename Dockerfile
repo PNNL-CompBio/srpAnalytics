@@ -1,6 +1,6 @@
 from rocker/tidyverse
 
-RUN Rscript -e "install.packages('argparse'); install.packages('WikipediR')"
+RUN Rscript -e "install.packages('argparse')"
 RUN apt-get update -qq && apt-get install -y net-tools
 RUN apt-get install -y python3.7
 RUN apt-get install -y python3-pip
@@ -15,6 +15,6 @@ COPY . srpAnalytics
 WORKDIR srpAnalytics
 
 #CMD ["Rscript","fromEndpointsToDataFiles.R"]
-CMD ["python3.7","dataQcBmd.py"]
+#CMD ["python3","dataQcBmd.py"]
 
 VOLUME ["/tmp"]

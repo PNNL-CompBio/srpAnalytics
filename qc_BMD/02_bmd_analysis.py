@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore')
 
 
 starting_dir = os.getcwd()
-print (starting_dir)
+print(starting_dir)
 
 args = sys.argv[0:]
 complete_file_path = args[1]
@@ -39,26 +39,36 @@ test_data_sim = 0
 if(test_data_sim == 0):
     # Add aggregate endpoints
     # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
-    morphological_data['ANY24'] = morphological_data[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
+    morphological_data['ANY24'] = morphological_data[['MO24', 'DP24', 'SM24']].sum(axis=1,\
+                                                                                   skipna=True, min_count=1)
 
     # 2. Any effect within 5 days (combination of all measurements at both time points)
-    morphological_data['ANY120'] = morphological_data[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
+    morphological_data['ANY120'] = morphological_data[['AXIS', 'BRN_', 'CRAN', \
+                                                       'EDEM', 'LTRK', 'MORT', \
+                                                       'MUSC', 'NC__', 'SKIN', \
+                                                       'TCHR', 'ANY24']].sum(axis=1,\
+                                                                             skipna=True, min_count=1)
 
     # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
-    morphological_data['TOT_MORT'] = morphological_data[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
+    morphological_data['TOT_MORT'] = morphological_data[['MO24', 'MORT']].sum(axis=1, \
+                                                                              skipna=True, min_count=1)
 
     # 4. Any effect except mortality (#2 minus MO24 and MORT) >> 'ALL_BUT_MORT'
-    morphological_data['ALL_BUT_MORT'] = morphological_data[['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM',                                                              'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']].sum(axis=1,skipna=True,min_count=1)
+    morphological_data['ALL_BUT_MORT'] = morphological_data[['AXIS', 'BRN_', 'CRAN', \
+                                                             'DP24', 'EDEM', 'LTRK', \
+                                                             'MUSC', 'NC__', 'SKIN', \
+                                                             'SM24', 'TCHR']].sum(axis=1,\
+                                                                                  skipna=True, min_count=1)
 
-# morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == chemical_id,['chemical.id', 'conc', 'plate.id', 'well', end_point]]
-morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == 1532,['chemical.id', 'conc', 'plate.id', 'well', 'ANY24']]
+# morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == chemical_id, ['chemical.id', 'conc', 'plate.id', 'well', end_point]]
+morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == 1532, ['chemical.id', 'conc', 'plate.id', 'well', 'ANY24']]
 print(morphological_data_end_point_chemical_id)
 #print(morphological_data.loc[morphological_data[]'chemical.id']==1532)
 #print ("done")
 
 print(morphological_data.head())
 
-if (os.path.isdir("output") == False):
+if(os.path.isdir("output") == False):
     os.mkdir("output")
 
 output_folder = os.path.join(starting_dir, "output")
@@ -86,7 +96,7 @@ start_time = time.time()
 
 overall_report_filename = os.path.join("report", 'overall_report.csv')
 overall_report_file = open(overall_report_filename, "w")
-write_this = "chemical_id,end_point,len_test_dose_response\n"
+write_this = "chemical_id, end_point, len_test_dose_response\n"
 overall_report_file.write(write_this)
 
 qc_flag_filename = os.path.join("report", 'qc_flag.csv')
@@ -98,13 +108,15 @@ qc_flag_file_out.write(write_this)
 erased_morphological_data_end_point_chemical_id_filename = os.path.join("report", 'erased_morphological_data_end_point_chemical_id.txt')
 
 erased_morphological_data_end_point_chemical_id_file = open(erased_morphological_data_end_point_chemical_id_filename, "w")
-write_this="chemical_id,plate_id,end_point\n"
+write_this="chemical_id, plate_id, end_point\n"
 erased_morphological_data_end_point_chemical_id_file.write(write_this)
 erased_morphological_data_end_point_chemical_id_file.close()
 
 
 # full -> 17
-end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK', 'MO24','MORT','MUSC','NC__','SKIN','SM24','TCHR','TOT_MORT']
+end_points = ['ANY24', 'ANY120', 'AXIS', 'ALL_BUT_MORT', 'BRN_', 'CRAN', 'DP24',\
+              'EDEM', 'LTRK', 'MO24', 'MORT', 'MUSC', 'NC__', 'SKIN', 'SM24',\
+              'TCHR', 'TOT_MORT']
 #end_points = ['ANY24']
 
 for chemical_id in np.unique(morphological_data['chemical.id']):
@@ -119,7 +131,7 @@ for chemical_id in np.unique(morphological_data['chemical.id']):
         #os.chdir(starting_dir)
         os.chdir(output_folder)
         # subset original dataframe for a user-specified chemical and end_point pair
-        morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == chemical_id,['chemical.id', 'conc', 'plate.id', 'well', end_point]]
+        morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == chemical_id, ['chemical.id', 'conc', 'plate.id', 'well', end_point]]
 
         # Binarize end-point hits (Values > 1 are forced to 1)
         end_point_hits = morphological_data_end_point_chemical_id[end_point]
@@ -142,7 +154,7 @@ for chemical_id in np.unique(morphological_data['chemical.id']):
 
         test_dose_response = gdr.reformat_dose_response(dose_response)
 
-#        write_this = str(chemical_id) + "," + str(end_point) + "," + str(len(test_dose_response)) + "\n"
+#        write_this = str(chemical_id) + ", " + str(end_point) + ", " + str(len(test_dose_response)) + "\n"
  #       print ("write_this:"+str(write_this))
   #      f_out.write(write_this)
 
@@ -165,13 +177,19 @@ for chemical_id in np.unique(morphological_data['chemical.id']):
             if(unique_model_flag == 0):
                 # Generate report
                 print(test_dose_response.dose[-1:])
-                ps.save_results_good_data_unique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
+                ps.save_results_good_data_unique_model(test_dose_response, \
+                                                       qc_flag, model_predictions, \
+                                                       selected_model_params, str(chemical_id), end_point)
             else:
                 bmd_analysis_flag = selected_model_params['model_select_flag']
                 if(bmd_analysis_flag == 1):
-                    ps.save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, str(chemical_id), end_point, selected_model_params)
+                    ps.save_results_poor_data_or_no_convergence(test_dose_response, \
+                                                                qc_flag, str(chemical_id), \
+                                                                end_point, selected_model_params)
                 else:
-                    ps.save_results_good_data_nounique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
+                    ps.save_results_good_data_nounique_model(test_dose_response, \
+                                                             qc_flag, model_predictions, \
+                                                             selected_model_params, str(chemical_id), end_point)
 #        '''
 #test_dose_f_out.close()
 #f_out.close()
