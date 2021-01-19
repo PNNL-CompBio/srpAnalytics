@@ -5,3 +5,17 @@ For detailed explanation, please read
 https://docs.google.com/document/d/1ellDNGIopmpBjW0QULgCuq12RmoOqwf834LGuSd-3JY/edit?usp=sharing
 and feel free to call Doo Nam.
 
+
+
+For speed purpose (fast development of code),
+
+lines of 150,151
+2_qc_BMD/Main_Wrapper_BMD_Analysis_7_PAHs.py 
+
+are
+
+end_points = ['ANY24','CRAN']
+
+
+For full running (slow), it needs to be
+end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC__', 'SKIN','SM24','TCHR','TOT_MORT']
