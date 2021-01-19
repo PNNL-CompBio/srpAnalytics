@@ -22,7 +22,7 @@ beha_full_csv_after_replacement = beha_full_csv[:-4] + "_replaced.csv"
 
 
 for line in beha_full_in:
-    beha_full_out = open (beha_full_csv_after_replacement, "a")    
+    beha_full_out = open (beha_full_csv_after_replacement, "a")
     splited_line = line.split(",")
     bottle_id = splited_line[1]
     #print ("bottle_id:" + str(bottle_id))
