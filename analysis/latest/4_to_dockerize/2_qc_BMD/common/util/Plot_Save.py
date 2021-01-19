@@ -16,6 +16,11 @@ from astropy import stats as astrostats
 import BMD_Analysis_Functions as baf
 import os
 
+from datetime import datetime as dt
+
+today = dt.now()  
+time_now_date = today.strftime('%Y_%m_%d')
+
 def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemical_id, end_point, selected_models = None):
     # Create the PdfPages object to which we will save the pages:
     # The with statement makes sure that the PdfPages object is closed properly at
@@ -53,9 +58,9 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
                          5 : 'Negative correlation detected in dose-response data.' + '\n' + 'Caution advised.' }
  
     # Filenames for csv files containing the results of analysis
-    bmd_vals_file_name = 'bmd_vals.csv'
-    dose_response_vals_file_name = 'dose_response_vals.csv'
-    fit_vals_file_name = 'fit_vals.csv'
+    bmd_vals_file_name = 'bmd_vals_' + str(time_now_date) + '.csv'
+    dose_response_vals_file_name = 'dose_response_vals.csv' + str(time_now_date) + '.csv'
+    fit_vals_file_name = 'fit_vals.csv' + str(time_now_date) + '.csv'
     
     # Generate text for report
     if(selected_models is not None):
@@ -100,7 +105,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         plt.close()
         
         # Create dataframes to apprend to write to csv files
-        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
+        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD10_Flag', 'BMD50_Flag'])
         dose_response_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Dose', 'Response', 'CI_Lo', 'CI_Hi'])
         fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals'])
         
@@ -117,7 +122,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         bmd_vals['Max_Dose'] = dose_max
         bmd_vals['AUC_Norm'] = dose_response_auc_norm
         bmd_vals['BMD_Analysis_Flag'] = np.nan
-        bmd_vals['BMD_Flag'] = np.nan
+        bmd_vals['BMD10_Flag'] = np.nan
         bmd_vals['BMD50_Flag'] = np.nan
         
         assign_nan = False
@@ -226,9 +231,9 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     unique_model_flag = selected_models['no_unique_model_found_flag']
     
     # Filenames for csv files containing the results of analysis
-    bmd_vals_file_name = 'bmd_vals.csv'
-    dose_response_vals_file_name = 'dose_response_vals.csv'
-    fit_vals_file_name = 'fit_vals.csv'
+    bmd_vals_file_name = 'bmd_vals_' + str(time_now_date) + '.csv'
+    dose_response_vals_file_name = 'dose_response_vals.csv' + str(time_now_date) + '.csv'
+    fit_vals_file_name = 'fit_vals.csv' + str(time_now_date) + '.csv'
     text_for_report = data_qc_flag_vals[qc_flag]
     
     # Generate text for report
@@ -340,7 +345,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         plt.close()
         
         # Create dataframes to apprend to write to csv files
-        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
+        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD10_Flag', 'BMD50_Flag'])
         dose_response_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Dose', 'Response', 'CI_Lo', 'CI_Hi'])
         #fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals', 'Y_vals_diff'])
         fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals'])
@@ -358,12 +363,13 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         bmd_vals['Max_Dose'] = dose_max
         bmd_vals['AUC_Norm'] = dose_response_auc_norm
         bmd_vals['BMD_Analysis_Flag'] = bmd_analysis_flag
+
         if(model_preds.loc[model_preds['Model'] == model_name[0], 'BMD10'].values < test_dose_response.dose[1]):
-            bmd_vals['BMD_Flag'] = -1
+            bmd_vals['BMD10_Flag'] = -1
         elif(model_preds.loc[model_preds['Model'] == model_name[0], 'BMD10'].values > test_dose_response.dose.iloc[-1]):
-            bmd_vals['BMD_Flag'] = 1
+            bmd_vals['BMD10_Flag'] = 1
         else:
-            bmd_vals['BMD_Flag'] = 0
+            bmd_vals['BMD10_Flag'] = 0
             
         if(model_preds.loc[model_preds['Model'] == model_name[0], 'BMD50'].values < test_dose_response.dose[1]):
             bmd_vals['BMD50_Flag'] = -1
@@ -447,7 +453,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
 
         
     # Create dictionaries for various flags
-    data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n ' + 'BMD analysis not performed.',
+    data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n '+ 'BMD analysis not performed.',
                          1 : 'No trend detected in dose-response data.' + '\n' + 'BMD analysis not performed.',
                          2 : 'Dose-response data quality very good.',
                          3 : 'Dose-response data quality good.',
@@ -467,9 +473,9 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     unique_model_flag = selected_models['no_unique_model_found_flag']
     
     # Filenames for csv files containing the results of analysis
-    bmd_vals_file_name = 'bmd_vals.csv'
-    dose_response_vals_file_name = 'dose_response_vals.csv'
-    fit_vals_file_name = 'fit_vals.csv'
+    bmd_vals_file_name = 'bmd_vals_' + str(time_now_date) + '.csv'
+    dose_response_vals_file_name = 'dose_response_vals.csv' + str(time_now_date) + '.csv'
+    fit_vals_file_name = 'fit_vals.csv' + str(time_now_date) + '.csv'
     
     # Generate text for report
     text_for_report = data_qc_flag_vals[qc_flag]
@@ -537,7 +543,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         plt.close()
         
         # Create dataframes to apprend to write to csv files
-        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD_Flag', 'BMD50_Flag'])
+        bmd_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Model', 'BMD10', 'BMDL', 'BMD50', 'AUC', 'Min_Dose', 'Max_Dose', 'AUC_Norm', 'DataQC_Flag', 'BMD_Analysis_Flag', 'BMD10_Flag', 'BMD50_Flag'])
         dose_response_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'Dose', 'Response', 'CI_Lo', 'CI_Hi'])
         fit_vals = pd.DataFrame(columns = ['Chemical_ID', 'End_Point', 'X_vals', 'Y_vals'])
         
@@ -554,7 +560,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         bmd_vals['Max_Dose'] = dose_max
         bmd_vals['AUC_Norm'] = dose_response_auc_norm
         bmd_vals['BMD_Analysis_Flag'] = bmd_analysis_flag
-        bmd_vals['BMD_Flag'] = np.nan
+        bmd_vals['BMD10_Flag'] = np.nan
         bmd_vals['BMD50_Flag'] = np.nan
                 
         dose_response_vals['Chemical_ID'] = [chemical_id]*len(test_dose_response.dose)

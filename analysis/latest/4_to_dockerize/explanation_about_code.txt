@@ -1,0 +1,7 @@
+The input folder (srpAnalytics/analysis/latest/4_to_dockerize/input) has an example input data ("tall format").
+From now on, everyone is supposed to follow this format/standard.
+
+For detailed explanation, please read
+https://docs.google.com/document/d/1ellDNGIopmpBjW0QULgCuq12RmoOqwf834LGuSd-3JY/edit?usp=sharing
+and feel free to call Doo Nam.
+
