@@ -1,0 +1,7 @@
+In constance, it took 8 hrs to transform
+344_zf_LPR_data_phase_1_and_2_-_2020JUNE25.csv
+into
+344_zf_LPR_data_phase_1_and_2_-_2020JUNE25_replaced.csv
+
+If I had used wide format, it would have taken much shorter time.
+
