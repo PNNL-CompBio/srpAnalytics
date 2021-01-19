@@ -27,8 +27,8 @@ required_sample_columns<-c("SampleNumber","date_sampled","sample_matrix","techno
     "water_concentration","water_concentration_unit")
 #extra columns: "bioassay_sample_from_lims","parent_samples_from_lims","child_samples_from_lims")
 
-required_bmd_colums<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD50',"Min_Dose","Max_Dose",
-                                "AUC_Norm","DataQC_Flag","BMD_Analysis_Flag","BMD10_Flag","BMD50_Flag"),
+required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD50',"Min_Dose","Max_Dose",
+                                "AUC_Norm","DataQC_Flag","BMD_Analysis_Flag"),#,"BMD10_Flag","BMD50_Flag"),
                           doseRep=c("Chemical_ID","End_Point","Dose","Response","CI_Lo","CI_Hi"),
                           fitVals=c("Chemical_ID","End_Point","X_vals","Y_vals"))
 
@@ -133,20 +133,14 @@ getNewChemicalClass<-function(data.dir){
 #' @param data.dir
 #' @return data.frame
 buildSampleData<-function(data.dir,chemMeta){
-
-  ###Environmental sample data
-  #These files have the extract information and the mappin gof extracts to chemicals
-  #consists of two files really - location data
-  #we might not need this anymore!!
-    #sampMeta<-readxl::read_xlsx(paste0(data.dir,'/superfund_location_data.xlsx'))
-
+  ##New data provided by michael
   sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         subset(SampleNumber!='None')%>%
     mutate(Chemical_ID=as.character(Chemical_ID))%>%
         distinct()
 
   chemDat<-chemMeta%>%
-    select(Chemical_ID,cas_number,AVERAGE_MASS)%>%
+    select(Chemical_ID,cas_number,AVERAGE_MASS,PREFERRED_NAME,chemical_class)%>%
     distinct()%>%
     mutate(Chemical_ID=as.character(Chemical_ID))
 
@@ -316,3 +310,5 @@ main<-function(){
   print(paste('Now zipping up',length(allfiles),'files'))
   tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
 }
+
+main()
