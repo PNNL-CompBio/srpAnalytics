@@ -21,8 +21,6 @@ require(xml2)
 ##setting these three parameters, can be appended
 data.dir<-'./data/'
 
-
-
 required_sample_columns<-c("SampleNumber","date_sampled","sample_matrix","technology",
     "Sample_ID","zf_lims_id","cas_number","ClientName","SampleName","LocationLat","LocationLon",
     "LocationName","LocationAlternateDescription","AlternateName","Chemical_ID","measurement_value",
@@ -94,7 +92,7 @@ getEndpointMetadata<-function(data.dir){
         rename(End_Point='Abbreviation',`End Point Name`='Simple name (<20char)')%>%
         rename(endPointLink='Ontology Link')
     return(endpointDetails)
-    }
+}
 
 #'getNewChemicalClass
 #'This file reads in the files and processes the chemical class names
@@ -175,7 +173,7 @@ buildSampleData<-function(data.dir,chemMeta){
 combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
 
 
-  cols <- c("Chemical_ID","End_Point","Model","BMD10","BMD50","AUC_Norm","BMD50_Flag")
+  cols <- required_bmd_columns$bmd
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
 
   mid.bmd<-do.call(rbind,files)%>%
@@ -209,10 +207,11 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 ##We will release an 'endpoint file for each condition'
 combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 
-  files <- lapply(bmdfiles,read.csv)
+    files <- lapply(bmdfiles,read.csv)
 
-  full.bmd<-do.call(rbind,files)%>%
-    mutate(zf.cid=as.character(Chemical_ID))%>%
+    full.bmd<-do.call(rbind,files)%>%
+        dplyr::select(required_bmd_columns$fitVals)%>%
+        mutate(zf.cid=as.character(Chemical_ID))%>%
     rename(ChemicalId='zf.cid')%>%
      left_join(endpointDetails)%>%
      distinct()%>%
@@ -226,6 +225,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
     files <- lapply(bmdfiles,read.csv)
 
     full.bmd<-do.call(rbind,files)%>%
+        dplyr::select(required_bmd_columns$doseRep)%>%
         mutate(zf.cid=as.character(Chemical_ID))%>%
         rename(ChemicalId='zf.cid')%>%
         left_join(endpointDetails)%>%
@@ -316,5 +316,3 @@ main<-function(){
   print(paste('Now zipping up',length(allfiles),'files'))
   tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
 }
-
-main()
