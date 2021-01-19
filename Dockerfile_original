@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from rocker/tidyverse
 
 RUN apt-get update -qq && apt-get install -y net-tools
@@ -10,7 +11,7 @@ WORKDIR srpAnalytics
 CMD ["Rscript","fromEndpointsToDataFiles.R"]
 
 VOLUME ["/tmp"]
-
+=======
 from rocker/tidyverse
 
 RUN Rscript -e "install.packages('argparse')"
@@ -31,4 +32,4 @@ WORKDIR srpAnalytics
 #CMD ["python3","dataQcBmd.py"]
 
 VOLUME ["/tmp"]
-
+>>>>>>> 93d5103ae653005638b9126e9865ec11c653de1a
