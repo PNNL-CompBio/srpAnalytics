@@ -43,6 +43,7 @@ __pycache__
 .ipynb_checkpoints
 ~*
 #*
+*.pdf
 analysis/latest/3_bmd_feasibility_BMD/*/output
 analysis/latest/3_bmd_feasibility_BMD/*/running_time.txt
 
