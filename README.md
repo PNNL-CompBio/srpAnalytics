@@ -11,7 +11,7 @@ If you prefer to build your own docker image, run these commands.
 ```
 git clone https://github.com/sgosline/srpAnalytics.git
 docker build . -t srp-analytics
-docker run --volume $PWD:/tmp -ti srp-analytics
+docker run --volume $PWD:/tmp -ti srp-analytics [your file here]
 ```
 
 
@@ -23,10 +23,18 @@ docker pull sgosline/srp-analytics
 ```
 
 ```
-docker run --volume $PWD:/tmp -ti sgosline/srp-analytics
+docker run --volume $PWD:/tmp -ti sgosline/srp-analytics [your file here]
 ```
 
-The results will be the four files for the data portal.
+The results will be the four files for the data portal. Add the `--devel` flag if you are just testing the code.
+
+## Data Input
+Currently the code is designed to take a specific form of input to be processed by our benchmark dose analysis pipeline. The columns are defined in the table below:
+
+| Column name| Description|
+| ---| ---|
+
 
 ## Data Output
-The result of the pipeline. 
+
+The result of the pipeline will be six files, zipped up into a single resource.

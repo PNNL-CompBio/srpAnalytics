@@ -19,7 +19,7 @@ require(xml2)
 
                                         #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
-data.dir<-'./data/'
+data.dir<-'/srpAnalytics/data/'
 
 required_sample_columns<-c("SampleNumber","date_sampled","sample_matrix","technology",
     "Sample_ID","zf_lims_id","cas_number","ClientName","SampleName","LocationLat","LocationLon",
@@ -34,7 +34,6 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
 
 ##output directory is fixed
 out.dir<-'/tmp/'
-#out.dir<-'./'
 
 #' Get chemical metadata, which is stored in `data.dir`
 #' @param data.dir path to standardized data that enables matching across datasets
@@ -166,7 +165,7 @@ buildSampleData<-function(data.dir,chemMeta){
 ##We will release an 'endpoint file for each condition'
 combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
 
-
+    print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
   cols <- required_bmd_columns$bmd
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
 
@@ -201,6 +200,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 ##We will release an 'endpoint file for each condition'
 combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 
+    print(paste('Combining fit files:',paste(bmdfiles,collapse=',')))
     files <- lapply(bmdfiles,read.csv)
 
     full.bmd<-do.call(rbind,files)%>%
@@ -217,7 +217,7 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 
 combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
     files <- lapply(bmdfiles,read.csv)
-
+    print(paste('Combining dose response files:',paste(bmdfiles,collapse=',')))
     full.bmd<-do.call(rbind,files)%>%
         dplyr::select(required_bmd_columns$doseRep)%>%
         mutate(zf.cid=as.character(Chemical_ID))%>%
@@ -234,48 +234,67 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 
 
 chem_dirs=c('phase_I_II','zf_morphology')
-samp_dirs=c('extracts')
+extract_dirs=c('extracts')
 
 #' main method
 #' Parsers arguments
 main<-function(){
   ##now we check for additional files
   parser <- ArgumentParser()
-  parser$add_argument('-s','--sampDir',dest='samp_dir',default="",
-                      help='Directory of additional environmental sample data')
-  parser$add_argument('-c','--chemDir',dest='chem_dir',default="",
-                      help='Directory of additional chem data')
+  parser$add_argument('-s','--samples',dest='samp_files',default="",
+                      help='The subsequent files are samples')
+  parser$add_argument('-c','--chemicals',dest='chem_files',default='',help='The subsequent files are chemicals')
 
-#  parser$add_argument('-e','--envSamp',dest='env_sample',default="",
-#                      help='Environmental Sample files')
 
-  args<-parser$parse_args()
-  #if we are adding new data, add to additional data in repo
-  chem.dirs<-c(chem_dirs,unlist(strsplit(args$chem_dir,split=',')))
-  extract.dirs<-c(samp_dirs,unlist(strsplit(args$samp_dir,split=',')))
+  args <- parser$parse_args()
+                                        #if we are adding new data, add to additional data in repo
+
+  #files that we're reading in
+  chem.files<-unlist(strsplit(args$chem_files,split=','))
+  extract.files<-unlist(strsplit(args$samp_files,split=','))
+
   bmd.files<-c()
   dose.files<-c()
   curv.files<-c()
+
   e.bmd<-c()
   e.dose<-c()
   e.curve<-c()
 
-  ##read in files
-  for(chem in chem.dirs){
-    path=paste0(data.dir,'/',chem,'/')
-    bmd.files<-c(bmd.files,paste0(path,'bmd_vals_all_qc.csv'))
-    dose.files<-c(dose.files,paste0(path,'dose_response_vals_all_qc.csv'))
-    curv.files<-c(curv.files,paste0(path,'fit_vals_all_qc.csv'))
-  }
+    for(chem in chem_dirs){
+        path=paste0(data.dir,'/',chem,'/')
+        bmd.files<-c(bmd.files,paste0(path,'bmd_vals_all_qc.csv'))
+        dose.files<-c(dose.files,paste0(path,'dose_response_vals_all_qc.csv'))
+        curv.files<-c(curv.files,paste0(path,'fit_vals_all_qc.csv'))
+    }
 
-  for(ext in extract.dirs){
-    path=paste0(data.dir,'/',ext,'/')
-    e.bmd<-c(e.bmd,paste0(path,'bmd_vals_all_qc.csv'))
-    e.dose<-c(e.dose,paste0(path,'dose_response_vals_all_qc.csv'))
-    e.curve<-c(e.curve,paste0(path,'fit_vals_all_qc.csv'))
-  }
+    for(ext in extract_dirs){
+        path=paste0(data.dir,'/',ext,'/')
+        e.bmd<-c(e.bmd,paste0(path,'bmd_vals_all_qc.csv'))
+        e.dose<-c(e.dose,paste0(path,'dose_response_vals_all_qc.csv'))
+        e.curve<-c(e.curve,paste0(path,'fit_vals_all_qc.csv'))
+    }
 
-  print("Processing environmental sample data")
+
+    ##read in files
+   if(length(chem.files)==3){
+       #path=paste0(data.dir,'/',chem,'/')
+       bmd.files<-c(bmd.files,chem.files[1])#paste0(path,'bmd_vals_all_qc.csv'))
+       dose.files<-c(dose.files,chem.files[3])#paste0(path)'dose_response_vals_all_qc.csv'
+       curv.files<-c(curv.files,chem.files[2])#paste0(path,'fit_vals_all_qc.csv'))
+       }
+       else{
+           print("Not adding any chemical files")
+       }
+                                        #for(ext in extract.dirs){
+    if(length(extract.files)==3){
+#        path=paste0(data.dir,'/',ext,'/')
+        e.bmd<-c(e.bmd,extract.files[1])#paste0(path,'bmd_vals_all_qc.csv'))
+        e.dose<-c(e.dose,extract.files[3])##paste0(path,'dose_response_vals_all_qc.csv'))
+        e.curve<-c(e.curve,extract.files[2])#paste0(path,'fit_vals_all_qc.csv'))
+    }else{
+        print("Not adding any envinromental files")
+    }
   chemMeta<-getChemMetadata(data.dir)
   sampChem<-buildSampleData(data.dir,chemMeta)
 
@@ -306,7 +325,9 @@ main<-function(){
 
   write.csv(sampChem,file=paste0('chemicalsByExtractSample.csv'),row.names=FALSE)
 
-  allfiles<-c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))])
+  wd <- paste0(getwd(),'/')
+    allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
+    print(allfiles)
   print(paste('Now zipping up',length(allfiles),'files'))
   tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
 }

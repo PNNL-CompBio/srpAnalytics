@@ -1,7 +1,7 @@
 from rocker/tidyverse
 
 RUN apt-get update -qq && apt-get install -y net-tools
-RUN Rscript -e "install.packages('argparse'); install.packages('WikipediR')"
+RUN Rscript -e "install.packages('argparse')"
 
 COPY . srpAnalytics
 WORKDIR srpAnalytics
@@ -27,8 +27,5 @@ RUN pip3 install scipy==1.4.1
 COPY . srpAnalytics
 WORKDIR srpAnalytics
 
-#CMD ["Rscript","fromEndpointsToDataFiles.R"]
-#CMD ["python3","dataQcBmd.py"]
-
+ENTRYPOINT ["python3", "/srpAnalytics/dataQcBmd.py"]
 VOLUME ["/tmp"]
-
