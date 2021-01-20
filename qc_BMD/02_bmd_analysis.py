@@ -24,10 +24,10 @@ warnings.filterwarnings('ignore')
 starting_dir = os.getcwd()
 print (starting_dir)
 
-
-util_path = os.path.join(starting_dir, "2_qc_BMD/common/util")
-print ("util_path:" + str(util_path))
-sys.path.insert(0, util_path)
+# not needed here
+# util_path = os.path.join(starting_dir, "2_qc_BMD/common/util")
+# print ("util_path:" + str(util_path))
+# sys.path.insert(0, util_path)
 
 import BMD_BMDL_estimation as bmdest
 import generate_dose_response_newest_no_avg as gdr
@@ -92,7 +92,6 @@ if (os.path.isdir("output") == False):
     os.mkdir("output")
 
 output_folder = os.path.join(starting_dir, "output")
-#output_folder = os.path.join(starting_dir, output_folder_name)
 os.chdir(output_folder)
     
 #if (os.path.isdir("report") == False):
