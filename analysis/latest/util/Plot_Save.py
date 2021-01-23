@@ -62,8 +62,8 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
  
     # Filenames for csv files containing the results of analysis
     bmd_vals_file_name = 'bmd_vals_' + str(time_now_date) + '.csv'
-    dose_response_vals_file_name = 'dose_response_vals.csv' + str(time_now_date) + '.csv'
-    fit_vals_file_name = 'fit_vals.csv' + str(time_now_date) + '.csv'
+    dose_response_vals_file_name = 'dose_response_vals_' + str(time_now_date) + '.csv'
+    fit_vals_file_name = 'fit_vals_' + str(time_now_date) + '.csv'
     
     # Generate text for report
     if(selected_models is not None):
@@ -235,8 +235,8 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     
     # Filenames for csv files containing the results of analysis
     bmd_vals_file_name = 'bmd_vals_' + str(time_now_date) + '.csv'
-    dose_response_vals_file_name = 'dose_response_vals.csv' + str(time_now_date) + '.csv'
-    fit_vals_file_name = 'fit_vals.csv' + str(time_now_date) + '.csv'
+    dose_response_vals_file_name = 'dose_response_vals_' + str(time_now_date) + '.csv'
+    fit_vals_file_name = 'fit_vals_' + str(time_now_date) + '.csv'
     
     text_for_report = data_qc_flag_vals[qc_flag]
     
@@ -478,8 +478,8 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     
     # Filenames for csv files containing the results of analysis
     bmd_vals_file_name = 'bmd_vals_' + str(time_now_date) + '.csv'
-    dose_response_vals_file_name = 'dose_response_vals.csv' + str(time_now_date) + '.csv'
-    fit_vals_file_name = 'fit_vals.csv' + str(time_now_date) + '.csv'
+    dose_response_vals_file_name = 'dose_response_vals_' + str(time_now_date) + '.csv'
+    fit_vals_file_name = 'fit_vals_' + str(time_now_date) + '.csv'
     
     # Generate text for report
     text_for_report = data_qc_flag_vals[qc_flag]
