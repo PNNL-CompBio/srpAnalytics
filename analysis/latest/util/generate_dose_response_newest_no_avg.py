@@ -14,6 +14,8 @@ from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
+#report = True
+report = False
 
 # Get dose-respone data for morphology
 # data_ep_cid -> morphological_data_end_point_chemical_id
@@ -44,7 +46,6 @@ def gen_dose_response(data_ep_cid, end_point):
         
         num_neg_ctrl_hits = (neg_ctrl_wells[end_point]).sum(axis=0,skipna=True,min_count=1)
         num_nonnan_wells_ctrl = sum(~np.isnan(neg_ctrl_wells[end_point]))
-         
 
         write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(plate_id) + "," + str(end_point) + "\n"
         # Katrina seems not sure whether a new criterion is better because the new criterion may be too harsh?
@@ -145,7 +146,8 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
 
         if(number_of_abnormal_nc_wells >= (plate_data_subset_nc.shape[0])/2):
             abnormal_response_wells.append(plate_ID)
-            print('Wells with abnormal response for negative control', abnormal_response_wells)
+            if (report):
+                print('Wells with abnormal response for negative control', abnormal_response_wells)
 
     # Remove data for abnormal wells
     delta_mov_auc_normal = delta_mov_auc_data[~delta_mov_auc_data['Plate'].isin(abnormal_response_wells)]
@@ -258,10 +260,45 @@ def BMD_feasibility_analysis(dose_response):
         BMD_feasibilitye_flag = 0
     else:
         frac_response = dose_response['num_affect']/dose_response['num_embryos']
-        data_corr = stats.spearmanr(np.log10(dose_response['dose']+1e-15), frac_response)
- #       print ("data_corr:" + str(data_corr))
-#        print ("data_corr[0]:" + str(data_corr[0]))
         #frac_response = dose_response['num_affect']/dose_response['frac_affect']      
+        data_corr = stats.spearmanr(np.log10(dose_response['dose']+1e-15), frac_response)
+        if (report):
+
+            print ("dose_response['num_affect']:\n" + str(dose_response['num_affect']))
+            print ("dose_response['num_embryos']:\n" + str(dose_response['num_embryos']))
+            print ("frac_response:\n" + str(frac_response))
+            print ("frac_response[0]:\n" + str(frac_response[0]))
+            print ("data_corr:" + str(data_corr))
+            print ("data_corr[0]:" + str(data_corr[0]))
+
+        # <begin>
+        # to rescue a case like PAH_7_3756_EPR_MOV1 that simply chemical is harmful \
+        # with all non-zero doses
+        
+        for i in range(len(frac_response)):
+            if (i == 0):
+                if ((frac_response[i]) > 0.25):
+                    may_need_to_be_calculated = False
+                    break
+            else:
+                if ((frac_response[i]) < 0.8):
+                    may_need_to_be_calculated = False
+                    break
+            may_need_to_be_calculated = True
+        # <end>
+        print ("may_need_to_be_calculated:"+str(may_need_to_be_calculated))
+        
+        if (may_need_to_be_calculated):
+            [t_stat, p_value] = stats.ttest_1samp(np.diff(frac_response),0)
+            if(p_value < 0.05): # Good data
+                BMD_feasibilitye_flag = 2
+            elif((p_value >= 0.05) & (p_value < 0.32)):  # Satisfactory data
+                BMD_feasibilitye_flag = 3
+            else:
+                BMD_feasibilitye_flag = 4
+            return BMD_feasibilitye_flag
+            
+        # traditional method
         if ((str(data_corr[0]) == "nan") or (data_corr[0] < 0.2)):
             # total flat results in nan
             BMD_feasibilitye_flag = 1
@@ -274,7 +311,7 @@ def BMD_feasibility_analysis(dose_response):
             else:
                 BMD_feasibilitye_flag = 4
     return BMD_feasibilitye_flag
-######### end of def gen_dose_response(data_ep_cid, end_point):
+######### end of def BMD_feasibility_analysis(dose_response):
 
 
 # Reformat dose-response data to be compatible with BMD analysis

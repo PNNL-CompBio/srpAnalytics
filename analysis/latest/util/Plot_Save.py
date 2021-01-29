@@ -24,6 +24,9 @@ from datetime import datetime as dt
 today = dt.now()  
 time_now_date = today.strftime('%Y_%m_%d')
 
+#report = True
+report = False
+
 def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemical_id, end_point, selected_models = None):
     # Create the PdfPages object to which we will save the pages:
     # The with statement makes sure that the PdfPages object is closed properly at
@@ -130,7 +133,7 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         
         assign_nan = False
         try: # 53_ANY24
-            print ("test_dose_response.dose[0]:"+str(test_dose_response.dose[0]))
+            print ("test_dose_response.dose[0]:"+str(test_dose_response.dose[0]))                
         except: # 1532_ANY24
             assign_nan = True
             # print ("test_dose_response.dose:"+str(test_dose_response.dose))
@@ -389,8 +392,9 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         dose_response_vals['CI_Lo'] = CI_bounds[0, :]
         dose_response_vals['CI_Hi'] = CI_bounds[1, :]
         
-        print(len(dose_x_vals))
-        print(len(y_vals))
+        if (report):
+            print(len(dose_x_vals))
+            print(len(y_vals))
         
         fit_vals['Chemical_ID'] = [chemical_id]*len(dose_x_vals)
         fit_vals['End_Point'] = [end_point]*len(dose_x_vals)
