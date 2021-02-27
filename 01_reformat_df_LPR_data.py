@@ -16,6 +16,8 @@ import os, sys, time
 
 args = sys.argv[0:]
 
+print ("reformat_LPR starts----------------------")
+
 starting_dir = os.getcwd()
 
 #complete_input_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/tall/7_PAH_zf_LPR_data_2021JAN11.csv'
@@ -194,5 +196,7 @@ print ("cwd: " + str(cwd)) # /srpAnalytics
 output_complete_file_path = complete_input_file_path[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
 print ("output_complete_file_path after reformat:" + str(output_complete_file_path))
 reformatted_data.to_csv(output_complete_file_path,index=False)
+
+print ("output_complete_file_path existence in same py code:" + str(os.path.isfile(output_complete_file_path)))
 
 # In[ ]:
