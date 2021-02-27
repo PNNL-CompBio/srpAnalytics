@@ -45,21 +45,35 @@ if __name__ == "__main__":
             #      print(command)
             #      os.system(command)
             #  else:
+            if args.devel:
+                full_devel = "devel"
+            else:
+                full_devel = "full"
+                
             if args.LPR == False:
                 command = "python3 /srpAnalytics/01_reformat_df_data.py " + str(input_csv_file_name)
             else:
-                command = "python3 /srpAnalytics/01_reformat_df_LPR_data.py " + str(input_csv_file_name)
+                command = "python3 /srpAnalytics/01_reformat_df_LPR_data.py " + str(input_csv_file_name) + " " + str(full_devel)
             print(command)
             os.system(command)
-            output_complete_file_path = input_csv_file_name[:-4] + "_wide_DNC_0.csv"
-
+            
+            
+            if args.LPR == False:
+                output_complete_file_path = input_csv_file_name[:-4] + "_wide_DNC_0.csv"
+            else:
+                output_complete_file_path = input_csv_file_name[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
+            
+            #print ("output_complete_file_path:" + str(output_complete_file_path))
+            # actual file is not saved here, but it is ok to be used at following procedures
+            
+            
             #command = "python3 /srpAnalytics/qc_BMD/02_bmd_analysis.py " + \
                 #    str(output_complete_file_path)
-            if args.devel:
-                fulldev = "devel"
+            
+            if args.LPR == False:
+                files = bmd.runBmdPipeline(output_complete_file_path, full_devel)
             else:
-                fulldev = "full"
-            files = bmd.runBmdPipeline(output_complete_file_path, fulldev)
+                files = bmd.runBmdPipeline(output_complete_file_path, full_devel)
 
             command = "Rscript /srpAnalytics/03_mergeWithExtracts.R "
             if args.isSample:

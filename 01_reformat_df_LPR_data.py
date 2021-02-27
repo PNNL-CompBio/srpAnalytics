@@ -16,10 +16,13 @@ import os, sys, time
 
 args = sys.argv[0:]
 
+starting_dir = os.getcwd()
 
 #complete_input_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/tall/7_PAH_zf_LPR_data_2021JAN11.csv'
 complete_input_file_path = args[1]
 behav_all_data = pd.read_csv(complete_input_file_path, header = 0)
+
+full_devel = args[2]
 
 # In[11]:
 
@@ -120,7 +123,7 @@ start_time = time.time()
 reformatted_data = pd.DataFrame()
 max_time = 240
 
-full_devel = "full"
+#full_devel = "full"
 #full_devel = "devel"
 
 if (full_devel == "full"):
@@ -172,15 +175,24 @@ print ("Done, it took:"+str(time_took))
 # In[16]:
 
 
-print(reformatted_data)
+print("reformatted_data:\n" + str(reformatted_data))
 
 # In[17]:
-
-
-reformatted_data_filename = str(complete_input_file_path[:-4]) + "_wide_t0_t239_" + str(full_devel) + ".csv"
+'''
+print("starting_dir:" + str(starting_dir))
+reformatted_data_filename = os.path.join(starting_dir, complete_input_file_path[:-4])
+reformatted_data_filename = reformatted_data_filename + "_wide_t0_t239_" + str(full_devel) + ".csv"
+print ("reformatted_data_filename:" + str(reformatted_data_filename))
 reformatted_data.to_csv(reformatted_data_filename,index=False)
+'''
+
+print ("starting_dir: " + str(starting_dir)) # /srpAnalytics
+
+cwd = os.getcwd()
+print ("cwd: " + str(cwd)) # /srpAnalytics
+
+output_complete_file_path = complete_input_file_path[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
+print ("output_complete_file_path after reformat:" + str(output_complete_file_path))
+reformatted_data.to_csv(output_complete_file_path,index=False)
 
 # In[ ]:
-
-
-
