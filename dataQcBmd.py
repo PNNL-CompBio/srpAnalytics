@@ -12,7 +12,7 @@ sys.path.insert(0, './qc_BMD')
 from qc_BMD import bmd_analysis_02 as bmd
 
 parser = argparse.ArgumentParser('Run the QC and BMD analysis as well as join with \
-    extract data to store in SRP data analytics portal')
+extract data to store in SRP data analytics portal')
 
 #parser.add_argument('--label', dest='label', help='Label to store data', \
 #                    default='newdata')
@@ -22,6 +22,9 @@ parser.add_argument('--isSample', dest='isSample', action='store_true',\
 parser.add_argument('files', nargs='?', default='')
 parser.add_argument('--devel', dest='devel',\
                     help='Set this flag to run test code instead of full analysis',\
+                    action='store_true', default=False)
+parser.add_argument('--LPR', dest='LPR',\
+                    help='Set this flag to run LPR code instead of morphological endpoint',\
                     action='store_true', default=False)
 
 if __name__ == "__main__":
