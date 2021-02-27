@@ -52,16 +52,23 @@ if __name__ == "__main__":
                 
             if args.LPR == False:
                 command = "python3 /srpAnalytics/01_reformat_df_data.py " + str(input_csv_file_name)
+                print(command)
+                os.system(command)
             else:
+                # for LPR reformatting both morphological and LPR is needed
+                command = "python3 /srpAnalytics/01_reformat_df_data.py " + str(input_csv_file_name)
+                print(command)
+                os.system(command)
+                
                 command = "python3 /srpAnalytics/01_reformat_df_LPR_data.py " + str(input_csv_file_name) + " " + str(full_devel)
-            print(command)
-            os.system(command)
+                print(command)
+                os.system(command)
             
             
-            if args.LPR == False:
-                output_complete_file_path = input_csv_file_name[:-4] + "_wide_DNC_0.csv"
-            else:
-                output_complete_file_path = input_csv_file_name[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
+            output_complete_file_path = input_csv_file_name[:-4] + "_wide_DNC_0.csv"
+            
+            if args.LPR == True:
+                output_complete_file_path_LPR = input_csv_file_name[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
             
             #print ("output_complete_file_path:" + str(output_complete_file_path))
             # actual file is not saved here, but it is ok to be used at following procedures
@@ -73,7 +80,7 @@ if __name__ == "__main__":
             if args.LPR == False:
                 files = bmd.runBmdPipeline(output_complete_file_path, full_devel)
             else:
-                files = bmd.runBmdPipeline(output_complete_file_path, full_devel)
+                files = bmd.runBmdPipeline_LPR(output_complete_file_path_LPR, output_complete_file_path, full_devel)
 
             command = "Rscript /srpAnalytics/03_mergeWithExtracts.R "
             if args.isSample:
