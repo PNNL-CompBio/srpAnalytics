@@ -45,7 +45,10 @@ if __name__ == "__main__":
             #      print(command)
             #      os.system(command)
             #  else:
-            command = "python3 /srpAnalytics/01_reformat_df_data.py " + str(input_csv_file_name)
+            if args.LPR == False:
+                command = "python3 /srpAnalytics/01_reformat_df_data.py " + str(input_csv_file_name)
+            else:
+                command = "python3 /srpAnalytics/01_reformat_df_LPR_data.py " + str(input_csv_file_name)
             print(command)
             os.system(command)
             output_complete_file_path = input_csv_file_name[:-4] + "_wide_DNC_0.csv"
