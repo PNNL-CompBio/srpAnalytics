@@ -14,10 +14,13 @@ import os, sys, time
 
 args = sys.argv[0:]
 
+print ("reformat for morphological data starts----------------------")
 
 #complete_file_path = '/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/paritosh_original_then_edit/to_dockerize/data/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
 complete_file_path = args[1]
 print ("complete_file_path:" + str(complete_file_path))
+
+full_devel = args[2]
 
 morph_all_data = pd.read_csv(complete_file_path, header = 0)
 
@@ -69,13 +72,19 @@ start_time = time.time()
 reformat_data = pd.DataFrame()
 total_number_of_unique_chemicals = 0
 total_number_of_chemical_plate_well = 0
-for chemical_index in np.unique(morph_all_data['chemical.id']):
+
+if (full_devel == "full"):
+    # all chemicals
+    chemical_id_from_here = np.unique(morph_all_data['chemical.id'])
+else: # full_devel = "devel"
+    chemical_id_from_here = np.unique([3756])
+    
+#for chemical_index in np.unique(morph_all_data['chemical.id']):
+for chemical_index in chemical_id_from_here:
+    
     print("chemical_index:" + str(chemical_index))
     total_number_of_unique_chemicals += 1
     morph_data_chemical = morph_all_data_select.loc[morph_all_data['chemical.id'] == chemical_index,:]
-
-#    if (chemical_index != 3756):
- #       continue
 
     # Append chemical_plate_well as a unique identifier
     morph_data_chemical.insert(0, 'chemical_plate_well', morph_data_chemical.loc[:,['chemical.id','plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis = 1))
@@ -175,9 +184,6 @@ pd.set_option('display.max_columns', None)
 # In[39]:
 
 output_complete_file_path = complete_file_path[:-4] + "_wide_DNC_0.csv"
-
-#reformat_data.to_csv('7_PAH_zf_morphology_data_2020NOV11_wide_DNC_0_1.csv',index=False)
-#reformat_data_DNC_0.to_csv('7_PAH_zf_morphology_data_2020NOV11_wide_DNC_0.csv',index=False)
 reformat_data_DNC_0.to_csv(output_complete_file_path,index=False)
 
 
