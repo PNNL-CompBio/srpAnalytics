@@ -43,8 +43,8 @@ getChemMetadata<-function(data.dir){
 
 
                                         #here is more mapping information from OSU
-    fullMapping<-read.csv(paste0(data.dir,'chemicalIdMapping.csv'))%>%
-        select(cas_number,zf.cid,Chemical_ID,chemical_class)%>%
+    fullMapping<-read.csv(paste0(data.dir,'chemicalIdMapping.csv'),header=TRUE,row.names = NULL)%>%
+        dplyr::select(cas_number='ï..cas_number',zf.cid,Chemical_ID,chemical_class)%>%
         distinct()
                                           #here we join the chemical metadata from the comptox dashboard
     chemMeta<-readxl::read_xls(paste0(data.dir,
@@ -181,7 +181,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 
   if(is_extract){
     full.bmd<-mid.bmd%>%
-      dplyr::mutate(`Sample_ID`=as.character(Chemical_ID))%>%
+      dplyr::mutate(`Sample_ID`=Chemical_ID)%>%
       dplyr::select(-Chemical_ID)%>%
       left_join(sampChem,by='Sample_ID')%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
       left_join(endpointDetails)%>%
@@ -190,7 +190,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 }
   else{
     full.bmd<-mid.bmd%>%
-      dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
+      #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
       left_join(sampChem)%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
       left_join(endpointDetails)%>%
