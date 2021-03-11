@@ -3,7 +3,11 @@
 library(jsonlite)
 library(httr)
 
+url <- "https://montilab.bu.edu/Xposome-API/portals?all=Yes"
+res <- GET(url = url, encode = 'json')
+stop_for_status(res)
 
+portals <- fromJSON(fromJSON(rawToChar(res$content)))
 
 portal_name='https://montilab.bu.edu/Xposome-API/portals'
 

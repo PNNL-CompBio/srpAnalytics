@@ -16,15 +16,16 @@ require(xml2)
 #' 6- ZF points to plot for samples
 #' 7- ZF curves to plot for samples
 
-
                                         #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
 data.dir<-'/srpAnalytics/data/'
-
+data.dir='./data/'
 required_sample_columns<-c("SampleNumber","date_sampled","sample_matrix","technology",
     "Sample_ID","zf_lims_id","cas_number","ClientName","SampleName","LocationLat","LocationLon",
     "LocationName","LocationAlternateDescription","AlternateName","Chemical_ID","measurement_value",
     "water_concentration","water_concentration_unit")
+
+required_mapping_columns<-c("SampleNumber","Sample_ID",'zf_lims_id')## added these to complete mapping
 #extra columns: "bioassay_sample_from_lims","parent_samples_from_lims","child_samples_from_lims")
 
 required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD50',"Min_Dose","Max_Dose",
@@ -34,35 +35,18 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
 
 ##output directory is fixed
 out.dir<-'/tmp/'
-
+out.dir<-'./'
 #' Get chemical metadata, which is stored in `data.dir`
 #' @param data.dir path to standardized data that enables matching across datasets
 #' @return data.frame
 getChemMetadata<-function(data.dir){
 
-                                        #step 1 - get cas ids to pre-defined class
-    chemMapping<-read.csv(paste0(data.dir,'Chemicals.csv'))%>%
-        dplyr::select(cas_number,chemical_class,zaap_cid)%>%
-        distinct()%>%
-        rename(zf.cid='zaap_cid')
-
-                                        #this file was downloaded from osu
-    newMapping<-readxl::read_xlsx(paste0(data.dir,'chemicalid_table_2020AUG07.xlsx'))%>%
-        select(cas_number='casrn',zf.cid='chemical_id')%>%
-        mutate(chemical_class=NA)
 
                                         #here is more mapping information from OSU
-    fullMapping<-readxl::read_xlsx(paste0(data.dir,'OSU_BU_Overlap_Inventory_2020MAR30.xlsx'))%>%
-        select(casrn,zf.cid)%>%
-        distinct()%>%
-        tidyr::separate_rows(zf.cid,sep=';\\s+')%>%
-                                        #rename(cas_number='casrn')%>%
-        left_join(chemMapping)%>%
-        select(-cas_number)%>%
-        rename(cas_number='casrn')%>%
-        rbind(newMapping)
-
-                                        #here we join the chemical metadata from the comptox dashboard
+    fullMapping<-read.csv(paste0(data.dir,'chemicalIdMapping.csv'))%>%
+        select(cas_number,zf.cid,Chemical_ID,chemical_class)%>%
+        distinct()
+                                          #here we join the chemical metadata from the comptox dashboard
     chemMeta<-readxl::read_xls(paste0(data.dir,
                                       'CompToxChemicalsDashboard-Batch-Search_2020-08-27_17_26_49.xls'))%>%
         select(INPUT,DTXSID,PREFERRED_NAME,INCHIKEY,SMILES,MOLECULAR_FORMULA,
@@ -70,13 +54,13 @@ getChemMetadata<-function(data.dir){
         rename(cas_number='INPUT')%>%
         #TODO: update this once we get info from Lindsey
         mutate(chemDescription='WikipediaDataGoesHere')%>%
-        right_join(fullMapping)%>%
+        full_join(fullMapping)%>%
         left_join(getNewChemicalClass(data.dir))%>%
         tidyr::replace_na(list(newClass='Unclassified'))%>%
         select(-c(chemical_class,Classification))%>%
         rename(chemical_class='newClass')
 
-    chemMeta<-mutate(chemMeta,Chemical_ID=unlist(as.character(zf.cid)))
+    #chemMeta<-mutate(chemMeta,Chemical_ID=unlist(as.character(zf.cid)))
 
     return(chemMeta)
 }
@@ -99,6 +83,7 @@ getEndpointMetadata<-function(data.dir){
 #'@param data.dir
 #'@return data.frame
 getNewChemicalClass<-function(data.dir){
+  
   pahs<-readxl::read_xlsx(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),
                          sheet='Master summary-PAHs')%>%
       dplyr::select(cas_number='casrn')%>%
@@ -113,7 +98,8 @@ getNewChemicalClass<-function(data.dir){
 
   full.class<-rbind(pahs,extras,non.pahs)
   full.class$newClass<-sapply(full.class$Classification,function(x)
-    if(x%in%c('industrial',"industrial; aniline","Industrial"))
+    if(x%in%c('industrial',"industrial; aniline","Industrial",
+    "industrial; consumerProduct; phenol","industrial; consumerProduct; aniline","industrial; phenol" ))
       return("Industrial")
     else if(x%in%c("PAH; industrial","PAH"))
       return("PAH")
@@ -121,6 +107,8 @@ getNewChemicalClass<-function(data.dir){
                    "personalCare; natural; consumerProduct","personalCare; natural",
                    "pharmacological; personalCare; industrial; natural; consumerProduct"))
         return("Natural")
+    else if(x=='pestFungicide')
+      return('Fungicide')
     else if(is.na(x)||x=='NA')
         return("Unclassified")
     else return(x))
@@ -132,30 +120,48 @@ getNewChemicalClass<-function(data.dir){
 #' @param data.dir
 #' @return data.frame
 buildSampleData<-function(data.dir,chemMeta){
-  ##New data provided by michael
-  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
+  ##New data provided by michael  
+  sampChem <- read.csv(paste0(data.dir,'/fses_data_for_pnnl_3-5-2021.csv'))%>%
+  #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         subset(SampleNumber!='None')%>%
-    mutate(Chemical_ID=as.character(Chemical_ID))%>%
-        distinct()
+        subset(cas_number!='NULL')%>%
+    mutate(water_concentration_molar=stringr::str_replace_all(water_concentration_molar,'BLOD|NULL|nc:BDL',"0"))%>%
+    mutate(measurement_value_molar=stringr::str_replace_all(measurement_value_molar,'BLOD|NULL|BDL',"0"))%>%
+   # subset(water_concentration_molar!='0.0')%>%
+    subset(!measurement_value_molar%in%c('0'))%>%
+    subset(!measurement_value%in%c("0","NULL",""))
+    
 
   chemDat<-chemMeta%>%
     select(Chemical_ID,cas_number,AVERAGE_MASS,PREFERRED_NAME,chemical_class)%>%
-    distinct()%>%
-    mutate(Chemical_ID=as.character(Chemical_ID))
+    distinct()
 
-  print("Updating concentration data")
+  ##TODO: join with sample ID file
+  ids<-read.csv(paste0(data.dir,'/sampleIdMapping.csv'))%>%
+    select(Sample_ID,SampleNumber)%>%
+    distinct()
+  
+  
   sampChem <-sampChem%>%
-    left_join(chemDat)%>%
- #   mutate(unit<-stringr::str_replace_all(unit,'ug/ml','pg/uL'))%>%
-#    mutate(unit<-stringr::str_replace_all(unit,'pg/ul','pg/uL'))%>%
-#    subset(unit!='ng PAH/ÂµL DMSO')%>%
-    rename(concentration=measurement_value)%>%
+    left_join(chemDat,by='cas_number')%>%
+    left_join(ids,by='SampleNumber')%>%
+    distinct()
+  
+  print("Updating concentration data")
+  #TODO: separate those without molar concentrations, recompute
+  blanks<-sampChem%>%subset(measurement_value_molar=='')
+  nonblanks<-sampChem%>%subset(measurement_value_molar!='')
+  fixed<-blanks%>%
+    mutate(concentration=as.numeric(measurement_value))%>%
     mutate(AVERAGE_MASS=as.numeric(AVERAGE_MASS))%>%
     rowwise()%>%
-    mutate(measurement_value=concentration*1000/AVERAGE_MASS)%>%
-    dplyr::select(-c(concentration,AVERAGE_MASS))
-
-    return(sampChem)
+    mutate(measurement_value_molar=concentration*1000/AVERAGE_MASS)%>%
+    select(-concentration)
+  
+  sampChem<-rbind(nonblanks,fixed)%>%
+    dplyr::select(-c(AVERAGE_MASS))
+  
+   return(sampChem)
  }
 
 #'combineChemicalEndpointData
@@ -165,7 +171,7 @@ buildSampleData<-function(data.dir,chemMeta){
 ##We will release an 'endpoint file for each condition'
 combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
 
-    print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
+  print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
   cols <- required_bmd_columns$bmd
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
 
@@ -189,7 +195,16 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 #      rename(Chemical_ID<-'zf.cid')%>%
       left_join(endpointDetails)%>%
       distinct()%>%select(-c(End_Point))##should we remove endpoint YES
-}
+  }
+  
+  ##now we fix QC values
+  full.bmd <- full.bmd%>%
+    rename(qc_num='DataQC_Flag')%>%
+    mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num==4,'Moderate','Good')))%>%
+    rowwise()%>%
+    mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
+    select(-qc_num)
+    
   return(full.bmd)
 }
 
@@ -243,7 +258,8 @@ main<-function(){
   parser <- ArgumentParser()
   parser$add_argument('-s','--samples',dest='samp_files',default="",
                       help='The subsequent files are samples')
-  parser$add_argument('-c','--chemicals',dest='chem_files',default='',help='The subsequent files are chemicals')
+  parser$add_argument('-c','--chemicals',dest='chem_files',default='',
+                      help='The subsequent files are chemicals')
 
 
   args <- parser$parse_args()
