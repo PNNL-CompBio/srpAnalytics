@@ -40,12 +40,12 @@ out.dir<-'./'
 #' @param data.dir path to standardized data that enables matching across datasets
 #' @return data.frame
 getChemMetadata<-function(data.dir){
-
-
-                                        #here is more mapping information from OSU
+    ##This mapping file consumes data from OSU to match identifiers to CAS
     fullMapping<-read.csv(paste0(data.dir,'chemicalIdMapping.csv'),header=TRUE,row.names = NULL)%>%
         dplyr::select(cas_number='ï..cas_number',zf.cid,Chemical_ID,chemical_class)%>%
         distinct()
+    
+    ##this file comes from COMPTOX
                                           #here we join the chemical metadata from the comptox dashboard
     chemMeta<-readxl::read_xls(paste0(data.dir,
                                       'CompToxChemicalsDashboard-Batch-Search_2020-08-27_17_26_49.xls'))%>%
@@ -59,8 +59,6 @@ getChemMetadata<-function(data.dir){
         tidyr::replace_na(list(newClass='Unclassified'))%>%
         select(-c(chemical_class,Classification))%>%
         rename(chemical_class='newClass')
-
-    #chemMeta<-mutate(chemMeta,Chemical_ID=unlist(as.character(zf.cid)))
 
     return(chemMeta)
 }
@@ -136,11 +134,10 @@ buildSampleData<-function(data.dir,chemMeta){
     select(Chemical_ID,cas_number,AVERAGE_MASS,PREFERRED_NAME,chemical_class)%>%
     distinct()
 
-  ##TODO: join with sample ID file
+  ##TODO: this mapipng file maps tanguay lab identifiers to those in the anderson lab
   ids<-read.csv(paste0(data.dir,'/sampleIdMapping.csv'))%>%
     select(Sample_ID,SampleNumber)%>%
     distinct()
-  
   
   sampChem <-sampChem%>%
     left_join(chemDat,by='cas_number')%>%
@@ -164,7 +161,7 @@ buildSampleData<-function(data.dir,chemMeta){
    return(sampChem)
  }
 
-#'combineChemicalEndpointData
+#'combineChemicalEndpointData produces the summary statistics from the BMD analysis
 #'@param bmdfiles a list of files that come from the BMD pipeline
 #'@param is_extract - if our chemical id is an extract we use a different metadata
 #'@return a data.frame
@@ -183,15 +180,15 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     full.bmd<-mid.bmd%>%
       dplyr::mutate(`Sample_ID`=Chemical_ID)%>%
       dplyr::select(-Chemical_ID)%>%
-      left_join(sampChem,by='Sample_ID')%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+     # left_join(sampChem,by='Sample_ID')%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
       left_join(endpointDetails)%>%
-      dplyr::select(-c('End_Point','cas_number','measurement_value'))%>%
+      dplyr::select(-c('End_Point'))%>%
     distinct()
 }
   else{
     full.bmd<-mid.bmd%>%
       #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
-      left_join(sampChem)%>%
+      #left_join(sampChem)%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
       left_join(endpointDetails)%>%
       distinct()%>%select(-c(End_Point))##should we remove endpoint YES
@@ -203,14 +200,15 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num==4,'Moderate','Good')))%>%
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
-    select(-qc_num)
+    select(-c(qc_num,BMD_Analysis_Flag))%>%
+    subset(AUC_Norm!='NULL')
     
   return(full.bmd)
 }
 
 
-#'combineChemicalFit files
-#'@param bmdfiles the output of files from teh BMD pipeline describing the dose response
+#'combineChemicalFit combines the xy coordinates of the best model fit
+#'@param bmdfiles the output of files from the BMD pipeline describing xy coordinates 
 # @return data.frame
 ##We will release an 'endpoint file for each condition'
 combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
@@ -221,15 +219,19 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
     full.bmd<-do.call(rbind,files)%>%
         dplyr::select(required_bmd_columns$fitVals)%>%
         mutate(zf.cid=as.character(Chemical_ID))%>%
-    rename(ChemicalId='zf.cid')%>%
-     left_join(endpointDetails)%>%
-     distinct()%>%
-    select(-c(End_Point,Description,ChemicalId))
+        rename(ChemicalId='zf.cid')%>%
+        subset(X_vals!="NULL")%>%
+        left_join(endpointDetails)%>%
+        distinct()%>%
+        select(-c(End_Point,Description,ChemicalId))
   if(is_extract)
     full.bmd <- rename(full.bmd,Sample_ID='Chemical_ID')
   return(full.bmd)
 }
 
+#'combineChemicalDoseData combines the dose response points and joins them with metadata
+#'@param bmdfiles the output of files in the BMD pipeline describing the 
+#'@return data.frame
 combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
     files <- lapply(bmdfiles,read.csv)
     print(paste('Combining dose response files:',paste(bmdfiles,collapse=',')))
@@ -309,8 +311,9 @@ main<-function(){
         e.dose<-c(e.dose,extract.files[3])##paste0(path,'dose_response_vals_all_qc.csv'))
         e.curve<-c(e.curve,extract.files[2])#paste0(path,'fit_vals_all_qc.csv'))
     }else{
-        print("Not adding any envinromental files")
+        print("Not adding any environmental files")
     }
+  
   chemMeta<-getChemMetadata(data.dir)
   sampChem<-buildSampleData(data.dir,chemMeta)
 
@@ -319,6 +322,7 @@ main<-function(){
   ebmds<-combineChemicalEndpointData(e.bmd,is_extract=TRUE,sampChem,endpointDetails)
   ecurves <- combineChemicalFitData(e.curve,is_extract=TRUE, endpointDetails)
   edrs<- combineChemicalDoseData(e.dose,is_extract=TRUE, endpointDetails)
+  
   print('Processing chemical response data')
   bmds<-combineChemicalEndpointData(bmd.files,FALSE,sampChem,endpointDetails)
   curves <-combineChemicalFitData(curv.files, FALSE, endpointDetails)

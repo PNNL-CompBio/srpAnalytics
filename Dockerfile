@@ -1,22 +1,11 @@
 from rocker/tidyverse
 
-RUN apt-get update -qq && apt-get install -y net-tools
-RUN Rscript -e "install.packages('argparse')"
-
-COPY . srpAnalytics
-WORKDIR srpAnalytics
-
-
-CMD ["Rscript","fromEndpointsToDataFiles.R"]
-
-VOLUME ["/tmp"]
-
-from rocker/tidyverse
+RUN apt-get update -qq && apt-get install -y net-tools \
+        python3.7 \
+        python3-pip
 
 RUN Rscript -e "install.packages('argparse')"
-RUN apt-get update -qq && apt-get install -y net-tools
-RUN apt-get install -y python3.7
-RUN apt-get install -y python3-pip
+
 RUN pip3 install pandas
 RUN pip3 install matplotlib
 RUN pip3 install seaborn
