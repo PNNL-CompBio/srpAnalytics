@@ -16,5 +16,5 @@ RUN pip3 install scipy==1.4.1
 COPY . srpAnalytics
 WORKDIR srpAnalytics
 
-ENTRYPOINT ["python3", "/srpAnalytics/dataQcBmd.py"]
+ENTRYPOINT ["python3", "dataQcBmd.py"]
 VOLUME ["/tmp"]
