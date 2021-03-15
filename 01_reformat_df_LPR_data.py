@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[9]:
-
-
-# reformat (tall->wide) 7 PAH LPR 
 
 import numpy as np
 import pandas as pd
@@ -26,23 +22,14 @@ behav_all_data = pd.read_csv(complete_input_file_path, header = 0)
 
 full_devel = args[2]
 
-# In[11]:
-
-
 behav_all_data.head()
-
-# In[12]:
-
 
 behav_all_data = behav_all_data.dropna()
 
-# In[6]:
 
 
 #behav_all_data_certain_TX = behav_all_data.loc[behav_all_data['bottle.id'] == "TX002271",['chemical.id', 'bottle.id', 'conc', 'plate.id', 'well', 'endpoint', 'value']]
 #behav_all_data_certain_TX.head()
-
-# In[13]:
 
 
 # Keep only relevant columns
@@ -51,13 +38,9 @@ columns_to_keep = ['chemical.id', 'conc', 'plate.id', 'well', 'endpoint', 'value
 behav_all_data_select = behav_all_data.loc[:,columns_to_keep]
 behav_all_data_select.head()
 
-# In[14]:
-
 
 print(np.unique(behav_all_data_select['endpoint']))
 print(len(np.unique(behav_all_data_select['endpoint'])))
-
-# In[ ]:
 
 
 '''
@@ -68,7 +51,7 @@ for chemical_index in np.unique(behav_all_data['chemical.id']):
     print(chemical_index)
     # Append chemical_plate_well as a unique identifier
     behav_data_chemical.insert(0, 'chemical_plate_well', behav_data_chemical.loc[:,['chemical.id','plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis = 1))
-    
+
     for cpw in np.unique(behav_data_chemical.chemical_plate_well):
         temp_df = behav_data_chemical.loc[behav_data_chemical.chemical_plate_well == cpw,:]
         temp_df_grouped = temp_df.groupby(['chemical.id', 'plate.id', 'well'])
@@ -100,25 +83,6 @@ for chemical_index in np.unique(behav_all_data['chemical.id']):
                             )
                 reformat_data = pd.concat([reformat_data, temp])'''
 
-# In[ ]:
-
-
-#reformat_data.head()
-
-# In[11]:
-
-
-#reformat_data.shape
-
-# In[12]:
-
-
-#reformat_data.to_csv('Phase_I_II_t3_t17_LPR.csv',index=False)
-
-# ### t0_t239 time points
-
-# In[15]:
-
 
 start_time = time.time()
 
@@ -137,10 +101,10 @@ else: # full_devel = "devel"
 for chemical_index in chemical_id_from_here:
     print("chemical_index:" + str(chemical_index))
     behav_data_chemical = behav_all_data_select.loc[behav_all_data['chemical.id'] == chemical_index,:]
-    
+
     # Append chemical_plate_well as a unique identifier
     behav_data_chemical.insert(0, 'chemical_plate_well', behav_data_chemical.loc[:,['chemical.id','plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis = 1))
-    
+
     for cpw in np.unique(behav_data_chemical.chemical_plate_well):
         temp_df = behav_data_chemical.loc[behav_data_chemical.chemical_plate_well == cpw,:]
         #print("temp_df.head():\n" + str(temp_df.head()))
@@ -170,23 +134,13 @@ for chemical_index in chemical_id_from_here:
 
 end_time = time.time()
 time_took = str(round((end_time-start_time), 1)) + " seconds"
-print ("Done, it took:"+str(time_took)) 
+print ("Done, it took:"+str(time_took))
 # for 2 chemicals -> took 2 minutes
 # for all 7 chemicals -> took 6 minutes
 
-# In[16]:
-
-
 print("reformatted_data:\n" + str(reformatted_data))
 
-# In[17]:
-'''
-print("starting_dir:" + str(starting_dir))
-reformatted_data_filename = os.path.join(starting_dir, complete_input_file_path[:-4])
-reformatted_data_filename = reformatted_data_filename + "_wide_t0_t239_" + str(full_devel) + ".csv"
-print ("reformatted_data_filename:" + str(reformatted_data_filename))
-reformatted_data.to_csv(reformatted_data_filename,index=False)
-'''
+
 
 print ("starting_dir: " + str(starting_dir)) # /srpAnalytics
 
@@ -198,5 +152,3 @@ print ("output_complete_file_path after reformat:" + str(output_complete_file_pa
 reformatted_data.to_csv(output_complete_file_path,index=False)
 
 print ("output_complete_file_path existence in same py code:" + str(os.path.isfile(output_complete_file_path)))
-
-# In[ ]:

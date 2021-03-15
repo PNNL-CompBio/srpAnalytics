@@ -25,46 +25,26 @@ full_devel = args[2]
 morph_all_data = pd.read_csv(complete_file_path, header = 0)
 
 
-# In[18]:
-
-
 morph_all_data.head(2400).tail
-
-
-# In[19]:
 
 
 np.sum(morph_all_data['value'] == 1)
 
 
-# In[20]:
-
-
 np.sum(morph_all_data['value'] == 0) # -> 82%
-
-
-# In[21]:
 
 
 np.sum(np.isnan(morph_all_data['value']))
 
 
-# In[22]:
-
-
 morph_all_data.shape
 
-
-# In[23]:
 
 
 # Keep only relevant columns
 columns_to_keep = ['chemical.id', 'conc', 'plate.id', 'well', 'endpoint', 'value']
 morph_all_data_select = morph_all_data.loc[:,columns_to_keep]
 morph_all_data_select.head()
-
-
-# In[14]:
 
 
 start_time = time.time()
@@ -76,12 +56,12 @@ total_number_of_chemical_plate_well = 0
 if (full_devel == "full"):
     # all chemicals
     chemical_id_from_here = np.unique(morph_all_data['chemical.id'])
-else: # full_devel = "devel"
+else: # full_devel = "deve01l"
     chemical_id_from_here = np.unique([3756])
-    
+
 #for chemical_index in np.unique(morph_all_data['chemical.id']):
 for chemical_index in chemical_id_from_here:
-    
+
     print("chemical_index:" + str(chemical_index))
     total_number_of_unique_chemicals += 1
     morph_data_chemical = morph_all_data_select.loc[morph_all_data['chemical.id'] == chemical_index,:]
@@ -148,8 +128,6 @@ reformat_data_DNC_0 = reformat_data.loc[reformat_data['DNC_'] == 0.0]
 print ("reformat_data_DNC_0.shape:" + str(reformat_data_DNC_0.shape))
 
 
-# In[ ]:
-
 
 '''
 nan_count = 0
@@ -198,26 +176,6 @@ len(np.unique(reformat_data['chemical.id']))
 # In[ ]:
 
 
-#complete_file_path = '/Users/pand381/Downloads/Phase 1 and 2 for PNNL database 2020JUNE21/344 zf LPR data phase 1 and 2 - 2020JUNE25.csv'
-#behav_all_data = pd.read_csv(complete_file_path, header = 0)
-
-
-# In[ ]:
-
-
-#behav_all_data.head()
-
-
-# In[ ]:
-
-
-# Keep only relevant columns
-#columns_to_keep = ['chemical.id', 'conc', 'plate.id', 'well', 'endpoint', 'value']
-#behav_all_data_select = behav_all_data.loc[:,columns_to_keep]
-#behav_all_data_select.head()
-
-
-# In[ ]:
 
 
 '''reformat_data = pd.DataFrame()
@@ -260,29 +218,6 @@ for chemical_index in np.unique(behav_all_data['chemical.id']):
                 reformat_data = pd.concat([reformat_data, temp])'''
 
 
-# In[ ]:
-
-
-#reformat_data.head()
-
-
-# In[ ]:
-
-
-#reformat_data.shape
-
-
-# In[ ]:
-
-
-#reformat_data.to_csv('Phase_I_II_t3_t17_LPR.csv',index=False)
-
-
-# ### t0_t239 time points
-
-# In[ ]:
-
-
 '''reformat_data = pd.DataFrame()
 
 #for chemical_index in np.unique([54]):
@@ -319,51 +254,6 @@ for chemical_index in np.unique(behav_all_data['chemical.id']):
                 #print(reformat_data)'''
 
 
-# In[ ]:
-
-
-#display(reformat_data)
-
-
-# In[ ]:
-
-
-#reformat_data.to_csv('Phase_I_II_t0_t239_LPR.csv',index=False)
-
-
-# In[ ]:
-
-
-#len(np.unique(reformat_data['chemical.id']))
-
-
-# ## Reformat EPR data
-
-# In[ ]:
-
-
-#complete_file_path = '/Users/pand381/Downloads/Phase 1 and 2 for PNNL database 2020JUNE21/344 zf EPR data phase 1 and 2 - 2020JUNE25.csv'
-#behav_all_data = pd.read_csv(complete_file_path, header = 0)
-
-
-# In[ ]:
-
-
-#behav_all_data.head()
-
-
-# In[ ]:
-
-
-# Keep only relevant columns
-#columns_to_keep = ['chemical.id', 'conc', 'plate.id', 'well', 'endpoint', 'value']
-#behav_all_data_select = behav_all_data.loc[:,columns_to_keep]
-#behav_all_data_select.head()
-
-
-# In[ ]:
-
-
 '''reformat_data = pd.DataFrame()
 
 #for chemical_index in np.unique([54]):
@@ -398,15 +288,3 @@ for chemical_index in np.unique(behav_all_data['chemical.id']):
                 #print(reformat_data)
                 reformat_data = pd.concat([reformat_data, temp])
                 #print(reformat_data)'''
-
-
-# In[ ]:
-
-
-#display(reformat_data)
-
-
-# In[ ]:
-
-
-#reformat_data.to_csv('Phase_I_II_t1_t49_EPR.csv',index=False)
