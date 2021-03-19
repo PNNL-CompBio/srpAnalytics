@@ -16,7 +16,7 @@ require(xml2)
 #' 6- ZF points to plot for samples
 #' 7- ZF curves to plot for samples
 
-                                        #These pathways refer to absolute pathways in the docker image
+#These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
 data.dir<-'/srpAnalytics/data/'
 #data.dir='./data/'
@@ -140,7 +140,7 @@ buildSampleData<-function(data.dir,chemMeta){
         distinct()
 
     ##TODO: this mapipng file maps tanguay lab identifiers to those in the anderson lab
-    ids<-read.csv(paste0(data.dir,'/sampleIdMapping.csv'))%>%
+    ids<-read.csv(paste0(data.dir,'/sampleIdMapping.csv'),fileEncoding="UTF-8-BOM")%>%
         select(Sample_ID,SampleNumber)%>%
         distinct()
 
@@ -213,9 +213,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
       select(-c(qc_num,BMD_Analysis_Flag))
-    #%>%
-    #subset(AUC_Norm!='NULL')
-
+ 
   return(full.bmd)
 }
 
@@ -346,10 +344,7 @@ main<-function(){
                       water_concentration_molar,water_concentration_molar_unit)%>%
         distinct()
 
-   # chemData<-sampChem%>%
-   #     dplyr::select(Chemical_ID,chemical_class,PREFERRED_NAME,cas_number)%>%
-   #     distinct()
-
+ 
     print('Processing extract response data')
     endpointDetails<-getEndpointMetadata(data.dir)%>%unique()
     ebmds<-combineChemicalEndpointData(e.bmd,is_extract=TRUE,sampData,endpointDetails)%>%
