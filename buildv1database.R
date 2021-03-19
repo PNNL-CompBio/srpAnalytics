@@ -185,14 +185,19 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
 
   mid.bmd<-do.call(rbind,files)%>%
-#    filter(!is.null(BMD_Analysis_Flag))%>%
     dplyr::select(cols)
+  
+  sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
+    select(-sub)
 
   if(is_extract){
     full.bmd<-mid.bmd%>%
-      dplyr::mutate(`Sample_ID`=Chemical_ID)%>%
+      dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
       dplyr::select(-Chemical_ID)%>%
-      full_join(sampChem,by='Sample_ID')%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+      full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+    nas<-which(is.na(full.bmd$Sample_ID))
+    full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
+    full.bmd<-full.bmd%>%
       left_join(endpointDetails)%>%
       dplyr::select(-c('End_Point'))%>%
     distinct()
