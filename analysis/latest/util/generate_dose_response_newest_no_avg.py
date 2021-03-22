@@ -271,6 +271,7 @@ def BMD_feasibility_analysis(dose_response):
             print ("data_corr:" + str(data_corr))
             print ("data_corr[0]:" + str(data_corr[0]))
 
+            
         # <begin>
         # to rescue a case like PAH_7_3756_EPR_MOV1 that simply chemical is harmful \
         # with all non-zero doses
@@ -278,17 +279,20 @@ def BMD_feasibility_analysis(dose_response):
         for i in range(len(frac_response)):
             if (i == 0):
                 if ((frac_response[i]) > 0.25):
-                    may_need_to_be_calculated = False
+                    BMD_may_need_to_be_calculated = False
                     break
             else:
                 if ((frac_response[i]) < 0.8):
-                    may_need_to_be_calculated = False
+                    BMD_may_need_to_be_calculated = False
                     break
-            may_need_to_be_calculated = True
+            BMD_may_need_to_be_calculated = True
+        print ("BMD_may_need_to_be_calculated:" + str(BMD_may_need_to_be_calculated))
         # <end>
-        print ("may_need_to_be_calculated:"+str(may_need_to_be_calculated))
+        # to rescue a case like PAH_7_3756_EPR_MOV1 that simply chemical is harmful \
+        # with all non-zero doses
         
-        if (may_need_to_be_calculated):
+        
+        if (BMD_may_need_to_be_calculated):
             [t_stat, p_value] = stats.ttest_1samp(np.diff(frac_response),0)
             if(p_value < 0.05): # Good data
                 BMD_feasibilitye_flag = 2
