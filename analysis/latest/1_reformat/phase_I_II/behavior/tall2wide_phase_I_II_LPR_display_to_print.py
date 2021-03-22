@@ -101,12 +101,12 @@ behav_all_data_select.head()
 # In[16]:
 
 
-display(np.unique(behav_all_data['endpoint']))
+print(np.unique(behav_all_data['endpoint']))
 
 # In[17]:
 
 
-display(np.unique(behav_all_data_select['endpoint']))
+print(np.unique(behav_all_data_select['endpoint']))
 
 # In[18]:
 
@@ -234,7 +234,7 @@ print ("Done, it took:"+str(time_took))
 # In[ ]:
 
 
-display(reformat_data)
+print(reformat_data)
 
 # In[ ]:
 

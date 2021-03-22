@@ -3,7 +3,7 @@ import glob, os, random, shutil, sys, time
 if (__name__ == "__main__"):
     start_time = time.time()
     args = sys.argv[1:]
-    print (len(args))
+    print ("len(args):" + str(len(args)))
     if (len(args) < 1):
         print ("Specify py filename \n")
         print ("For example, python display_to_print.py wide2dicho_LPR_7_PAH_t0_t239.py\n")
