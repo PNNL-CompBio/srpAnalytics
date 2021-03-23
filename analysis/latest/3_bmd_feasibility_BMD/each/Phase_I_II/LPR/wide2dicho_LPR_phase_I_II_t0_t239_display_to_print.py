@@ -35,7 +35,7 @@ print (starting_dir)
 #complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/behavioral/wide/Phase_I_II_wide_t0_t239_LPR_53_54_only.csv'
 
 #constance
-complete_file_path = '/people/kimd999/tox/phase_I_II/data/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_wide_t0_t239_full.csv'
+complete_file_path = '/people/kimd999/tox/phase_I_II/input/wide/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_wide_t0_t239_full.csv'
 
 lpr_all_data = pd.read_csv(complete_file_path, header = 0)
 
