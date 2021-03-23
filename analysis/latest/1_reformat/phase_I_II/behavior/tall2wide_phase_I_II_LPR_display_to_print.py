@@ -25,7 +25,12 @@ warnings.filterwarnings('ignore')
 # In[3]:
 
 
-complete_input_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/behavioral/tall/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX.csv'
+#mac
+#complete_input_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/behavioral/tall/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX.csv'
+
+#constance
+complete_input_file_path = '/people/kimd999/tox/phase_I_II_close_file_frequently/data/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX.csv'
+
 behav_all_data = pd.read_csv(complete_input_file_path, header = 0)
 #behav_all_data.head()
 
@@ -50,7 +55,12 @@ len(TX_bottle_id_behav_all_data)
 
 ##### (start) replace plate.id in behavioral data with plate.id in morphological data (common data will be bottle.id)
 
-complete_morph_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/morphology/after_Lisa_cleanup/tall/zf_morphology_data_335_chemicals_2020DEC16.csv'
+#mac
+#complete_morph_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/morphology/tall/zf_morphology_data_335_chemicals_2020DEC16.csv'
+
+#constance
+complete_morph_file_path = '/people/kimd999/tox/phase_I_II_close_file_frequently/data/zf_morphology_data_335_chemicals_2020DEC16.csv'
+
 morph_all_data = pd.read_csv(complete_morph_file_path, header = 0)
 #morph_all_data.head()
 
