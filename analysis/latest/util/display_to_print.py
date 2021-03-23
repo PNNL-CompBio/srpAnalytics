@@ -30,4 +30,4 @@ if (__name__ == "__main__"):
 end_time = time.time()
 time_took = str(round((end_time-start_time), 1)) + " seconds "
 
-print ("display_to_print" + str(time_took))
+print ("display_to_print is finished in " + str(time_took))
