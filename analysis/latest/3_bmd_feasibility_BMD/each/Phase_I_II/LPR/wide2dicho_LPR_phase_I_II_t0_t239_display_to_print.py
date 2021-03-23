@@ -32,10 +32,10 @@ print (starting_dir)
 #LPR data file
 
 #mac
-complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/behavioral/wide/Phase_I_II_wide_t0_t239_LPR_53_54_only.csv'
+#complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/behavioral/wide/Phase_I_II_wide_t0_t239_LPR_53_54_only.csv'
 
 #constance
-#complete_file_path = '/people/kimd999/tox/phase_I_II_close_file_frequently/data/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_wide_t0_t239_full.csv'
+complete_file_path = '/people/kimd999/tox/phase_I_II/data/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_wide_t0_t239_full.csv'
 
 lpr_all_data = pd.read_csv(complete_file_path, header = 0)
 
@@ -86,7 +86,7 @@ for chemical_ID in unique_chemical_IDs:
 #morph_data_file_complete_path = '/Users/kimd999/research/projects/toxicity/per_each_data/Phase_I_II/input/morphology/after_Lisa_cleanup/wide/zf_morphology_data_335_chemicals_2020DEC16_wide_DNC_0.csv'
 
 #constance
-morph_data_file_complete_path = '/people/kimd999/tox/phase_I_II_close_file_frequently/input/wide/zf_morphology_data_335_chemicals_2020DEC16_wide_DNC_0.csv'
+morph_data_file_complete_path = '/people/kimd999/tox/phase_I_II/input/wide/zf_morphology_data_335_chemicals_2020DEC16_wide_DNC_0.csv'
 
 morphology_all_data = pd.read_csv(morph_data_file_complete_path, header = 0)
 print(morphology_all_data.head())
