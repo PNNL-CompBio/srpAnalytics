@@ -16,10 +16,11 @@ warnings.filterwarnings('ignore')
 
 import sys
 
+#mac
 #util_path = "/Users/kimd999/research/script_not_in_dropbox/srpAnalytics/analysis/latest/util"
-#sys.path.insert(0, util_path)
 
-
+#constance
+#'''
 args = sys.argv[0:]
 py_file = args[0]
 py_file_wo_path = os.path.basename(py_file)
@@ -27,6 +28,8 @@ py_file_wo_path = os.path.basename(py_file)
 code_location = os.path.dirname(os.path.abspath(py_file))
 index_of_latest = code_location.index('latest')
 util_path = os.path.join(code_location[:index_of_latest], "latest", "utils")
+#'''
+
 sys.path.insert(0, util_path)
 
 
