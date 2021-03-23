@@ -28,6 +28,8 @@ py_file_wo_path = os.path.basename(py_file)
 code_location = os.path.dirname(os.path.abspath(py_file))
 index_of_latest = code_location.index('latest')
 util_path = os.path.join(code_location[:index_of_latest], "latest", "utils")
+print ("util_path:" + str(util_path))
+a=b
 #'''
 
 sys.path.insert(0, util_path)
