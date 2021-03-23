@@ -192,7 +192,7 @@ for chemical_index in np.unique(behav_all_data['chemical.id']):
 
 start_time = time.time()
 
-reformat_data = pd.DataFrame()
+reformatted_data = pd.DataFrame()
 max_time = 240
     
 full_devel = "full"
@@ -232,9 +232,7 @@ for chemical_index in chemical_id_from_here:
                     end_point = 't'+ str(time_point)
                     temp = pd.concat([temp, pd.DataFrame({end_point: temp_df.value[temp_df.endpoint == end_point].values})],axis = 1)
                 #print(temp.head())
-                #print(reformat_data)
-                reformat_data = pd.concat([reformat_data, temp])
-                #print(reformat_data)
+                reformatted_data = pd.concat([reformatted_data, temp])
 
 end_time = time.time()
 time_took = str(round((end_time-start_time), 1)) + " seconds"
@@ -244,7 +242,7 @@ print ("Done, it took:"+str(time_took))
 # In[ ]:
 
 
-print(reformat_data)
+
 
 # In[ ]:
 
@@ -255,4 +253,4 @@ reformatted_data.to_csv(reformatted_data_filename,index=False)
 # In[ ]:
 
 
-len(np.unique(reformat_data['chemical.id']))
+len(np.unique(reformatted_data['chemical.id']))
