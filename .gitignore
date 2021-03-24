@@ -2,4 +2,5 @@
 *.pdf
 __pycache__
 analysis/latest/3_bmd_feasibility_BMD/each/7_PAH/LPR/output/*
+analysis/latest/3_bmd_feasibility_BMD/each/7_PAH/LPR/lpr_filtered_data_in_minute_groupped.csv
 analysis/paritosh_original/qc_BMD/behavior_phase_I_II/working/output/

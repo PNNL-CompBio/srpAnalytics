@@ -28,8 +28,8 @@ print (starting_dir)
 
 
 #LPR data file
-#complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/wide/7_PAH_zf_LPR_data_2021JAN11_wide_t0_t239_devel.csv'
-complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/wide/7_PAH_zf_LPR_data_2021JAN11_wide_t0_t239_full.csv'
+complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/wide/7_PAH_zf_LPR_data_2021JAN11_wide_t0_t239_devel.csv'
+#complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/wide/7_PAH_zf_LPR_data_2021JAN11_wide_t0_t239_full.csv'
 lpr_all_data = pd.read_csv(complete_file_path, header = 0)
 
 # In[4]:
