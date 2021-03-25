@@ -25,10 +25,16 @@ print (starting_dir)
 
 
 #mac
-complete_input_file_path= '/Users/kimd999/research/projects/toxicity/per_each_data/phase_III/original/behavior/Tanguay_Phase_3_zf_LPR_data_PNNL_2021MAR23.csv'
+#complete_input_file_path= '/Users/kimd999/research/projects/toxicity/per_each_data/phase_III/original/behavior/Tanguay_Phase_3_zf_LPR_data_PNNL_2021MAR23.csv'
 
 #constance
+# phase I & II
+complete_input_file_path= '/qfs/people/kimd999/tox/phase_I_II/LPR/input/tall/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_full_w_15_endpoints.csv'
+#complete_input_file_path= '/qfs/people/kimd999/tox/phase_I_II/LPR/input/tall/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_full_w_240_endpoints.csv'
+
+# phase III
 #complete_input_file_path= '/people/kimd999/tox/phase_III/Tanguay_Phase_3_zf_LPR_data_PNNL_2021MAR23.csv'
+
 
 behav_all_data = pd.read_csv(complete_input_file_path, header = 0)
 print(len(np.unique(behav_all_data['chemical.id'])))
