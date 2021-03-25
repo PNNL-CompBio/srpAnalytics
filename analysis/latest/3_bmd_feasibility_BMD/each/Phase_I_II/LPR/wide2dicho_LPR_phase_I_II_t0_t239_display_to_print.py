@@ -212,10 +212,10 @@ lpr_filtered_data_in_minute['chemical_conc'] = lpr_filtered_data_in_minute[['che
 #lpr_filtered_data_in_minute.head(1000) # this should have only 0~23 Tns
 
 #lpr_filtered_data_in_minute_groupped = lpr_filtered_data_in_minute.groupby(['chemical_conc']).sum()
-lpr_filtered_data_in_minute_groupped = lpr_filtered_data_in_minute.groupby(['chemical_conc']).mean()
-lpr_filtered_data_in_minute_groupped.head() # this should have only 0~23 Tns
+#lpr_filtered_data_in_minute_groupped = lpr_filtered_data_in_minute.groupby(['chemical_conc']).mean()
+#lpr_filtered_data_in_minute_groupped.head() # this should have only 0~23 Tns
 
-lpr_filtered_data_in_minute_groupped.to_csv('lpr_filtered_data_in_minute_groupped.csv', index=False)
+#lpr_filtered_data_in_minute_groupped.to_csv('lpr_filtered_data_in_minute_groupped.csv', index=False)
 
 
 # In[ ]:
