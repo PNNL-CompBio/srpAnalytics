@@ -56,8 +56,6 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
     # Create dictionaries for various flags
     data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n ' + 'BMD analysis not performed.',
                          1 : 'No trend detected in dose-response data.' + '\n' + 'BMD analysis not performed.',
-                         #11 : 'qc=1-1',
-                         #12 : 'qc=1-2',
                          2 : 'Dose-response data quality very good.',
                          3 : 'Dose-response data quality good.',
                          4 : 'Data resolution poor.' + '\n' + 'Caution advised.',
