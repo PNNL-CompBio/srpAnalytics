@@ -149,6 +149,41 @@ buildSampleData<-function(data.dir,chemMeta){
         left_join(ids,by='SampleNumber')%>%
         distinct()
 
+    ##now we have to fix duplicate sample names
+    
+    #get duplicates, assign
+    all.samp.names<-sampChem%>%
+      select(Sample_ID,SampleName)%>%
+      distinct()%>%
+      mutate(isDupe=duplicated(SampleName))
+    
+    #filter only duplicates
+    dupe.samp.names<-all.samp.names%>%
+      subset(isDupe)%>%
+      arrange(SampleName)
+    #get number
+    num.dupes<-dupe.samp.names%>%group_by(SampleName)%>%
+      summarize(nid=n_distinct(Sample_ID))%>%left_join(dupe.samp.names)
+    #paste sequence to end of each name
+    new.names<-num.dupes%>%
+      select(SampleName,nid)%>%distinct()%>%
+      rowwise()%>%
+      mutate(newName=paste(SampleName,seq(nid),collapse=','))%>%
+      tidyr::separate_rows(newName,sep=',')%>%
+      select(oldSN='SampleName',newName)%>%
+      arrange(oldSN)
+    #combine in new data frame
+    full.rep=data.frame(dupe.samp.names,new.names)%>%
+      select(Sample_ID,SampleName='newName')
+    
+    new.samp.names<-all.samp.names%>%subset(!isDupe)%>%
+      select(-isDupe)%>%
+      rbind(full.rep)
+    
+    sampChem<-sampChem%>%
+      select(-SampleName)%>%#remove duplicates
+      left_join(new.samp.names)
+    
     print("Updating concentration data")
                                         #TODO: separate those without molar concentrations, recompute
     blanks<-sampChem%>%subset(measurement_value_molar=='')
