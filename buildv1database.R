@@ -395,11 +395,11 @@ main<-function(){
       unique()
 
     print('Processing chemical response data')
-    bmds<-combineChemicalEndpointData(bmd.files,FALSE,chemMeta,endpointDetails)%>%
+    bmds<-combineChemicalEndpointData(bmd.files,is_extract=FALSE,sampChem,endpointDetails)%>%
       unique()
-    curves <-combineChemicalFitData(curv.files, FALSE, endpointDetails)%>%
+    curves <-combineChemicalFitData(curv.files, is_extract=FALSE, endpointDetails)%>%
       unique()
-    doseReps <-combineChemicalDoseData(dose.files, FALSE, endpointDetails)%>%
+    doseReps <-combineChemicalDoseData(dose.files, is_extract=FALSE, endpointDetails)%>%
       unique()
 
     ##there are mismatches, so we should figure out where those exists
@@ -408,23 +408,18 @@ main<-function(){
 
     print(missing)
     ##Final output for the platform team is these 4 files
-    write.csv(bmds,file=paste0('chemSummaryStats.csv'),row.names = FALSE)
-    write.csv(ebmds,file=paste0('envSampSummaryStats.csv'),row.names=FALSE)
+    write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),row.names = FALSE)
+    write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE)
 
-    write.csv(curves,file=paste0('chemXYcoords.csv'),row.names = FALSE)
-    write.csv(ecurves,file=paste0('envSampXYcoords.csv'),row.names = FALSE)
+    write.csv(curves,file=paste0(out.dir,'chemXYcoords.csv'),row.names = FALSE)
+    write.csv(ecurves,file=paste0(out.dir,'envSampXYcoords.csv'),row.names = FALSE)
 
-    write.csv(doseReps,file=paste0('chemdoseResponseVals.csv'),row.names = FALSE)
-    write.csv(edrs,file=paste0('envSampdoseResponseVals.csv'),row.names = FALSE)
+    write.csv(doseReps,file=paste0(out.dir,'chemdoseResponseVals.csv'),row.names = FALSE)
+    write.csv(edrs,file=paste0(out.dir,'envSampdoseResponseVals.csv'),row.names = FALSE)
 
-    write.csv(sampToChem,file=paste0('chemicalsByExtractSample.csv'),row.names=FALSE)
+    write.csv(sampToChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
 
-    wd <- paste0(getwd(),'/')
-    allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
-    print(allfiles)
-    print(paste('Now zipping up',length(allfiles),'files'))
-    tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
-
+   
 }
 
 main()

@@ -118,6 +118,14 @@ if __name__ == "__main__":
             command = command + ','.join(merged_files)
             print(command)
             os.system(command)
+            
+         #wd <- paste0(getwd(),'/')
+         ##UPDATE TO PYTHON     allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
+        allfiles = 'README.md'+[a for a in os.listdir('/tmp') if 'tsv' in a]
+        print(allfiles)
+        print('Now zipping up'+len(allfiles)+'files')
+        ##UPDATE to PYTHON tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
+
 
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
