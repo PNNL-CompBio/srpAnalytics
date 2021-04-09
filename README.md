@@ -17,9 +17,14 @@ docker build . -t srp-analytics
 
 Then run like this
 ```
-docker run srp-analytics [your file here, for example test_input/7_PAH_zf_morphology_data_2020NOV11_tall.csv]
+docker run -v $PWD:/tmp srp-analytics [your file here, for example to_be_processedt/7_PAH_zf_morphology_data_2020NOV11_tall.csv]
 ```
 
+To build the whole database:
+
+``` 1c-enterprise
+sh build_db.sh
+```
 
 ## How to run from docker hub
 To create a data package, you simply need to add your data to the existing repository by running the following
@@ -31,7 +36,7 @@ docker pull sgosline/srp-analytics
 
 Then run like this
 ```
-docker run sgosline/srp-analytics [your file here, for example test_input/7_PAH_zf_morphology_data_2020NOV11_tall.csv]
+docker run -v $PWD:/tmp sgosline/srp-analytics [your file here, for example test_input/7_PAH_zf_morphology_data_2020NOV11_tall.csv]
 ```
 
 The results will be the four files for the data portal. Add the `--devel` flag if you are just testing the code.

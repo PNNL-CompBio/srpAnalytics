@@ -16,7 +16,7 @@ require(xml2)
 #' 6- ZF points to plot for samples
 #' 7- ZF curves to plot for samples
 
-                                        #These pathways refer to absolute pathways in the docker image
+#These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
 data.dir<-'/srpAnalytics/data/'
 #data.dir='./data/'
@@ -140,7 +140,7 @@ buildSampleData<-function(data.dir,chemMeta){
         distinct()
 
     ##TODO: this mapipng file maps tanguay lab identifiers to those in the anderson lab
-    ids<-read.csv(paste0(data.dir,'/sampleIdMapping.csv'))%>%
+    ids<-read.csv(paste0(data.dir,'/sampleIdMapping.csv'),fileEncoding="UTF-8-BOM")%>%
         select(Sample_ID,SampleNumber)%>%
         distinct()
 
@@ -149,6 +149,41 @@ buildSampleData<-function(data.dir,chemMeta){
         left_join(ids,by='SampleNumber')%>%
         distinct()
 
+    ##now we have to fix duplicate sample names
+    
+    #get duplicates, assign
+    all.samp.names<-sampChem%>%
+      select(Sample_ID,SampleName)%>%
+      distinct()%>%
+      mutate(isDupe=duplicated(SampleName))
+    
+    #filter only duplicates
+    dupe.samp.names<-all.samp.names%>%
+      subset(isDupe)%>%
+      arrange(SampleName)
+    #get number
+    num.dupes<-dupe.samp.names%>%group_by(SampleName)%>%
+      summarize(nid=n_distinct(Sample_ID))%>%left_join(dupe.samp.names)
+    #paste sequence to end of each name
+    new.names<-num.dupes%>%
+      select(SampleName,nid)%>%distinct()%>%
+      rowwise()%>%
+      mutate(newName=paste(SampleName,seq(nid),collapse=','))%>%
+      tidyr::separate_rows(newName,sep=',')%>%
+      select(oldSN='SampleName',newName)%>%
+      arrange(oldSN)
+    #combine in new data frame
+    full.rep=data.frame(dupe.samp.names,new.names)%>%
+      select(Sample_ID,SampleName='newName')
+    
+    new.samp.names<-all.samp.names%>%subset(!isDupe)%>%
+      select(-isDupe)%>%
+      rbind(full.rep)
+    
+    sampChem<-sampChem%>%
+      select(-SampleName)%>%#remove duplicates
+      left_join(new.samp.names)
+    
     print("Updating concentration data")
                                         #TODO: separate those without molar concentrations, recompute
     blanks<-sampChem%>%subset(measurement_value_molar=='')
@@ -185,14 +220,19 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
 
   mid.bmd<-do.call(rbind,files)%>%
-#    filter(!is.null(BMD_Analysis_Flag))%>%
     dplyr::select(cols)
+  
+  sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
+    select(-sub)
 
   if(is_extract){
     full.bmd<-mid.bmd%>%
-      dplyr::mutate(`Sample_ID`=Chemical_ID)%>%
+      dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
       dplyr::select(-Chemical_ID)%>%
-      full_join(sampChem,by='Sample_ID')%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+      full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+    nas<-which(is.na(full.bmd$Sample_ID))
+    full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
+    full.bmd<-full.bmd%>%
       left_join(endpointDetails)%>%
       dplyr::select(-c('End_Point'))%>%
     distinct()
@@ -213,9 +253,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
       select(-c(qc_num,BMD_Analysis_Flag))
-    #%>%
-    #subset(AUC_Norm!='NULL')
-
+ 
   return(full.bmd)
 }
 
@@ -346,10 +384,7 @@ main<-function(){
                       water_concentration_molar,water_concentration_molar_unit)%>%
         distinct()
 
-   # chemData<-sampChem%>%
-   #     dplyr::select(Chemical_ID,chemical_class,PREFERRED_NAME,cas_number)%>%
-   #     distinct()
-
+ 
     print('Processing extract response data')
     endpointDetails<-getEndpointMetadata(data.dir)%>%unique()
     ebmds<-combineChemicalEndpointData(e.bmd,is_extract=TRUE,sampData,endpointDetails)%>%
@@ -360,11 +395,11 @@ main<-function(){
       unique()
 
     print('Processing chemical response data')
-    bmds<-combineChemicalEndpointData(bmd.files,FALSE,chemMeta,endpointDetails)%>%
+    bmds<-combineChemicalEndpointData(bmd.files,is_extract=FALSE,sampChem,endpointDetails)%>%
       unique()
-    curves <-combineChemicalFitData(curv.files, FALSE, endpointDetails)%>%
+    curves <-combineChemicalFitData(curv.files, is_extract=FALSE, endpointDetails)%>%
       unique()
-    doseReps <-combineChemicalDoseData(dose.files, FALSE, endpointDetails)%>%
+    doseReps <-combineChemicalDoseData(dose.files, is_extract=FALSE, endpointDetails)%>%
       unique()
 
     ##there are mismatches, so we should figure out where those exists
@@ -373,23 +408,18 @@ main<-function(){
 
     print(missing)
     ##Final output for the platform team is these 4 files
-    write.csv(bmds,file=paste0('chemSummaryStats.csv'),row.names = FALSE)
-    write.csv(ebmds,file=paste0('envSampSummaryStats.csv'),row.names=FALSE)
+    write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),row.names = FALSE)
+    write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE)
 
-    write.csv(curves,file=paste0('chemXYcoords.csv'),row.names = FALSE)
-    write.csv(ecurves,file=paste0('envSampXYcoords.csv'),row.names = FALSE)
+    write.csv(curves,file=paste0(out.dir,'chemXYcoords.csv'),row.names = FALSE)
+    write.csv(ecurves,file=paste0(out.dir,'envSampXYcoords.csv'),row.names = FALSE)
 
-    write.csv(doseReps,file=paste0('chemdoseResponseVals.csv'),row.names = FALSE)
-    write.csv(edrs,file=paste0('envSampdoseResponseVals.csv'),row.names = FALSE)
+    write.csv(doseReps,file=paste0(out.dir,'chemdoseResponseVals.csv'),row.names = FALSE)
+    write.csv(edrs,file=paste0(out.dir,'envSampdoseResponseVals.csv'),row.names = FALSE)
 
-    write.csv(sampToChem,file=paste0('chemicalsByExtractSample.csv'),row.names=FALSE)
+    write.csv(sampToChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
 
-    wd <- paste0(getwd(),'/')
-    allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
-    print(allfiles)
-    print(paste('Now zipping up',length(allfiles),'files'))
-    tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
-
+   
 }
 
 main()
