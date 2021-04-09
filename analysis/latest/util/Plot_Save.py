@@ -200,7 +200,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         chemical_id = str(chemical_id)
         
     filename = chemical_id + '_' + end_point + '.pdf'
-    model_preds = model_preds.round(3)
+    model_preds = model_preds.round(8)
     
     # Extract subset of results table 
     model_preds_basic_stats = model_preds[['Model', 'Chi-squared', 'p-val', 'AIC', 'BMD10', 'BMDL10']]
@@ -212,7 +212,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     model_preds_residuals[residual_column_names] = model_preds_residuals_matrix
     for model_pred_index in range(model_preds['Scaled Residuals'].shape[0]):
         if(not any(np.isnan(model_preds['Scaled Residuals'][model_pred_index]))):
-            model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(6)
+            model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)
 
     # Create dictionaries for various flags
     data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n ' + 'BMD analysis not performed.',
@@ -441,7 +441,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
         chemical_id = str(chemical_id)
         
     filename = chemical_id + '_' + end_point + '.pdf'
-    model_preds = model_preds.round(3)
+    model_preds = model_preds.round(8)
     
     # Extract subset of results table 
     model_preds_basic_stats = model_preds[['Model', 'Chi-squared', 'p-val', 'AIC', 'BMD10', 'BMDL10']]
@@ -455,7 +455,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     model_preds_residuals[residual_column_names] = model_preds_residuals_matrix
     for model_pred_index in range(model_preds['Scaled Residuals'].shape[0]):
         if(not any(np.isnan(model_preds['Scaled Residuals'][model_pred_index]))):
-            model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(6)
+            model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)
 
         
     # Create dictionaries for various flags
