@@ -181,8 +181,8 @@ bmd_feasibility_flag_file_out = open(bmd_feasibility_flag_filename, "w")
 write_this = "bmd_feasibility_flag\n"
 bmd_feasibility_flag_file_out.write(write_this)
 
-#full_devel = "full"
-full_devel = "devel"
+full_devel = "full"
+#full_devel = "devel"
 
 chemical_id_from_here = np.unique(morpho_data['chemical.id'])
 
