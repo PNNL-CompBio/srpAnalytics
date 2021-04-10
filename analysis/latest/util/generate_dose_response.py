@@ -20,7 +20,7 @@ report = False
 # Get dose-respone data for morphology
 # data_ep_cid -> morphological_data_end_point_chemical_id
 def gen_dose_response(data_ep_cid, end_point):
-    print ("data_ep_cid:\n"+str(data_ep_cid))
+    #print ("data_ep_cid:\n"+str(data_ep_cid))
     '''
              chemical.id  conc  plate.id well  ANY24
         192           54  5.00     12838  A01    0.0
@@ -90,7 +90,7 @@ def gen_dose_response(data_ep_cid, end_point):
 
     # First get rid of nan values
     dose_response = dose_response.dropna()
-    print ("dose_response (after dropna):\n" + str(dose_response))
+    #print ("dose_response (after dropna):\n" + str(dose_response))
     ''' dose  num_affect  frac_affect  num_embryos  tot_wells
     0   0.0         0.0     0.000000         26.0       32.0
     1   0.1         1.0     0.032258         31.0       32.0
