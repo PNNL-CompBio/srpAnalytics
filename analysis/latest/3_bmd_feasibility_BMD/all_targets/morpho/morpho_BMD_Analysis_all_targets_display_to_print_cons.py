@@ -62,9 +62,21 @@ print(morpho_data.tail())
 # In[4]:
 
 
-test_data_sim = 0
-if(test_data_sim == 0):
-    # Add aggregate endpoints
+# Add aggregate endpoints
+if ("PAH" in complete_file_path):
+    # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
+    morpho_data['ANY24'] = morpho_data[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
+    
+    # 2. Any effect within 5 days (combination of all measurements at both time points)
+    morpho_data['ANY120'] = morpho_data[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
+    
+    # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
+    morpho_data['TOT_MORT'] = morpho_data[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
+
+    # 4. Any effect except mortality (#2 minus MO24 and MORT) >> 'ALL_BUT_MORT'
+    morpho_data['ALL_BUT_MORT'] = morpho_data[['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM', \
+                                                             'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']].sum(axis=1,skipna=True,min_count=1)
+else:
     # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
     # 2. Any effect within 5 days (combination of all measurements at both time points)
     # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
