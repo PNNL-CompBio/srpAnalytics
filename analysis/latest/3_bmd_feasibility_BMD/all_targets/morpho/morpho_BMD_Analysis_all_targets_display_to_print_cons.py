@@ -171,8 +171,8 @@ bmd_feasibility_flag_file_out.write(write_this)
 #end_points = ['AXIS','BRAI','CFIN','CIRC','DP24','EYE_','JAW_','MO24','MORT','NC24','NC__',\
 #              'OTIC','PE__','PFIN','PIG_','SM24','SNOU','SOMI','SWIM','TRUN','TR__','YSE_']
 
-#full_devel = "full"
-full_devel = "devel"
+full_devel = "full"
+#full_devel = "devel"
 
 
 # full_oregon_state_request -> 18 (without DNC)
