@@ -6,7 +6,7 @@
 
 import numpy as np
 import pandas as pd
-import os, shutil, sys, time
+import os, random, shutil, sys, time
 from scipy import stats
 from matplotlib import pyplot as plt
 import seaborn as sns
