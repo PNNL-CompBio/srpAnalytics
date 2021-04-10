@@ -47,11 +47,17 @@ print (starting_dir)
 # mac - phase I && II - full
 #complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/phase_I_II/input/morpho/wide/zf_morphology_data_335_chemicals_2020DEC16_wide_DNC_0.csv'
 
+# mac - 7 PAH - full
+#complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/wide/7_PAH_zf_morphology_data_2021JAN11_wide_made_in_2021_01_19_DNC_0.csv'
+
 # constance - phase I && II - full
 #complete_file_path = '/people/kimd999/tox/phase_I_II/morpho/wide/zf_morphology_data_335_chemicals_2020DEC16_wide_DNC_0.csv'
 
 # constance - 7 PAH - full
-complete_file_path = '/people/kimd999/tox/7_PAH/input/7_PAH_zf_morphology_data_2020NOV11_wide_DNC_0.csv'
+#complete_file_path = '/people/kimd999/tox/7_PAH/input/7_PAH_zf_morphology_data_2020NOV11_wide_DNC_0.csv'
+
+# constance - extracts - full
+complete_file_path = '/qfs/people/kimd999/tox/extracts/input/tall_extracts_morphology_PNNL_10-28-2020_005958_wide_DNC_0.csv'
 
 morpho_data = pd.read_csv(complete_file_path, header = 0)
 pd.set_option('display.max_columns', None)
