@@ -157,7 +157,6 @@ import Plot_Save as ps
 
 # In[9]:
 
-
 start_time = time.time()
 
 os.chdir(output_folder)
@@ -170,24 +169,25 @@ bmd_feasibility_flag_file_out = open(bmd_feasibility_flag_filename, "w")
 write_this = "bmd_feasibility_flag\n"
 bmd_feasibility_flag_file_out.write(write_this)
 
-# all before merging/generating new endpoints
-#end_points = ['AXIS','BRAI','CFIN','CIRC','DP24','EYE_','JAW_','MO24','MORT','NC24','NC__',\
-#              'OTIC','PE__','PFIN','PIG_','SM24','SNOU','SOMI','SWIM','TRUN','TR__','YSE_']
+#full_devel = "full"
+full_devel = "devel"
 
-full_devel = "full"
-#full_devel = "devel"
-
+chemical_id_from_here = np.unique(morpho_data['chemical.id'])
 
 # full_oregon_state_request -> 18 (without DNC)
 if (full_devel == "full"):
-    end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM',\
+    if ("PAH" in complete_file_path):
+        end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC__', 'SKIN','SM24','TCHR','TOT_MORT']
+    else:
+        end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM',\
                   'LTRK','MO24','MORT','MUSC','NC24','NC__','SKIN','SM24','TCHR','TOT_MORT']
-    chemical_id_from_here = np.unique(morpho_data['chemical.id'])
+    #chemical_id_from_here = np.unique(morpho_data['chemical.id'])
 else:
-    end_points = ['TCHR']
-    chemical_id_from_here = [62]
+    end_points = ['ANY24']
+    randomly_chosen = random.choice(chemical_id_from_here)
+    chemical_id_from_here = []
+    chemical_id_from_here.append(randomly_chosen)
 
-    
 for chemical_id in chemical_id_from_here:
     print("chemical_id:" + str(chemical_id))
     for end_point in end_points:
@@ -259,7 +259,6 @@ time_filename = os.path.join("report", 'running_time.txt')
 f_time = open(time_filename, 'w')
 f_time.write(str(time_took))
 f_time.close() 
-
 
 # In[10]:
 
