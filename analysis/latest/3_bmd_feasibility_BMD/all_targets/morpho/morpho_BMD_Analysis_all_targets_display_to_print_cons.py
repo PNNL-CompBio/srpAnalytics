@@ -272,10 +272,6 @@ f_time = open(time_filename, 'w')
 f_time.write(str(time_took))
 f_time.close() 
 
-# In[10]:
-
-
-print ("model_predictions"+str(model_predictions))
 
 # In[11]:
 
