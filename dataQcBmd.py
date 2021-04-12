@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os, sys, time
 import argparse
+import tarfile
+
 sys.path.insert(0, './qc_BMD')
 #from qc_BMD import bmd_analysis_full as bmd
 from qc_BMD import bmd_analysis_02 as bmd
@@ -118,14 +120,19 @@ if __name__ == "__main__":
             command = command + ','.join(merged_files)
             print(command)
             os.system(command)
-            
+            for m in merged_files:
+                os.system('rm '+m)
+
          #wd <- paste0(getwd(),'/')
          ##UPDATE TO PYTHON     allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
-        allfiles = 'README.md'+[a for a in os.listdir('/tmp') if 'tsv' in a]
+        allfiles = ['README.md'] + [a for a in os.listdir('/tmp') if 'csv' in a]
         print(allfiles)
-        print('Now zipping up'+len(allfiles)+'files')
-        ##UPDATE to PYTHON tar(paste0(out.dir,'srpAnalyticsCompendium.tar.gz'),files=allfiles,compression='gzip')
-
+        print('Now zipping up'+str(len(allfiles))+'files')
+        tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
+        for fname in allfiles:
+            #os.system('mv '+fname+' /tmp')
+            tar.add(fname)
+        tar.close()
 
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"

@@ -150,13 +150,13 @@ buildSampleData<-function(data.dir,chemMeta){
         distinct()
 
     ##now we have to fix duplicate sample names
-    
+
     #get duplicates, assign
     all.samp.names<-sampChem%>%
       select(Sample_ID,SampleName)%>%
       distinct()%>%
       mutate(isDupe=duplicated(SampleName))
-    
+
     #filter only duplicates
     dupe.samp.names<-all.samp.names%>%
       subset(isDupe)%>%
@@ -175,15 +175,15 @@ buildSampleData<-function(data.dir,chemMeta){
     #combine in new data frame
     full.rep=data.frame(dupe.samp.names,new.names)%>%
       select(Sample_ID,SampleName='newName')
-    
+
     new.samp.names<-all.samp.names%>%subset(!isDupe)%>%
       select(-isDupe)%>%
       rbind(full.rep)
-    
+
     sampChem<-sampChem%>%
       select(-SampleName)%>%#remove duplicates
       left_join(new.samp.names)
-    
+
     print("Updating concentration data")
                                         #TODO: separate those without molar concentrations, recompute
     blanks<-sampChem%>%subset(measurement_value_molar=='')
@@ -221,20 +221,25 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 
   mid.bmd<-do.call(rbind,files)%>%
     dplyr::select(cols)
-  
-  sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
-    select(-sub)
+
+
 
   if(is_extract){
+    sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
+      select(-sub)
+
     full.bmd<-mid.bmd%>%
       dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
       dplyr::select(-Chemical_ID)%>%
       full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+
     nas<-which(is.na(full.bmd$Sample_ID))
+
     full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
+
     full.bmd<-full.bmd%>%
       left_join(endpointDetails)%>%
-      dplyr::select(-c('End_Point'))%>%
+      dplyr::select(-c('End_Point','tmpId'))%>%
     distinct()
 }
   else{
@@ -243,7 +248,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
       full_join(sampChem)%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
       left_join(endpointDetails)%>%
-      distinct()%>%select(-c(End_Point))##should we remove endpoint YES
+      distinct()%>%select(-c('End_Point'))##should we remove endpoint YES
   }
 
   ##now we fix QC values
@@ -253,7 +258,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
       select(-c(qc_num,BMD_Analysis_Flag))
- 
+
   return(full.bmd)
 }
 
@@ -384,7 +389,7 @@ main<-function(){
                       water_concentration_molar,water_concentration_molar_unit)%>%
         distinct()
 
- 
+
     print('Processing extract response data')
     endpointDetails<-getEndpointMetadata(data.dir)%>%unique()
     ebmds<-combineChemicalEndpointData(e.bmd,is_extract=TRUE,sampData,endpointDetails)%>%
@@ -395,7 +400,7 @@ main<-function(){
       unique()
 
     print('Processing chemical response data')
-    bmds<-combineChemicalEndpointData(bmd.files,is_extract=FALSE,sampChem,endpointDetails)%>%
+    bmds<-combineChemicalEndpointData(bmd.files,is_extract=FALSE,chemMeta,endpointDetails)%>%
       unique()
     curves <-combineChemicalFitData(curv.files, is_extract=FALSE, endpointDetails)%>%
       unique()
@@ -419,7 +424,7 @@ main<-function(){
 
     write.csv(sampToChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
 
-   
+
 }
 
 main()
