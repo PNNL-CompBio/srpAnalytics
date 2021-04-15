@@ -200,7 +200,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
         chemical_id = str(chemical_id)
 
     filename = chemical_id + '_' + end_point + '.pdf'
-    model_preds = model_preds.round(3)
+    model_preds = model_preds.round(8)
 
     # Extract subset of results table
     model_preds_basic_stats = model_preds[['Model', 'Chi-squared', \
@@ -450,7 +450,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag,\
         chemical_id = str(chemical_id)
 
     filename = chemical_id + '_' + end_point + '.pdf'
-    model_preds = model_preds.round(3)
+    model_preds = model_preds.round(8)
 
     # Extract subset of results table
     model_preds_basic_stats = model_preds[['Model', 'Chi-squared', 'p-val', 'AIC', 'BMD10', 'BMDL10']]

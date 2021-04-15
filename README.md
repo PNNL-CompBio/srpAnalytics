@@ -13,7 +13,7 @@ git clone https://github.com/sgosline/srpAnalytics.git
 cd srp-analytics
 docker build . -t srp-analytics
 ```
-(this building took 8 minutes in mackbook since it installs all depencies)
+(this building took 8 minutes in macbook pro since it installs all depencies)
 
 Then run like this
 ```
