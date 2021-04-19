@@ -6,19 +6,26 @@ This repository contains the code necessary to process any new data for the Supe
 The incoming data will be formatted as a table with schema TBD. Currently we are just compiling the current data and not adding to it
 
 ## How to build your own docker image
-If you prefer to build your own docker image, run these commands.
+If you prefer to build your own docker image, run these commands (turn off PNNL VPN).
 
 ```
 git clone https://github.com/sgosline/srpAnalytics.git
 cd srp-analytics
 docker build . -t srp-analytics
 ```
-(this building took 8 minutes in mackbook since it installs all depencies)
+(this building took 8 minutes in macbook pro since it installs all dependencies)
 
 Then run like this
 ```
 docker run -v $PWD:/tmp srp-analytics [your file here, for example to_be_processedt/7_PAH_zf_morphology_data_2020NOV11_tall.csv]
 ```
+
+For faster running add --devel,
+```
+docker run -v $PWD:/tmp srp-analytics [your file here, for example to_be_processedt/7_PAH_zf_morphology_data_2020NOV11_tall.csv] --devel
+```
+
+
 
 To build the whole database:
 
