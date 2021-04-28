@@ -53,7 +53,7 @@ getChemMetadata<-function(data.dir){
     ##this file comes from COMPTOX
     ##here we join the chemical metadata from the comptox dashboard
     chemMeta<-readxl::read_xls(paste0(data.dir,
-                                      'CompToxChemicalsDashboard-Batch-Search_2020-08-27_17_26_49.xls'))%>%
+                                      'CompToxChemicalsDashboard-Batch-Search_2021-04-28_10_10_47.xls'))%>%
         select(INPUT,DTXSID,PREFERRED_NAME,INCHIKEY,SMILES,MOLECULAR_FORMULA,
                AVERAGE_MASS,PUBCHEM_DATA_SOURCES)%>%
         rename(cas_number='INPUT')%>%
@@ -125,7 +125,7 @@ getNewChemicalClass<-function(data.dir){
 #' @return data.frame
 buildSampleData<-function(data.dir,chemMeta){
     ##New data provided by michael
-    sampChem <- read.csv(paste0(data.dir,'/fses_data_for_pnnl_3-5-2021.csv'))%>%
+    sampChem <- read.csv(paste0(data.dir,'/fses_data_for_pnnl_4-27-2021.csv'))%>%
                                         #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         subset(SampleNumber!='None')%>%
         subset(cas_number!='NULL')%>%
@@ -310,7 +310,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 }
 
 
-chem_dirs=c('phase_I_II','zf_morphology')
+chem_dirs=c('phase_I_II')#,'zf_morphology')
 extract_dirs=c('extracts')
 
 #' main method
@@ -343,16 +343,16 @@ main<-function(){
 
     for(chem in chem_dirs){
         path=paste0(data.dir,'/',chem,'/')
-        bmd.files<-c(bmd.files,paste0(path,'bmd_vals_all_qc.csv'))
-        dose.files<-c(dose.files,paste0(path,'dose_response_vals_all_qc.csv'))
-        curv.files<-c(curv.files,paste0(path,'fit_vals_all_qc.csv'))
+        bmd.files<-c(bmd.files,paste0(path,'bmd_vals_2021_04_09.csv'))
+        dose.files<-c(dose.files,paste0(path,'dose_response_vals_2021_04_09.csv'))
+        curv.files<-c(curv.files,paste0(path,'fit_vals_2021_04_09.csv'))
     }
 
     for(ext in extract_dirs){
         path=paste0(data.dir,'/',ext,'/')
-        e.bmd<-c(e.bmd,paste0(path,'bmd_vals_all_qc.csv'))
-        e.dose<-c(e.dose,paste0(path,'dose_response_vals_all_qc.csv'))
-        e.curve<-c(e.curve,paste0(path,'fit_vals_all_qc.csv'))
+        e.bmd<-c(e.bmd,paste0(path,'bmd_vals_2021_04_09.csv'))
+        e.dose<-c(e.dose,paste0(path,'dose_response_vals_2021_04_09.csv'))
+        e.curve<-c(e.curve,paste0(path,'fit_vals_2021_04_09.csv'))
     }
 
 
