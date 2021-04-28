@@ -125,7 +125,7 @@ getNewChemicalClass<-function(data.dir){
 #' @return data.frame
 buildSampleData<-function(data.dir,chemMeta){
     ##New data provided by michael
-    sampChem <- read.csv(paste0(data.dir,'/fses_data_for_pnnl_4-27-2021.csv'))%>%
+    sampChem <- read.csv(paste0(data.dir,'/fses_data_for_pnnl_4-27-2021.csv'),fileEncoding="UTF-8-BOM")%>%
                                         #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         subset(SampleNumber!='None')%>%
         subset(cas_number!='NULL')%>%
@@ -133,7 +133,8 @@ buildSampleData<-function(data.dir,chemMeta){
         mutate(measurement_value_molar=stringr::str_replace_all(measurement_value_molar,'BLOD|NULL|BDL',"0"))%>%
                                         # subset(water_concentration_molar!='0.0')%>%
         subset(!measurement_value_molar%in%c('0'))%>%
-        subset(!measurement_value%in%c("0","NULL",""))
+        subset(!measurement_value%in%c("0","NULL",""))%>%
+        select(-c(Sample_ID,Chemical_ID)) ##These two are added in the 4/27 version of the file
 
     chemDat<-chemMeta%>%
         select(Chemical_ID,cas_number,AVERAGE_MASS)%>%
@@ -343,9 +344,9 @@ main<-function(){
 
     for(chem in chem_dirs){
         path=paste0(data.dir,'/',chem,'/')
-        bmd.files<-c(bmd.files,paste0(path,'bmd_vals_2021_04_09.csv'))
-        dose.files<-c(dose.files,paste0(path,'dose_response_vals_2021_04_09.csv'))
-        curv.files<-c(curv.files,paste0(path,'fit_vals_2021_04_09.csv'))
+        bmd.files<-c(bmd.files,paste0(path,'bmd_vals_2021_04_26.csv'))
+        dose.files<-c(dose.files,paste0(path,'dose_response_vals_2021_04_26.csv'))
+        curv.files<-c(curv.files,paste0(path,'fit_vals_2021_04_26.csv'))
     }
 
     for(ext in extract_dirs){
