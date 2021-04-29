@@ -131,7 +131,7 @@ if __name__ == "__main__":
         tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
         for fname in allfiles:
             #os.system('mv '+fname+' /tmp')
-            tar.add(fname)
+            tar.add('/tmp/'+fname)
         tar.close()
 
     end_time = time.time()
