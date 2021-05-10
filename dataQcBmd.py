@@ -8,6 +8,12 @@ import seaborn as sns
 import os, sys, time
 import argparse
 import tarfile
+from ingest import pull_raw_data
+
+OUT_FOLDER='/tmp'
+IF_EXITS='replace'
+DB='dev'
+
 
 sys.path.insert(0, './qc_BMD')
 #from qc_BMD import bmd_analysis_full as bmd
@@ -36,7 +42,7 @@ parser.add_argument('--LPR', dest='LPR', type=os.path.abspath,\
 
 def merge_files(path,file_dict):
     '''
-    merge_files takes a dictionary of files and joints them to a single file to
+    merge_files t bghrrerakes a dictionary of files and joints them to a single file to
     added to the next step of the algorithm
     '''
 
@@ -62,6 +68,9 @@ if __name__ == "__main__":
         print("No new files, just re-building archive")
         command = "Rscript /srpAnalytics/buildv1database.R"
         os.system(command)
+        print('Saving to {}...'.format(DB))
+        pull_raw_data(folder=OUT_FOLDER, if_exists=IF_EXITS, database=DB)
+        print('Finished saving to database.')
     else:
         for input_csv_file_name in flist:
             print ("input_csv_file_name:" + str(input_csv_file_name))
@@ -126,6 +135,9 @@ if __name__ == "__main__":
          #wd <- paste0(getwd(),'/')
          ##UPDATE TO PYTHON     allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
         allfiles = ['README.md'] + [a for a in os.listdir('/tmp') if 'csv' in a]
+        print('Saving to database...')
+        pull_raw_data(folder=OUT_FOLDER, if_exists=IF_EXITS, database=DB)
+        print('Saved to database.')
         print(allfiles)
         print('Now zipping up'+str(len(allfiles))+'files')
         tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
