@@ -1,0 +1,4 @@
+because it used tall_data. If it used wide data, it will be faster to process?
+But in reality, dividing wide data into 2 by # of endpoints is difficult?
+
+

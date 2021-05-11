@@ -131,7 +131,8 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         
         assign_nan = False
         try: # 53_ANY24
-            print ("test_dose_response.dose[0]:"+str(test_dose_response.dose[0]))                
+            bogus = test_dose_response.dose[0]
+            #print ("test_dose_response.dose[0]:"+str(test_dose_response.dose[0]))                
         except: # 1532_ANY24
             assign_nan = True
             # print ("test_dose_response.dose:"+str(test_dose_response.dose))

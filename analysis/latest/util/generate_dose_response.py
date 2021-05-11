@@ -286,7 +286,9 @@ def BMD_feasibility_analysis(dose_response):
                     BMD_may_need_to_be_calculated_by_new_rescue_method = False
                     break
             BMD_may_need_to_be_calculated_by_new_rescue_method = True
-        print ("BMD_may_need_to_be_calculated_by_new_rescue_method:" + str(BMD_may_need_to_be_calculated_by_new_rescue_method))
+        
+        #print ("BMD_may_need_to_be_calculated_by_new_rescue_method:" + #str(BMD_may_need_to_be_calculated_by_new_rescue_method))
+
         # <end>
         # to rescue a case like PAH_7_3756_EPR_MOV1 that simply chemical is harmful \
         # with all non-zero doses

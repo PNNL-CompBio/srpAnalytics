@@ -1,3 +1,5 @@
+# purpose: replace plate.id in behavior data with bottle.id in morphology data
+
 import subprocess, time
 
 def show_time(process, time_start, time_end):
@@ -14,8 +16,12 @@ def show_time(process, time_start, time_end):
 
 start_time = time.time()
 
-beha_full_csv = "344_zf_LPR_data_phase_1_and_2_-_2020JUNE25.csv"
-#beha_full_csv = "/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/latest/2_after_preprocessing/replace_plate_id_in_behavioral/344_zf_LPR_data_phase_1_and_2_-_2020JUNE25_head.csv"
+# used to work
+#beha_full_csv = "344_zf_LPR_data_phase_1_and_2_-_2020JUNE25.csv"
+
+beha_full_csv = "344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_full_15_timepoints_wide_t3_t17_full.csv"
+
+
 beha_full_in = open (beha_full_csv, "r")
 
 beha_full_csv_after_replacement = beha_full_csv[:-4] + "_replaced.csv"
@@ -34,7 +40,10 @@ for line in beha_full_in:
         beha_full_out.write(line)
         continue
     old_plate_id = splited_line[3]
-    command = "grep -m 1 " + str(bottle_id) + " zf_morphology_data_335_chemicals_2020DEC16.csv"
+    
+    #command = "grep -m 1 " + str(bottle_id) + " zf_morphology_data_335_chemicals_2020DEC16.csv"
+    command = "grep -m 1 " + str(bottle_id) + " zf_morphology_data_335_chemicals_2020DEC16_fixed.csv"
+    
     #print ("\ncommand:" + str(command))
     subprocessed = subprocess.check_output(command, shell=True)
     #print ("subprocessed:" + str(subprocessed))
@@ -63,4 +72,11 @@ beha_full_in.close()
 
 end_time = time.time()
 write_this = show_time("replacement of plate id", start_time, end_time)
+'''
+In constance, it took 8 hrs to transform
+344_zf_LPR_data_phase_1_and_2_-_2020JUNE25.csv
+into
+344_zf_LPR_data_phase_1_and_2_-_2020JUNE25_replaced.csv
 
+If I had used wide format, it would have taken much shorter time.
+'''
