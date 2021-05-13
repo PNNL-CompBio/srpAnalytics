@@ -42,7 +42,7 @@ parser.add_argument('--update-db', dest='update_db', action='store_true', help='
 
 def merge_files(path,file_dict):
     '''
-    merge_files t bghrrerakes a dictionary of files and joints them to a single file to
+    merge_files takes a dictionary of files and joints them to a single file to
     added to the next step of the algorithm
     '''
 
