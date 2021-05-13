@@ -21,11 +21,11 @@ def pull_raw_data(folder, if_exists, database):
         nothing
     """
     if database == "production":
-        engine = db.create_engine('mssql+pyodbc://SRP_API_User:NArte+7m@10.120.148.153:915/srp?driver=ODBC Driver 17 for SQL Server?trusted_connection=yes', 
-                        pool_pre_ping=True, echo=False, hide_parameters=True, connect_args={'connect_timeout': 55})
+        engine = db.create_engine('mssql+pyodbc://SRP_API_User:NArte+7m@10.120.148.153:915/srp?driver=ODBC Driver 17 for SQL Server', 
+                        pool_pre_ping=True, echo=False, hide_parameters=True, connect_args={'connect_timeout': 100}, fast_executemany=True)
     else:
-        engine = db.create_engine('mssql+pyodbc://SRP_API_User:NArte+7m@10.120.148.170:915/srp?driver=ODBC Driver 17 for SQL Server?trusted_connection=yes', 
-                        pool_pre_ping=True, echo=False, hide_parameters=True, connect_args={'connect_timeout': 55})
+        engine = db.create_engine('mssql+pyodbc://SRP_API_User:NArte+7m@10.120.148.170:915/srp?driver=ODBC Driver 17 for SQL Server', 
+                        pool_pre_ping=True, echo=False, hide_parameters=True, connect_args={'connect_timeout': 100}, fast_executemany=True)
     for file in os.listdir(folder):
         filename, file_extension = os.path.splitext(file)
         if (file_extension == ".csv"):
