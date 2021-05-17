@@ -408,6 +408,14 @@ main<-function(){
     doseReps <-combineChemicalDoseData(dose.files, is_extract=FALSE, endpointDetails)%>%
       unique()
 
+    nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
+    print(length(nas))
+    to.remove<-setdiff(nas,sampToChem$Chemical_ID)
+    print(length(to.remove))
+    bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
+    curves<-curves%>%subset(!Chemical_ID%in%to.remove)
+    doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
+    
     ##there are mismatches, so we should figure out where those exists
     missing<-list(zebrafishNoChem=setdiff(ebmds$Sample_ID,as.character(sampChem$Sample_ID)),
                   chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
