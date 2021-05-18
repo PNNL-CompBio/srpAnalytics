@@ -46,8 +46,8 @@ df_behav = df_behav.rename({'variable': 'timepoint'}, axis=1)
 df_behav['chemical.id'] = df_behav['chemical.id'].astype(str)
 # this recasting is needed for "df_select_1846 = df_select.loc[df_select['chemical.id'] == '1846',:]" later
 
-print(df_behav.head())
-print(df_behav.tail())
+display(df_behav.head())
+display(df_behav.tail())
 
 
 # In[41]:
@@ -57,16 +57,16 @@ print(df_behav.tail())
 columns_to_keep = ['chemical.id', 'conc', 'plate.id', 'well', 'timepoint', 'value']
 df_select = df_behav.loc[:,columns_to_keep]
 
-print(df_select.head())
-print("number of unique chemical.id:" + str(len(np.unique(df_select['chemical.id']))))
-print("number of unique timepoints: " + str(len(np.unique(df_select['timepoint']))))
+display(df_select.head())
+display("number of unique chemical.id:" + str(len(np.unique(df_select['chemical.id']))))
+display("number of unique timepoints: " + str(len(np.unique(df_select['timepoint']))))
 
 
 # In[36]:
 
 
 nan = df_select[df_select['value'].isna()]
-print(nan.head())
+display(nan.head())
 
 # [phase III] there is no nan in 'chemical.id', 'conc', 'plate.id', 'well', 'variable'
 
@@ -183,15 +183,15 @@ f_report.close()
 # In[ ]:
 
 
-print(df_reformatted_240_timepoints.head())
+display(df_reformatted_240_timepoints.head())
 
 chemical_id_is_NaN = df_reformatted_240_timepoints['chemical.id'].isnull().values.any()
 
-print(chemical_id_is_NaN)
+display(chemical_id_is_NaN)
 row_has_NaN = is_NaN.any(axis=1)
 
-print (len(np.unique(df_reformatted_240_timepoints['chemical.id'])))
-print     (np.unique(df_reformatted_240_timepoints['chemical.id']))
+display (len(np.unique(df_reformatted_240_timepoints['chemical.id'])))
+display     (np.unique(df_reformatted_240_timepoints['chemical.id']))
 
 
 '''
@@ -199,33 +199,33 @@ is_NaN = df_reformatted_240_timepoints.isnull()
 row_has_NaN = is_NaN.any(axis=1)
 rows_with_NaN = df_reformatted_240_timepoints[row_has_NaN]
 
-print(rows_with_NaN.head())
-print(rows_with_NaN.tail())
+display(rows_with_NaN.head())
+display(rows_with_NaN.tail())
 '''
 
 
 # In[ ]:
 
 
-print(df_reformatted_15_timepoints.head())
+display(df_reformatted_15_timepoints.head())
 
 
 # In[ ]:
 
 
-print (len(np.unique(df_reformatted_240_timepoints['chemical.id'])))
-print (np.unique(df_reformatted_240_timepoints['chemical.id']))
+display (len(np.unique(df_reformatted_240_timepoints['chemical.id'])))
+display (np.unique(df_reformatted_240_timepoints['chemical.id']))
 
 
 # In[ ]:
 
 
 reformatted_data_filename = str(complete_input_file_path[:-4]) + "_wide_t0_t239_" + str(full_devel) + ".csv"
-print ("reformatted_data_filename:", reformatted_data_filename)
+display ("reformatted_data_filename:", reformatted_data_filename)
 df_reformatted_240_timepoints.to_csv(reformatted_data_filename, index=False)
 
 reformatted_data_filename = str(complete_input_file_path[:-4]) + "_wide_t3_t17_" + str(full_devel) + ".csv"
-print ("reformatted_data_filename:", reformatted_data_filename)
+display ("reformatted_data_filename:", reformatted_data_filename)
 df_reformatted_15_timepoints.to_csv(reformatted_data_filename, index=False)
 
 
