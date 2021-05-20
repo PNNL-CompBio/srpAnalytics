@@ -1,10 +1,17 @@
 FROM rocker/tidyverse
 
-COPY setup.sh setup.sh
-RUN sh setup.sh
+# To setup other dependencies
+RUN apt-get update -qq && apt-get install -y net-tools \
+        python3.7 \
+        python3-pip \
+        curl \
+        unixodbc
+COPY setup.sh /setup.sh
+RUN sh /setup.sh
 
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+COPY requirements.txt /requirements.txt
+
+RUN pip3 install -r /requirements.txt
 
 COPY . srpAnalytics
 WORKDIR srpAnalytics
