@@ -9,6 +9,27 @@ logging.basicConfig()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.ERROR)
 logging.getLogger("sqlalchemy.pool").setLevel(logging.ERROR)
 
+username=os.environ.get('DB_USER')
+password=os.environ.get('DB_PASS')
+db_dev_ip=os.environ.get('DB_DEV_IP')
+db_prod_ip=os.environ.get('DB_PROD_IP')
+db_port=os.environ.get('DB_PORT')
+db_name=os.environ.get('DB_NAME')
+
+def test_connection(database):
+    if database == "production":
+        engine = db.create_engine('mssql+pyodbc://{}:{}@{}:{}/{}?driver=ODBC Driver 17 for SQL Server'.format(username, password, db_prod_ip, db_port, db_name), 
+                        pool_pre_ping=True, echo=False, hide_parameters=True, connect_args={'connect_timeout': 100}, fast_executemany=True)
+    else:
+        engine = db.create_engine('mssql+pyodbc://{}:{}@{}:{}/{}?driver=ODBC Driver 17 for SQL Server'.format(username, password, db_dev_ip, db_port, db_name), 
+                        pool_pre_ping=True, echo=False, hide_parameters=True, connect_args={'connect_timeout': 100}, fast_executemany=True)
+    try:
+       engine.connect()
+       return True, ""
+    except Exception as e:
+        return False, e
+
+
 def pull_raw_data(folder, if_exists, database):
     """ Looks for CSV files in the provided path and then calls the read_and_save function. This function calls all of the others, this is the management function.
 
@@ -20,12 +41,6 @@ def pull_raw_data(folder, if_exists, database):
     Returns:
         nothing
     """
-    username=os.environ.get('DB_USER')
-    password=os.environ.get('DB_PASS')
-    db_dev_ip=os.environ.get('DB_DEV_IP')
-    db_prod_ip=os.environ.get('DB_PROD_IP')
-    db_port=os.environ.get('DB_PORT')
-    db_name=os.environ.get('DB_NAME')
     if database == "production":
         engine = db.create_engine('mssql+pyodbc://{}:{}@{}:{}/{}?driver=ODBC Driver 17 for SQL Server'.format(username, password, db_prod_ip, db_port, db_name), 
                         pool_pre_ping=True, echo=False, hide_parameters=True, connect_args={'connect_timeout': 100}, fast_executemany=True)
