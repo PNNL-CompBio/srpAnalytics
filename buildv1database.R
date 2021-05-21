@@ -313,7 +313,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 }
 
 
-chem_dirs=c('phase_I_II')#,'zf_morphology')
+chem_dirs=c('phase_I_II_III')#,'zf_morphology')
 extract_dirs=c('extracts')
 
 #' main method
@@ -346,9 +346,9 @@ main<-function(){
 
     for(chem in chem_dirs){
         path=paste0(data.dir,'/',chem,'/')
-        bmd.files<-c(bmd.files,paste0(path,'bmd_vals_2021_04_26.csv'))
-        dose.files<-c(dose.files,paste0(path,'dose_response_vals_2021_04_26.csv'))
-        curv.files<-c(curv.files,paste0(path,'fit_vals_2021_04_26.csv'))
+        bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_2021_04_26.csv','bmd_vals_2021_05_18_all_phase_III_morpho.csv')))
+        dose.files<-c(dose.files,paste0(path,c('dose_response_vals_2021_04_26.csv','dose_response_vals_2021_05_10_all_phase_III_morpho.csv')))
+        curv.files<-c(curv.files,paste0(path,c('fit_vals_2021_04_26.csv','fit_vals_2021_05_20_all_phase_III_morpho.csv')))
     }
 
     for(ext in extract_dirs){
