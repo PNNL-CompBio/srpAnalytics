@@ -186,7 +186,7 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
     # the end of the block, even if an Exception occurs.
     
     # Estimate AUC and min and mox doses
-    if(not test_dose_response.empty):
+    if(not test_dose_response.empty):        
         dose_response_auc = np.trapz(test_dose_response.num_affected/test_dose_response.total_num, x = test_dose_response.dose)
         dose_min = min(test_dose_response.dose)
         dose_max = max(test_dose_response.dose)
@@ -428,6 +428,8 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     
     # Estimate AUC and min and mox doses
     if(not test_dose_response.empty):
+        print ("test_dose_response:"+str(test_dose_response))
+        
         dose_response_auc = np.trapz(test_dose_response.num_affected/test_dose_response.total_num, x = test_dose_response.dose)
         dose_min = min(test_dose_response.dose)
         dose_max = max(test_dose_response.dose)
@@ -607,3 +609,6 @@ def gen_uneven_spacing(doses, int_steps):
     for dose_index in range(len(doses) - 1):
         dose_samples.extend(np.linspace(doses[dose_index],doses[dose_index + 1], int_steps).tolist())
     return np.unique(dose_samples)   
+
+
+#save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds, selected_models, chemical_id, end_point)
