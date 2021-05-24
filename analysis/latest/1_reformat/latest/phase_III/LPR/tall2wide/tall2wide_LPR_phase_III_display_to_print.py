@@ -67,8 +67,8 @@ df_reformatted = pd.DataFrame()
     
 len_group_timepoint = []
     
-#full_devel = "full"
-full_devel = "devel"
+full_devel = "full"
+#full_devel = "devel"
 
 
 chemical_id_from_here = np.unique(df_behav['chemical.id'])
