@@ -124,7 +124,7 @@ for chemical_index in chemical_id_from_here:
                 #   +str(pd.DataFrame({end_point: per_cpw.value[per_cpw.timepoint == end_point]})))
                 #print ("pd.DataFrame({end_point: per_cpw.value[per_cpw.timepoint == end_point].values}):"\
                 #   +str(pd.DataFrame({end_point: per_cpw.value[per_cpw.timepoint == end_point].values})))
-                df_to_add = pd.concat([df_to_add, pd.DataFrame({end_point: df_per_cpw.value[df_per_cpw.timepoint == time_point].values})],axis = 1)
+                df_to_add = pd.concat([df_to_add, pd.DataFrame({timepoint: df_per_cpw.value[df_per_cpw.timepoint == time_point].values})],axis = 1)
             #display("after concat:", temp.head())
 
             df_reformatted = pd.concat([df_reformatted, df_to_add])
