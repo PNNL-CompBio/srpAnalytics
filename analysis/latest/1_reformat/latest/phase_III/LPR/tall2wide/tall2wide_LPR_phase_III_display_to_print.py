@@ -118,7 +118,7 @@ for chemical_index in chemical_id_from_here:
             
             # Append additonal columns corresponding to time points
             for time_point in np.arange(len(group.timepoint)):
-                time_point = 't'+ str(time_point)
+                timepoint = 't'+ str(time_point)
                 #print ("\nend_point:"+str(end_point))
                 #print ("pd.DataFrame({end_point: per_cpw.value[per_cpw.timepoint == end_point]}):"\
                 #   +str(pd.DataFrame({end_point: per_cpw.value[per_cpw.timepoint == end_point]})))
