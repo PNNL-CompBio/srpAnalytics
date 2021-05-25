@@ -1,0 +1,4 @@
+2636_0.0_15839 trans_point: 2, index_of_max_diff: 5
+2636_0.0_15839 trans_point: 8, index_of_max_diff: 3
+2636_0.0_15839 trans_point: 14, index_of_max_diff: 3
+2636_0.0_15839 trans_point: 20, index_of_max_diff: 3
