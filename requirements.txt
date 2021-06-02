@@ -1,0 +1,9 @@
+pandas
+numpy
+sqlalchemy
+matplotlib
+seaborn
+statsmodels
+astropy
+scipy==1.4.1
+pyodbc

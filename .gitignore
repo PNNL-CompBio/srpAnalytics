@@ -47,3 +47,5 @@ analysis/latest/3_bmd_feasibility_BMD/*/output
 analysis/latest/3_bmd_feasibility_BMD/*/running_time.txt
 
 tmp/
+
+.env

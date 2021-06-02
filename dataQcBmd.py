@@ -8,6 +8,12 @@ import seaborn as sns
 import os, sys, time
 import argparse
 import tarfile
+from ingest import pull_raw_data, test_connection
+
+OUT_FOLDER='/tmp'
+IF_EXITS='replace' # options: "append", "replace", "fail"
+DB='develop' # options: "develop", "production"
+
 
 sys.path.insert(0, './qc_BMD')
 #from qc_BMD import bmd_analysis_full as bmd
@@ -28,7 +34,7 @@ parser.add_argument('--devel', dest='devel',\
                     action='store_true', default=False)
 parser.add_argument('--LPR', dest='LPR', type=os.path.abspath,\
                     help='LPR input csv file, needed for LPR data processing')
-
+parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
 ############ developer comment:
 # for morphological data, only morphological data is needed as input
 # for LPR processing, both morphological data and LPR data re needed as inputs
@@ -126,6 +132,7 @@ if __name__ == "__main__":
          #wd <- paste0(getwd(),'/')
          ##UPDATE TO PYTHON     allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
         allfiles = ['README.md'] + [a for a in os.listdir('/tmp') if 'csv' in a]
+       
         print(allfiles)
         print('Now zipping up'+str(len(allfiles))+'files')
         tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
@@ -134,6 +141,17 @@ if __name__ == "__main__":
             tar.add('/tmp/'+fname)
         tar.close()
 
+    if args.update_db: 
+        print('Saving to {}...'.format(DB))
+        pull_raw_data(folder=OUT_FOLDER, if_exists=IF_EXITS, database=DB)
+        print('Finished saving to database.')
+    else: # if not saving to database, check connection to DB is okay
+        print("Testing connection to database...", end='')
+        okay, error = test_connection(database=DB)
+        if okay:
+            print('Connection OK')
+        else:
+            print('Connection failed, {}'.format(error))
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print ("Done, it took:" + str(time_took))
