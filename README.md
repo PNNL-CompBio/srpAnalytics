@@ -19,10 +19,10 @@ docker build . -t srp-analytics
 
 (this building took 8 minutes in macbook pro since it installs all dependencies)
 
-Then run like this
+Then, run like this
 
 ```bash
-docker run -v $PWD:/tmp srp-analytics [your file here, for example to_be_processedt/7_PAH_zf_morphology_data_2020NOV11_tall.csv] [--update-db]
+docker run -v $PWD:/tmp srp-analytics [your file here, for example to_be_processed/7_PAH_zf_morphology_data_2020NOV11_tall.csv] [--update-db]
 ```
 
 If ```--update-db``` is not included, the script will still test the connection to the database. If it is included the script, by default, overwrites the develop database. You can either append or replace to either the develop or production database (requires changes to the ```dataQcBmd.py``` file).
@@ -30,7 +30,7 @@ If ```--update-db``` is not included, the script will still test the connection 
 For faster running add --devel,
 
 ```bash
-docker run -v $PWD:/tmp srp-analytics [your file here, for example to_be_processedt/7_PAH_zf_morphology_data_2020NOV11_tall.csv] --devel
+docker run -v $PWD:/tmp srp-analytics [your file here, for example to_be_processed/7_PAH_zf_morphology_data_2020NOV11_tall.csv] --devel
 ```
 
 To build the whole database:
