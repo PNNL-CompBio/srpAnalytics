@@ -28,8 +28,8 @@ def gen_dose_response(data_ep_cid, end_point):
         194           54  1.12     12838  A03    0.0
     ''' 
         
-    erased_since_gt_0p5_1_neg_filename = os.path.join("report", 'erased_since_gt_0p5_1_neg.csv')
-    kept_since_lt_0p5_1_neg_filename = os.path.join("report", 'kept_since_lt_0p5_1_neg.csv')
+    # erased_since_gt_0p5_1_neg_filename = os.path.join("report", 'erased_since_gt_0p5_1_neg.csv')
+    # kept_since_lt_0p5_1_neg_filename = os.path.join("report", 'kept_since_lt_0p5_1_neg.csv')
 
     dose_response = pd.DataFrame(columns = ['dose', 'num_affect', 'frac_affect', 'num_embryos', 'tot_wells'])
     # Remove all wells for plates for which number of hits for negative controls > 50% wells
@@ -54,17 +54,17 @@ def gen_dose_response(data_ep_cid, end_point):
             # my_list = data_ep_cid_plate.columns.values.tolist()
             # print ("my_list:" + str(my_list))
             
-            file = open(erased_since_gt_0p5_1_neg_filename, "a+")
-            file.write(write_this)
-            file.close()
-            
+            # file = open(erased_since_gt_0p5_1_neg_filename, "a+")
+            # file.write(write_this)
+            # file.close()
+            # 
             # Delete all wells corresponding to that plate
             data_ep_cid = data_ep_cid[data_ep_cid['plate.id'] != plate_id]
-        else:
-            file = open(kept_since_lt_0p5_1_neg_filename, "a+")
-            file.write(write_this)
-            file.close()
-            
+        # else:
+        #     file = open(kept_since_lt_0p5_1_neg_filename, "a+")
+        #     file.write(write_this)
+        #     file.close()
+        #     
             
     # print ("after processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
     for concentration_id in np.unique(data_ep_cid['conc']):
@@ -85,8 +85,8 @@ def gen_dose_response(data_ep_cid, end_point):
     # Delete dose groups if 'number of embryos' < '25% of total wells'
     # (number of embryos -> number of wells whose embryos are countable either 0/1)
     
-    erased_since_lt_0p25_filled_filename = os.path.join("report", 'erased_since_lt_0p25_filled.csv')
-    kept_since_gt_0p25_filled_filename = os.path.join("report", 'kept_since_gt_0p25_filled.csv')
+    # erased_since_lt_0p25_filled_filename = os.path.join("report", 'erased_since_lt_0p25_filled.csv')
+    # kept_since_gt_0p25_filled_filename = os.path.join("report", 'kept_since_gt_0p25_filled.csv')
 
     # First get rid of nan values
     dose_response = dose_response.dropna()
@@ -109,13 +109,13 @@ def gen_dose_response(data_ep_cid, end_point):
             dose_response = dose_response[dose_response.index != dr_index_original]
             delete_count+=1
             
-            file = open(erased_since_lt_0p25_filled_filename, "a+")
-            file.write(write_this)
-            file.close()
-        else:
-            file = open(kept_since_gt_0p25_filled_filename, "a+")
-            file.write(write_this)
-            file.close()
+        #     file = open(erased_since_lt_0p25_filled_filename, "a+")
+        #     file.write(write_this)
+        #     file.close()
+        # else:
+        #     file = open(kept_since_gt_0p25_filled_filename, "a+")
+        #     file.write(write_this)
+        #     file.close()
             
     return dose_response
 
