@@ -1,5 +1,0 @@
-
-chemical_index:53
-number of unique chemical.id:1
-unique chemical.id:['53']
-
