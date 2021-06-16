@@ -223,8 +223,6 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   mid.bmd<-do.call(rbind,files)%>%
     dplyr::select(cols)
 
-
-
   if(is_extract){
     sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
       select(-sub)
@@ -234,10 +232,14 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
       dplyr::select(-Chemical_ID)%>%
       full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
 
+    #fix up sample ids
     nas<-which(is.na(full.bmd$Sample_ID))
-
     full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
 
+    #now fix up sample names
+    new.nas<-which(is.na(full.bmd$SampleName))
+    full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
+    
     full.bmd<-full.bmd%>%
       left_join(endpointDetails)%>%
       dplyr::select(-c('End_Point','tmpId'))%>%
@@ -311,7 +313,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 }
 
 
-chem_dirs=c('phase_I_II')#,'zf_morphology')
+chem_dirs=c('phase_I_II_III')#,'zf_morphology')
 extract_dirs=c('extracts')
 
 #' main method
@@ -344,9 +346,9 @@ main<-function(){
 
     for(chem in chem_dirs){
         path=paste0(data.dir,'/',chem,'/')
-        bmd.files<-c(bmd.files,paste0(path,'bmd_vals_2021_04_26.csv'))
-        dose.files<-c(dose.files,paste0(path,'dose_response_vals_2021_04_26.csv'))
-        curv.files<-c(curv.files,paste0(path,'fit_vals_2021_04_26.csv'))
+        bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_2021_04_26.csv','bmd_vals_2021_05_18_all_phase_III_morpho.csv')))
+        dose.files<-c(dose.files,paste0(path,c('dose_response_vals_2021_04_26.csv','dose_response_vals_2021_05_10_all_phase_III_morpho.csv')))
+        curv.files<-c(curv.files,paste0(path,c('fit_vals_2021_04_26.csv','fit_vals_2021_05_20_all_phase_III_morpho.csv')))
     }
 
     for(ext in extract_dirs){
@@ -408,6 +410,14 @@ main<-function(){
     doseReps <-combineChemicalDoseData(dose.files, is_extract=FALSE, endpointDetails)%>%
       unique()
 
+    nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
+    print(length(nas))
+    to.remove<-setdiff(nas,sampToChem$Chemical_ID)
+    print(length(to.remove))
+    bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
+    curves<-curves%>%subset(!Chemical_ID%in%to.remove)
+    doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
+    
     ##there are mismatches, so we should figure out where those exists
     missing<-list(zebrafishNoChem=setdiff(ebmds$Sample_ID,as.character(sampChem$Sample_ID)),
                   chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
@@ -428,4 +438,4 @@ main<-function(){
 
 }
 
-main()
+#main()
