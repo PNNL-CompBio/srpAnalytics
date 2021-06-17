@@ -14,10 +14,10 @@ from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
-#report = True
-report = False
+report = True
+#report = False
 
-# Get dose-respone data for morphology
+# Get dose-response data for morphology
 # data_ep_cid -> morphological_data_end_point_chemical_id
 def gen_dose_response(data_ep_cid, end_point):
     #print ("data_ep_cid:\n"+str(data_ep_cid))
@@ -31,7 +31,7 @@ def gen_dose_response(data_ep_cid, end_point):
     # erased_since_gt_0p5_1_neg_filename = os.path.join("report", 'erased_since_gt_0p5_1_neg.csv')
     # kept_since_lt_0p5_1_neg_filename = os.path.join("report", 'kept_since_lt_0p5_1_neg.csv')
 
-    dose_response = pd.DataFrame(columns = ['dose', 'num_affect', 'frac_affect', 'num_embryos', 'tot_wells'])
+    dose_response = pd.DataFrame(columns = ['dose', 'num_affected', 'frac_affect', 'num_embryos', 'tot_wells'])
     # Remove all wells for plates for which number of hits for negative controls > 50% wells
     
     for plate_id in np.unique(data_ep_cid['plate.id']):
@@ -77,7 +77,7 @@ def gen_dose_response(data_ep_cid, end_point):
             fraction_affected = np.nan
         else:
             fraction_affected = num_affected / num_nonnan_wells
-        dose_response = dose_response.append({'dose': concentration_id, 'num_affect': num_affected , 'frac_affect': fraction_affected, 'num_embryos': num_nonnan_wells, 'tot_wells': tot_wells}, ignore_index = True)
+        dose_response = dose_response.append({'dose': concentration_id, 'num_affected': num_affected , 'frac_affect': fraction_affected, 'num_embryos': num_nonnan_wells, 'tot_wells': tot_wells}, ignore_index = True)
     
     
     
@@ -91,7 +91,7 @@ def gen_dose_response(data_ep_cid, end_point):
     # First get rid of nan values
     dose_response = dose_response.dropna()
     #print ("dose_response (after dropna):\n" + str(dose_response))
-    ''' dose  num_affect  frac_affect  num_embryos  tot_wells
+    ''' dose  num_affected  frac_affect  num_embryos  tot_wells
     0   0.0         0.0     0.000000         26.0       32.0
     1   0.1         1.0     0.032258         31.0       32.0
     2   0.5         1.0     0.062500         16.0       32.0
@@ -155,7 +155,7 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
     # Pre-define dataframe for dose-respose
     dose_response_info = pd.DataFrame(columns = ['Concentration', 'Response', 
                                                  'Hypo', 'Hyper', 'Number_of_Wells'])
-    dose_response = pd.DataFrame(columns = ['dose', 'num_affect', 'num_embryos'])
+    dose_response = pd.DataFrame(columns = ['dose', 'num_affected', 'num_embryos'])
                                                  
     # Get data for a given concentration
     delta_mov_auc_data_compound = delta_mov_auc_normal
@@ -206,7 +206,7 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
                                                              ignore_index = True)
             
             dose_response = dose_response.append({'dose': concentration,
-                                                  'num_affect': (count_hypo_wells + count_hyper_wells),
+                                                  'num_affected': (count_hypo_wells + count_hyper_wells),
                                                   'num_embryos': count_total_wells},
                                                    ignore_index = True)
                         
@@ -236,7 +236,7 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
                                                              ignore_index = True)
 
             dose_response = dose_response.append({'dose': concentration,
-                                                  'num_affect': count_response_wells,
+                                                  'num_affected': count_response_wells,
                                                   'num_embryos': count_total_wells},
                                                    ignore_index = True)
             
@@ -246,9 +246,8 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
 
 # Get data QC code
 def BMD_feasibility_analysis(dose_response):
-    final_count = ''
     '''This function performs feasibility analysis
-    for dose respone data. The value returned is a 
+    for dose response data. The value returned is a 
     flag indicating data quality as defined below:
     0: Not enough dose groups for BMD analysis. BMD analysis not performed
     1: No trend detected in dose-response data.. BMD Analysis not performed
@@ -256,15 +255,15 @@ def BMD_feasibility_analysis(dose_response):
     3: Dose-response data quality poor. BMD analysis might be unreliable
     4: Data resolution poor. BMD analysis might be unreliable
     5: No trend detected in dose-response data. BMD analysis not performed'''
+    print ("dose_response:\n"+str(dose_response))
     if(dose_response.shape[0] < 3):
         BMD_feasibilitye_flag = 0
     else:
-        frac_response = dose_response['num_affect']/dose_response['num_embryos']
-        #frac_response = dose_response['num_affect']/dose_response['frac_affect']      
+        frac_response = dose_response['num_affected']/dose_response['num_embryos']
+        #frac_response = dose_response['num_affected']/dose_response['frac_affect']      
         data_corr = stats.spearmanr(np.log10(dose_response['dose']+1e-15), frac_response)
         if (report):
-
-            print ("dose_response['num_affect']:\n" + str(dose_response['num_affect']))
+            print ("dose_response['num_affected']:\n" + str(dose_response['num_affected']))
             print ("dose_response['num_embryos']:\n" + str(dose_response['num_embryos']))
             print ("frac_response:\n" + str(frac_response))
             print ("frac_response[0]:\n" + str(frac_response[0]))
@@ -273,7 +272,7 @@ def BMD_feasibility_analysis(dose_response):
 
             
         # <begin>
-        # to rescue a case like PAH_7_3756_EPR_MOV1 that simply chemical is harmful \
+        # to rescue a case like PAH_7_3756_EPR_MOV1 that shows chemical is harmful \
         # with all non-zero doses
         
         for i in range(len(frac_response)):
@@ -320,12 +319,28 @@ def BMD_feasibility_analysis(dose_response):
 ######### end of def BMD_feasibility_analysis(dose_response):
 
 
+''' paritosh original
 # Reformat dose-response data to be compatible with BMD analysis
 def reformat_dose_response(dose_response):
     test_dose_response = pd.DataFrame(columns = ['dose', 'num_affected', 'total_num'])
     test_dose_response['dose'] = dose_response['dose']
-    test_dose_response['num_affected'] = dose_response['num_affect']
+    test_dose_response['num_affected'] = dose_response['num_affected']
     test_dose_response['total_num'] = dose_response['num_embryos']
+    #index = np.arange(0,len(test_dose_response.dose))
+    #test_dose_response.reset_index()
+    test_dose_response.reset_index(inplace = True, drop = True) 
+    return test_dose_response
+###### end of def reformat_dose_response(dose_response):
+'''
+
+
+# Reformat dose-response data to be compatible with BMD analysis
+def reformat_dose_response(dose_response):
+    test_dose_response = pd.DataFrame(columns = ['dose', 'num_affected', 'total_num', 'num_embryos'])
+    test_dose_response['dose'] = dose_response['dose']
+    test_dose_response['num_affected'] = dose_response['num_affected']
+    test_dose_response['total_num'] = dose_response['num_embryos']
+    test_dose_response['num_embryos'] = dose_response['num_embryos']
     #index = np.arange(0,len(test_dose_response.dose))
     #test_dose_response.reset_index()
     test_dose_response.reset_index(inplace = True, drop = True) 
