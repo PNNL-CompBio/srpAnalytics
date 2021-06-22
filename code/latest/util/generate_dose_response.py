@@ -14,8 +14,8 @@ from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
-report = True
-#report = False
+#global_report = True
+global_report = False
 
 # Get dose-response data for morphology
 # data_ep_cid -> morphological_data_end_point_chemical_id
@@ -146,7 +146,7 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
 
         if(number_of_abnormal_nc_wells >= (plate_data_subset_nc.shape[0])/2):
             abnormal_response_wells.append(plate_ID)
-            if (report):
+            if (global_report):
                 print('Wells with abnormal response for negative control', abnormal_response_wells)
 
     # Remove data for abnormal wells
@@ -255,14 +255,15 @@ def BMD_feasibility_analysis(dose_response):
     3: Dose-response data quality poor. BMD analysis might be unreliable
     4: Data resolution poor. BMD analysis might be unreliable
     5: No trend detected in dose-response data. BMD analysis not performed'''
-    print ("dose_response:\n"+str(dose_response))
+    if (global_report):
+        print ("dose_response:\n"+str(dose_response))
     if(dose_response.shape[0] < 3):
         BMD_feasibilitye_flag = 0
     else:
         frac_response = dose_response['num_affected']/dose_response['num_embryos']
         #frac_response = dose_response['num_affected']/dose_response['frac_affect']      
         data_corr = stats.spearmanr(np.log10(dose_response['dose']+1e-15), frac_response)
-        if (report):
+        if (global_report):
             print ("dose_response['num_affected']:\n" + str(dose_response['num_affected']))
             print ("dose_response['num_embryos']:\n" + str(dose_response['num_embryos']))
             print ("frac_response:\n" + str(frac_response))
