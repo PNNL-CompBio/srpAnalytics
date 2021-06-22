@@ -338,7 +338,8 @@ full_devel = "full"
 
 if (full_devel == "full"):
     chemical_id_from_here = np.unique(delta_mov_auc['Chemical.ID'])
-    end_points_from_here = ['MOV1','AUC1']
+    #end_points_from_here = ['MOV1','AUC1']
+    end_points_from_here = ['MOV2','AUC2','MOV3','AUC3''MOV4','AUC4']
 else:
     chemical_id_from_here = [53]
     end_points_from_here = ['MOV1']
