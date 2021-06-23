@@ -280,8 +280,7 @@ print (output_filename)
 
 ## calculate MOV, AUC for all chemical concentrations
 
-delta = df_lpr_min[['chemical.id', 'conc', 'plate.id', 'well']].copy()
-#delta -> delta_mov_auc
+delta_mov_auc = df_lpr_min[['chemical.id', 'conc', 'plate.id', 'well']].copy()
 
 trans_points = [2,8,14,20] # "official"
 
@@ -296,9 +295,9 @@ for trans_index, trans_point in enumerate(trans_points):
     
     for just_index, end_point in enumerate(end_points):
         if (end_point == 'MOV'):
-            delta['MOV' + str(trans_index + 1)] = df_lpr_min['t' + str(trans_point + 1)] - df_lpr_min['t' + str(trans_point)]
+            delta_mov_auc['MOV' + str(trans_index + 1)] = df_lpr_min['t' + str(trans_point + 1)] - df_lpr_min['t' + str(trans_point)]
         else:
-            delta['AUC' + str(trans_index + 1)]             = sum(df_lpr_min['t' + str(trans_point + 1 + index_count)]                   for index_count in range(num_dark))             - sum(df_lpr_min['t' + str(trans_point - index_count)]                   for index_count in range(num_light))
+            delta_mov_auc['AUC' + str(trans_index + 1)]             = sum(df_lpr_min['t' + str(trans_point + 1 + index_count)]                   for index_count in range(num_dark))             - sum(df_lpr_min['t' + str(trans_point - index_count)]                   for index_count in range(num_light))
 
 print(delta.head(1))
 #delta.to_csv("delta_mov_auc.csv", index=False)
