@@ -355,9 +355,9 @@ for chemical_id in chemical_id_from_here:
     for end_point in end_points_from_here:
         if (report): 
             print("end_point:" + str(end_point))
-            check_this_pdf = str(chemical_id) + "_" + str(end_point) + ".pdf"
-            if (os.path.isfile(check_this_pdf) == True):
-                continue
+        check_this_pdf = str(chemical_id) + "_" + str(end_point) + ".pdf"
+        if (os.path.isfile(check_this_pdf) == True):
+            continue
             
         # subset original dataframe for a user-specified chemical and end_point pair
         delta_mov_auc_end_point_chemical_id = delta_mov_auc.loc[delta_mov_auc['Chemical.ID'] == chemical_id,['Chemical.ID', 'CONC', 'Plate', 'WELL', end_point]]
@@ -405,121 +405,3 @@ time_filename = 'running_time.txt'
 f_time = open(time_filename, 'w')
 f_time.write(str(time_took))
 f_time.close()
-
-
-# In[ ]:
-
-
-####### stop here
-a=b
-
-
-# In[ ]:
-
-
-print(len(np.unique(df_lpr_min['chemical.id'])))
-print(np.unique(df_lpr_min['chemical.id']))
-
-
-# In[ ]:
-
-
-print("before dropna, len(df_lpr_filtered):"+str(len(df_lpr_filtered)))
-df_lpr_filtered_no_na = df_lpr_filtered.dropna(how='any')
-print("after dropna,  len(df_lpr_filtered_no_na):"+str(len(df_lpr_filtered_no_na)))
-
-is_NaN = df_lpr_filtered.isnull()
-row_has_NaN = is_NaN.any(axis=1)
-rows_with_NaN = df_lpr_filtered[row_has_NaN]
-
-print(rows_with_NaN.head())
-print(len(rows_with_NaN))
-
-
-# In[ ]:
-
-
-#df_lpr.to_csv("df_lpr_cpw_added.csv",index=False)
-df_lpr_filtered.to_csv("df_lpr_filtered_cpw_added.csv",index=False)
-
-
-# In[ ]:
-
-
-# skip this
-"(Lisa) LPR (5d): L1: T61-89; D1: T90-119; L2: T120-149; D2: T150-179; L3: T180-209; D3: T210-239"
-
-# (L0,D0) 
-# T1 - T60 --> 360 seconds -> 6 minutes
-
-# (L1,D1) 
-# T61 - T120 --> 360 seconds -> 6 minutes
-
-# (L2,D2) 
-# T121 - T180 --> 360 seconds -> 6 minutes
-
-# (L3,D3) 
-# T181 - T240 --> 360 seconds -> 6 minutes
-
-
-# In[ ]:
-
-
-# calculate new decreasing endpoints
-delta_mov_auc_w_decreasing = delta_mov_auc.copy()
-for transition_index, transition_point in enumerate(transition_points):
-    print ("\ntransition_index:" + str(transition_index))
-    print ("transition_point:" + str(transition_point))
-    
-    for just_index, end_point in enumerate(end_points):
-        ori = str(end_point) + str(transition_index + 1)
-        #print ("\nori:" + str(ori))
-        #print ("delta_mov_auc_w_decreasing[ori]:\n" + str(delta_mov_auc_w_decreasing[ori]))
-        
-        for new_index in range(len(transition_points)-1):
-            final_index = transition_index + new_index
-            new = str(end_point) + str(final_index+2)
-            #print ("new:" + str(new))
-            check_whether_new_exists = new in delta_mov_auc_w_decreasing.columns
-            #print ("check_whether_new_exists:"+str(check_whether_new_exists))
-            if (check_whether_new_exists == False):
-                continue
-            name = str(end_point) + str(transition_index + 1) + "_" + str(new)
-            print ("name:" + str(name))
-            delta_mov_auc_w_decreasing[name]                 = delta_mov_auc_w_decreasing[ori] - delta_mov_auc_w_decreasing[new]
-print (delta_mov_auc_w_decreasing.head(1))
-
-
-# In[ ]:
-
-
-# calculate final decreasing endpoints
-delta_mov_auc_w_decreasing_copied = delta_mov_auc_w_decreasing.copy()
-delta_mov_auc_final = delta_mov_auc_w_decreasing.copy()
-columns_to_keep = []
-for just_index, end_point in enumerate(end_points):
-    for (columnName, columnData) in delta_mov_auc_w_decreasing_copied.iteritems():
-        if "_" not in columnName:
-            continue
-        if str(end_point) not in columnName:
-            continue
-#        print('Colunm Name : ', columnName)
-        columns_to_keep.append(columnName)
-
-    delta_mov_auc_w_decreasing_copied_select = delta_mov_auc_w_decreasing_copied.loc[:,columns_to_keep]
-    
-    # "axis 0” represents rows
-    # "axis 1” represents columns
-
-    all_ = delta_mov_auc_w_decreasing_copied_select.sum(axis=1)
-   # print ("all_:\n" + str(all_))
-    
-    final_endpoint_name = str(end_point) + "_all_" 
-    delta_mov_auc_final.insert(0, final_endpoint_name, all_)
-    
-
-print("delta_mov_auc_final.head():", delta_mov_auc_final.head())
-    
-delta_mov_auc_final.to_csv("delta_mov_auc_final.csv",index=False)
-    
-
