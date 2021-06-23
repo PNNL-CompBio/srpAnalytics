@@ -46,7 +46,7 @@ print (starting_dir)
 #complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/phase_III/input/behavior/LPR/wide/full/Tanguay_Phase_3_zf_LPR_data_PNNL_2021MAR23_full_w_240_timepoints_wide_full.csv'
 
 # constance
-complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/phase_III/input/behavior/LPR/wide/full/Tanguay_Phase_3_zf_LPR_data_PNNL_2021MAR23_full_w_240_timepoints_wide_full.csv'
+complete_file_path = '/people/kimd999/tox/phase_III/LPR/input/wide/Tanguay_Phase_3_zf_LPR_data_PNNL_2021MAR23_full_w_240_timepoints_wide_full.csv'
 
 df_lpr = pd.read_csv(complete_file_path, header = 0)
 print(df_lpr.head())
