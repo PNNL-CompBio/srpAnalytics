@@ -353,7 +353,12 @@ number_of_chemicals_processed = 0
 for chemical_id in chemical_id_from_here:
     print("\nchemical_id:" + str(chemical_id))
     for end_point in end_points_from_here:
-        if (report): print("end_point:" + str(end_point))
+        if (report): 
+            print("end_point:" + str(end_point))
+            check_this_pdf = str(chemical_id) + "_" + str(end_point) + ".pdf"
+            if (os.path.isfile(check_this_pdf) == True):
+                continue
+            
         # subset original dataframe for a user-specified chemical and end_point pair
         delta_mov_auc_end_point_chemical_id = delta_mov_auc.loc[delta_mov_auc['Chemical.ID'] == chemical_id,['Chemical.ID', 'CONC', 'Plate', 'WELL', end_point]]
         #print("delta_mov_auc_end_point_chemical_id:\n"+str(delta_mov_auc_end_point_chemical_id))
