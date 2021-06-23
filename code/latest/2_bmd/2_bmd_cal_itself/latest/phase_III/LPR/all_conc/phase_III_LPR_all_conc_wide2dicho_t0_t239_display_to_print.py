@@ -299,7 +299,7 @@ for trans_index, trans_point in enumerate(trans_points):
         else:
             delta_mov_auc['AUC' + str(trans_index + 1)]             = sum(df_lpr_min['t' + str(trans_point + 1 + index_count)]                   for index_count in range(num_dark))             - sum(df_lpr_min['t' + str(trans_point - index_count)]                   for index_count in range(num_light))
 
-print(delta.head(1))
+print(delta_mov_auc.head(1))
 #delta.to_csv("delta_mov_auc.csv", index=False)
 
 
