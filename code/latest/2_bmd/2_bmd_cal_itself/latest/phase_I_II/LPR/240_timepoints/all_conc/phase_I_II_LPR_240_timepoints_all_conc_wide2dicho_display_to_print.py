@@ -326,9 +326,9 @@ print(delta_mov_auc.head())
 start_time = time.time()
 os.chdir(starting_dir)
 
-if (os.path.isdir("output") == True):
-    shutil.rmtree("output")
-os.mkdir("output")
+#if (os.path.isdir("output") == True):
+#    shutil.rmtree("output")
+#os.mkdir("output")
 
 output_folder = os.path.join(starting_dir, "output")
 os.chdir(output_folder)
