@@ -342,7 +342,7 @@ for chemical_id in chemical_id_from_here:
     for end_point in end_points_from_here:
         if (report): print("end_point:" + str(end_point))
         # subset original dataframe for a user-specified chemical and end_point pair
-        delta_mov_auc_end_point_chemical_id = delta_mov_auc.loc[delta_mov_auc['chemical.id'] == chemical_id,['chemical.id', 'CONC', 'Plate', 'WELL', end_point]]
+        delta_mov_auc_end_point_chemical_id = delta_mov_auc.loc[delta_mov_auc['chemical.id'] == chemical_id,['chemical.id', 'conc', 'plate.id', 'well', end_point]]
         #print("delta_mov_auc_end_point_chemical_id:\n"+str(delta_mov_auc_end_point_chemical_id))
         #print("type(delta_mov_auc_end_point_chemical_id):\n"+str(type(delta_mov_auc_end_point_chemical_id)))
         #print("type(end_point):\n"+str(type(end_point)))
