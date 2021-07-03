@@ -125,7 +125,10 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
     # Remove the plates for which number of abnormal control wells > 50% total
     # control wells
       
-    unique_plate_IDs = np.unique(delta_mov_auc_data['Plate'])
+    try:
+        unique_plate_IDs = np.unique(delta_mov_auc_data['Plate'])
+    except:
+        unique_plate_IDs = np.unique(delta_mov_auc_data['plate.id'])
     #print('Unique number of plates:', len(unique_plate_IDs))
     
     abnormal_response_wells = [];
