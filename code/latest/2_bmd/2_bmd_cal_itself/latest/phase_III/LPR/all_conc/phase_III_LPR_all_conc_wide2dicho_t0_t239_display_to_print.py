@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
+
+# Calculate BMD for phase III LPR
 
 import numpy as np
 import pandas as pd
@@ -16,7 +18,7 @@ warnings.filterwarnings('ignore')
 import sys
 
 #mac
-#util_path = "/Users/kimd999/research/script_not_in_dropbox/srpAnalytics/analysis/latest/util"
+#util_path = "/Users/kimd999/research/script_not_in_dropbox/srpAnalytics/code/latest/util"
 
 #constance
 #'''
@@ -32,14 +34,14 @@ util_path = os.path.join(code_location[:index_of_latest], "latest", "util")
 sys.path.insert(0, util_path)
 
 
-# In[2]:
+# In[6]:
 
 
 starting_dir = os.getcwd()
 print (starting_dir)
 
 
-# In[3]:
+# In[7]:
 
 
 # mac       - phase III - LPR - 240 timepoints - full
@@ -52,7 +54,7 @@ df_lpr = pd.read_csv(complete_file_path, header = 0)
 print(df_lpr.head())
 
 
-# In[4]:
+# In[8]:
 
 
 print(len(np.unique(df_lpr['chemical.id'])))
@@ -64,7 +66,7 @@ print(len(np.unique(df_lpr['chemical.id'])))
 print(np.unique(df_lpr['chemical.id']))
 
 
-# In[4]:
+# In[9]:
 
 
 # preprocess chemical ids
@@ -77,7 +79,7 @@ print(len(np.unique(df_lpr['chemical.id'])))
 #display(df_lpr.tail())
 
 
-# In[5]:
+# In[10]:
 
 
 # preprocess plate ids
@@ -91,7 +93,7 @@ print(df_lpr.head())
 
 # ## Load morphological data for filtering wells that have dead fish
 
-# In[6]:
+# In[11]:
 
 
 # mac       - phase III - morpho - full
@@ -105,14 +107,14 @@ print(df_morph.head())
 print(len(df_morph))
 
 
-# In[7]:
+# In[12]:
 
 
 # Goal of this box 
 # -> (in df_lpr) leave only rows with non 1 and NA MORT
 
 # Running time
-# -> 8 seconds for 1 chemical
+# 14 seconds took for 215 chemicals
 
 # 1. Append additional identifier column (Plate_Well value) to lpr and morphology data
 # 2. Find rows in morphology data for which MORT end-point is not 1 or NA
@@ -146,10 +148,10 @@ print ("\n")
 
 end_time = time.time()
 time_took = str(round((end_time-start_time), 1)) + " seconds"
-print ("Done, it took:"+str(time_took)) # 8 seconds took for 1 chemical
+print ("Done, it took:"+str(time_took)) # 14 seconds took for 215 chemicals
 
 
-# In[8]:
+# In[13]:
 
 
 print("\ndf_lpr.shape:" + str(df_lpr.shape))
@@ -158,7 +160,7 @@ print("df_lpr_filtered.shape:"+str(df_lpr_filtered.shape) + "\n")
 print('df_lpr_filtered.head()',df_lpr_filtered.head())
 
 
-# In[9]:
+# In[14]:
 
 
 # [Goal] 
@@ -236,14 +238,14 @@ print ("Conversion of time interval is done. It took "+str(time_took))
 # -> 0.5 seconds for 1 chemical
 
 
-# In[10]:
+# In[15]:
 
 
 print(df_lpr_min.head())
 print(df_lpr_min.tail())
 
 
-# In[15]:
+# In[16]:
 
 
 # Plot few lpr curves to check transition points
@@ -260,8 +262,8 @@ print ("df_lpr_min.shape:" + str(df_lpr_min.shape))
 
 fig, ax = plt.subplots()
 
-#ax.plot(np.transpose(df_lpr_min.iloc[10:223,time_index_start:time_index_start + num_time_points].values));
-ax.plot(np.transpose(df_lpr_min.iloc[:,time_index_start:time_index_start + num_time_points].values));
+ax.plot(np.transpose(df_lpr_min.iloc[10:23,time_index_start:time_index_start + num_time_points].values));
+#ax.plot(np.transpose(df_lpr_min.iloc[:,time_index_start:time_index_start + num_time_points].values));
 
 print(len(df_lpr_min))
 print(df_lpr_min.head(10))
@@ -275,12 +277,13 @@ print (output_filename)
 #plt.savefig(output_filename, bbox_inches="tight")
 
 
-# In[ ]:
+# In[24]:
 
 
 ## calculate MOV, AUC for all chemical concentrations
-
-delta_mov_auc = df_lpr_min[['chemical.id', 'conc', 'plate.id', 'well']].copy()
+df_lpr_min = df_lpr_min.rename(columns={"plate.id": "Plate", "chemical.id": "Chemical.ID", "conc": "CONC", "well": "WELL"})
+delta_mov_auc = df_lpr_min[['Chemical.ID', 'CONC', 'Plate', 'WELL']].copy()
+#delta_mov_auc = df_lpr_min[['chemical.id', 'conc', 'plate.id', 'well']].copy()
 
 trans_points = [2,8,14,20] # "official"
 
@@ -299,11 +302,11 @@ for trans_index, trans_point in enumerate(trans_points):
         else:
             delta_mov_auc['AUC' + str(trans_index + 1)]             = sum(df_lpr_min['t' + str(trans_point + 1 + index_count)]                   for index_count in range(num_dark))             - sum(df_lpr_min['t' + str(trans_point - index_count)]                   for index_count in range(num_light))
 
-print(delta_mov_auc.head(1))
+#display(delta_mov_auc.head(1))
 #delta.to_csv("delta_mov_auc.csv", index=False)
 
 
-# In[ ]:
+# In[20]:
 
 
 import generate_dose_response as gdr
@@ -328,7 +331,7 @@ full_devel = "full"
 #full_devel = "devel"
 
 if (full_devel == "full"):
-    chemical_id_from_here = np.unique(delta_mov_auc['chemical.id'])
+    chemical_id_from_here = np.unique(delta_mov_auc['Chemical.ID'])
     end_points_from_here = ['MOV1','AUC1']
 else:
     chemical_id_from_here = [53]
@@ -342,7 +345,7 @@ for chemical_id in chemical_id_from_here:
     for end_point in end_points_from_here:
         if (report): print("end_point:" + str(end_point))
         # subset original dataframe for a user-specified chemical and end_point pair
-        delta_mov_auc_end_point_chemical_id = delta_mov_auc.loc[delta_mov_auc['chemical.id'] == chemical_id,['chemical.id', 'conc', 'plate.id', 'well', end_point]]
+        delta_mov_auc_end_point_chemical_id = delta_mov_auc.loc[delta_mov_auc['Chemical.ID'] == chemical_id,['Chemical.ID', 'CONC', 'Plate', 'WELL', end_point]]
         #print("delta_mov_auc_end_point_chemical_id:\n"+str(delta_mov_auc_end_point_chemical_id))
         #print("type(delta_mov_auc_end_point_chemical_id):\n"+str(type(delta_mov_auc_end_point_chemical_id)))
         #print("type(end_point):\n"+str(type(end_point)))
@@ -381,4 +384,10 @@ time_filename = 'running_time.txt'
 f_time = open(time_filename, 'w')
 f_time.write(str(time_took))
 f_time.close()
+
+
+# In[ ]:
+
+
+
 
