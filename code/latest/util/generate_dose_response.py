@@ -14,8 +14,8 @@ from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
-global_report = True
-#global_report = False
+#global_report = True
+global_report = False
 
 # Get dose-response data for morphology
 # data_ep_cid -> morphological_data_end_point_chemical_id
