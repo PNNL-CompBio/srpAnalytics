@@ -14,8 +14,8 @@ from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
-#global_report = True
-global_report = False
+global_report = True
+#global_report = False
 
 # Get dose-response data for morphology
 # data_ep_cid -> morphological_data_end_point_chemical_id
@@ -180,14 +180,33 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
                 neg_control_ref_vals = neg_control_plate_specific_vals[end_point]
                 response_vals_plate = delta_mov_auc_data_compound_concentration.loc[delta_mov_auc_data_compound_concentration['Plate'] == plate_id]
                 response_vals = response_vals_plate[end_point]
+                #if (global_report):
+                #    print (f"response_vals:\n{response_vals}")
 
                 response_vals_positive = response_vals[response_vals >= 0]
+                #if (global_report):
+                #       print (f"response_vals_positive:\n{response_vals_positive}")
+                # (note) for chemical_id = 1155 and plate.id = 13739, response_vals and response_vals_positive are same
+                                       
                 # Identify hypo- and hyperactive responses
                 Q1_neg_control_vals = neg_control_ref_vals.quantile(0.25)
                 Q3_neg_control_vals = neg_control_ref_vals.quantile(0.75)
                 IQR_neg_control_vals = Q3_neg_control_vals - Q1_neg_control_vals
+                
                 hyper_response_vals = response_vals_positive[(response_vals_positive < (Q1_neg_control_vals - 1.5 * IQR_neg_control_vals)) | (response_vals_positive > (Q3_neg_control_vals + 1.5 * IQR_neg_control_vals))]
+                
+                # (note) for chemical_id = 1155 and plate.id = 13739, 0 counts are counted twice (both hyper and hypo_response_vals)
+
+                # so fix here
+                hyper_response_vals = hyper_response_vals[hyper_response_vals > 0]
+                
+                if (global_report):
+                       print (f"\n\nhyper_response_vals:\n{hyper_response_vals}")
+                       print (f"\n\ntype(hyper_response_vals):\n{type(hyper_response_vals)}")
+                    
                 hypo_response_vals = response_vals[response_vals <= 0]
+                if (global_report):
+                       print (f"hypo_response_vals:\n{hypo_response_vals}")
                 
                 #Compare box-plots for visual inspection
                 #fig, ax = plt.subplots()
