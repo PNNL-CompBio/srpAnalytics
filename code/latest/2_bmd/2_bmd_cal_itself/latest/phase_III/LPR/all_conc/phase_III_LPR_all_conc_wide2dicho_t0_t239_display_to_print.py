@@ -337,8 +337,8 @@ else:
     chemical_id_from_here = [53]
     end_points_from_here = ['MOV1']
 
-#report = True
-report = False
+report = True
+#report = False
 
 for chemical_id in chemical_id_from_here:
     if (report): print("chemical_id:" + str(chemical_id))
