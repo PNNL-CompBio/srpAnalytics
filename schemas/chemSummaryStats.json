@@ -1,0 +1,108 @@
+{
+    "type": "object",
+    "properties": { 
+        "Chemical_ID": {
+            "type": "integer", 
+            "minimum": 0
+        }, 
+        "Model": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "BMD10": {
+            "type": ["number", "null"],
+            "minimum": 0
+        }, 
+        "BMD50": {
+            "type": ["number", "null"],
+            "minimum": 0
+        }, 
+        "Min_Dose": {
+            "type": "number", 
+            "minimum": 0
+        }, 
+        "Max_Dose": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 100
+        },
+        "AUC_Norm": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 1
+        },
+        "cas_number": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 255
+        },
+        "DTXSID": {
+            "type": "string",
+            "pattern": "(DTXSID)[0-9]+",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "PREFERRED_NAME": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "INCHIKEY": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "SMILES": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "MOLECULAR_FORMULA": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "AVERAGE_MASS": {
+            "type": "number", 
+            "minimum": 0
+        },
+        "PUBCHEM_DATA_SOURCES": {
+            "type": "integer", 
+            "minimum": 0
+        },
+        "zf.cid": {
+            "type": ["number", "null"],
+            "minimum": 0
+        },
+        "chemical_class": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255
+        },
+        "chemDescription": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "End Point Name": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "Description": {
+            "type": ["string", "null"],
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "endPointLink": {
+            "type": ["string", "null"],
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "DataQC_Flag": {
+            "type": ["string", "null"],
+            "pattern": "^(Good|Moderate|Poor)"
+        }
+    }
+}

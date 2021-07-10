@@ -1,0 +1,29 @@
+{
+    "type": "object",
+    "properties": { 
+        "Sample_ID": {
+            "type": "integer", 
+            "minimum": 0
+        }, 
+        "X_vals": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 100000
+        }, 
+        "Y_vals": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 100000
+        }, 
+        "End Point Name": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "endPointLink": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        }
+    }
+}

@@ -1,0 +1,111 @@
+{
+    "type": "object",
+    "properties": { 
+        "Model": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "BMD10": {
+            "type": "number",
+            "minimum": 0
+        }, 
+        "BMD50": {
+            "type": "number",
+            "minimum": 0
+        }, 
+        "Min_Dose": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 100000
+        }, 
+        "Max_Dose": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 100000
+        },
+        "AUC_Norm": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "SampleNumber": {
+            "type": "string",
+            "pattern": "^C[0-9]+",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "date_sampled": {
+            "type": "string",
+            "format": "date"
+        },
+        "sample_matrix": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "technology": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "Sample_ID": {
+            "type": "integer",
+            "minLength": 0
+        },
+        "ClientName": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "SampleName": {
+            "type": "string", 
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "LocationLat": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximu ": 180
+        },
+        "LocationLon": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximu ": 180
+        },
+        "LocationName": {
+            "type": ["string", "null"],
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "LocationAlternateDescription": {
+            "type": ["string", "null"],
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "AlternateName": {
+            "type": ["string", "null"],
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "End Point Name": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "Description": {
+            "type": ["string", "null"],
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "endPointLink": {
+            "type": ["string", "null"],
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "DataQC_Flag": {
+            "type": ["string", "null"],
+            "pattern": "^(Good|Moderate|Poor)"
+        }
+    }
+}
