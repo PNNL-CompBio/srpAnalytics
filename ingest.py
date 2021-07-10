@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import sqlalchemy as db
+from jsonschema import validate
 import os
 import sys
+from json import load
 
 import logging
 logging.basicConfig()
@@ -15,6 +17,16 @@ db_dev_ip=os.environ.get('DB_DEV_IP')
 db_prod_ip=os.environ.get('DB_PROD_IP')
 db_port=os.environ.get('DB_PORT')
 db_name=os.environ.get('DB_NAME')
+
+schemas = {
+    'chemdoseResponseVals': load(open('./schemas/chemdoseResponseVals.json')),
+    'chemicalByExtractSample': load(open('./schemas/chemicalByExtractSample.json')),
+    'chemSummaryStats': load(open('./schemas/chemSummaryStats.json')),
+    'chemXYcoords': load(open('./schemas/chemXYcoords.json')),
+    'envSampdoseResponseVals': load(open('./schemas/envSampdoseResponseVals.json')),
+    'envSampSummaryStats': load(open('./schemas/envSampSummaryStats.json')),
+    'envSampXYcoords': load(open('./schemas/envSampXYcoords.json')),
+}
 
 def test_connection(database):
     if database == "production":
@@ -73,7 +85,13 @@ def read_and_save(csv_file, table_name, if_exists, engine):
     print("\t\tWriting to {}...".format(table_name))
     # If any infinite value is found, replace with a NULL value.
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df.to_sql(table_name, engine, if_exists=if_exists, index=False)
+    try:
+        validate(instance=df.to_json(), schema=schemas['table_name'])
+    except Exception as e:
+        print("Invalid schema: {}".format(e))
+        return
+    # TODO uncomment once done testing schema
+    #df.to_sql(table_name, engine, if_exists=if_exists, index=False)
     print("\tFinished writing to {}.".format(table_name))
     verify(df, table_name, engine)
 
@@ -96,7 +114,7 @@ def verify(csv_df, table_name, engine):
     elif saved_numRows < original_numRows: 
         print('\t\tMissing rows, if this is unexpected please review')
     else:
-        print('\t\tNo known issues with save')
+        print('\t\tNo known issues with number of rows')
     print("\tFinished verifying.")
 
 
