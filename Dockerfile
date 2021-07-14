@@ -1,17 +1,17 @@
-from rocker/tidyverse
+FROM rocker/tidyverse
 
+# To setup other dependencies
 RUN apt-get update -qq && apt-get install -y net-tools \
         python3.7 \
-        python3-pip
+        python3-pip \
+        curl \
+        unixodbc
+COPY setup.sh /setup.sh
+RUN sh /setup.sh
 
-RUN Rscript -e "install.packages('argparse')"
+COPY requirements.txt /requirements.txt
 
-RUN pip3 install pandas
-RUN pip3 install matplotlib
-RUN pip3 install seaborn
-RUN pip3 install statsmodels
-RUN pip3 install astropy
-RUN pip3 install scipy==1.4.1
+RUN pip3 install -r /requirements.txt
 
 COPY . srpAnalytics
 WORKDIR srpAnalytics

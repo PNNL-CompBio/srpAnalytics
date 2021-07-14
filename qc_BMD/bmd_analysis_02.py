@@ -17,20 +17,12 @@ warnings.filterwarnings('ignore')
 starting_dir = os.getcwd()
 print(starting_dir)
 
-# not needed here
-# util_path = os.path.join(starting_dir, "2_qc_BMD/common/util")
-# print ("util_path:" + str(util_path))
-
 import BMD_BMDL_estimation as bmdest
-import generate_dose_response_newest_no_avg as gdr
+import generate_dose_response as gdr
 import Plot_Save as ps
 
 def main():
-
-    #complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH_zf_morphology/input/wide/7_PAH_zf_morphology_data_2020NOV11_wide_DNC_0.csv'
     args = sys.argv[0:]
-
-    #complete_file_path = '/Users/kimd999/Dropbox/script/python/srpAnalytics/analysis/paritosh_original_then_edit/to_dockerize/data/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
     complete_file_path = args[1]
     print("Running command line bmd analysis on "+complete_file_path)
     full_devel = args[2]
@@ -72,59 +64,14 @@ def runBmdPipeline(complete_file_path, full_devel):
                                                                  'LTRK', 'MUSC', 'NC__', \
                                                                  'SKIN', 'SM24', 'TCHR']].sum(axis=1, skipna=True, min_count=1)
 
-    # morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == chemical_id,['chemical.id', 'conc', 'plate.id', 'well', end_point]]
-    #morphological_data_end_point_chemical_id = morphological_data.loc[morphological_data['chemical.id'] == 1532,['chemical.id', 'conc', 'plate.id', 'well', 'ANY24']]
-    #display(morphological_data_end_point_chemical_id)
-    #display(morphological_data.loc[morphological_data[]'chemical.id']==1532)
-    #print ("done")
-    #display(morphological_data.head())
-
     if os.path.isdir("output") is False:
         os.mkdir("output")
 
     output_folder = os.path.join(starting_dir, "output")
     os.chdir(output_folder)
 
-    #if (os.path.isdir("report") == False):
-    #    os.mkdir("report")
-
-    #morphological_data_filename = os.path.join("report", 'morphological_data.csv')
-    #morphological_data_file_out = open(morphological_data_filename, "w")
-    #morphological_data.to_csv(morphological_data_filename, index=False)
-    #morphological_data_file_out.close()
-    # Specify end_point and chemical of interest
-    # Perform a check of the existence of "essential" column labels
-
     start_time = time.time()
-
-    '''
-    qc_flag_filename = os.path.join("report", 'qc_flag.csv')
-    qc_flag_file_out = open(qc_flag_filename, "w")
-
-    write_this = "qc_flag\n"
-    qc_flag_file_out.write(write_this)
-
-    erased_morphological_data_end_point_chemical_id_filename = os.path.join("report", 'erased_morphological_data_end_point_chemical_id.csv')
-    erased_morphological_data_end_point_chemical_id_file = open(erased_morphological_data_end_point_chemical_id_filename, "w")
-    write_this="chemical_id,plate_id,end_point\n"
-    erased_morphological_data_end_point_chemical_id_file.write(write_this)
-    erased_morphological_data_end_point_chemical_id_file.close()
-
-
-    erased_morphological_data_end_point_chemical_id_filename_0p25_erased = erased_morphological_data_end_point_chemical_id_filename[:-4] + '_0p25_erased.csv'
-    erased_morphological_data_end_point_chemical_id_file_0p25_erased = open(erased_morphological_data_end_point_chemical_id_filename_0p25_erased, "w")
-    write_this="chemical_id,end_point,dose\n"
-    erased_morphological_data_end_point_chemical_id_file_0p25_erased.write(write_this)
-    erased_morphological_data_end_point_chemical_id_file_0p25_erased.close()
-
-
-    erased_morphological_data_end_point_chemical_id_filename_0p25_kept = erased_morphological_data_end_point_chemical_id_filename[:-4] + '_0p25_kept.csv'
-    erased_morphological_data_end_point_chemical_id_file_0p25_kept = open(erased_morphological_data_end_point_chemical_id_filename_0p25_kept, "w")
-    write_this="chemical_id,end_point,dose\n"
-    erased_morphological_data_end_point_chemical_id_file_0p25_kept.write(write_this)
-    erased_morphological_data_end_point_chemical_id_file_0p25_kept.close()
-    '''
-
+   
     # full -> 17 (without DNC) unlike phase_I_II (18 endpoints), 7_PAH lacks NC24
     if full_devel == "full":
         end_points = ['ANY24', 'ANY120', 'AXIS', 'ALL_BUT_MORT', 'BRN_',\
@@ -145,29 +92,12 @@ def runBmdPipeline(complete_file_path, full_devel):
             # Binarize end-point hits (Values > 1 are forced to 1)
             end_point_hits = morphological_data_end_point_chemical_id[end_point]
             end_point_hits.loc[end_point_hits > 0] = 1
-            #print (str(morphological_data_end_point_chemical_id))
-            #     morphological_data_end_point_chemical_id.to_csv('morpho.csv', index=False)
-
-            #        f_end_point = open('end_point.txt', 'w')
-            #       f_end_point.write(str(end_point))
-            #      f_end_point.close()
 
             dose_response = gdr.gen_dose_response(morphological_data_end_point_chemical_id, end_point)
 
             qc_flag = gdr.BMD_feasibility_analysis(dose_response)
-            #    qc_flag = gdr.BMD_feasibility_analysis_qc_1(dose_response)
-            #qc_flag_file_out.write(str(qc_flag)+"\n")
 
             test_dose_response = gdr.reformat_dose_response(dose_response)
-
-            #        write_this = str(chemical_id) + "," + str(end_point) + "," + str(len(test_dose_response)) + "\n"
-            #       print ("write_this:"+str(write_this))
-            #      f_out.write(write_this)
-
-            #qc_flag_folder = "qc_" + str(qc_flag)
-            #if (os.path.isdir(str(qc_flag_folder)) == False):
-            #    os.mkdir(str(qc_flag_folder))
-            #os.chdir(str(qc_flag_folder))
 
             ##TODO: currently we format the files in individual methods;
             ## we should do that here, then pass the file in from here
@@ -200,9 +130,7 @@ def runBmdPipeline(complete_file_path, full_devel):
                         filenames = ps.save_results_good_data_nounique_model(test_dose_response, qc_flag,\
                                                                  model_predictions, selected_model_params, \
                                                                  str(chemical_id), end_point)
-                        #test_dose_f_out.close()
-                        #f_out.close()
-                        #qc_flag_file_out.close()
+                        
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print("Done, it took:"+str(time_took))
@@ -214,36 +142,6 @@ def runBmdPipeline(complete_file_path, full_devel):
     np.asarray(morphological_data_end_point_chemical_id['plate.id'])
     full_paths = [output_folder+'/'+f for f in filenames]
     return full_paths
-
-'''
-qc_flag_filename = os.path.join("report", 'qc_flag.csv')
-print ("qc_flag_filename:"+str(qc_flag_filename))
-qc_flag_data = pd.read_csv(qc_flag_filename, index_col=None)
-#display(qc_flag_data.head())
-ds = pd.Series({"Column": qc_flag_data["qc_flag"]})
-plt.figure(figsize=(8,4))
-sns.countplot(x="Column", data=ds)
-plt.show()
-'''
-
-'''os.chdir(starting_dir)
-
-sns.set_theme(style="whitegrid")
-print ("array_filename:"+str(array_filename))
-array_report_data = pd.read_csv(array_filename, index_col=None)
-display(array_report_data.head())
-#ax = sns.barplot(x="end_point", y="len_test_dose_response", data=array_report_data)
-
-ds = pd.Series({"Column": array_report_data["len_test_dose_response"]})
-plt.figure(figsize=(8,4))
-plt.xlabel("leng")
-sns.countplot(x="Column", data=ds)
-plt.show()
-print ("done")'''
-
-#test_dose_response.dose
-#test_dose_response.dose.iloc[0]+test_dose_response.dose.iloc[1]
-#dose_response['num_affect']/dose_response['num_embryos']
 
 if __name__ == '__main__':
     main()
