@@ -1,11 +1,15 @@
 # Superfund Research Program Analytics
 <img src="OSU-PNNLsuperfund_Small.png"  width="400">
-This repository contains the code necessary to process any new data for the Superfund Research Program Analytics Portal.
+This repository contains the code necessary to process any new data for the Superfund Research Program Analytics Portal. It is designed to consume two types of data: (1) zebrafish measurements describing the response to zebrafish under various levels of chemical stressors, and (2) environmental sample measurements that describe the relative concentration of specific chemicals in environmental samples. This is described in more detail in our `Scientific Data` manuscript (to be submitted) and depicted below.
+<img src='overview.jpg' width="200">
 
 ## Incoming Data
-The incoming data will be formatted as a table with schema TBD. Currently we are just compiling the current data and not adding to it
+We accept two types of data, each with a slightly different schema. For both types of data there is a chemical identifier (`chemical.id` or `Chemical_ID`) that must be mapped to the CAS identifiers. The schema for each type of data (the environmental sample data and the zebrafish data) can be found in the  [dataSchema spreadsheet](./dataSchemas/processingPipelineSchema.xlsx) file.
 
-## How to build your own docker image
+We have currently started to run this with test data to evaluate its performance.
+
+## To run the pipeline
+We have combined the data standardization
 If you prefer to build your own docker image, run these commands.
 
 ```
@@ -40,13 +44,3 @@ docker run -v $PWD:/tmp sgosline/srp-analytics [your file here, for example test
 ```
 
 The results will be the four files for the data portal. Add the `--devel` flag if you are just testing the code.
-
-## Data Input
-Currently the code is designed to take a specific form of input to be processed by our benchmark dose analysis pipeline. The columns are defined in the table below:
-
-| Column name| Description|
-| ---| ---|
-
-
-## Data Output
-The result of the pipeline will be six files, zipped up into a single resource.
