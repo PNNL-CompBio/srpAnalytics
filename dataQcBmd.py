@@ -40,12 +40,18 @@ parser.add_argument('--update-db', dest='update_db', action='store_true', help='
 # for LPR processing, both morphological data and LPR data re needed as inputs
 
 
-def merge_files(path,file_dict):
-    '''
+def merge_files(path, file_dict):
+    """
     merge_files takes a dictionary of files and joints them to a single file to
     added to the next step of the algorithm
-    '''
 
+    Attributes
+    ------
+    path : str
+    file_dict: dict
+    """
+
+    ## three lists of files to collect
     bmds = []
     fits = []
     dose = []
@@ -53,12 +59,17 @@ def merge_files(path,file_dict):
         bmds.append(filelist[0])
         fits.append(filelist[1])
         dose.append(filelist[2])
+
+    ##concatenate all the files together
     pd.concat([pd.read_csv(f) for f in bmds]).to_csv(path+'/new_bmds.csv')
     pd.concat([pd.read_csv(f) for f in fits]).to_csv(path+'/new_fits.csv')
     pd.concat([pd.read_csv(f) for f in dose]).to_csv(path+'/new_dose.csv')
     return [path+'/new_bmds.csv',path+'/new_fits.csv',path+'/new_dose.csv']
 
 if __name__ == "__main__":
+    """
+    main method for command line
+    """
     start_time = time.time()
     args = parser.parse_args()
     flist = args.files.split(',')
@@ -72,13 +83,6 @@ if __name__ == "__main__":
         for input_csv_file_name in flist:
             print ("input_csv_file_name:" + str(input_csv_file_name))
 
-            #  if args.isSample:
-            ##this doesn't exist yet - we need to read in sample information and merge with
-            ##existing dose response data
-            #      command = "Rscript 04_mergeWithChems.R "+str(input_csv_file_name)
-            #      print(command)
-            #      os.system(command)
-            #  else:
             if args.devel:
                 full_devel = "devel"
             else:
@@ -132,7 +136,6 @@ if __name__ == "__main__":
          #wd <- paste0(getwd(),'/')
          ##UPDATE TO PYTHON     allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
         allfiles = ['README.md'] + [a for a in os.listdir('/tmp') if 'csv' in a]
-       
         print(allfiles)
         print('Now zipping up'+str(len(allfiles))+'files')
         tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
