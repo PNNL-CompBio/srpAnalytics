@@ -89,13 +89,13 @@ if __name__ == "__main__":
                 full_devel = "full"
 
             if args.LPR == None:
-                command = "python3 /srpAnalytics/01_reformat_df_data.py " + \
+                command = "python3 /srpAnalytics/01_reformat_df_morpho_data.py " + \
                     str(input_csv_file_name) + " " + str(full_devel)
                 print(command)
                 os.system(command)
             else:
                 # for LPR reformatting both morphological and LPR is needed
-                command = "python3 /srpAnalytics/01_reformat_df_data.py " + \
+                command = "python3 /srpAnalytics/01_reformat_df_morpho_data.py " + \
                     str(input_csv_file_name) + " " + str(full_devel)
                 print(command)
                 os.system(command)
