@@ -16,11 +16,11 @@ import warnings
 warnings.filterwarnings('ignore')
 
 #mac
-util_path = "/Users/kimd999/Dropbox/script/python/srpAnalytics/code/latest/util"
-sys.path.insert(0, util_path)
+#util_path = "/Users/kimd999/Dropbox/script/python/srpAnalytics/code/latest/util"
+#sys.path.insert(0, util_path)
 
 #constance
-'''
+#'''
 args = sys.argv[0:]
 py_file = args[0]
 py_file_wo_path = os.path.basename(py_file)
@@ -29,7 +29,7 @@ code_location = os.path.dirname(os.path.abspath(py_file))
 index_of_latest = code_location.index('latest')
 util_path = os.path.join(code_location[:index_of_latest], "latest", "util")
 print ("util_path:"+ str(util_path))
-'''
+#'''
 
 
 # In[2]:
@@ -54,10 +54,10 @@ import Plot_Save as ps
 #complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/wide/7_PAH_zf_morphology_data_2021JAN11_wide_made_in_2021_01_19_DNC_0.csv'
 
 # mac
-complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/morpho/input/wide/7_PAH_zf_morphology_data_2020NOV11_wide_made_in_2021_07_14.csv'
+#complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/morpho/input/wide/7_PAH_zf_morphology_data_2020NOV11_wide_made_in_2021_07_14.csv'
 
 # constance
-#complete_file_path = '/people/kimd999/tox/7_PAH/input/7_PAH_zf_morphology_data_2020NOV11_wide_made_in_2021_07_14.csv'
+complete_file_path = '/people/kimd999/tox/7_PAH/input/7_PAH_zf_morphology_data_2020NOV11_wide_made_in_2021_07_14.csv'
 
 dir_of_inputfile = os.path.dirname(complete_file_path)
 os.chdir(dir_of_inputfile)
