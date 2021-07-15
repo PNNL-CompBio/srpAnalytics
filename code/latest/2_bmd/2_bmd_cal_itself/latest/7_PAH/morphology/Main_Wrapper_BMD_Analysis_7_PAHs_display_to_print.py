@@ -30,13 +30,10 @@ index_of_latest = code_location.index('latest')
 util_path = os.path.join(code_location[:index_of_latest], "latest", "util")
 print ("util_path:"+ str(util_path))
 #'''
-
+sys.path.insert(0, util_path)
 
 # In[2]:
 
-
-starting_dir = os.getcwd()
-print (starting_dir)
 
 
 # In[3]:
