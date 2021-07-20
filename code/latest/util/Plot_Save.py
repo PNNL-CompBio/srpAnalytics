@@ -223,6 +223,9 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
             if (report):
                 print (f"model_preds_residuals:\n{model_preds_residuals}")
                 print (f"model_pred_index:\n{model_pred_index}")
+                
+                print (f"np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8):\n{np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)}")
+                #[[-0.71275987 -0.04841195  1.2423122   0.22264199  0.0676003  -0.32941879  -1.42086953  1.03044301]]
             
             model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)
 
