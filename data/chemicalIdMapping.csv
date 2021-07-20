@@ -60,7 +60,7 @@ NOCAS_47353,119,119,NA,,1'-{2-[2-(34-dichlorophenyl)-4-(phenylcarbonyl)morpholin
 56892-31-0,129,129,PAH_Hydroxy,,
 112-38-9,138,138,NA,,
 678-39-7,148,148,NA,,
-3074-03-1,155,155,PAH_Oxy,,
+428856,155,155,PAH_Oxy,,
 95-14-7,163,163,NA,,
 87-61-6,164,164,NA,,
 96-18-4,165,165,NA,,
@@ -134,16 +134,11 @@ NOCAS_48172,263,263,NA,,2-(2-{5-[5-(Azepan-1-ylmethyl)-2-thienyl]-124-oxadiazol-
 112-25-4,268,268,NA,,
 126-11-4,269,269,NA,,
 21564-17-0,271,271,Fungicide,,
-38411-22-2,272,4014,PCB,PCB 136,
-52663-68-0,273,4016,PCB,PCB 187,
-38379-99-6,274,4013,PCB,PCB 95,
 68631-49-2,275,275,Flame Retardant,,
-35065-27-1,276,4012,PCB,PCB 153,
 60348-60-9,278,278,Flame Retardant,,
 5436-43-1,279,279,Flame Retardant,,
 79-95-8,280,280,NA,,
 3296-90-0,281,281,NA,,
-31508-00-6,282,4009,PCB,PCB 118,
 1746-01-6,283,283,NA,,
 19660-16-3,284,284,NA,,
 92-44-4,285,285,PAH_Hydroxy,,
@@ -267,7 +262,7 @@ NOCAS_47292,456,456,NA,,
 496-72-0,473,473,NA,,
 99-54-7,474,474,NA,,
 95-65-8,475,475,NA,,
-6893-02-3,476,476,NA,,
+1823692,476,476,NA,,
 5392-40-5,481,481,NA,,
 826-62-0,487,487,NA,,
 30516-87-1,488,488,NA,,
@@ -381,13 +376,15 @@ NOCAS_47338,687,687,NA,,
 1705-85-7,694,694,PAH_Alkylated,,
 91-62-3,695,695,NA,,
 63041-90-7,696,696,PAH_Nitro,,
-7496-02-08,697,697,PAH_Nitro,,
+2043937,697,697,PAH_Nitro,,
 51-52-5,699,699,NA,,
 154-42-7,700,700,NA,,
 57-97-6,702,702,PAH,,
 20268-51-3,721,721,PAH_Nitro,,
 NOCAS_0003,722,722,NA,,
+27905-45-9,C331561,725,EPA PFAS,,8:2 Fluorotelomer acrylate
 678-39-7,726,726,NA,,
+678-39-7,C880284,726,EPA PFAS,,8:2 Fluorotelomer Alcohol
 148-24-3,740,740,NA,,
 611-32-5,741,741,PAH_Heterocyclic,,
 84-65-1,746,746,PAH_Oxy,,
@@ -402,7 +399,7 @@ NOCAS_0003,722,722,NA,,
 954-46-1,777,777,PAH_Nitro,,
 484-17-3,778,778,PAH_Hydroxy,,
 71751-41-2,944,944,NA,,
-6373-11-1,946,946,PAH_Oxy,,
+1634036,946,946,PAH_Oxy,,
 83-32-9,947,947,PAH_Parent,,
 82-86-0,948,948,PAH_Oxy,,
 208-96-8,949,949,PAH_Parent,,
@@ -434,6 +431,7 @@ NOCAS_0003,722,722,NA,,
 33089-61-1,1014,1014,Insecticide,,
 1111-78-0,1015,1015,NA,,
 3825-26-1,1016,1016,NA,,
+3825-26-1,C476948,1016,EPA PFAS,,Ammonium perfluorooctanoate
 26787-78-0,1017,1017,NA,,
 101-05-3,1028,1028,Fungicide,,
 191-26-4,1030,1030,PAH_Parent,,
@@ -494,7 +492,7 @@ NOCAS_0003,722,722,NA,,
 1571-75-1,1214,1214,NA,,
 77-40-7,1215,1215,NA,,
 79-97-0,1216,1216,NA,,
-2081-08-5,1217,1217,NA,,
+66328,1217,1217,NA,,
 620-92-8,1218,1218,NA,,
 2167-51-3,1219,1219,NA,,
 24038-68-4,1220,1220,NA,,
@@ -525,7 +523,7 @@ NOCAS_0003,722,722,NA,,
 58-08-2,1307,1307,Pharmacological,,
 123122-55-4,1308,1308,NA,,
 105-60-2,1310,1310,NA,,
-2425-06-1,1311,1311,Fungicide,,
+191906,1311,1311,Fungicide,,
 133-06-2,1312,1312,Fungicide,,
 184653-84-7,1313,1313,NA,,
 298-46-4,1314,1314,NA,,
@@ -660,7 +658,7 @@ NOCAS_0003,722,722,NA,,
 123-25-1,1644,1644,NA,,
 84-66-2,1645,1645,Insecticide,,
 64-67-5,1646,1646,NA,,
-2781-11-5,1647,1647,NA,,
+322089,1647,1647,NA,,
 111-46-6,1648,1648,Industrial,,
 120-55-8,1649,1649,NA,,
 111-77-3,1650,1650,NA,,
@@ -795,7 +793,6 @@ NOCAS_47389,1784,1784,NA,,
 330198-91-9,1887,1887,NA,,
 129453-61-8,1888,1888,NA,,
 98-01-1,1890,1890,NA,,
-1222-05-5,1896,4003,"Personal Care, Industrial",galaxolide,
 446-72-0,1898,1898,NA,,
 548-62-9,1899,1899,NA,,
 106-24-1,1900,1900,NA,,
@@ -868,7 +865,7 @@ NOCAS_47389,1784,1784,NA,,
 121-75-5,2104,2104,Insecticide,,
 123-33-1,2105,2105,NA,,
 118-71-8,2106,2106,NA,,
-8018-01-7,2108,2108,NA,,
+2234562,2108,2108,NA,,
 12427-38-2,2109,2109,NA,,
 12108-13-3,2110,2110,NA,,
 110235-47-7,2122,2122,Fungicide,,
@@ -1022,15 +1019,26 @@ NOCAS_0007,2509,2509,NA,,
 628-63-7,2580,2580,NA,,
 29420-49-3,2582,2582,NA,,
 335-76-2,2585,2585,NA,,
+335-76-2,C505277,2585,EPA PFAS,,Perfluorodecanoic acid
 375-85-9,2587,2587,NA,,
+375-85-9,C891393,2587,EPA PFAS,,Perfluoroheptanoic acid
 3871-99-6,2588,2588,NA,,
 307-24-4,2589,2589,NA,,
+307-24-4,C272788,2589,EPA PFAS,,Perfluorohexanoic acid
 375-95-1,2590,2590,NA,,
+375-95-1,C850268,2590,EPA PFAS,,Perfluorononanoic acid
 2795-39-3,2592,2592,NA,,
 1763-23-1,2593,2593,NA,,
 754-91-6,2594,2594,NA,,
+754-91-6,C754644,2594,EPA PFAS,,Perfluorooctanesulfonamide
+1763-23-1,C591669,2595,EPA PFAS,,Perfluorooctanesulfonic acid
 335-67-1,2596,2596,NA,,
+335-67-1,C80695,2596,EPA PFAS,,Perfluorooctanoic acid
+2706-90-3,C313315,2597,EPA PFAS,,Perfluoropentanoic acid
+376-06-7,C628617,2598,EPA PFAS,,Perfluorotetradecanoic acid
+72629-94-8,C942208,2599,EPA PFAS,,Perfluorotridecanoic acid
 2058-94-8,2600,2600,NA,,
+2058-94-8,C79213,2600,EPA PFAS,,Perfluoroundecanoic acid
 548-39-0,2601,2601,PAH_Oxy,,
 52645-53-1,2602,2602,Insecticide,,
 94-18-8,2623,2623,NA,,
@@ -1048,7 +1056,7 @@ NOCAS_0007,2509,2509,NA,,
 126-73-8,2649,2649,Flame Retardant,,
 732-11-6,2650,2650,Insecticide,,
 78-51-3,2651,2651,Flame Retardant,,
-1918-02-1,2652,2652,NA,,
+6607,2652,2652,NA,,
 117428-22-5,2653,2653,Fungicide,,
 112529-15-4,2655,2655,NA,,
 110-85-0,2656,2656,NA,,
@@ -1060,10 +1068,11 @@ NOCAS_0007,2509,2509,NA,,
 NOCAS_47328,2683,2683,NA,,
 29420-49-3,2684,2684,NA,,
 3871-99-6,2685,2685,NA,,
+3871-99-6,C222309,2685,EPA PFAS,,Potassium perfluorohexanesulfonate
 2795-39-3,2686,2686,NA,,
+2795-39-3,C59898,2686,EPA PFAS,,Potassium perfluorooctanesulfonate
 72-54-8,2687,2687,Insecticide,,
 72-55-9,2688,2688,Insecticide,,
-2050-47-7,2690,4004,Flame Retardant,p-p-dibromodiphenyl ether,
 23031-36-9,2691,2691,Insecticide,,
 81131-70-6,2694,2694,NA,,
 53-03-2,2701,2701,NA,,
@@ -1298,19 +1307,149 @@ NOCAS_0001,3413,3413,NA,,
 2531-84-2,3760,3760,NA,,
 192-51-8,3761,3761,NA,Dibenzo[e-l]pyrene,
 832-69-9,3762,3762,NA,1-Methylphenanthrene,
+41997-13-1,C160169,3766,EPA PFAS,,Perfluorohexanesulfonamide
+375-92-8,C104808,3771,EPA PFAS,,Perfluoroheptanesulfonic acid
+335-95-5,C212400,3853,EPA PFAS,,Sodium perfluorooctanoate
 2381-21-7,3859,3859,NA,1-methylpyrene,
 3697-24-3,3862,3862,NA,5-methylchrysene,
 196-42-9,3898,3898,NA,"naphtho[2,3-a]pyrene",
+1222-05-5,1896,4003,"Personal Care, Industrial",galaxolide,
+2050-47-7,2690,4004,Flame Retardant,p-p-dibromodiphenyl ether,
+31508-00-6,282,4009,PCB,PCB 118,
+35065-27-1,276,4012,PCB,PCB 153,
+38379-99-6,274,4013,PCB,PCB 95,
+38411-22-2,272,4014,PCB,PCB 136,
+52663-68-0,273,4016,PCB,PCB 187,
+355-46-4,C4466,4336,EPA PFAs,,Perfluorohexanesulfonic acid
+678-77-3,C250241,4337,EPA PFAs,,Hexafluoroglutaryl chloride
+375-82-6,C469575,4338,EPA PFAS,,6:1 Fluorotelomer alcohol
+80220-63-9,C557784,4339,EPA PFAS,,((Perfluorooctyl)ethyl)phosphonic acid
+3834-42-2,C384221,4340,EPA PFAS,,(Heptafluoropropyl)trimethylsilane
+883498-76-8,C582743,4341,EPA PFAS,,"Bis(1H,1H-perfluoropropyl)amine"
+355-43-1,C37112,4342,EPA PFAS,,Perfluoro-1-iodohexane
+27619-97-2,C39659,4343,EPA PFAS,,6:2 Fluorotelomer sulfonic acid
+423-60-9,C628599,4344,EPA PFAS,,Perfluoro-1-octanesulfonyl chloride
+94159-84-9,C760033,4345,EPA PFAS,,"1-(Perfluorofluorooctyl)propane-2,3-diol"
+63863-43-4,C921354,4346,EPA PFAS,,Methyl perfluoro(3-(1-ethenyloxypropan-2-yloxy)propanoate)
+355-81-7,C131847,4347,EPA PFAS,,Perfluoropentanamide
+13695-31-3,C908049,4348,EPA PFAS,,"2,2,3,3,4,4,4-Heptafluorobutyl methacrylate"
+374-40-3,C219862,4349,EPA PFAS,,1-Pentafluoroethylethanol
+31506-32-8,C882678,4350,EPA PFAS,,N-Methylperfluorooctanesulfonamide
+13252-14-7,C917351,4351,EPA PFAS,,"Perfluoro-2,5-dimethyl-3,6-dioxanonanoic acid"
+17587-22-3,C76569,4352,EPA PFAS,,(Heptafluorobutanoyl)pivaloylmethane
+24448-09-7,C619629,4353,EPA PFAS,,N-Methyl-N-(2-hydroxyethyl)perfluorooctanesulfonamide
+151772-58-6,C83766,4354,EPA PFAS,,"Perfluoro-3,6-dioxaheptanoic acid"
+243139-64-2,C21696,4355,EPA PFAS,,3-(Perfluoroisopropyl)-2-propenoic acid
+50836-66-3,C54476,4356,EPA PFAS,,(Perfluoro-5-methylhexyl)ethyl 2-methylprop-2-enoate
+355-27-1,C266861,4357,EPA PFAS,,"1H,1H-Perfluoropentylamine"
+423-65-4,C615644,4358,EPA PFAS,,11:1 Fluorotelomer alcohol
+6588-63-2,C732000,4359,EPA PFAS,,Perfluorocyclohexanecarbonyl fluoride
+914637-49-3,C31669,4360,EPA PFAS,,"2H,2H,3H,3H-Perfluorooctanoic acid"
+19932-26-4,C354428,4361,EPA PFAS,,"((2,2,3,3-Tetrafluoropropoxy)methyl)oxirane"
+757124-72-4,C604304,4362,EPA PFAS,,4:2 Fluorotelomer sulfonic acid
+252237-40-4,C199329,4363,EPA PFAS,,2-(Perfluorohexyl)ethylphosphonic acid
+801212-59-9,C127141,4364,EPA PFAS,,Perfluoro-4-isopropoxybutanoic acid
+812-70-4,C364593,4365,EPA PFAS,,3-Perfluoroheptylpropanoic acid
+34143-74-3,C514485,4366,EPA PFAS,,2-(Perfluorooctyl)ethanthiol
+307-34-6,C797646,4367,EPA PFAS,,Perfluorooctane
+4151-50-2,C627306,4368,EPA PFAS,,N-Ethylperfluorooctanesulfonamide
+1691-99-2,C74242,4369,EPA PFAS,,N-Ethyl-N-(2-hydroxyethyl)perfluorooctanesulfonamide
+1763-28-6,C632169,4370,EPA PFAS,,"3,3-Bis(trifluoromethyl)-2-propenoic acid"
+679-12-9,C117062,4371,EPA PFAS,,4H-Perfluorobutanoic acid
+147492-57-7,C79607,4372,EPA PFAS,,"1H,1H-Perfluoro-3,6,9-trioxadecan-1-ol"
+330562-41-9,C775051,4373,EPA PFAS,,"Perfluoro-3,6,9-trioxatridecanoic acid"
+335-58-0,C662668,4374,EPA PFAS,,1-Iodopentadecafluoroheptane
+422-63-9,C926563,4375,EPA PFAS,,"1H-Perfluoro-1,1-propanediol"
+2043-47-2,C364765,4376,EPA PFAS,,4:2 Fluorotelomer alcohol
+39108-34-4,C534856,4377,EPA PFAS,,8:2 Fluorotelomer sulfonic acid
+307-98-2,C628733,4378,EPA PFAS,,"1H,1H-Perfluorooctyl acrylate"
+375-73-5,C958677,4379,EPA PFAS,,Perfluorobutanesulfonic acid
+57678-01-0,C122952,4380,EPA PFAS,,6:2 Fluorotelomer phosphate monoester
+568550-25-4,C5422,4381,EPA PFAS,,Methyl 3H-perfluoroisopropyl ether
+2395-00-8,C86386,4382,EPA PFAS,,Potassium perfluorooctanoate
+424-16-8,C429763,4383,EPA PFAS,,"1H,1H,7H-Perfluoroheptyl 4-methylbenzenesulfonate"
+1651-41-8,C753429,4384,EPA PFAS,,3-(Perfluorooctyl)propanol
+129301-42-4,C845847,4385,EPA PFAS,,"1H,1H,8H,8H-Perfluoro-3,6-dioxaoctane-1,8-diol"
+335-99-9,C897025,4386,EPA PFAS,,"1H,1H,7H-Dodecafluoro-1-heptanol"
+55621-21-1,C752092,4387,EPA PFAS,,"Perfluoro-3,6-dioxaoctane-1,8-dioic acid"
+355-80-6,C124796,4388,EPA PFAS,,"1H,1H,5H-Perfluoropentanol"
+65294-16-8,C777605,4390,EPA PFAS,,"Perfluoro-(2,5,8-trimethyl-3,6,9-trioxadodecanoic) acid"
+29420-49-3,C778608,4391,EPA PFAS,,Potassium perfluorobutanesulfonate
+125070-38-4,C969330,4392,EPA PFAS,,"3-(Perfluoro-2-butyl)propane-1,2-diol"
+132424-36-3,C299523,4393,EPA PFAS,,"Methyl 2H,2H,3H,3H-perfluoroheptanoate"
+330562-44-2,C957996,4394,EPA PFAS,,"1H,1H,11H,11H-Perfluorotetraethylene glycol"
+3934-23-4,C203221,4395,EPA PFAS,,"2,2,3,3,4,4,5,5,6,6,7,7,8,8,8-Pentadecafluorooctyl methacrylate"
+90177-96-1,C241118,4396,EPA PFAS,,"1H,1H,8H,8H-Perfluorooctane-1,8-diol"
+1652-63-7,C518971,4397,EPA PFAS,,Perfluorooctanesulfonamido ammonium iodide
+13485-61-5,C595036,4398,EPA PFAS,,Nonafluoropentanamide
+31253-34-6,C367937,4399,EPA PFAS,,2-Aminohexafluoropropan-2-ol
+13252-13-6,C808134,4400,EPA PFAS,,Perfluoro-2-methyl-3-oxahexanoic acid
+423-54-1,C334437,4401,EPA PFAS,,Perfluorooctanamide
+863090-89-5,C680904,4402,EPA PFAS,,Perfluoro(4-methoxybutanoic) acid
+647-42-7,C220452,4403,EPA PFAS,,6:2 Fluorotelomer alcohol
+663-35-4,C678004,4404,EPA PFAS,,Ethyl pentafluoropropionyl acetate
+1765-92-0,C689665,4405,EPA PFAS,,"1H,1H-Heptafluorobutyl epoxide"
+1682-31-1,C42792,4406,EPA PFAS,,"1-Iodo-1H,1H,2H,2H-perfluoroheptane"
+3792-02-7,C103567,4407,EPA PFAS,,4:4 Fluorotelomer alcohol
+375-88-2,C676861,4408,EPA PFAS,,1-Bromopentadecafluoroheptane
+338-83-0,C45738,4410,EPA PFAS,,Perfluamine
+354-76-7,C245785,4411,EPA PFAS,,Pentafluoropropionamide
+133331-77-8,C394962,4412,EPA PFAS,,1-(Perfluorohexyl)octane
+52591-27-2,C743534,4413,EPA PFAS,,2-(Perfluorobutyl)ethyl acrylate
+85857-17-6,C814192,4414,EPA PFAS,,Dimethoxymethyl((perfluorohexyl)ethyl)silane
+51851-37-7,C822357,4415,EPA PFAS,,Triethoxy((perfluorohexyl)ethyl)silane
+79963-95-4,C100423,4416,EPA PFAS,,"2,2,2-Trifluoroethyl perfluorobutanesulfonate"
+38565-52-5,C133221,4417,EPA PFAS,,"3-(Perfluorohexyl)-1,2-epoxypropane"
+559-94-4,C536447,4418,EPA PFAS,,(Perfluorobutyryl)-2-thenoylmethane
+58244-27-2,C611393,4419,EPA PFAS,,tris(Trifluoroethoxy)methane
+679-02-7,C66264,4420,EPA PFAS,,3-(Perfluoropropyl)propanol
+78560-45-9,C515304,4421,EPA PFAS,,Trichloro((perfluorohexyl)ethyl)silane
+1765-48-6,C407130,4422,EPA PFAS,,11-H-Perfluoroundecanoic acid
+15290-77-4,C697957,4423,EPA PFAS,,"1H,1H,2H-Perfluorocyclopentane"
+35192-44-0,C146997,4424,EPA PFAS,,"1,8-Divinylperfluorooctane"
+375-01-9,C436433,4425,EPA PFAS,,"1H,1H-Heptafluorobutanol"
+355-66-8,C719054,4426,EPA PFAS,,Octafluoroadipamide
+374-98-1,C954232,4427,EPA PFAS,,Heptafluorobutyl iodide
+336-08-3,C134358,4428,EPA PFAS,,Perfluorohexanedioic acid
+329710-76-1,C964713,4429,EPA PFAS,,2-(Trifluoromethoxy)ethyl trifluoromethanesulfonate
+376-73-8,C468275,4430,EPA PFAS,,Perfluoropentanedioic acid
+678-95-5,C135090,4431,EPA PFAS,,"1H,1H,5H,5H-Perfluoro-1,5-pentanediol diacrylate"
+73609-36-6,C796284,4432,EPA PFAS,,Dichloromethyl((perfluorohexyl)ethyl)silane
+21652-58-4,C960116,4433,EPA PFAS,,1H-1H-2H-Perfluoro-1-decene
+377-38-8,C512002,4434,EPA PFAS,,Perfluorobutanedioic acid
+376-90-9,C322569,4435,EPA PFAS,,Hexafluoroamylene glycol
+77953-71-0,C488834,4436,EPA PFAS,,"3H-Perfluoro-2,2,4,4-tetrahydroxypentane"
+4180-26-1,C506784,4437,EPA PFAS,,"1H,1H,9H-Perfluorononyl acrylate"
+662-50-0,C879081,4438,EPA PFAS,,Heptafluorobutyramide
+307-31-3,C306519,4439,EPA PFAS,,Perfluorooctanamidine
+422-64-0,C734863,4440,EPA PFAS,,Perfluoropropanoic acid
+2144-53-8,C796679,4441,EPA PFAS,,6:2 Fluorotelomer methacrylate
+53296-64-3,C80593,4442,EPA PFAS,,N-Methyl-N-trimethylsilylheptafluorobutyramide
+54009-81-3,C88044,4443,EPA PFAS,,"3-(Perfluoro-3-methylbutyl)-1,2-propenoxide"
+2043-52-9,C471693,4444,EPA PFAS,,"1-Iodo-1H,1H,2H,2H-perfluorononane"
+74427-22-8,C477040,4445,EPA PFAS,,"2,2-Difluoroethyl triflate"
+25600-66-2,C725567,4446,EPA PFAS,,7:3 Fluorotelomer alcohol
+2043-55-2,C203027,4447,EPA PFAS,,"1H,1H,2H,2H-Perfluorohexyl iodide"
+20825-07-4,C83907,4448,EPA PFAS,,"3H,3H-Perfluoro-2,4-hexanedione"
+377-73-1,C925438,4449,EPA PFAS,,Perfluoro-3-methoxypropanoic acid
+375-22-4,C376795,4450,EPA PFAS,,Perfluorobutanoic acid
+754-96-1,C664858,4451,EPA PFAS,,"1H,1H,10H,10H-Perfluorodecane-1,10-diol"
+7383-71-3,C953658,4452,EPA PFAS,,"2,2,3,3-Tetrafluoropropyl acrylate"
+2264-01-9,C565333,4453,EPA PFAS,,"1H,1H,6H,6H-Perfluorohexane-1,6-diol diacrylate"
+865-79-2,C136541,4454,EPA PFAS,,9-Chloro-perfluorononanoic acid
+307-35-7,C992642,4455,EPA PFAS,,Perfluorooctanesulfonyl fluoride
+356-02-5,C882576,4456,EPA PFAS,,3:3 Fluorotelomer carboxylic acid
+559-14-8,C665534,4457,EPA PFAS,,Perfluorooct-1-ene
 113096-99-4,NA,10001,Insecticide,,
 119611-00-6,NA,10002,Fungicide,,
 207122-15-4,NA,10003,Flame Retardant,,
 207122-16-5,NA,10004,NA,,
-207122-16-5 ,NA,10013,Flame Retardant,,
-213-46-7,NA,10011,NA,,
 2237-14-1,NA,10005,PAH_Oxy,,
 28804-88-8,NA,10006,PAH_Alkylated,,
 5385-22-8,NA,10007,PAH_Parent,,
-59919-41-4,NA,10012,NA,,
 62-53-3,NA,10008,Industrial,,
 64257-84-7,NA,10009,Insecticide,,
 79127-80-3,NA,10010,Insecticide,,
+213-46-7,NA,10011,NA,,
+59919-41-4,NA,10012,NA,,
+207122-16-5 ,NA,10013,Flame Retardant,,

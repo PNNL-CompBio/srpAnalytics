@@ -37,7 +37,7 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
 
 ##output directory is fixed
 out.dir<-'/tmp/'
-#out.dir<-'./'
+
 #' Get chemical metadata, which is stored in `data.dir`
 #' @param data.dir path to standardized data that enables matching across datasets
 #' @return data.frame
@@ -53,7 +53,7 @@ getChemMetadata<-function(data.dir){
     ##this file comes from COMPTOX
     ##here we join the chemical metadata from the comptox dashboard
     chemMeta<-readxl::read_xls(paste0(data.dir,
-                                      'CompToxChemicalsDashboard-Batch-Search_2021-04-28_10_10_47.xls'))%>%
+                                      'CompToxChemicalsDashboard-Batch-Search_2021-07-14_17_49_42.xls'))%>%
         select(INPUT,DTXSID,PREFERRED_NAME,INCHIKEY,SMILES,MOLECULAR_FORMULA,
                AVERAGE_MASS,PUBCHEM_DATA_SOURCES)%>%
         rename(cas_number='INPUT')%>%
@@ -239,7 +239,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     #now fix up sample names
     new.nas<-which(is.na(full.bmd$SampleName))
     full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
-    
+
     full.bmd<-full.bmd%>%
       left_join(endpointDetails)%>%
       dplyr::select(-c('End_Point','tmpId'))%>%
@@ -346,9 +346,12 @@ main<-function(){
 
     for(chem in chem_dirs){
         path=paste0(data.dir,'/',chem,'/')
-        bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_2021_04_26.csv','bmd_vals_2021_05_18_all_phase_III_morpho.csv')))
-        dose.files<-c(dose.files,paste0(path,c('dose_response_vals_2021_04_26.csv','dose_response_vals_2021_05_10_all_phase_III_morpho.csv')))
-        curv.files<-c(curv.files,paste0(path,c('fit_vals_2021_04_26.csv','fit_vals_2021_05_20_all_phase_III_morpho.csv')))
+        bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_2021_04_26.csv',
+                                             'bmd_vals_2021_05_18_all_phase_III_morpho.csv')))
+        dose.files<-c(dose.files,paste0(path,c('dose_response_vals_2021_04_26.csv',
+                                               'dose_response_vals_2021_05_10_all_phase_III_morpho.csv')))
+        curv.files<-c(curv.files,paste0(path,c('fit_vals_2021_04_26.csv',
+                                               'fit_vals_2021_05_10_all_phase_III_morpho.csv')))
     }
 
     for(ext in extract_dirs){
@@ -417,7 +420,7 @@ main<-function(){
     bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
     curves<-curves%>%subset(!Chemical_ID%in%to.remove)
     doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
-    
+
     ##there are mismatches, so we should figure out where those exists
     missing<-list(zebrafishNoChem=setdiff(ebmds$Sample_ID,as.character(sampChem$Sample_ID)),
                   chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
@@ -438,4 +441,4 @@ main<-function(){
 
 }
 
-#main()
+main()
