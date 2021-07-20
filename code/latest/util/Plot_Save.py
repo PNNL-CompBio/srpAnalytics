@@ -239,7 +239,10 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
                 {type(np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)[0][0])}")
                 # <class 'numpy.float64'>
                 
-            model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)
+            try: # works in Doo Nam jupyter, but not works in docker
+                model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(6)
+            except: # works in docker
+                model_preds_residuals.iloc[model_pred_index,1:] = model_preds['Scaled Residuals'][model_pred_index].tolist()
 
     # Create dictionaries for various flags
     data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n ' + 'BMD analysis not performed.',
@@ -484,8 +487,12 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     model_preds_residuals[residual_column_names] = model_preds_residuals_matrix
     for model_pred_index in range(model_preds['Scaled Residuals'].shape[0]):
         if(not any(np.isnan(model_preds['Scaled Residuals'][model_pred_index]))):
-            model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)
 
+            try: # works in Doo Nam jupyter, but not works in docker
+                model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(6)
+            except: # works in docker
+                model_preds_residuals.iloc[model_pred_index,1:] = model_preds['Scaled Residuals'][model_pred_index].tolist()
+                
         
     # Create dictionaries for various flags
     data_qc_flag_vals = {0 : 'Not enough dose groups for BMD analysis.' + '\n '+ 'BMD analysis not performed.',
