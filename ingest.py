@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import sqlalchemy as db
-from jsonschema import validate
+from jsonschema import validate, Draft3Validator
+from jsonschema.exceptions import ValidationError, SchemaError 
 import os
 import sys
 from json import load
@@ -20,7 +21,7 @@ db_name=os.environ.get('DB_NAME')
 
 schemas = {
     'chemdoseResponseVals': load(open('./schemas/chemdoseResponseVals.json')),
-    'chemicalByExtractSample': load(open('./schemas/chemicalByExtractSample.json')),
+    'chemicalsByExtractSample': load(open('./schemas/chemicalByExtractSample.json')),
     'chemSummaryStats': load(open('./schemas/chemSummaryStats.json')),
     'chemXYcoords': load(open('./schemas/chemXYcoords.json')),
     'envSampdoseResponseVals': load(open('./schemas/envSampdoseResponseVals.json')),
@@ -85,18 +86,17 @@ def read_and_save(csv_file, table_name, if_exists, engine):
     print("\t\tWriting to {}...".format(table_name))
     # If any infinite value is found, replace with a NULL value.
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    try:
-        validate(instance=df.to_json(), schema=schemas['table_name'])
-    except Exception as e:
-        print("Invalid schema: {}".format(e))
-        return
-    # TODO uncomment once done testing schema
-    #df.to_sql(table_name, engine, if_exists=if_exists, index=False)
-    print("\tFinished writing to {}.".format(table_name))
-    verify(df, table_name, engine)
+    valid = verify(df, table_name)
+    if valid:
+        # TODO uncomment once done testing schema
+        #df.to_sql(table_name, engine, if_exists=if_exists, index=False)
+        print("\tFinished writing to {}.".format(table_name))
+    else:
+        print("Invalid schema, not saving.")
+    
 
 
-def verify(csv_df, table_name, engine):
+def verify(df, table_name):
     """ Takes a Pandas DataFrame and a Microsoft SQL Server table name to compare the number of rows in each. This function only works if the to_sql function replaces the table (if it appends the number of rows will obviously be off)
 
     Parameters: 
@@ -106,15 +106,18 @@ def verify(csv_df, table_name, engine):
     Returns:
         nothing
     """
-    print("\tVerifying saved data...")
-    original_numRows = len(csv_df)
-    saved_numRows = len(pull(table_name, engine))
-    if original_numRows < saved_numRows:
-        print('\t\tExtra rows saved, if this is unexpected please review')
-    elif saved_numRows < original_numRows: 
-        print('\t\tMissing rows, if this is unexpected please review')
-    else:
-        print('\t\tNo known issues with number of rows')
+    print("\tVerifying schema...")
+    df = df.where(pd.notnull(df), None)
+    v = Draft3Validator(schemas[table_name])
+    errors = set()
+    for row in df.to_dict(orient='records'):
+        for error in sorted(v.iter_errors(row), key=str):
+            errors.add(str(error))   
+
+    if errors:
+        print('Validation errors when running schema check on {}'.format(table_name))
+        for error in errors:
+            print(error)
     print("\tFinished verifying.")
 
 
