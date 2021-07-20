@@ -224,7 +224,6 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
             print (f"type(model_preds['Scaled Residuals'][model_pred_index].tolist()):\n{type(model_preds['Scaled Residuals'][model_pred_index].tolist())}")
             print (f"model_preds['Scaled Residuals'][model_pred_index].tolist():\n{model_preds['Scaled Residuals'][model_pred_index].tolist()}")
 
-
         if(not any(np.isnan(model_preds['Scaled Residuals'][model_pred_index]))):
             model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)
 
