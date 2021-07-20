@@ -226,7 +226,19 @@ def save_results_good_data_unique_model(test_dose_response, qc_flag, model_preds
                 
                 print (f"np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8):\n{np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)}")
                 #[[-0.71275987 -0.04841195  1.2423122   0.22264199  0.0676003  -0.32941879  -1.42086953  1.03044301]]
-            
+                
+                #print (f"model_preds_residuals.iloc[model_pred_index,1:].shape:\
+                #{model_preds_residuals.iloc[model_pred_index,1:].shape}")
+                # (8,)
+
+                #print (f"np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8).shape:\
+                #{np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8).shape}")            
+                # (1, 8)
+                
+                print (f"type(np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)[0][0]):\
+                {type(np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)[0][0])}")
+                # <class 'numpy.float64'>
+                
             model_preds_residuals.iloc[model_pred_index,1:] = np.matrix(model_preds['Scaled Residuals'][model_pred_index].tolist()).round(8)
 
     # Create dictionaries for various flags
