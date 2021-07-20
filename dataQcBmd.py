@@ -16,9 +16,9 @@ DB='develop' # options: "develop", "production"
 
 
 sys.path.insert(0, './qc_BMD')
-#from qc_BMD import bmd_analysis_full as bmd
-from qc_BMD import bmd_analysis_02 as bmd
-from qc_BMD import wide2dicho_LPR_7_PAH_t0_t239_display_to_print_03 as bmd_LPR
+
+from qc_BMD import bmd_analysis_morpho as bmd
+from qc_BMD import bmd_analysis_LPR_7_PAH_t0_t239 as bmd_LPR
 
 parser = argparse.ArgumentParser('Run the QC and BMD analysis as well as join with \
 extract data to store in SRP data analytics portal')
@@ -32,12 +32,14 @@ parser.add_argument('files', nargs='?', default='',\
 parser.add_argument('--devel', dest='devel',\
                     help='Set this flag to run test code instead of full analysis',\
                     action='store_true', default=False)
-parser.add_argument('--LPR', dest='LPR', type=os.path.abspath,\
-                    help='LPR input csv file, needed for LPR data processing')
+parser.add_argument('--LPR', dest='LPR', \
+                    help='If this tag is added, then LPR is calculated.',\
+                    action='store_true', default=False)
 parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
-############ developer comment:
+
+############ (developer comment)
 # for morphological data, only morphological data is needed as input
-# for LPR processing, both morphological data and LPR data re needed as inputs
+# for LPR processing, both morphological data and LPR data are needed as inputs
 
 
 def merge_files(path, file_dict):
@@ -73,51 +75,75 @@ if __name__ == "__main__":
     start_time = time.time()
     args = parser.parse_args()
     flist = args.files.split(',')
-    print(flist)
+    #print(flist)
+
     files = dict()
     if flist[0] == '':
         print("No new files, just re-building archive")
         command = "Rscript /srpAnalytics/buildv1database.R"
         os.system(command)
     else:
-        for input_csv_file_name in flist:
-            print ("input_csv_file_name:" + str(input_csv_file_name))
-
+        for morpho_input_csv_file_name in flist:
             if args.devel:
                 full_devel = "devel"
             else:
                 full_devel = "full"
+            print ("full_devel:" + str(full_devel)) # devel
 
-            if args.LPR == None:
-                command = "python3 /srpAnalytics/01_reformat_df_morpho_data.py " + \
-                    str(input_csv_file_name) + " " + str(full_devel)
-                print(command)
-                os.system(command)
-            else:
-                # for LPR reformatting both morphological and LPR is needed
-                command = "python3 /srpAnalytics/01_reformat_df_morpho_data.py " + \
-                    str(input_csv_file_name) + " " + str(full_devel)
-                print(command)
-                os.system(command)
 
-                command = "python3 /srpAnalytics/01_reformat_df_LPR_data.py " + \
-                    str(args.LPR) + " " + str(full_devel)
-                print(command)
-                os.system(command)
 
-            output_complete_file_path = input_csv_file_name[:-4] + \
+            ########## <begin> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
+            print ("morpho_input_csv_file_name:" + str(morpho_input_csv_file_name))
+            #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
+
+            command = "python3 /srpAnalytics/01_reformat_df_morpho_data.py " + \
+                    str(morpho_input_csv_file_name) + " " + str(full_devel)
+            print(command)
+            os.system(command)
+            #time.sleep(20)
+
+            morpho_input_csv_file_name_wide = morpho_input_csv_file_name[:-4] + \
                 "_wide_DNC_0.csv"
+            print ("morpho_input_csv_file_name_wide:" + str(morpho_input_csv_file_name_wide))
             # actual file is not saved here, but it is ok to be used at following procedures
 
-            if args.LPR != None:
-                output_complete_file_path_LPR = args.LPR[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
 
-            if args.LPR == None:
-                files[input_csv_file_name] = bmd.runBmdPipeline(output_complete_file_path, full_devel)
-            else:
-                files[input_csv_file_name] = bmd_LPR.runBmdPipeline(output_complete_file_path, \
-                                               output_complete_file_path_LPR, \
-                                               full_devel)
+            print ("args.LPR:" + str(args.LPR)) # True
+            if (args.LPR == True):
+                # for LPR reformatting (tall->wide), both morphological and LPR is needed
+                
+                LPR_input_csv_file_name = morpho_input_csv_file_name.replace("morphology", "LPR")
+
+                command = "python3 /srpAnalytics/01_reformat_df_LPR_data.py " + \
+                    str(LPR_input_csv_file_name) + " " + str(full_devel)
+                print(command)
+                os.system(command)
+
+                LPR_input_csv_file_name_wide = LPR_input_csv_file_name[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
+
+                print ("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
+                
+                #devel
+                print ("press enter to continue")
+                bypass_can = input()
+                #devel
+
+                #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall_wide_t0_t239_devel.csv
+            ########### <end> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
+
+
+
+            ########### <begin> BMD calculation
+            if (args.LPR == True):
+                files[morpho_input_csv_file_name] = bmd_LPR.runBmdPipeline(morpho_input_csv_file_name_wide, \
+                                             LPR_input_csv_file_name_wide, \
+                                             full_devel)
+            else: # if (args.LPR == False):
+                files[morpho_input_csv_file_name] = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, \
+                                             full_devel)
+            ########### <end> BMD calculation
+
+
 
         merged_files = merge_files(os.getcwd(), files)
         command = "Rscript /srpAnalytics/buildv1database.R "
