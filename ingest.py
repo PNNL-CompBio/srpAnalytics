@@ -81,7 +81,7 @@ def read_and_save(csv_file, table_name, if_exists, engine):
         nothing
     """
     print("\tReading csv...")
-    df = pd.read_csv(csv_file, sep=',')
+    df = pd.read_csv(csv_file)
     print("\t\tFinished reading csv.")
     print("\t\tWriting to {}...".format(table_name))
     # If any infinite value is found, replace with a NULL value.
@@ -116,9 +116,11 @@ def verify(df, table_name):
 
     if errors:
         print('Validation errors when running schema check on {}'.format(table_name))
-        for error in errors:
-            print(error)
-    print("\tFinished verifying.")
+        with open("/tmp/{}_validation_errors.txt".format(table_name), 'w+') as fp:
+            for error in errors:
+                fp.write("{}\n".format(error))
+        return False
+    return True
 
 
 def pull(table_name, engine):
