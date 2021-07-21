@@ -72,7 +72,7 @@
             "minimum": 0
         },
         "zf.cid": {
-            "type": ["number", "null"],
+            "type": ["string", "null"],
             "minimum": 0
         },
         "chemical_class": {
@@ -83,7 +83,7 @@
         "chemDescription": {
             "type": "string",
             "minLength": 0,
-            "maxLength": 255
+            "maxLength": 8000
         },
         "End Point Name": {
             "type": "string",

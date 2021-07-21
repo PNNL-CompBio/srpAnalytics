@@ -96,7 +96,7 @@
         "Description": {
             "type": ["string", "null"],
             "minLength": 0,
-            "maxLength": 255
+            "maxLength": 8000
         },
         "endPointLink": {
             "type": ["string", "null"],

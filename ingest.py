@@ -118,7 +118,7 @@ def verify(df, table_name):
         print('Validation errors when running schema check on {}'.format(table_name))
         with open("/tmp/{}_validation_errors.txt".format(table_name), 'w+') as fp:
             for error in errors:
-                fp.write("{}\n".format(error))
+                fp.write("{}\n\n\n".format(error))
         return False
     return True
 
