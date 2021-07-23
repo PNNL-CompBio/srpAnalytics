@@ -152,3 +152,6 @@ print ("output_complete_file_path after reformat:" + str(output_complete_file_pa
 reformatted_data.to_csv(output_complete_file_path,index=False)
 
 print ("output_complete_file_path existence in same py code:" + str(os.path.isfile(output_complete_file_path)))
+
+print ("Reformat of wide data (LPR) is done")
+

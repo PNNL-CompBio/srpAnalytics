@@ -7,8 +7,9 @@ RUN apt-get update -qq && apt-get install -y net-tools \
         curl \
         unixodbc
 COPY setup.sh /setup.sh
-RUN sh /setup.sh
 
+RUN sh /setup.sh
+RUN Rscript -e "install.packages('argparse')"
 COPY requirements.txt /requirements.txt
 
 RUN pip3 install -r /requirements.txt
