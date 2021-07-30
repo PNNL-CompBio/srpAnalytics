@@ -426,6 +426,7 @@ main<-function(){
                   chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
 
     print(missing)
+    
     ##Final output for the platform team is these 4 files
     write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),row.names = FALSE)
     write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE)
