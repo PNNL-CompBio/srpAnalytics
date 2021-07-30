@@ -31,14 +31,26 @@ getGoTerms<-function(chemical_id,proj){
 
   
   if(res$status_code!=200)
-    return(NULL)
+    gs_enrichment_stat <- data.frame(`GenesetName`=NULL,`Geneset`=NULL,`Summary Score`=NULL,`GSScore`=NULL,`Conc`=NULL)
+  else{
+    gs_enrichment_stat <- fromJSON(fromJSON(rawToChar(res$content)))
+    gs_enrichment_stat <- gs_enrichment_stat%>%
+      tibble::rownames_to_column('GenesetName')
+    gs_enrichment_stat <- gs_enrichment_stat%>%
+      pivot_longer(cols=grep('GS Score',colnames(gs_enrichment_stat)),names_to='Conc',values_to='GSScore')%>%
+      mutate(Conc=stringr::str_replace_all(Conc,'GS Score ',''))
   
-  gs_enrichment_stat <- fromJSON(fromJSON(rawToChar(res$content)))
-  gs_enrichment_stat
+    }
+  print(head(gs_enrichment_stat))
+  data.frame(Project=proj,cas_number=chemical_id,gs_enrichment_stat) 
 }
 
 
-#getdiffex genes
+#' getGenes
+#' Gets list of genes differentially expressed for a particular chemical and project
+#' @param chemical_id CAS id
+#' @param proj project id
+#' @return data frame
 getGenes<-function(chemical_id,proj){
 
   url1 <- paste0("https://montilab.bu.edu/Xposome-API/gene_expression?project=", 
@@ -49,11 +61,21 @@ getGenes<-function(chemical_id,proj){
   # Send GET Request to API
   res <- GET(url = url1, encode = 'json')
   
+  #print(fromJSON(rawToChar(res$content)))
   if(res$status_code!=200)
-    return(NULL)res
-  
-  gene_expression_stat <- fromJSON(fromJSON(rawToChar(res$content)))
-  gene_expression_stat 
+    gene_expression_stat=data.frame(Gene=NULL,GeneName=NULL,Direction=NULL,`Summary Score`=NULL,`Zscore`=NULL,`Conc`=NULL)
+  else{
+    gene_expression_stat <- fromJSON(fromJSON(rawToChar(res$content)))
+    gene_expression_stat <- gene_expression_stat%>%
+      tibble::rownames_to_column('GeneName')
+    gene_expression_stat <-gene_expression_stat%>%
+      pivot_longer(cols=grep('ModZScore',colnames(gene_expression_stat)),names_to='Conc',values_to='ModZScore')%>%
+      mutate(Conc=stringr::str_replace_all(Conc,'ModZScore ',''))
+    if('Landmark_Gene'%in%colnames(gene_expression_stat))
+      gene_expression_stat <- select(gene_expression_stat,-Landmark_Gene)
+  }
+ # print(head(gene_expression_stat))
+    data.frame(Project=proj,cas_number=chemical_id,gene_expression_stat) 
   
 }
 
@@ -70,7 +92,19 @@ for(proj in projects){
   print(paste('Found',length(overlap),'cas ids in common'))
   
   
-  gg=getGenes(paste(overlap,collapse=','),proj)
-  gt=getGoTerms(paste(overlap,collapse=','),proj)
+  gg=do.call(rbind,lapply(overlap,function(chem) getGenes(chem,proj)))
+  gt=do.call(rbind,lapply(overlap,function(chem) getGoTerms(chem,proj)))
   full.list[[proj]]<-list(genes=gg,goterms=gt)
 }
+
+gene.tab<-NULL
+term.tab<-NULL
+for(i in 1:length(projects)){
+  print(i)
+  gene.tab <- rbind(gene.tab, full.list[[i]]$genes)
+  term.tab <-rbind(term.tab,full.list[[i]]$goterms)
+}
+
+
+write.table(gene.tab,file='data/geneExp.tsv',sep='\t',row.names=F)
+write.table(term.tab,file='data/geneEnrich.tsv',sep='\t',row.names=F)
