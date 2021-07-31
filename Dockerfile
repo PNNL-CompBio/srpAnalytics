@@ -14,6 +14,8 @@ COPY requirements.txt /requirements.txt
 
 RUN pip3 install -r /requirements.txt
 
+RUN Rscript -e "install.packages('argparse', repos='https://cran.microsoft.com')"
+
 COPY . srpAnalytics
 WORKDIR srpAnalytics
 
