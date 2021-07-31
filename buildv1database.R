@@ -439,6 +439,13 @@ main<-function(){
 
     write.csv(sampToChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
 
+    ##let's do one last summary
+    summ.tab<-sampToChem%>%select(Sample_ID,Chemical_ID)%>%
+      distinct()%>%
+      right_join(select(bmds,c('Chemical_ID','chemical_class','End Point Name','BMD10')))%>%
+      subset(!is.na('AUC_Norm'))%>%
+      distinct()%>%
+      group_by(chemical_class)%>%summarize(numChems=n_distinct(Chemical_ID),numSamps=n_distinct(Sample_ID),numEndpoints=n_distinct(`End Point Name`))
 
 }
 
