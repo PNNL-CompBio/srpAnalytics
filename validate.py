@@ -1,6 +1,7 @@
 from json import load
 from jsonschema import Draft3Validator
 import pandas as pd
+import argparse
 
 schemas = {
     'chemdoseResponseVals': load(open('./schemas/chemdoseResponseVals.json')),
@@ -22,7 +23,7 @@ def verify(df, table_name):
     Returns:
         nothing
     """
-    print("\tVerifying schema...")
+    print("Verifying schema...")
     df = df.where(pd.notnull(df), None)
     v = Draft3Validator(schemas[table_name])
     errors = set()
@@ -37,3 +38,19 @@ def verify(df, table_name):
                 fp.write("{}\n\n\n".format(error))
         return False
     return True
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Validate CSVs are in proper schema')
+    parser.add_argument('csv_file', type=str, help='Path to CSV you want to validate')
+    parser.add_argument('schema', type=str, help='The schema you want to validate against. Acceptable options are: {}'.format(list(schemas.keys())))
+
+    args = parser.parse_args()
+
+    if args.schema not in schemas.keys():
+        print("{} is not a valid schema, please enter one of the following: {}".format(args.schema, list(schemas.keys())))
+        exit(-1) 
+
+    if verify(pd.read_csv(args.csv_file), args.schema):
+        print('CSV file is in expected format.')
+    else:
+        print('Schema validation failed.')
