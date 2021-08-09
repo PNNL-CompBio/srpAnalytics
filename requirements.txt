@@ -7,3 +7,4 @@ statsmodels
 astropy
 scipy==1.4.1
 pyodbc
+jsonschema

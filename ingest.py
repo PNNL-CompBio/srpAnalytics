@@ -1,10 +1,13 @@
 import pandas as pd
 import numpy as np
 import sqlalchemy as db
+ 
 import os
 import sys
 
 import logging
+
+from validate import verify
 logging.basicConfig()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.ERROR)
 logging.getLogger("sqlalchemy.pool").setLevel(logging.ERROR)
@@ -15,6 +18,7 @@ db_dev_ip=os.environ.get('DB_DEV_IP')
 db_prod_ip=os.environ.get('DB_PROD_IP')
 db_port=os.environ.get('DB_PORT')
 db_name=os.environ.get('DB_NAME')
+
 
 def test_connection(database):
     if database == "production":
@@ -68,36 +72,17 @@ def read_and_save(csv_file, table_name, if_exists, engine):
         nothing
     """
     print("\tReading csv...")
-    df = pd.read_csv(csv_file, sep=',')
+    df = pd.read_csv(csv_file)
     print("\t\tFinished reading csv.")
     print("\t\tWriting to {}...".format(table_name))
     # If any infinite value is found, replace with a NULL value.
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df.to_sql(table_name, engine, if_exists=if_exists, index=False)
-    print("\tFinished writing to {}.".format(table_name))
-    verify(df, table_name, engine)
-
-
-def verify(csv_df, table_name, engine):
-    """ Takes a Pandas DataFrame and a Microsoft SQL Server table name to compare the number of rows in each. This function only works if the to_sql function replaces the table (if it appends the number of rows will obviously be off)
-
-    Parameters: 
-        csv_df (Pandas Dataframe): dataframe of the original data from CSV
-        table_name (string): name of table that you want to compare against
-
-    Returns:
-        nothing
-    """
-    print("\tVerifying saved data...")
-    original_numRows = len(csv_df)
-    saved_numRows = len(pull(table_name, engine))
-    if original_numRows < saved_numRows:
-        print('\t\tExtra rows saved, if this is unexpected please review')
-    elif saved_numRows < original_numRows: 
-        print('\t\tMissing rows, if this is unexpected please review')
+    valid = verify(df, table_name)
+    if valid:
+        df.to_sql(table_name, engine, if_exists=if_exists, index=False)
+        print("\tFinished writing to {}.".format(table_name))
     else:
-        print('\t\tNo known issues with save')
-    print("\tFinished verifying.")
+        print("Invalid schema, not saving.")
 
 
 def pull(table_name, engine):

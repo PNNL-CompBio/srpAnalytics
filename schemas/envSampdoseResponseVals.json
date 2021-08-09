@@ -1,0 +1,39 @@
+{
+    "type": "object",
+    "properties": { 
+        "Sample_ID": {
+            "type": "integer", 
+            "minimum": 0
+        }, 
+        "Dose": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 100000
+        }, 
+        "Response": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 1
+        }, 
+        "CI_Lo": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 1
+        }, 
+        "CI_Hi": {
+            "type": "number", 
+            "minimum": 0,
+            "maximum": 1
+        }, 
+        "End Point Name": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        },
+        "endPointLink": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255
+        }
+    }
+}

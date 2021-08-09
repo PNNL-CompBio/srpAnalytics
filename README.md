@@ -41,6 +41,14 @@ To build the whole database:
 sh build_db.sh
 ```
 
+To validate an output CSV with a schema, use the following format: ```python3 validate.py <path to CSV file> <schema>```
+
+Allowable schemas: chemdoseResponseVals, chemicalsByExtractSample, chemSummaryStats, chemXYcoords, envSampdoseResponseVals, envSampSummaryStats, or envSampXYcoords
+Examples:
+
+* ```python3 validate.py out/chemXYcoords.csv chemXYcoords```
+* ```python3 validate.py out/chemdoseResponseVals.csv chemdoseResponseVals```
+
 ## How to run from docker hub
 
 To create a data package, you simply need to add your data to the existing repository by running the following
