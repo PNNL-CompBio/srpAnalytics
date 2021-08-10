@@ -96,7 +96,7 @@ if __name__ == "__main__":
             print ("morpho_input_csv_file_name:" + str(morpho_input_csv_file_name))
             #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
 
-            command = "python3 /srpAnalytics/01_reformat_df_morpho_data.py " + \
+            command = "python3 /srpAnalytics/format_morpho_input.py " + \
                     str(morpho_input_csv_file_name) + " " + str(full_devel)
             print(command)
             os.system(command)
@@ -111,10 +111,10 @@ if __name__ == "__main__":
             print ("args.LPR:" + str(args.LPR)) # True
             if (args.LPR == True):
                 # for LPR reformatting (tall->wide), both morphological and LPR is needed
-                
+
                 LPR_input_csv_file_name = morpho_input_csv_file_name.replace("morphology", "LPR")
 
-                command = "python3 /srpAnalytics/01_reformat_df_LPR_data.py " + \
+                command = "python3 /srpAnalytics/format_LPR_input.py " + \
                     str(LPR_input_csv_file_name) + " " + str(full_devel)
                 print(command)
                 os.system(command)
@@ -122,7 +122,7 @@ if __name__ == "__main__":
                 LPR_input_csv_file_name_wide = LPR_input_csv_file_name[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
 
                 print ("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
-                
+
                 #devel
                 print ("press enter to continue")
                 bypass_can = input()
@@ -170,7 +170,7 @@ if __name__ == "__main__":
             tar.add('/tmp/'+fname)
         tar.close()
 
-    if args.update_db: 
+    if args.update_db:
         print('Saving to {}...'.format(DB))
         pull_raw_data(folder=OUT_FOLDER, if_exists=IF_EXITS, database=DB)
         print('Finished saving to database.')
