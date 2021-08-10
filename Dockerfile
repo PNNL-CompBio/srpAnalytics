@@ -8,13 +8,12 @@ RUN apt-get update -qq && apt-get install -y net-tools \
         unixodbc
 COPY setup.sh /setup.sh
 
-RUN sh /setup.sh
-RUN Rscript -e "install.packages('argparse')"
+RUN sh ./setup.sh
 COPY requirements.txt /requirements.txt
 
 RUN pip3 install -r /requirements.txt
 
-RUN Rscript -e "install.packages('argparse', repos='https://cran.microsoft.com')"
+#RUN Rscript -e "install.packages('argparse', repos='https://cran.microsoft.com')"
 
 COPY . srpAnalytics
 WORKDIR srpAnalytics
