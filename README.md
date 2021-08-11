@@ -1,10 +1,34 @@
 # Superfund Research Program Analytics
 
 <img src="OSU-PNNLsuperfund_Small.png"  width="400">
-This repository contains the code necessary to process any new data for the Superfund Research Program Analytics Portal. It is designed to consume two types of data: (1) zebrafish measurements describing the response to zebrafish under various levels of chemical stressors, and (2) environmental sample measurements that describe the relative concentration of specific chemicals in environmental samples. This is described in more detail in our `Scientific Data` manuscript (to be submitted) and depicted below.
-<img src='overview.jpg' width="200">
+This repository contains the code necessary to process any new data for the Superfund Research Program Analytics Portal. Currently the portal displays two types of data:
+- Zebrafish measurements describing the response to zebrafish under various levels of chemical stressors
+- Environmental sample measurements that describe the relative concentration of specific chemicals in environmental samples.
 
-## Incoming Data
+Furthermore we are in the process of adding two more types of data:
+- Human differential expression measurements for each chemical
+- Human wristband measurements of chemical concentrations.
+
+The data can be browsed at http://srp.pnnl.gov
+
+This repository contains the code to handle various aspects of this portal, each described below.
+
+## Docker image
+All code in this repository requires specific package components that are contained in a Docker image. To build the docker image, run the `build_image.sh` script.
+
+### Docker build test
+TODO: add test
+
+## Benchmark Dose Calculation
+Calculating the benchmark dose of each chemical on the zebrafish is an active area of research. This analysis is described in an upcoming manuscript and is primarily contained in the [qc_BMD](./qc_BMD) directory. The data format required as input to this is described in the [processing pipeline schema](./schemas/processingPipelineSchema.xlsx).
+
+### BMD Test
+TODO: add single test
+
+## Linking zebrafish data to environmental sample data
+
+##
+Incoming Data
 We accept two types of data, each with a slightly different schema. For both types of data there is a chemical identifier (`chemical.id` or `Chemical_ID`) that must be mapped to the CAS identifiers. The schema for each type of data (the environmental sample data and the zebrafish data) can be found in the  [dataSchema spreadsheet](./dataSchemas/processingPipelineSchema.xlsx) file.
 
 We have currently started to run this with test data to evaluate its performance.
@@ -66,4 +90,3 @@ docker run -v $PWD:/tmp sgosline/srp-analytics [your file here, for example test
 ```
 
 The results will be the four files for the data portal. Add the `--devel` flag if you are just testing the code.
-
