@@ -21,7 +21,7 @@
             "maxLength": 255
         },
         "endPointLink": {
-            "type": "string",
+            "type": ["string", "null"],
             "minLength": 0,
             "maxLength": 255
         }
