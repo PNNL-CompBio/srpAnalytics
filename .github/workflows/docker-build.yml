@@ -37,4 +37,4 @@ jobs:
       - name: build db
         run: "docker run -v $PWD:/tmp sgosline/srp-analytics"
       - name: validate schemas
-        run: "docker run -v $PWD/:tmp sgosline/srp-analytics --validate"
+        run: "docker run -v $PWD:/tmp sgosline/srp-analytics --validate"
