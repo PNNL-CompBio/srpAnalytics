@@ -28,25 +28,12 @@ jobs:
           context: .
           push: true
           tags: sgosline/srp-analytics:latest
-  test-lpr:
-    runs-on: ubuntu-latest
-    steps:
       - name: docker pull
         run: "docker pull sgosline/srp-analytics"
       - name: test LPR
-        run: "docker run -v $PWD:/tmp sgosline-srp-analytics --test-lpr"
-  test-morpho:
-    runs-on: ubuntu-latest
-    steps:
-      - name: docker pull
-        run: "docker pull sgosline/srp-analytics"
+        run: "docker run -v $PWD:/tmp sgosline/srp-analytics --test-lpr"
       - name: test morpho
         run: "docker run -v $PWD:/tmp sgosline/srp-analytics --test-morpho"
-  test-db-build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: docker pull
-        run: "docker pull sgosline/srp-analytics"
       - name: build db
         run: "docker run -v $PWD:/tmp sgosline/srp-analytics"
       - name: validate schemas
