@@ -17,6 +17,8 @@ DB='develop' # options: "develop", "production"
 
 sys.path.insert(0, './qc_BMD')
 
+
+##impor  BMD files from directory
 from qc_BMD import bmd_analysis_morpho as bmd
 from qc_BMD import bmd_analysis_LPR_7_PAH_t0_t239 as bmd_LPR
 
@@ -25,15 +27,23 @@ extract data to store in SRP data analytics portal')
 
 #parser.add_argument('--label', dest='label', help='Label to store data', \
 #                    default='newdata')
-parser.add_argument('--isSample', dest='isSample', action='store_true',\
-                    default=False, help='Set this flag if we are processing a sample not a chemical')
-parser.add_argument('files', nargs='?', default='',\
-                    help='Morphological files for regular BMD input or LPR (with --LPR option)')
-parser.add_argument('--devel', dest='devel',\
-                    help='Set this flag to run test code instead of full analysis',\
-                    action='store_true', default=False)
+#parser.add_argument('files', nargs='?', default='',\
+#                    help='Morphological files for regular BMD input or LPR (with --LPR option)')
+parser.add_argument('--morpho',dest='morpho',\
+                    help='Comma-delimited list of morphological files to be processed',\
+                    default='')
 parser.add_argument('--LPR', dest='LPR', \
-                    help='If this tag is added, then LPR is calculated.',\
+                    help='Comma-delimited list of LPR-related files to be processed. MUST correspond to similar files in the morpho argument',\
+                    default='')
+parser.add_argument('--test-lpr', dest='test_lpr',\
+                    help='Set this flag to run LPR test code instead of full analysis',\
+                    action='store_true', default=False)
+parser.add_argument('--test-morpho', dest='test_morph',\
+                    help='Set this flag to run LPR test code instead of full analysis',\
+                    action='store_true', default=False)
+
+parser.add_argument('--validate', dest='valid', \
+                    help='If this tag is added, then we validate existing files',\
                     action='store_true', default=False)
 parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
 
@@ -68,64 +78,132 @@ def merge_files(path, file_dict):
     pd.concat([pd.read_csv(f) for f in dose]).to_csv(path+'/new_dose.csv')
     return [path+'/new_bmds.csv',path+'/new_fits.csv',path+'/new_dose.csv']
 
-if __name__ == "__main__":
+
+def run_lpr_on_file(lpr_file,morph_file, full_devel='full'):
+    """
+    runs LPR code on a file
+    Attributes
+    ----
+    unformatted_file: str
+    """
+    LPR_input_csv_file_name = morpho_input_csv_file_name.replace("morphology", "LPR")
+
+    command = "python3 /srpAnalytics/format_LPR_input.py " + \
+        str(lpr_file) + " " + str(full_devel)
+    print(command)
+    os.system(command)
+
+    LPR_input_csv_file_name_wide = lpr_file[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
+
+    #print ("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
+
+    #print ("morpho_input_csv_file_name:" + str(morph_file))
+    #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
+    command = "python3 /srpAnalytics/format_morpho_input.py " + \
+                    str(morph_file) + " " + str(full_devel)
+    print(command)
+    os.system(command)
+            #time.sleep(20)
+
+    morpho_input_csv_file_name_wide = morpho_file[:-4] + "_wide_DNC_0.csv"
+
+    res = bmd_LPR.runBmdPipeline(morpho_input_csv_file_name_wide, \
+                                             LPR_input_csv_file_name_wide, full_devel)
+    return res
+
+def run_morpho_on_file(morph_file,full_devel='full'):
+    """
+    formats and runs morphological BMD on file
+    """
+    print ("morpho_input_csv_file_name:" + str(morph_file))
+    #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
+    command = "python3 /srpAnalytics/format_morpho_input.py " + \
+                    str(morph_file) + " " + str(full_devel)
+    print(command)
+    os.system(command)
+            #time.sleep(20)
+
+    morpho_input_csv_file_name_wide = morpho_file[:-4] + \
+        "_wide_DNC_0.csv"
+    print ("morpho_input_csv_file_name_wide:" + str(morpho_input_csv_file_name_wide))
+    res = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, \
+                                             full_devel)
+    return res
+
+def build_db_with_files(fdict):
+    """
+    Builds database from dictoary of of filelists
+    """
+    merged_files = merge_files(os.getcwd(), fdict)
+    command = "Rscript /srpAnalytics/buildv1database.R "
+
+    #if args.isSample:
+    #        command = command+'--samples  '
+    #    else:
+    command = command+'--chemicals '
+    if len(merged_files) == 3:
+        command = command + ','.join(merged_files)
+        print(command)
+        os.system(command)
+        for m in merged_files:
+            os.system('rm '+m)
+
+
+def main():
     """
     main method for command line
     """
     start_time = time.time()
     args = parser.parse_args()
-    flist = args.files.split(',')
+    #flist = args.files.split(',')
     #print(flist)
 
+    ##collecting a list of files to add to DB
     files = dict()
-    if flist[0] == '':
-        print("No new files, just re-building archive")
-        command = "Rscript /srpAnalytics/buildv1database.R"
-        os.system(command)
-    else:
-        for morpho_input_csv_file_name in flist:
-            if args.devel:
-                full_devel = "devel"
-            else:
-                full_devel = "full"
-            print ("full_devel:" + str(full_devel)) # devel
 
+    mfiles = []
+    lfiles = []
+    if args.morpho!='':
+        mfiles = args.morpho.split(',')
+        print("Calculating morphological endpoints for "+str(len(mfiles))+' files')
 
+    if args.lpr!="":
+        lfiles = args.lpr.split(',')
+        if len(lfiles)!=len(mfiles):
+            print("Cannot calculate LPR without morphological files, please re-run with --morpho argument")
+            sys.exit()
+        else:
+            print('Calculating LPR endpoints for '+str(len(lfiles))+'LPR files')
+
+            morpho_input_csv_file_name='/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+    if args.morpho=="":
+        if args.test_lpr:
+            print("Testing LPR code")
+        else if args.test_morpho:
+            print("Testing morphological code")
+        else:
+            print("Testing database rebuild")
+            command = "Rscript /srpAnalytics/buildv1database.R"
+            os.system(command)
+
+    if args.validate:
+        print("Validating existing files")
+#    else:
+#        for morpho_input_csv_file_name in flist:
+           #ull_devel = "full"
+           # print ("full_devel:" + str(full_devel)) # devel
 
             ########## <begin> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
-            print ("morpho_input_csv_file_name:" + str(morpho_input_csv_file_name))
-            #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
 
-            command = "python3 /srpAnalytics/format_morpho_input.py " + \
-                    str(morpho_input_csv_file_name) + " " + str(full_devel)
-            print(command)
-            os.system(command)
-            #time.sleep(20)
 
-            morpho_input_csv_file_name_wide = morpho_input_csv_file_name[:-4] + \
-                "_wide_DNC_0.csv"
-            print ("morpho_input_csv_file_name_wide:" + str(morpho_input_csv_file_name_wide))
             # actual file is not saved here, but it is ok to be used at following procedures
 
 
-            print ("args.LPR:" + str(args.LPR)) # True
-            if (args.LPR == True):
+ #           print ("args.LPR:" + str(args.LPR)) # True
+       #     if (args.LPR == True):
                 # for LPR reformatting (tall->wide), both morphological and LPR is needed
 
-                LPR_input_csv_file_name = morpho_input_csv_file_name.replace("morphology", "LPR")
-
-                command = "python3 /srpAnalytics/format_LPR_input.py " + \
-                    str(LPR_input_csv_file_name) + " " + str(full_devel)
-                print(command)
-                os.system(command)
-
-                LPR_input_csv_file_name_wide = LPR_input_csv_file_name[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
-
-                print ("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
-
-                #devel
-                print ("press enter to continue")
-                bypass_can = input()
+        #          bypass_can = input()
                 #devel
 
                 #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall_wide_t0_t239_devel.csv
@@ -134,30 +212,14 @@ if __name__ == "__main__":
 
 
             ########### <begin> BMD calculation
-            if (args.LPR == True):
-                files[morpho_input_csv_file_name] = bmd_LPR.runBmdPipeline(morpho_input_csv_file_name_wide, \
-                                             LPR_input_csv_file_name_wide, \
-                                             full_devel)
-            else: # if (args.LPR == False):
-                files[morpho_input_csv_file_name] = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, \
-                                             full_devel)
+         #   if (args.LPR == True):
+          #                                            full_devel)
+           # else: # if (args.LPR == False):
+            #    files[morpho_input_csv_file_name] =
             ########### <end> BMD calculation
 
 
 
-        merged_files = merge_files(os.getcwd(), files)
-        command = "Rscript /srpAnalytics/buildv1database.R "
-
-        if args.isSample:
-            command = command+'--samples  '
-        else:
-            command = command+'--chemicals '
-        if len(merged_files) == 3:
-            command = command + ','.join(merged_files)
-            print(command)
-            os.system(command)
-            for m in merged_files:
-                os.system('rm '+m)
 
          #wd <- paste0(getwd(),'/')
          ##UPDATE TO PYTHON     allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
@@ -184,3 +246,7 @@ if __name__ == "__main__":
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print ("Done, it took:" + str(time_took))
+
+
+if __name__ == "__main__":
+    main()
