@@ -428,16 +428,16 @@ main<-function(){
     print(missing)
     
     ##Final output for the platform team is these 4 files
-    write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),row.names = FALSE)
-    write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE)
+    write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),quote=F,row.names = FALSE)
+    write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE, quote = FALSE)
 
-    write.csv(curves,file=paste0(out.dir,'chemXYcoords.csv'),row.names = FALSE)
-    write.csv(ecurves,file=paste0(out.dir,'envSampXYcoords.csv'),row.names = FALSE)
+    write.csv(curves,file=paste0(out.dir,'chemXYcoords.csv'),row.names = FALSE, quote = FALSE)
+    write.csv(ecurves,file=paste0(out.dir,'envSampXYcoords.csv'),row.names = FALSE, quote = FALSE)
 
-    write.csv(doseReps,file=paste0(out.dir,'chemdoseResponseVals.csv'),row.names = FALSE)
-    write.csv(edrs,file=paste0(out.dir,'envSampdoseResponseVals.csv'),row.names = FALSE)
+    write.csv(doseReps,file=paste0(out.dir,'chemdoseResponseVals.csv'),row.names = FALSE, quote = FALSE)
+    write.csv(edrs,file=paste0(out.dir,'envSampdoseResponseVals.csv'),row.names = FALSE, quote = FALSE)
 
-    write.csv(sampToChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE)
+    write.csv(sampToChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE, quote = FALSE)
 
     ##let's do one last summary
     summ.tab<-sampToChem%>%select(Sample_ID,Chemical_ID)%>%

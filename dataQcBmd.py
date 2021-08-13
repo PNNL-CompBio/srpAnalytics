@@ -174,13 +174,13 @@ if __name__ == "__main__":
         print('Saving to {}...'.format(DB))
         pull_raw_data(folder=OUT_FOLDER, if_exists=IF_EXITS, database=DB)
         print('Finished saving to database.')
-    else: # if not saving to database, check connection to DB is okay
-        print("Testing connection to database...", end='')
-        okay, error = test_connection(database=DB)
-        if okay:
-            print('Connection OK')
-        else:
-            print('Connection failed, {}'.format(error))
+  #  else: # if not saving to database, check connection to DB is okay
+  #      print("Testing connection to database...", end='')
+  #      okay, error = test_connection(database=DB)
+  #      if okay:
+  #          print('Connection OK')
+  #      else:
+  #          print('Connection failed, {}'.format(error))
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print ("Done, it took:" + str(time_took))
