@@ -8,7 +8,7 @@ RUN apt-get update -qq && apt-get install -y net-tools \
         unixodbc
 COPY setup.sh /setup.sh
 
-RUN sh ./setup.sh
+RUN /bin/bash ./setup.sh
 COPY requirements.txt /requirements.txt
 
 RUN pip3 install -r /requirements.txt

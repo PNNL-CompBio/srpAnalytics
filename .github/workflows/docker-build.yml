@@ -34,14 +34,14 @@ jobs:
       - name: docker pull
         run: "docker pull sgosline/srp-analytics"
       - name: test LPR
-        run: "docker run -v $PWD:/tmp sgosline-srp-analytics --devel --LPR"
+        run: "docker run -v $PWD:/tmp sgosline-srp-analytics --test-lpr"
   test-morpho:
     runs-on: ubuntu-latest
     steps:
       - name: docker pull
         run: "docker pull sgosline/srp-analytics"
       - name: test morpho
-        run: "docker run -v $PWD:/tmp sgosline/srp-analytics --devel"
+        run: "docker run -v $PWD:/tmp sgosline/srp-analytics --test-morpho"
   test-db-build:
     runs-on: ubuntu-latest
     steps:
