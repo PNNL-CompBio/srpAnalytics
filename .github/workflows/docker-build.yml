@@ -5,8 +5,8 @@ defaults:
 on:
   push:
     branches:
-      - "main"
-      - "dev"
+      - "*"
+
 jobs:
   -
     name: Checkout
