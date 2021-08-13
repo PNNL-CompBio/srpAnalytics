@@ -14,15 +14,25 @@ The data can be browsed at http://srp.pnnl.gov
 This repository contains the code to handle various aspects of this portal, each described below.
 
 ## Docker image
-All code in this repository requires specific package components that are contained in a Docker image. To build the docker image, run the `build_image.sh` script.
+All code in this repository requires specific package components that are contained in a Docker image. The Docker image is built automatically and stored [on Docker Hub](https://hub.docker.com/repository/docker/sgosline/srp-analytics). As such it can be pulled locally using the following command:
 
-### Docker build test
-TODO: add test
+``` bash
+docker pull sgosline/srp-analytics
+```
+
+If you would like to build the docker image locally, you can check out this repository and run build it using the following command:
+
+``` bash
+docker build . -t sgosline/srp-analytics
+```
+
 
 ## Benchmark Dose Calculation
 Calculating the benchmark dose of each chemical on the zebrafish is an active area of research. This analysis is described in an upcoming manuscript and is primarily contained in the [qc_BMD](./qc_BMD) directory. The data format required as input to this is described in the [processing pipeline schema](./schemas/processingPipelineSchema.xlsx).
 
-### BMD Test
+Any changes to the BMD calculation will have to pass a series of tests to ensure that they work with the existing format data format
+
+
 TODO: add single test
 
 ## Linking zebrafish data to environmental sample data
