@@ -198,8 +198,6 @@ def main():
         build_db_with_files(files)
 
 
-
-
     allfiles = [a for a in os.listdir('/tmp') if 'csv' in a]
     print(allfiles)
     if args.validate:
