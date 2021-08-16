@@ -9,6 +9,7 @@ import os, sys, time
 import argparse
 import tarfile
 from ingest import pull_raw_data, test_connection
+import validate as valid
 
 OUT_FOLDER='/tmp'
 IF_EXITS='replace' # options: "append", "replace", "fail"
@@ -195,10 +196,19 @@ def main():
     else:
         print("building database with new files")
         build_db_with_files(files)
+
+
+
+
+    allfiles = [a for a in os.listdir('/tmp') if 'csv' in a]
+    print(allfiles)
     if args.validate:
         print("Validating existing files")
         ##get files
+        for fval in allfiles:
+            valid.verify(pd.read_csv(fval,gsub('.csv','',fval)))
         ##validate
+    allfiles = ['README.md']+allfiles
 #    else:
 #        for morpho_input_csv_file_name in flist:
            #ull_devel = "full"
@@ -217,7 +227,7 @@ def main():
                 #devel
 
                 #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall_wide_t0_t239_devel.csv
-            ########### <end> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
+            ########### <end> tall format (Oregon state original) -> xide format (so that BMD can be calculated)
 
 
 
@@ -232,15 +242,13 @@ def main():
 
 
          #wd <- paste0(getwd(),'/')
-         ##UPDATE TO PYTHON     allfiles<-paste0(wd, c('README.md',list.files(path='.')[grep('csv',list.files(path='.'))]))
-        allfiles = ['README.md'] + [a for a in os.listdir('/tmp') if 'csv' in a]
-        print(allfiles)
-        print('Now zipping up'+str(len(allfiles))+'files')
-        tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
-        for fname in allfiles:
-            #os.system('mv '+fname+' /tmp')
-            tar.add('/tmp/'+fname)
-        tar.close()
+         ##UPDATE TO PYTHON
+
+    print('Now zipping up'+str(len(allfiles))+'files')
+    tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
+    for fname in allfiles:
+        tar.add('/tmmkp/'+fname)
+    tar.close()
 
     if args.update_db:
         print('Saving to {}...'.format(DB))
