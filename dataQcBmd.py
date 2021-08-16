@@ -247,7 +247,7 @@ def main():
     print('Now zipping up'+str(len(allfiles))+'files')
     tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
     for fname in allfiles:
-        tar.add('/tmmkp/'+fname)
+        tar.add('/tmp/'+fname)
     tar.close()
 
     if args.update_db:
