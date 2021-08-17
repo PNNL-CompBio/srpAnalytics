@@ -225,7 +225,7 @@ def main():
                 #devel
 
                 #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall_wide_t0_t239_devel.csv
-            ########### <end> tall format (Oregon state original) -> xide format (so that BMD can be calculated)
+            ########### <end> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
 
 
 
