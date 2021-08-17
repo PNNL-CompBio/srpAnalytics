@@ -2,7 +2,8 @@
 
 library(jsonlite)
 library(httr)
-
+library(dplyr)
+library(tidyr)
 url <- "https://montilab.bu.edu/Xposome-API/projects?all=Yes"
 res <- GET(url = url, encode = 'json')
 stop_for_status(res)
@@ -105,6 +106,14 @@ for(i in 1:length(projects)){
   term.tab <-rbind(term.tab,full.list[[i]]$goterms)
 }
 
+
+
+gene.tab%>%rowwise()%>%mutate(absVal=abs(ModZScore))%>%
+  subset(absVal>1.63)%>%
+  subset(cas_number=='115-86-6')%>%ggplot()+geom_jitter(aes(x=Conc,y=ModZScore,col=Project,alpha=0.5))
+
+
+term.tab%>%subset(cas_number=='115-86-6')%>%ggplot()+geom_jitter(aes(x=Conc,y=Summary.Score,col=Project,alpha=0.5))
 
 write.table(gene.tab,file='data/geneExp.tsv',sep='\t',row.names=F)
 write.table(term.tab,file='data/geneEnrich.tsv',sep='\t',row.names=F)
