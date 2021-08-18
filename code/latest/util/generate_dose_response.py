@@ -35,7 +35,7 @@ def gen_dose_response(data_ep_cid, end_point):
     # Remove all wells for plates for which number of hits for negative controls > 50% wells
     
     for plate_id in np.unique(data_ep_cid['plate.id']):
-  #      print ("plate_id:\n"+str(plate_id))
+        # print ("plate_id:\n"+str(plate_id))
         # Count number of wells corresponding to negative controls
         data_ep_cid_plate = data_ep_cid.loc[data_ep_cid['plate.id'] == plate_id]
         neg_ctrl_wells = data_ep_cid_plate.loc[data_ep_cid_plate['conc'] == 0]
@@ -97,14 +97,14 @@ def gen_dose_response(data_ep_cid, end_point):
     2   0.5         1.0     0.062500         16.0       32.0
     '''
     delete_count = 0
-   # print ("dose_response.shape[0]:" + str(dose_response.shape[0]))
+    # print ("dose_response.shape[0]:" + str(dose_response.shape[0]))
     #for new 7 PAHs, these are mostly 8 which is number of dose groups
     for dr_index in range(dose_response.shape[0]):
         dr_index_original = dr_index
         dr_index = dr_index - delete_count
-#        print ("\ndr_index:" + str(dr_index))
- #       print ("dose_response.iloc[dr_index]:\n" + str(dose_response.iloc[dr_index]))
-  #      print ("dose_response.iloc[dr_index].num_embryos:" + str(dose_response.iloc[dr_index].num_embryos))
+        # print ("\ndr_index:" + str(dr_index))
+        # print ("dose_response.iloc[dr_index]:\n" + str(dose_response.iloc[dr_index]))
+        # print ("dose_response.iloc[dr_index].num_embryos:" + str(dose_response.iloc[dr_index].num_embryos))
         if((dose_response.iloc[dr_index].num_embryos) < (0.25*(dose_response.iloc[dr_index].tot_wells))):
             dose_response = dose_response[dose_response.index != dr_index_original]
             delete_count+=1
@@ -201,12 +201,12 @@ def gen_dose_response_behavior(delta_mov_auc_data, end_point):
                 hyper_response_vals = hyper_response_vals[hyper_response_vals > 0]
                 
                 if (global_report):
-                       print (f"\n\nhyper_response_vals:\n{hyper_response_vals}")
-                       print (f"\n\ntype(hyper_response_vals):\n{type(hyper_response_vals)}")
+                    print (f"\n\nhyper_response_vals:\n{hyper_response_vals}")
+                    print (f"\n\ntype(hyper_response_vals):\n{type(hyper_response_vals)}")
                     
                 hypo_response_vals = response_vals[response_vals <= 0]
                 if (global_report):
-                       print (f"hypo_response_vals:\n{hypo_response_vals}")
+                    print (f"hypo_response_vals:\n{hypo_response_vals}")
                 
                 #Compare box-plots for visual inspection
                 #fig, ax = plt.subplots()

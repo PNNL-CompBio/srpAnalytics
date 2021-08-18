@@ -24,8 +24,8 @@ from datetime import datetime as dt
 today = dt.now()  
 time_now_date = today.strftime('%Y_%m_%d')
 
-report = True
-#report = False
+#report = True
+report = False
 
 def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemical_id, end_point, selected_models = None):
     # Create the PdfPages object to which we will save the pages:
@@ -90,8 +90,9 @@ def save_results_poor_data_or_no_convergence(test_dose_response, qc_flag, chemic
         CI_bounds = np.zeros([2, len(test_dose_response.dose)])
         # in save_results_poor_data_or_no_convergence fn
         for index in range(len(test_dose_response.dose)):
-            print (f"test_dose_response.num_affected[index]:{test_dose_response.num_affected[index]}")
-            print (f"test_dose_response.total_num[index]:{test_dose_response.total_num[index]}")
+            if (report):
+                print (f"test_dose_response.num_affected[index]:{test_dose_response.num_affected[index]}")
+                print (f"test_dose_response.total_num[index]:{test_dose_response.total_num[index]}")
             CI = astrostats.binom_conf_interval(test_dose_response.num_affected[index], test_dose_response.total_num[index], confidence_level = 0.95)
             CI = np.abs(CI - test_dose_response.num_affected[index]/test_dose_response.total_num[index])
             CI_bounds[0, index] = CI[0]
@@ -457,7 +458,8 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag, model_pre
     
     # Estimate AUC and min and mox doses
     if(not test_dose_response.empty):
-        print ("test_dose_response:"+str(test_dose_response))
+        if (report):
+            print ("test_dose_response:"+str(test_dose_response))
         
         dose_response_auc = np.trapz(test_dose_response.num_affected/test_dose_response.total_num, x = test_dose_response.dose)
         dose_min = min(test_dose_response.dose)
