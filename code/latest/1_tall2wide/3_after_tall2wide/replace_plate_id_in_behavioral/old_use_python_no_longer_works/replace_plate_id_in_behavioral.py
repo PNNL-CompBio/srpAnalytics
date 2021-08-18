@@ -19,7 +19,8 @@ start_time = time.time()
 # used to work
 #beha_full_csv = "344_zf_LPR_data_phase_1_and_2_-_2020JUNE25.csv"
 
-beha_full_csv = "344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_full_15_timepoints_wide_t3_t17_full.csv"
+#beha_full_csv = "344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_full_15_timepoints_wide_t3_t17_full.csv"
+beha_full_csv = "344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_full_15_timepoints_wide_full.csv"
 
 
 beha_full_in = open (beha_full_csv, "r")
@@ -28,14 +29,14 @@ beha_full_csv_after_replacement = beha_full_csv[:-4] + "_replaced.csv"
 
 
 for line in beha_full_in:
-    beha_full_out = open (beha_full_csv_after_replacement, "a")
+    beha_full_out = open(beha_full_csv_after_replacement, "a")
     splited_line = line.split(",")
     bottle_id = splited_line[1]
     #print ("bottle_id:" + str(bottle_id))
     if (bottle_id == "\"bottle.id\""):
         beha_full_out.write(line)
         continue
-    #print ("bottle_id[:3]:" + str(bottle_id[:3]))
+    print ("bottle_id[:3]:" + str(bottle_id[:3]))
     if (bottle_id[:3] != "\"TX"):
         beha_full_out.write(line)
         continue
@@ -69,9 +70,9 @@ for line in beha_full_in:
     
 beha_full_in.close()
 
-
 end_time = time.time()
 write_this = show_time("replacement of plate id", start_time, end_time)
+
 '''
 In constance, it took 8 hrs to transform
 344_zf_LPR_data_phase_1_and_2_-_2020JUNE25.csv
