@@ -88,8 +88,8 @@ def run_lpr_on_file(lpr_file,morph_file, full_devel='full'):
     unformatted_file: str
     """
 
-    command = "python3 /srpAnalytics/format_LPR_input.py " + \
-        str(lpr_file) + " " + str(full_devel)
+    command = "python3 format_LPR_input.py " + str(lpr_file) + " " + str(full_devel)
+
     print(command)
     os.system(command)
 
@@ -99,7 +99,8 @@ def run_lpr_on_file(lpr_file,morph_file, full_devel='full'):
 
     #print ("morpho_input_csv_file_name:" + str(morph_file))
     #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    command = "python3 /srpAnalytics/format_morpho_input.py " + \
+    
+    command = "python3 format_morpho_input.py " + \
                     str(morph_file) + " " + str(full_devel)
     print(command)
     os.system(command)
@@ -117,7 +118,7 @@ def run_morpho_on_file(morph_file,full_devel='full'):
     """
     print ("morpho_input_csv_file_name:" + str(morph_file))
     #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    command = "python3 /srpAnalytics/format_morpho_input.py " + \
+    command = "python3 format_morpho_input.py " + \
                     str(morph_file) + " " + str(full_devel)
     print(command)
     os.system(command)
@@ -181,11 +182,11 @@ def main():
     if args.morpho=="":
         if args.test_lpr:
             print("Testing LPR code")
-            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2020NOV11_tall.csv'
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+            test_lpr = '/test_files/7_PAH_zf_LPR_data_2020NOV11_tall.csv'
+            test_morph = 'test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
             res = run_lpr_on_file(test_lpr,test_morph,'devel')
         elif args.test_morpho:
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+            test_morph = 'test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
             print("Testing morphological code")
             res = run_morpho_on_file(test_morph,'devel')
     if len(files)==0:
