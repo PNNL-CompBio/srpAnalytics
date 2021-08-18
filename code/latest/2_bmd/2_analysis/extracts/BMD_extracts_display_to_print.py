@@ -47,7 +47,11 @@ print (starting_dir)
 # In[3]:
 
 
-wide_file_path = '/Users/kimd999/research/projects/Katrina/per_each_data/extracts/input/latest/wide/ZF_120_SRP_Sample_Extracts_with_Dilution_Factors_2021MAY21_wide_DNC_0.csv'
+#mac
+#wide_file_path = '/Users/kimd999/research/projects/Katrina/per_each_data/extracts/input/latest/wide/ZF_120_SRP_Sample_Extracts_with_Dilution_Factors_2021MAY21_wide_DNC_0.csv'
+
+# constance
+wide_file_path = '/people/kimd999/tox/extracts/input/ZF_120_SRP_Sample_Extracts_with_Dilution_Factors_2021MAY21_wide_DNC_0.csv'
 
 df = pd.read_csv(wide_file_path, header = 0)
 pd.set_option('display.max_columns', None)
