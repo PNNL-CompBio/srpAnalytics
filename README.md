@@ -40,8 +40,8 @@ Any changes to the BMD calculation will have to pass a series of tests to ensure
 Currently there are two tests for the BMD calculation, one for the morpohological changes and one for the light response. These are both automated in the continuous integration tests, but can be evaluated locally using the following commands:
 
 ``` bash
-python3 dataQcBmd.py --test-morpho
-python3 dataQcBmd.py --test-lpr
+docker run srp-analytics --test-morpho
+docker run srp-analytics --test-lpr
 ```
 
 Note: these commands currently only work for chemical dose-response values, and still need to be updated to work with extract dose-response values.
@@ -54,7 +54,7 @@ Once we have re-calculated BMD values, we must link these data to environmental 
 The environmental sample data has a very specific format that is defined in our [schemas](./schemas) directory. To test the building the database with new data you can simply run:
 
 ``` bash
-python3 dataQcBmd.py
+docker run srp-analytics
 ```
 This is currently being run upon pushing changes to the repository.
 
@@ -63,6 +63,10 @@ This is currently being run upon pushing changes to the repository.
 To validate an output CSV with a schema, use the following format:
 ```
 python3 validate.py <path to CSV file> <schema>
+```
+or use the Docker image to validate all files:
+```
+docker run srp-analytics --validate
 ```
 
 Allowable schemas: chemdoseResponseVals, chemicalsByExtractSample, chemSummaryStats, chemXYcoords, envSampdoseResponseVals, envSampSummaryStats, or envSampXYcoords
