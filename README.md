@@ -40,7 +40,7 @@ Any changes to the BMD calculation will have to pass a series of tests to ensure
 Currently there are two tests for the BMD calculation, one for the morpohological changes and one for the light response. These are both automated in the continuous integration tests, but can be evaluated locally using the following commands:
 
 ``` bash
-python 3 dataQcBmd.py --test-morpho
+python3 dataQcBmd.py --test-morpho
 python3 dataQcBmd.py --test-lpr
 ```
 
