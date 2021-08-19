@@ -194,10 +194,10 @@ for chemical_id in chemical_id_from_here:
         #print (f"test_dose_response:{test_dose_response}")
         
     
-        qc_flag_folder = "qc_" + str(qc_flag)
-        if (os.path.isdir(str(qc_flag_folder)) == False):
-            os.mkdir(str(qc_flag_folder))
-        os.chdir(str(qc_flag_folder))
+#        qc_flag_folder = "qc_" + str(qc_flag)
+ #       if (os.path.isdir(str(qc_flag_folder)) == False):
+  #          os.mkdir(str(qc_flag_folder))
+   #     os.chdir(str(qc_flag_folder))
 
         
         if(qc_flag in [0, 1]):
