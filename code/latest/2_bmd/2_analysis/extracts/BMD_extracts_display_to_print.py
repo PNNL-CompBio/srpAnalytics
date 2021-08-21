@@ -229,9 +229,6 @@ for chemical_id in chemical_id_from_here:
     current_time = now.strftime("%H:%M:%S")
     print("Current Time =", current_time)
     
-print ("\ntotal_number_of_unique_chemicals:" + str(total_number_of_unique_chemicals))
-print ("total_number_of_chemical_plate_well:" + str(total_number_of_chemical_plate_well))
-
 end_time = time.time()
 
 time_took = str(round((end_time-start_time), 1)) + " seconds"
