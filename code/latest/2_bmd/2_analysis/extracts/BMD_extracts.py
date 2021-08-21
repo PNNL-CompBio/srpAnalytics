@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[15]:
+# In[1]:
 
 
 from datetime import datetime
@@ -13,10 +13,10 @@ from scipy import stats
 import seaborn as sns
 
 #mac
-#util_path = "/Users/kimd999/Dropbox/script/python/srpAnalytics/code/latest/util"
+util_path = "/Users/kimd999/Dropbox/script/python/srpAnalytics/code/latest/util"
 
 #constance
-#'''
+'''
 args = sys.argv[0:]
 py_file = args[0]
 py_file_wo_path = os.path.basename(py_file)
@@ -25,7 +25,7 @@ code_location = os.path.dirname(os.path.abspath(py_file))
 index_of_latest = code_location.index('latest')
 util_path = os.path.join(code_location[:index_of_latest], "latest", "util")
 print ("util_path:"+ str(util_path))
-#'''
+''' 
 
 sys.path.insert(0, util_path)
 
@@ -48,16 +48,16 @@ print (starting_dir)
 
 
 #mac
-#wide_file_path = '/Users/kimd999/research/projects/Katrina/per_each_data/extracts/input/latest/wide/ZF_120_SRP_Sample_Extracts_with_Dilution_Factors_2021MAY21_wide_DNC_0.csv'
+wide_file_path = '/Users/kimd999/research/projects/Katrina/per_each_data/extracts/input/latest/wide/ZF_120_SRP_Sample_Extracts_with_Dilution_Factors_2021MAY21_wide_DNC_0.csv'
 
 # constance
-wide_file_path = '/people/kimd999/tox/extracts/input/ZF_120_SRP_Sample_Extracts_with_Dilution_Factors_2021MAY21_wide_DNC_0.csv'
+#wide_file_path = '/people/kimd999/tox/extracts/input/ZF_120_SRP_Sample_Extracts_with_Dilution_Factors_2021MAY21_wide_DNC_0.csv'
 
 df = pd.read_csv(wide_file_path, header = 0)
 pd.set_option('display.max_columns', None)
-print(df.head())
-print(df.columns)
-print(np.unique(df.well))
+display(df.head())
+display(df.columns)
+display(np.unique(df.well))
 
 
 # In[4]:
@@ -100,14 +100,14 @@ if(test_data_sim == 0):
 # In[6]:
 
 
-print(df.head())
+display(df.head())
 
 
 # In[7]:
 
 
-print(df.columns)
-print(len(df.columns))
+display(df.columns)
+display(len(df.columns))
 
 
 # In[8]:
@@ -136,18 +136,19 @@ df_file_out.close()
 # In[9]:
 
 
-print(df.shape)
+display(df.shape)
 df_final = df.dropna(how='any')
 
 
 # In[10]:
 
 
-print(df_final.shape)
-print(df_final.head())
+display(df_final.shape)
+display(df_final.head())
+display(len(np.unique(df['chemical.id'])))
 
 
-# In[ ]:
+# In[11]:
 
 
 # BMD analysis
@@ -163,8 +164,8 @@ if (full_devel == "full"):
     # deal 18 end_points
     end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC__','NC24', 'SKIN','SM24','TCHR','TOT_MORT']
 else:
-    chemical_id_from_here = [101]
-    end_points = ['ANY24']
+    chemical_id_from_here = [799]
+    end_points = ['MORT']
 
     
 total_number_of_chemicals_to_process = len(chemical_id_from_here)
@@ -194,11 +195,13 @@ for chemical_id in chemical_id_from_here:
         #print (f"test_dose_response:{test_dose_response}")
         
     
-#        qc_flag_folder = "qc_" + str(qc_flag)
- #       if (os.path.isdir(str(qc_flag_folder)) == False):
-  #          os.mkdir(str(qc_flag_folder))
-   #     os.chdir(str(qc_flag_folder))
-
+        '''
+        qc_flag_folder = "qc_" + str(qc_flag)
+        if (os.path.isdir(str(qc_flag_folder)) == False):
+            os.mkdir(str(qc_flag_folder))
+        os.chdir(str(qc_flag_folder))
+        '''
+        
         
         if(qc_flag in [0, 1]):
             # No BMD analysis required. Generate report and exit
@@ -212,7 +215,8 @@ for chemical_id in chemical_id_from_here:
             unique_model_flag = selected_model_params['no_unique_model_found_flag']
             if(unique_model_flag == 0):
                 # Generate report
-                #print(test_dose_response.dose[-1:])
+                #print(f"test_dose_response.dose:\n{test_dose_response.dose}")
+                print(f"test_dose_response:\n{test_dose_response}")
                 ps.save_results_good_data_unique_model(test_dose_response, qc_flag, model_predictions, selected_model_params, str(chemical_id), end_point)
             else:
                 bmd_analysis_flag = selected_model_params['model_select_flag']
@@ -228,22 +232,19 @@ for chemical_id in chemical_id_from_here:
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print("Current Time =", current_time)
-    
-print ("\ntotal_number_of_unique_chemicals:" + str(total_number_of_unique_chemicals))
-print ("total_number_of_chemical_plate_well:" + str(total_number_of_chemical_plate_well))
 
 end_time = time.time()
 
-time_took = str(round((end_time-start_time), 1)) + " seconds"
+time_took = str(round((end_time-start_time), 1)) + " seconds\n"
 print ("Done, it took:"+str(time_took)) 
-# for all combinations of 42 chemicals and 18 endpoints, <212 minutes took for qc and bmd
+# for all combinations (1,512) of 84 chemicals and 18 endpoints, <212 minutes took for qc and bmd
 
 f_time = open('running_time.txt', 'w')
 f_time.write(str(time_took))
 f_time.close()
 
 
-# In[ ]:
+# In[12]:
 
 
 a=b
@@ -286,7 +287,7 @@ plt.show()
 sns.set_theme(style="whitegrid")
 print ("array_filename:"+str(array_filename))
 array_report_data = pd.read_csv(array_filename, index_col=None)
-print(array_report_data.head())
+display(array_report_data.head())
 #ax = sns.barplot(x="end_point", y="len_test_dose_response", data=array_report_data)
 
 ds = pd.Series({"Column": array_report_data["len_test_dose_response"]})
