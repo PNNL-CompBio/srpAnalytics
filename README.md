@@ -34,7 +34,7 @@ This is required for local testing of the code.
 ## Benchmark Dose Calculation
 Calculating the benchmark dose of each chemical on the zebrafish is an active area of research. This analysis is described in an upcoming manuscript and is primarily contained in the [qc_BMD](./qc_BMD) directory. The data format required as input to this is described in the [processing pipeline schema](./schemas/processingPipelineSchema.xlsx).
 
-Any changes to the BMD calculation will have to pass a series of tests to ensure that they work with the existing format data format.
+Any changes to the BMD calculation will have to pass a series of tests to ensure that they work with the existing data format.
 
 ### BMD Testing
 Currently there are two tests for the BMD calculation, one for the morpohological changes and one for the light response. These are both automated in the continuous integration tests, but can be evaluated locally using the following commands:
@@ -44,7 +44,8 @@ docker run srp-analytics --test-morpho
 docker run srp-analytics --test-lpr
 ```
 
-Note: these commands currently only work for chemical dose-response values, and still need to be updated to work with extract dose-response values.
+Note: these commands currently only work for chemical dose-response values that are derived from simple set of endpoints (e.g. AXIS, BRN_, CRAN, DP24, EDEM, LTRK, MO24, MORT, MUSC, NC__, SKIN, SM24, and TCHR as found for 7 PAH dataset). For chemical dose-response values that are derived from more complex endpoints (e.g. AXIS, BRAI, CFIN, CIRC, DP24, EYE_, JAW_, MO24, MORT, NC24, NC__, OTIC, PE__, PFIN, PIG_, SM24, SNOU, SOMI, SWIM, TRUN, TR__, YSE_ that are found in extracts or phase I,II dataset), automation into github is not made yet.
+
 
 ## Linking zebrafish data to environmental sample data
 
