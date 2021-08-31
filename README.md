@@ -44,7 +44,9 @@ docker run srp-analytics --test-morpho
 docker run srp-analytics --test-lpr
 ```
 
-Note: these commands currently only work for chemical dose-response values that are derived from simple set of endpoints (e.g. AXIS, BRN_, CRAN, DP24, EDEM, LTRK, MO24, MORT, MUSC, NC__, SKIN, SM24, and TCHR as found for 7 PAH dataset). For chemical dose-response values that are derived from more complex endpoints (e.g. AXIS, BRAI, CFIN, CIRC, DP24, EYE_, JAW_, MO24, MORT, NC24, NC__, OTIC, PE__, PFIN, PIG_, SM24, SNOU, SOMI, SWIM, TRUN, TR__, YSE_ that are found in extracts or phase I,II dataset), automation into github is not made yet.
+Note 1: These commands run with shorter version ("devel") for faster sanity check by default.
+
+Note 2: These commands currently only work for chemical dose-response values that are derived from simple set of endpoints (e.g. AXIS, BRN_, CRAN, DP24, EDEM, LTRK, MO24, MORT, MUSC, NC__, SKIN, SM24, and TCHR as found for 7 PAH dataset). For chemical dose-response values that are derived from more complex endpoints (e.g. AXIS, BRAI, CFIN, CIRC, DP24, EYE_, JAW_, MO24, MORT, NC24, NC__, OTIC, PE__, PFIN, PIG_, SM24, SNOU, SOMI, SWIM, TRUN, TR__, YSE_ that are found in extracts or phase I,II dataset), automation into github is not made yet.
 
 
 ## Linking zebrafish data to environmental sample data

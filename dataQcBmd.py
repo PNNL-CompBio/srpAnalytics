@@ -33,14 +33,21 @@ extract data to store in SRP data analytics portal')
 parser.add_argument('--morpho',dest='morpho',\
                     help='Comma-delimited list of morphological files to be processed',\
                     default='')
+
 parser.add_argument('--LPR', dest='lpr', \
                     help='Comma-delimited list of LPR-related files to be processed. MUST correspond to similar files in the morpho argument',\
                     default='')
+
 parser.add_argument('--test-lpr', dest='test_lpr',\
                     help='Set this flag to run LPR test code instead of full analysis',\
                     action='store_true', default=False)
+
 parser.add_argument('--test-morpho', dest='test_morpho',\
-                    help='Set this flag to run LPR test code instead of full analysis',\
+                    help='Set this flag to run morpho test code instead of full analysis',\
+                    action='store_true', default=False)
+
+parser.add_argument('--test-extracts',dest='test_extracts',\
+                    help='Set this flag to run morpho test code with extracts data',\
                     action='store_true', default=False)
 
 parser.add_argument('--validate', dest='validate', \
@@ -80,7 +87,7 @@ def merge_files(path, file_dict):
     return [path+'/new_bmds.csv',path+'/new_fits.csv',path+'/new_dose.csv']
 
 
-def run_lpr_on_file(lpr_file,morph_file, full_devel='full'):
+def run_lpr_on_file(lpr_file,morph_file, full_devel='devel'):
     """
     runs LPR code on a file
     Attributes
@@ -178,21 +185,26 @@ def main():
             for i in range(len(files)):
                 fname=lfiles[i]
                 files[fname] = run_lpr_on_file(fname,mfiles[i])
+
     if args.morpho=="":
         if args.test_lpr:
             print("Testing LPR code")
-            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2020NOV11_tall.csv'
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
+            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
             res = run_lpr_on_file(test_lpr,test_morph,'devel')
         elif args.test_morpho:
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
-            print("Testing morphological code")
+            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
+            print("Testing morphological code with 7 PAH data")
             res = run_morpho_on_file(test_morph,'devel')
+        elif args.test_extracts:
+            test_morph = '/srpAnalytics/test_files/Extracts_with_Dilution_Factors_2021MAY21_101.csv'
+            print("Testing morphological code with extracts data")
+            res = run_morpho_on_file(test_morph,'devel')
+    
     if len(files)==0:
         print("Testing database rebuild")
         command = "Rscript /srpAnalytics/buildv1database.R"
         os.system(command)
-
     else:
         print("building database with new files")
         build_db_with_files(files)
