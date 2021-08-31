@@ -54,5 +54,5 @@ $run
 END_TIME=$(date +%s)
 
 echo "
-LPR test took $(($END_TIME - $START_TIME)) seconds for conda setup from .bashrc"
+LPR test took $(($END_TIME - $START_TIME)) seconds"
 # (when echoing, scp/rsync from my mac didn't work)
