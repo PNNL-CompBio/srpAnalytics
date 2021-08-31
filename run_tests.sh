@@ -29,15 +29,15 @@ $run
 
 
 echo "
-Running morpho test with 7 PAH data"
+Running morpho test with 7 PAH data (single chemical)"
 run=$docker_FILE" run -v "$PWD":/tmp srp-analytics --test-morpho"
 echo $run
 $run
 
 
 echo "
-Running morpho test with extracts data"
-run=$docker_FILE" run -v "$PWD":/tmp srp-analytics --test-extracts"
+Running morpho test with extract data (single chemical)"
+run=$docker_FILE" run -v "$PWD":/tmp srp-analytics --test-extract"
 echo $run
 $run
 

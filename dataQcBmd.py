@@ -46,8 +46,8 @@ parser.add_argument('--test-morpho', dest='test_morpho',\
                     help='Set this flag to run morpho test code instead of full analysis',\
                     action='store_true', default=False)
 
-parser.add_argument('--test-extracts',dest='test_extracts',\
-                    help='Set this flag to run morpho test code with extracts data',\
+parser.add_argument('--test-extract',dest='test_extract',\
+                    help='Set this flag to run morpho test code with extract data',\
                     action='store_true', default=False)
 
 parser.add_argument('--validate', dest='validate', \
@@ -194,11 +194,11 @@ def main():
             res = run_lpr_on_file(test_lpr,test_morph,'devel')
         elif args.test_morpho:
             test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-            print("Testing morphological code with 7 PAH data")
+            print("Testing morphological code with 7 PAH data (single chemical)")
             res = run_morpho_on_file(test_morph,'devel')
-        elif args.test_extracts:
+        elif args.test_extract:
             test_morph = '/srpAnalytics/test_files/Extracts_with_Dilution_Factors_2021MAY21_101.csv'
-            print("Testing morphological code with extracts data")
+            print("Testing morphological code with extract data (single chemical)")
             res = run_morpho_on_file(test_morph,'devel')
     
     if len(files)==0:

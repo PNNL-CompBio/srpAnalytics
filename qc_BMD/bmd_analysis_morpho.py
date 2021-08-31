@@ -40,7 +40,10 @@ def runBmdPipeline(complete_file_path, full_devel):
     if(test_data_sim == 0):
         # Add aggregate endpoints for 7 PAH
 
-        if 'BRAI' not in df_morph.columns: # as 7 PATH
+        ## JUSTIFICATION: 7 PAH dataset doesn't have "BRAI" endpoint.
+        ## On the other hand, extract/phase I,II have "BRAI" endpoint.
+
+        if 'BRAI' not in df_morph.columns: # as 7 PAH
             # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
             df_morph['ANY24'] = df_morph[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
             
@@ -56,7 +59,7 @@ def runBmdPipeline(complete_file_path, full_devel):
 
 
 
-        else: # as extracts
+        else: # as extract
             df_morph['ANY24'] = df_morph[['MO24','DP24','SM24','NC24']].sum(axis=1,skipna=True,min_count=1)
             df_morph['ANY120'] = df_morph[['MORT', 'YSE_', 'AXIS', 'EYE_', 'SNOU', 'JAW_', 'OTIC', \
                                                                'PE__', 'BRAI', 'SOMI', 'PFIN', 'CFIN', 'PIG_', 'CIRC', \
@@ -128,14 +131,6 @@ def runBmdPipeline(complete_file_path, full_devel):
                 # Check if unique model is found
                 unique_model_flag = selected_model_params['no_unique_model_found_flag']
                 if(unique_model_flag == 0):
-                    # Generate report
-                    # print(f"test_dose_response.dose:{test_dose_response.dose}")
-                    # print(f"test_dose_response.dose[-1:]:{test_dose_response.dose[-1:]}")
-                    # print(f"qc_flag:{qc_flag}")
-                    # print(f"model_predictions:{model_predictions}")
-                    # print(f"selected_model_params:{selected_model_params}")
-                    # print(f"chemical_id:{chemical_id}")
-                    # print(f"end_point:{end_point}")
 
                     filenames = ps.save_results_good_data_unique_model(test_dose_response,\
                                                            qc_flag, model_predictions,\

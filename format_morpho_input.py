@@ -27,29 +27,15 @@ full_devel = args[2]
 
 
 
-morph_all_data = pd.read_csv(complete_file_path, header = 0)
+df_morph = pd.read_csv(complete_file_path, header = 0)
 
-
-morph_all_data.head(2400).tail
-
-
-np.sum(morph_all_data['value'] == 1)
-
-
-np.sum(morph_all_data['value'] == 0) # -> 82%
-
-
-np.sum(np.isnan(morph_all_data['value']))
-
-
-morph_all_data.shape
 
 
 
 # Keep only relevant columns
 columns_to_keep = ['chemical.id', 'conc', 'plate.id', 'well', 'endpoint', 'value']
-morph_all_data_select = morph_all_data.loc[:,columns_to_keep]
-morph_all_data_select.head()
+df_morph_select = df_morph.loc[:,columns_to_keep]
+df_morph_select.head()
 
 
 start_time = time.time()
@@ -60,16 +46,16 @@ total_number_of_chemical_plate_well = 0
 
 if (full_devel == "full"):
     # all chemicals
-    chemical_id_from_here = np.unique(morph_all_data['chemical.id'])
+    chemical_id_from_here = np.unique(df_morph['chemical.id'])
 else: # full_devel = "deve01l"
-    chemical_id_from_here = random.sample(set(np.unique(morph_all_data['chemical.id'])), 1)
+    chemical_id_from_here = random.sample(set(np.unique(df_morph['chemical.id'])), 1)
 
 
 for chemical_index in chemical_id_from_here:
 
     print("chemical_index:" + str(chemical_index))
     total_number_of_unique_chemicals += 1
-    morph_data_chemical = morph_all_data_select.loc[morph_all_data['chemical.id'] == chemical_index,:]
+    morph_data_chemical = df_morph_select.loc[df_morph['chemical.id'] == chemical_index,:]
 
     # Append chemical_plate_well as a unique identifier
     morph_data_chemical.insert(0, 'chemical_plate_well', morph_data_chemical.loc[:,['chemical.id','plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis = 1))
@@ -80,7 +66,11 @@ for chemical_index in chemical_id_from_here:
         
         temp_df_grouped = temp_df.groupby(['chemical.id', 'plate.id', 'well'])
         for name, group in temp_df_grouped:
-            if 'BRAI' not in temp_df.endpoint.values: # as 7 PATH
+            
+            ## JUSTIFICATION: 7 PAH dataset doesn't have "BRAI" endpoint.
+            ## On the other hand, extracts/phase I,II have "BRAI" endpoint.
+
+            if 'BRAI' not in temp_df.endpoint.values: # as 7 PAH
                 try:
     #            if(len(group.endpoint) == 14):
                     temp = pd.DataFrame( {
@@ -161,5 +151,5 @@ print ("df_reformatted_DNC_0.shape:" + str(df_reformatted_DNC_0.shape)) #(287, 1
 output_complete_file_path = complete_file_path[:-4] + "_wide_DNC_0.csv"
 print ("output_complete_file_path:" + str(output_complete_file_path))
 df_reformatted_DNC_0.to_csv(output_complete_file_path,index=False)
-#a=b
+
 print ("Reformat of morpho data is done")
