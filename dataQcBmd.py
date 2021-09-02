@@ -53,6 +53,7 @@ parser.add_argument('--test-extract',dest='test_extract',\
 parser.add_argument('--validate', dest='validate', \
                     help='If this tag is added, then we validate existing files',\
                     action='store_true', default=False)
+
 parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
 
 ############ (developer comment)
