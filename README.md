@@ -34,7 +34,7 @@ This is required for local testing of the code.
 ## Benchmark Dose Calculation
 Calculating the benchmark dose of each chemical on the zebrafish is an active area of research. This analysis is described in an upcoming manuscript and is primarily contained in the [qc_BMD](./qc_BMD) directory. The data format required as input to this is described in the [processing pipeline schema](./schemas/processingPipelineSchema.xlsx).
 
-Any changes to the BMD calculation will have to pass a series of tests to ensure that they work with the existing format data format.
+Any changes to the BMD calculation will have to pass a series of tests to ensure that they work with the existing data format.
 
 ### BMD Testing
 Currently there are two tests for the BMD calculation, one for the morpohological changes and one for the light response. These are both automated in the continuous integration tests, but can be evaluated locally using the following commands:
@@ -44,7 +44,8 @@ docker run srp-analytics --test-morpho
 docker run srp-analytics --test-lpr
 ```
 
-Note: these commands currently only work for chemical dose-response values, and still need to be updated to work with extract dose-response values.
+Note : These commands run with shorter version ("devel") for faster sanity check by default.
+
 
 ## Linking zebrafish data to environmental sample data
 
