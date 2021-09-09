@@ -11,7 +11,7 @@ Furthermore we are in the process of adding two more types of data:
 
 The data can be browsed at http://srp.pnnl.gov
 
-This repository contains the code to handle various aspects of this portal, each described below.
+This repository contains the code to handle various aspects of this portal, each described below in a single workflow.
 
 ## Docker image
 All code in this repository requires specific package components that are contained in a Docker image. The Docker image is built automatically and stored [on Docker Hub](https://hub.docker.com/repository/docker/sgosline/srp-analytics). As such it can be pulled locally using the following command:
