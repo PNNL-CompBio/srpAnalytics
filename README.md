@@ -20,6 +20,8 @@ All code in this repository requires specific package components that are contai
 docker pull sgosline/srp-analytics
 ```
 
+Docker image is pulled
+
 ### Docker image testing
 Currently all changes to the repository trigger a build of the docker image and pushing it to DockerHub. If this fails you will be notified.
 
