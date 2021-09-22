@@ -125,8 +125,8 @@ for(i in chems){
   ggsave(paste0('summary',i,'.png'),plot=res)
 }
 
-sg.stats <- sig.genes%>%
-  group_by(Project,cas_number,Direction,Link)%>%
+sg.stats <- sig_genes%>%
+  group_by(Project,cas_number,Conc,Link)%>%
   summarize(nGenes=n_distinct(Gene))
 write.table(sg.stats,file='data/sigGeneStats.csv',sep=',',row.names=F)
 ##not using this for now:
