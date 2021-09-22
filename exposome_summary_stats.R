@@ -10,7 +10,7 @@ stop_for_status(res)
 
 projects <- fromJSON(fromJSON(rawToChar(res$content)))
 
-print(paste('We now have',length(projects),'projects'))
+print(paste('We now have data from',length(projects),'projects'))
 
 #portal_name=  'https://montilab.bu.edu/Xposome-API/portals'
 
@@ -55,16 +55,15 @@ getGoTerms<-function(chemical_id,proj){
 getGenes<-function(chemical_id,proj){
 
   url1 <- paste0("https://montilab.bu.edu/Xposome-API/gene_expression?project=", 
-                 proj, "&chemical_id=", chemical_id)#, 
-                 #"&summarize.func=median&landmark=TRUE&do.markers=TRUE&do.scorecutoff=TRUE")
-  
-  print(url1)
+                 proj, "&chemical_id=", chemical_id,"&landmark=FALSE&do.scorecutoff=FALSE")
   # Send GET Request to API
   res <- GET(url = url1, encode = 'json')
+  chem_gene_link=paste0("https://montilab.bu.edu/Xposome/?page=",proj,
+                   "&tab=chemical_explorer&chemical_id=",chemical_id,"&stat=gene_expression")
   
   #print(fromJSON(rawToChar(res$content)))
   if(res$status_code!=200)
-    gene_expression_stat=data.frame(Gene=NULL,GeneName=NULL,Direction=NULL,`Summary Score`=NULL,`Zscore`=NULL,`Conc`=NULL)
+    gene_expression_stat=data.frame(Gene=NULL,GeneName=NULL,Direction=NULL,`Summary Score`=NULL,`Zscore`=NULL,`Conc`=NULL,Link=NULL)
   else{
     gene_expression_stat <- fromJSON(fromJSON(rawToChar(res$content)))
     gene_expression_stat <- gene_expression_stat%>%
@@ -76,7 +75,7 @@ getGenes<-function(chemical_id,proj){
       gene_expression_stat <- select(gene_expression_stat,-Landmark_Gene)
   }
  # print(head(gene_expression_stat))
-    data.frame(Project=proj,cas_number=chemical_id,gene_expression_stat) 
+    data.frame(Project=proj,cas_number=chemical_id,gene_expression_stat,Link=chem_gene_link) 
   
 }
 
@@ -90,12 +89,14 @@ for(proj in projects){
     chemicals <- fromJSON(fromJSON(rawToChar(res$content)))
   
   overlap <- intersect(all.chems$cas_number,chemicals$CAS)
-  print(paste('Found',length(overlap),'cas ids in common'))
+  print(paste('Found',length(overlap),'cas ids in common in project',proj))
   
+   #chem_Term_link=paste0("https://montilab.bu.edu/Xposome/?page=",proj,
+  #                 "&tab=chemical_explorer&chemical_id=",chem,"&stat=gene_set_enrichment")
   
   gg=do.call(rbind,lapply(overlap,function(chem) getGenes(chem,proj)))
-  gt=do.call(rbind,lapply(overlap,function(chem) getGoTerms(chem,proj)))
-  full.list[[proj]]<-list(genes=gg,goterms=gt)
+#  gt=do.call(rbind,lapply(overlap,function(chem) getGoTerms(chem,proj)))
+  full.list[[proj]]<-list(genes=gg)#,goterms=gt)
 }
 
 gene.tab<-NULL
@@ -103,17 +104,31 @@ term.tab<-NULL
 for(i in 1:length(projects)){
   print(i)
   gene.tab <- rbind(gene.tab, full.list[[i]]$genes)
-  term.tab <-rbind(term.tab,full.list[[i]]$goterms)
+ # term.tab <-rbind(term.tab,full.list[[i]]$goterms)
 }
 
 
+sig.genes <- gene.tab%>%rowwise()%>%mutate(absVal=abs(ModZScore))%>%
+  subset(absVal>1.63)
 
-gene.tab%>%rowwise()%>%mutate(absVal=abs(ModZScore))%>%
-  subset(absVal>1.63)%>%
-  subset(cas_number=='115-86-6')%>%ggplot()+geom_jitter(aes(x=Conc,y=ModZScore,col=Project,alpha=0.5))
+library(ggplot2)
+chems<-unique(gene.tab$cas_number)[100:105]
+for(i in chems){
+  p1<-sig.genes%>%
+    subset(cas_number==i)%>%
+    ggplot()+geom_jitter(aes(x=Conc,y=ModZScore,col=Project,alpha=0.5))+ggtitle(i)+ scale_x_discrete(guide = guide_axis(angle = 90))
+  p2<-sig.genes%>%
+    subset(cas_number==i)%>%
+    ggplot()+geom_bar(aes(x=Conc,fill=Project),position='dodge')+ggtitle(i) +scale_x_discrete(guide = guide_axis(angle = 90))
 
+  res=cowplot::plot_grid(plotlist=list(p1,p2))
+  ggsave(paste0('summary',i,'.png'),plot=res)
+}
 
-term.tab%>%subset(cas_number=='115-86-6')%>%ggplot()+geom_jitter(aes(x=Conc,y=Summary.Score,col=Project,alpha=0.5))
-
-write.table(gene.tab,file='data/geneExp.tsv',sep='\t',row.names=F)
-write.table(term.tab,file='data/geneEnrich.tsv',sep='\t',row.names=F)
+sg.stats <- sig.genes%>%
+  group_by(Project,cas_number,Direction,Link)%>%
+  summarize(nGenes=n_distinct(Gene))
+write.table(sg.stats,file='data/sigGeneStats.csv',sep=',',row.names=F)
+##not using this for now:
+write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)
+#write.table(term.tab,file='data/geneEnrich.tsv',sep='\t',row.names=F)
