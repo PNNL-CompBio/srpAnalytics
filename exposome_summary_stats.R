@@ -125,9 +125,17 @@ for(i in chems){
   ggsave(paste0('summary',i,'.png'),plot=res)
 }
 
-sg.stats <- sig_genes%>%
+
+map <-read.csv('data/chemicalIdMapping.csv',header=T,sep=',',fileEncoding = 'UTF-8-BOM')%>%
+  dplyr::select(cas_number,Chemical_ID)%>%distinct()
+
+
+
+sg.stats <- sig.genes%>%
   group_by(Project,cas_number,Conc,Link)%>%
-  summarize(nGenes=n_distinct(Gene))
+  summarize(nGenes=n_distinct(Gene))%>%
+  left_join(map)
+
 write.table(sg.stats,file='data/sigGeneStats.csv',sep=',',row.names=F)
 ##not using this for now:
 write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)
