@@ -126,9 +126,8 @@ for(i in chems){
 }
 
 
-map <-read.csv('data/chemicalIdMapping.csv',header=T,sep=',',fileEncoding = 'UTF-8-BOM')%>%
+map <-all.chems%>%
   dplyr::select(cas_number,Chemical_ID)%>%distinct()
-
 
 
 sg.stats <- sig.genes%>%

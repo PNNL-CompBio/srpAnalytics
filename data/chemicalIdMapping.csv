@@ -1027,7 +1027,6 @@ NOCAS_0007,2509,2509,NA,,
 307-24-4,C272788,2589,EPA PFAS,,Perfluorohexanoic acid
 375-95-1,2590,2590,NA,,
 375-95-1,C850268,2590,EPA PFAS,,Perfluorononanoic acid
-2795-39-3,2592,2592,NA,,
 1763-23-1,2593,2593,NA,,
 754-91-6,2594,2594,NA,,
 754-91-6,C754644,2594,EPA PFAS,,Perfluorooctanesulfonamide
@@ -1053,7 +1052,6 @@ NOCAS_0007,2509,2509,NA,,
 62-38-4,2644,2644,NA,,
 298-02-2,2645,2645,Insecticide,,
 2310-17-0,2647,2647,Insecticide,,
-126-73-8,2649,2649,Flame Retardant,,
 732-11-6,2650,2650,Insecticide,,
 78-51-3,2651,2651,Flame Retardant,,
 6607,2652,2652,NA,,
@@ -1069,7 +1067,7 @@ NOCAS_47328,2683,2683,NA,,
 29420-49-3,2684,2684,NA,,
 3871-99-6,2685,2685,NA,,
 3871-99-6,C222309,2685,EPA PFAS,,Potassium perfluorohexanesulfonate
-2795-39-3,2686,2686,NA,,
+2795-39-3,2686,2686,EPA PFAS,,Potassium perfluorooctanesulfonate
 2795-39-3,C59898,2686,EPA PFAS,,Potassium perfluorooctanesulfonate
 72-54-8,2687,2687,Insecticide,,
 72-55-9,2688,2688,Insecticide,,
@@ -1263,7 +1261,6 @@ xs189003-92-7,3093,3093,NA,,
 76-87-9,3141,3141,NA,,
 25498-49-1,3142,3142,NA,,
 13674-87-8,3143,3143,NA,,
-13674-87-8,3144,3144,NA,,
 78-51-3,3146,3146,Flame Retardant,,
 13674-84-5,3147,3147,NA,,
 126-72-7,3149,3149,NA,,
@@ -1390,7 +1387,7 @@ NOCAS_0001,3413,3413,NA,,
 663-35-4,C678004,4404,EPA PFAS,,Ethyl pentafluoropropionyl acetate
 1765-92-0,C689665,4405,EPA PFAS,,"1H,1H-Heptafluorobutyl epoxide"
 1682-31-1,C42792,4406,EPA PFAS,,"1-Iodo-1H,1H,2H,2H-perfluoroheptane"
-3792-02-7,C103567,4407,EPA PFAS,,4:4 Fluorotelomer alcohol
+2/7/3792,C103567,4407,EPA PFAS,,4:4 Fluorotelomer alcohol
 375-88-2,C676861,4408,EPA PFAS,,1-Bromopentadecafluoroheptane
 338-83-0,C45738,4410,EPA PFAS,,Perfluamine
 354-76-7,C245785,4411,EPA PFAS,,Pentafluoropropionamide
@@ -1435,7 +1432,7 @@ NOCAS_0001,3413,3413,NA,,
 375-22-4,C376795,4450,EPA PFAS,,Perfluorobutanoic acid
 754-96-1,C664858,4451,EPA PFAS,,"1H,1H,10H,10H-Perfluorodecane-1,10-diol"
 7383-71-3,C953658,4452,EPA PFAS,,"2,2,3,3-Tetrafluoropropyl acrylate"
-2264-01-9,C565333,4453,EPA PFAS,,"1H,1H,6H,6H-Perfluorohexane-1,6-diol diacrylate"
+1/9/2264,C565333,4453,EPA PFAS,,"1H,1H,6H,6H-Perfluorohexane-1,6-diol diacrylate"
 865-79-2,C136541,4454,EPA PFAS,,9-Chloro-perfluorononanoic acid
 307-35-7,C992642,4455,EPA PFAS,,Perfluorooctanesulfonyl fluoride
 356-02-5,C882576,4456,EPA PFAS,,3:3 Fluorotelomer carboxylic acid
