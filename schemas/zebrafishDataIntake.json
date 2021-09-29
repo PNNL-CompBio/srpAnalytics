@@ -1,0 +1,65 @@
+[
+    {
+        "Column":["chemical.id"],
+        "Friendly Name":["Chemical ID"],
+        "Description":["Internal chemical identifier"],
+        "Nas allowed":["no"],
+        "Allowable values":[null],
+        "Comment":[null]
+    },
+    {
+        "Column":["bottle.id"],
+        "Friendly Name":["Bottle ID"],
+        "Description":["Internal bottle identifer"],
+        "Nas allowed":["no"],
+        "Allowable values":[null],
+        "Comment":[null]
+    },
+    {
+        "Column":["conc"],
+        "Friendly Name":["Concentration"],
+        "Description":["Dose of chemical"],
+        "Nas allowed":["no"],
+        "Allowable values":["numeric"],
+        "Comment":[null]
+    },
+    {
+        "Column":["plate.id"],
+        "Friendly Name":["Plate ID"],
+        "Description":["Plate identifier"],
+        "Nas allowed":["no"],
+        "Allowable values":[null],"Comment":[null]
+    },
+    {
+        "Column":["well"],
+        "Friendly Name":["Well"],
+        "Description":["Well of plate"],
+        "Nas allowed":["no"],
+        "Allowable values":[null],
+        "Comment":[null]
+    },
+    {
+        "Column":["date"],
+        "Friendly Name":["Date"],
+        "Description":["Date assay was initated"],
+        "Nas allowed":["no"],
+        "Allowable values":[null],
+        "Comment":[null]
+    },
+    {
+        "Column":["endpoint"],
+        "Friendly Name":["Zebrafish End point"],
+        "Description":["Endpoint measured"],
+        "Nas allowed":["no"],
+        "Allowable values":["listed in endpoint document"],
+        "Comment":[null]
+    },
+    {
+        "Column":["value"],
+        "Friendly Name":["Value of endpoint"],
+        "Description":["Individual Fish Response"],
+        "Nas allowed":["yes"],
+        "Allowable values":["1,0"],
+        "Comment":["When endpoint is DNC_ then  value is NA"]
+    }
+]

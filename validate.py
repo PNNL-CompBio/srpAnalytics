@@ -13,6 +13,11 @@ schemas = {
     'envSampXYcoords': load(open('./schemas/envSampXYcoords.json')),
 }
 
+proc_schemas = {
+    'envSample': load(open('./schemas/envSampleIntake.json')),
+    'zebrafish': load(open('./schemas/zebrafishDataIntake.json'))
+}
+
 def verify(df, table_name):
     """ Takes a Pandas DataFrame and a Microsoft SQL Server table name to compare the number of rows in each. This function only works if the to_sql function replaces the table (if it appends the number of rows will obviously be off)
 
