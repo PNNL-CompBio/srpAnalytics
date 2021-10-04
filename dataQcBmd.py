@@ -188,6 +188,13 @@ def main():
             test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
             print("Testing morphological code")
             res = run_morpho_on_file(test_morph,'devel')
+
+    ##here we run the gene data collection
+    print("Collecting data from BU")
+    command = 'Rscript /srpAnalytics/exposomeSummaryStats.R'
+    os.system(command)
+
+    ##here we run R code to merge all the files togeter
     if len(files)==0:
         print("Testing database rebuild")
         command = "Rscript /srpAnalytics/buildv1database.R"
@@ -201,46 +208,12 @@ def main():
     allfiles = [a for a in os.listdir('/tmp') if 'csv' in a]
     print(allfiles)
     if args.validate:
-        print("Validating existing files")
+        print("Validating existing files for database ingest")
         ##get files
         for fval in allfiles:
             valid.verify(pd.read_csv(fval,gsub('.csv','',fval)))
         ##validate
     allfiles = ['README.md']+allfiles
-#    else:
-#        for morpho_input_csv_file_name in flist:
-           #ull_devel = "full"
-           # print ("full_devel:" + str(full_devel)) # devel
-            ########## <begin> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
-
-
-            # actual file is not saved here, but it is ok to be used at following procedures
-
-
- #           print ("args.LPR:" + str(args.LPR)) # True
-       #     if (args.LPR == True):
-                # for LPR reformatting (tall->wide), both morphological and LPR is needed
-
-        #          bypass_can = input()
-                #devel
-
-                #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall_wide_t0_t239_devel.csv
-            ########### <end> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
-
-
-
-            ########### <begin> BMD calculation
-         #   if (args.LPR == True):
-          #                                            full_devel)
-           # else: # if (args.LPR == False):
-            #    files[morpho_input_csv_file_name] =
-            ########### <end> BMD calculation
-
-
-
-
-         #wd <- paste0(getwd(),'/')
-         ##UPDATE TO PYTHON
 
     print('Now zipping up'+str(len(allfiles))+'files')
     tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
