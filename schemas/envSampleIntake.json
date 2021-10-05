@@ -248,8 +248,8 @@
         "Data type":["list of strings"],
         "Nas allowed":["yes"],
         "Possible values":[null],
-        "Ontology link":[null
-                        },
+        "Ontology link":[null]
+    },
     {
         "Term name":["projectName"],
         "Friendly Name":["Project Name"],
