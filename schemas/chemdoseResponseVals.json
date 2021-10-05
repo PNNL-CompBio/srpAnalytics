@@ -1,35 +1,39 @@
 {
     "type": "object",
-    "properties": { 
+    "properties": {
         "Chemical_ID": {
-            "type": "integer", 
-            "minimum": 0
-        }, 
+            "type": "integer",
+            "minimum": 0,
+            "Friendly Name":"",
+            "Description" :"",
+            "Comment": ""
+        },
         "Dose": {
-            "type": "number", 
+            "type": "number",
             "minimum": 0,
             "maximum": 100
-        }, 
+        },
         "Response": {
-            "type": "number", 
+            "type": "number",
             "minimum": 0,
             "maximum": 1
-        }, 
+        },
         "CI_Lo": {
-            "type": "number", 
+            "type": "number",
             "minimum": 0,
             "maximum": 1
-        }, 
+        },
 
         "CI_Hi": {
-            "type": "number", 
+            "type": "number",
             "minimum": 0,
             "maximum": 1
-        }, 
+        },
         "End Point Name": {
             "type": "string",
             "minLength": 0,
-            "maxLength": 255
+            "maxLength": 255,
+            "pattern":""
         },
         "endPointLink": {
             "type": ["string", "null"],

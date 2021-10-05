@@ -1,10 +1,13 @@
 {
     "type": "object",
-    "properties": { 
+    "properties": {
         "Chemical_ID": {
-            "type": "integer", 
-            "minimum": 0
-        }, 
+            "type": "integer",
+            "minimum": 0,
+            "Friendly Name": "",
+            "Description": "",
+            "Ontology Link": ""
+        },
         "Model": {
             "type": "string",
             "minLength": 0,
@@ -13,17 +16,17 @@
         "BMD10": {
             "type": ["number", "null"],
             "minimum": 0
-        }, 
+        },
         "BMD50": {
             "type": ["number", "null"],
             "minimum": 0
-        }, 
+        },
         "Min_Dose": {
-            "type": "number", 
+            "type": "number",
             "minimum": 0
-        }, 
+        },
         "Max_Dose": {
-            "type": "number", 
+            "type": "number",
             "minimum": 0,
             "maximum": 100
         },
@@ -64,11 +67,11 @@
             "maxLength": 255
         },
         "AVERAGE_MASS": {
-            "type": "number", 
+            "type": "number",
             "minimum": 0
         },
         "PUBCHEM_DATA_SOURCES": {
-            "type": "integer", 
+            "type": "integer",
             "minimum": 0
         },
         "zf.cid": {

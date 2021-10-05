@@ -427,7 +427,7 @@ main<-function(){
                   chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
 
     print(missing)
-    
+
     ##Final output for the platform team is these 4 files
     write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),quote=T,row.names = FALSE)
     write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE, quote = TRUE)
@@ -444,7 +444,7 @@ main<-function(){
     samp.count<-sampToChem%>%select(Sample_ID,Chemical_ID)%>%
       group_by(Chemical_ID)%>%
       summarize(`Number of samples`=n_distinct(Sample_ID))
-    
+
     chem.eps<-bmds%>%
       select(c('Chemical_ID','chemical_class','End Point Name','AUC_Norm'))%>%
       subset(!is.na(AUC_Norm))%>%
@@ -454,26 +454,26 @@ main<-function(){
       tidyr::replace_na(list(`End Points`=0,`Number of samples`=0,`chemical_class`='None'))%>%
       group_by(chemical_class)%>%
       summarize(`End Points`=sum(`End Points`),`Samples`=sum(`Number of samples`))
-    
-    
-    
+
+
+
     chem.count<-sampToChem%>%select(Sample_ID,Chemical_ID)%>%
       group_by(Sample_ID)%>%
       summarize(`Number of chemicals`=n_distinct(Chemical_ID))
-    
+
     samp.eps<-ebmds%>%
      select(c('Sample_ID','LocationName','End Point Name','AUC_Norm'))%>%
       subset(!is.na(AUC_Norm))%>%
     group_by(Sample_ID,LocationName)%>%
     summarize(`End Points`=n_distinct(`End Point Name`))%>%
-    full_join(chem.count)%>%   
+    full_join(chem.count)%>%
     tidyr::replace_na(list(`End Points`=0,`Number of chemicals`=0,LocationName='None'))%>%
       group_by(LocationName)%>%
       summarize(`End Points`=sum(`End Points`),Chemicals=sum(`Number of chemicals`))
-    
+
     write.table(chem.eps,'chemCounts.csv',row.names=F,col.names=T)
     write.table(samp.eps,'sampCounts.csv',row.names=F,col.names=T)
-    
+
 }
 
 main()

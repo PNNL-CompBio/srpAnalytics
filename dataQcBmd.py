@@ -46,7 +46,9 @@ parser.add_argument('--test-morpho', dest='test_morpho',\
 parser.add_argument('--validate', dest='validate', \
                     help='If this tag is added, then we validate existing files',\
                     action='store_true', default=False)
-parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
+parser.add_argument('--update-db', dest='update_db', action='store_true', \
+                    help='Include --update-db if you want to update the database',\
+                    default=False)
 
 ############ (developer comment)
 # for morphological data, only morphological data is needed as input
@@ -190,8 +192,10 @@ def main():
             res = run_morpho_on_file(test_morph,'devel')
 
     ##here we run the gene data collection
+
+
     print("Collecting data from BU")
-    command = 'Rscript /srpAnalytics/exposomeSummaryStats.R'
+    command = 'Rscript /srpAnalytics/exposome_summary_stats.R'
     os.system(command)
 
     ##here we run R code to merge all the files togeter
@@ -215,7 +219,7 @@ def main():
         ##validate
     allfiles = ['README.md']+allfiles
 
-    print('Now zipping up'+str(len(allfiles))+'files')
+    print('Now zipping up '+str(len(allfiles))+' files')
     tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
     for fname in allfiles:
         tar.add('/tmp/'+fname)

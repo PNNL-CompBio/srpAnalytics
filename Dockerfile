@@ -6,7 +6,9 @@ RUN apt-get update -qq && apt-get install -y net-tools \
         python3-pip \
         curl \
         unixodbc
+
 COPY setup.sh /setup.sh
+RUN Rscript -e "install.packages('argparse'); install.packages('cowplot')"
 
 RUN /bin/bash ./setup.sh
 COPY requirements.txt /requirements.txt
