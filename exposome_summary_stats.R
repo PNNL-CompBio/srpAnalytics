@@ -33,7 +33,8 @@ getGoTerms<-function(chemical_id,proj){
 
 
   if(res$status_code!=200)
-    gs_enrichment_stat <- data.frame(`GenesetName`=NULL,`Geneset`=NULL,`Summary Score`=NULL,`GSScore`=NULL,`Conc`=NULL)
+      gs_enrichment_stat <- data.frame(`GenesetName`=NULL,`Geneset`=NULL,
+                                       `Summary Score`=NULL,`GSScore`=NULL,`Conc`=NULL)
   else{
     gs_enrichment_stat <- fromJSON(fromJSON(rawToChar(res$content)))
     gs_enrichment_stat <- gs_enrichment_stat%>%
@@ -62,7 +63,6 @@ getGenes<-function(chemical_id,proj){
   chem_gene_link=paste0("https://montilab.bu.edu/Xposome/?page=",proj,
                    "&tab=chemical_explorer&chemical_id=",chemical_id,"&stat=gene_expression")
 
-  #print(fromJSON(rawToChar(res$content)))
   if(res$status_code!=200)
     gene_expression_stat=data.frame(Gene=NULL,GeneName=NULL,Direction=NULL,`Summary Score`=NULL,`Zscore`=NULL,`Conc`=NULL,Link=NULL)
   else{
@@ -138,5 +138,4 @@ sg.stats <- sig.genes%>%
 
 write.table(sg.stats,file='data/sigGeneStats.csv',sep=',',row.names=F)
 ##not using this for now:
-write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)
-#write.table(term.tab,file='data/geneEnrich.tsv',sep='\t',row.names=F)
+#write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)

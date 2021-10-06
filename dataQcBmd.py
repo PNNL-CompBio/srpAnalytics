@@ -8,6 +8,7 @@ import seaborn as sns
 import os, sys, time
 import argparse
 import tarfile
+import re
 from ingest import pull_raw_data, test_connection
 import validate as valid
 
@@ -49,6 +50,8 @@ parser.add_argument('--validate', dest='validate', \
 parser.add_argument('--update-db', dest='update_db', action='store_true', \
                     help='Include --update-db if you want to update the database',\
                     default=False)
+parser.add_argument('--get-genes', dest='get_genes', action='store_true',\
+                    help='Get genes from BU REST API', default=False)
 
 ############ (developer comment)
 # for morphological data, only morphological data is needed as input
@@ -113,7 +116,7 @@ def run_lpr_on_file(lpr_file,morph_file, full_devel='full'):
                                              LPR_input_csv_file_name_wide, full_devel)
     return res
 
-def run_morpho_on_file(morph_file,full_devel='full'):
+def run_morpho_on_file(morph_file, full_devel='full'):
     """
     formats and runs morphological BMD on file
     """
@@ -194,12 +197,13 @@ def main():
     ##here we run the gene data collection
 
 
-    print("Collecting data from BU")
-    command = 'Rscript /srpAnalytics/exposome_summary_stats.R'
-    os.system(command)
+    if args.get_genes:
+        print("Collecting data from BU")
+        command = 'Rscript /srpAnalytics/exposome_summary_stats.R'
+        os.system(command)
 
     ##here we run R code to merge all the files togeter
-    if len(files)==0:
+    if len(files) == 0:
         print("Testing database rebuild")
         command = "Rscript /srpAnalytics/buildv1database.R"
         os.system(command)
@@ -215,7 +219,7 @@ def main():
         print("Validating existing files for database ingest")
         ##get files
         for fval in allfiles:
-            valid.verify(pd.read_csv(fval,gsub('.csv','',fval)))
+            valid.verify(pd.read_csv(fval, re.sub('.csv', '', fval)))
         ##validate
     allfiles = ['README.md']+allfiles
 

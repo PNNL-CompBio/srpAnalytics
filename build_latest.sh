@@ -23,6 +23,6 @@ $mor_cmd
 
 ##now run the docker image with the files
 echo "Running all code"
-run="/usr/bin/docker run -v "$PWD":/tmp srp-analytics --morpho=/tmp/temp/morph.csv --LPR=/tmp/temp/lpr.csv"
+run="/usr/bin/docker run -v "$PWD":/tmp srp-analytics --morpho=/tmp/temp/morph.csv --LPR=/tmp/temp/lpr.csv --get-genes"
 echo $run
 $run

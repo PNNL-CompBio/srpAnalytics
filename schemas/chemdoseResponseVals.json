@@ -11,34 +11,52 @@
         "Dose": {
             "type": "number",
             "minimum": 0,
-            "maximum": 100
+            "maximum": 100,
+            "Friendly Name":"",
+            "Description" :"",
+            "Comment": ""
         },
         "Response": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "Friendly Name":"",
+            "Description" :"",
+            "Comment": ""
         },
         "CI_Lo": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "Friendly Name":"",
+            "Description" :"",
+            "Comment": ""
         },
 
         "CI_Hi": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "Friendly Name":"",
+            "Description" :"",
+            "Comment": ""
         },
         "End Point Name": {
             "type": "string",
             "minLength": 0,
             "maxLength": 255,
-            "pattern":""
+            "pattern":"",
+            "Friendly Name":"",
+            "Description" :"",
+            "Comment": ""
         },
         "endPointLink": {
             "type": ["string", "null"],
             "minLength": 0,
-            "maxLength": 255
+            "maxLength": 255,
+            "Friendly Name":"",
+            "Description" :"",
+            "Comment": ""
         }
     }
 }
