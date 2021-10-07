@@ -48,13 +48,20 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
         bmdl_converge_flag = 1
         bmdl_mid_val = np.nan
         
+        #print (f"model_name:{model_name}")
+        #logistic
+
         # Setup model
         if(model_name == 'logistic'):
+            
             model = baf.Logistic(test_dose_response[['dose','num_affected', 'total_num']].copy())
+            
             res = model.fit()
+             
+            print(f"Model Convergence:{res.mle_retvals['converged']}")
+            # True
             
-            #print('Model Convergence: ' + str(res.mle_retvals['converged']))
-            
+            a=b
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0
