@@ -17,6 +17,7 @@ warnings.filterwarnings('ignore')
 starting_dir = os.getcwd()
 print (starting_dir)
 
+report = False
 
 def main():
 
@@ -40,11 +41,11 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     # In[4]:
     
     
-    print(lpr_all_data.head())
+    #print(lpr_all_data.head())
     #display("lpr_all_data.shape:" + str(lpr_all_data.shape))
     # Convert plate ids to ints
     lpr_all_data['plate.id'] = (lpr_all_data['plate.id'].values).astype(int)
-    print(lpr_all_data)
+    #print(lpr_all_data)
     
     # In[5]:
     
@@ -60,12 +61,13 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     # Count number of wells for each chemical
     for chemical_ID in unique_chemical_IDs:
         lpr_data_subset = lpr_all_data.loc[lpr_all_data['chemical.id'] == chemical_ID]
-        print('\nPlates/Wells/Concentration information about compound:', chemical_ID)
-        print('Plate IDs:', np.unique(lpr_data_subset['plate.id']))
-        print('Number of unique plates:', len(np.unique(lpr_data_subset['plate.id'])))
-        print('Concentrations tested:', np.unique(lpr_data_subset['conc']))
-        print('Number of concentrations:', len(np.unique(lpr_data_subset['conc'])))
-        print('Total number of wells:', lpr_data_subset.shape[0])
+        if report:
+            print('\nPlates/Wells/Concentration information about compound:', chemical_ID)
+            print('Plate IDs:', np.unique(lpr_data_subset['plate.id']))
+            print('Number of unique plates:', len(np.unique(lpr_data_subset['plate.id'])))
+            print('Concentrations tested:', np.unique(lpr_data_subset['conc']))
+            print('Number of concentrations:', len(np.unique(lpr_data_subset['conc'])))
+            print('Total number of wells:', lpr_data_subset.shape[0])
         for concentration_id in np.unique(lpr_data_subset['conc']):
             lpr_data_subset_concs = lpr_data_subset.loc[lpr_data_subset['conc'] == concentration_id]
             #print('Number of wells for compound ID', chemical_ID, 'and concentration', concentration_id, 'are', len((lpr_data_subset_concs['well'])))
@@ -79,7 +81,8 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     #morph_data_file_complete_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/wide/7_PAH_zf_morphology_data_2021JAN11_wide_made_in_2021_01_19_DNC_0.csv'
     morph_data_file_complete_path = complete_file_path_morpho
     morphology_all_data = pd.read_csv(morph_data_file_complete_path, header = 0)
-    print(morphology_all_data.head())
+    if report:
+        print(morphology_all_data.head())
     
     # In[8]:
     
@@ -95,16 +98,16 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     
     # In[9]:
     
+    if report:
+        print("morphology_all_data.shape:" + str(morphology_all_data.shape))
+        print("morphology_nonna_data_plate_well.shape:" + str(morphology_nonna_data_plate_well.shape))
     
-    print("morphology_all_data.shape:" + str(morphology_all_data.shape))
-    print("morphology_nonna_data_plate_well.shape:" + str(morphology_nonna_data_plate_well.shape))
+        print("\nlpr_all_data.shape:" + str(lpr_all_data.shape))
+        print("lpr_filtered_data.shape:"+str(lpr_filtered_data.shape) + "\n")
     
-    print("\nlpr_all_data.shape:" + str(lpr_all_data.shape))
-    print("lpr_filtered_data.shape:"+str(lpr_filtered_data.shape) + "\n")
-    
-    print(morphology_nonna_data_plate_well[0:5])
-    print ("\n")
-    print(lpr_all_data.Chemical_Plate_WELL[0:5])
+        print(morphology_nonna_data_plate_well[0:5])
+        print ("\n")
+        print(lpr_all_data.Chemical_Plate_WELL[0:5])
     
     # In[10]:
     
@@ -142,7 +145,7 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     interval = "1 min"
     #interval = "30 sec"
     #interval = "12 sec"
-    print ("interval:" + str(interval))
+    #print ("interval:" + str(interval))
     if (interval == "1 min"):
         group_size = 10 # (10 X 6 sec/sample = 1 min/sample)
     elif (interval == "30 sec"):
@@ -182,11 +185,11 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     time_index_start = 4 # because 0-3th columns show irrelevant values
     num_time_points = 24 # >= 25 will not make any difference
     
-    print ("lpr_filtered_data_in_minute.shape:" + str(lpr_filtered_data_in_minute.shape)) #(223, 28)
+    #print ("lpr_filtered_data_in_minute.shape:" + str(lpr_filtered_data_in_minute.shape)) #(223, 28)
     
     fig, ax = plt.subplots()
-    
-    print (lpr_filtered_data_in_minute.iloc[10:15, time_index_start:time_index_start + num_time_points]) 
+    if report:
+        print (lpr_filtered_data_in_minute.iloc[10:15, time_index_start:time_index_start + num_time_points]) 
     # first ':' shows rows, second ':' shows columns
     
     ax.plot(np.transpose(lpr_filtered_data_in_minute.iloc[10:223,time_index_start:time_index_start + num_time_points].values));
@@ -213,9 +216,10 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     #delta_mov_auc['AUC_1_2_3'] = 0 # just initial value
     
     for transition_index, transition_point in enumerate(transition_points):
-        print ("\n")
-        print ("transition_index:" + str(transition_index))
-        print ("transition_point:" + str(transition_point))
+        if report:
+            print ("\n")
+            print ("transition_index:" + str(transition_index))
+            print ("transition_point:" + str(transition_point))
         
         delta_mov_auc['MOV' + str(transition_index + 1)] \
         = lpr_filtered_data_in_minute['t' + str(transition_point + 1)] \
@@ -230,30 +234,24 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
         # I didn't fully understand this part, but it works as intended
         #delta_mov_auc['MOV_1_2_3'] = delta_mov_auc['MOV_1_2_3'] + delta_mov_auc['MOV' + str(transition_index + 1)]
         #delta_mov_auc['AUC_1_2_3'] = delta_mov_auc['AUC_1_2_3'] + delta_mov_auc['AUC' + str(transition_index + 1)]
-        
-    print(delta_mov_auc.head())
+    if report:    
+        print(delta_mov_auc.head())
     
     # In[23]:
     
     
     # Rename column headers to make it compatible with earlier data received from Lisa
     delta_mov_auc.rename(columns={"chemical.id": "Chemical.ID", "conc": "CONC", "plate.id": "Plate", "well": "WELL"}, inplace = True)
-    print(delta_mov_auc.head())
-    
-    # In[24]:
-    
-    
-    print(delta_mov_auc.tail())
-    
-    # In[25]:
+    if report:
+        print(delta_mov_auc.head())
+        print(delta_mov_auc.tail())
     
     
     import generate_dose_response as gdr
     import BMD_BMDL_estimation as bmdest
     import Plot_Save as ps
     
-    # In[ ]:
-    
+
     
     start_time = time.time()
     

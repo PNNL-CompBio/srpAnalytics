@@ -72,7 +72,7 @@ def runBmdPipeline(complete_file_path, full_devel):
         chemical_id_from_here = [3756]
 
     for chemical_id in chemical_id_from_here:
-        print("chemical_id:" + str(chemical_id))
+        #print("chemical_id:" + str(chemical_id))
         for end_point in end_points:
             os.chdir(output_folder)
             # subset original dataframe for a user-specified chemical and end_point pair

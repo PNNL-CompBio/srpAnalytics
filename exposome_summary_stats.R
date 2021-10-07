@@ -4,7 +4,7 @@ library(jsonlite)
 library(httr)
 library(dplyr)
 library(tidyr)
-library(cowplot)
+#library(cowplot)
 url <- "https://montilab.bu.edu/Xposome-API/projects?all=Yes"
 res <- GET(url = url, encode = 'json')
 stop_for_status(res)
@@ -112,19 +112,19 @@ for(i in 1:length(projects)){
 sig.genes <- gene.tab%>%rowwise()%>%mutate(absVal=abs(ModZScore))%>%
   subset(absVal>1.63)
 
-library(ggplot2)
-chems<-unique(gene.tab$cas_number)[100:105]
-for(i in chems){
-  p1<-sig.genes%>%
-    subset(cas_number==i)%>%
-    ggplot()+geom_jitter(aes(x=Conc,y=ModZScore,col=Project,alpha=0.5))+ggtitle(i)+ scale_x_discrete(guide = guide_axis(angle = 90))
-  p2<-sig.genes%>%
-    subset(cas_number==i)%>%
-    ggplot()+geom_bar(aes(x=Conc,fill=Project),position='dodge')+ggtitle(i) +scale_x_discrete(guide = guide_axis(angle = 90))
+## library(ggplot2)
+## chems<-unique(gene.tab$cas_number)[100:105]
+## for(i in chems){
+##   p1<-sig.genes%>%
+##     subset(cas_number==i)%>%
+##     ggplot()+geom_jitter(aes(x=Conc,y=ModZScore,col=Project,alpha=0.5))+ggtitle(i)+ scale_x_discrete(guide = guide_axis(angle = 90))
+##   p2<-sig.genes%>%
+##     subset(cas_number==i)%>%
+##     ggplot()+geom_bar(aes(x=Conc,fill=Project),position='dodge')+ggtitle(i) +scale_x_discrete(guide = guide_axis(angle = 90))
 
-  res=cowplot::plot_grid(plotlist=list(p1,p2))
-  ggsave(paste0('summary',i,'.png'),plot=res)
-}
+##   res=cowplot::plot_grid(plotlist=list(p1,p2))
+##   ggsave(paste0('summary',i,'.png'),plot=res)
+## }
 
 
 map <-all.chems%>%
@@ -136,6 +136,6 @@ sg.stats <- sig.genes%>%
   summarize(nGenes=n_distinct(Gene))%>%
   left_join(map)
 
-write.table(sg.stats,file='data/sigGeneStats.csv',sep=',',row.names=F)
+write.table(sg.stats,file='tmp/sigGeneStats.csv',sep=',',row.names=F)
 ##not using this for now:
 #write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)

@@ -8,7 +8,7 @@ RUN apt-get update -qq && apt-get install -y net-tools \
         unixodbc
 
 COPY setup.sh /setup.sh
-RUN Rscript -e "install.packages('argparse'); install.packages('cowplot')"
+RUN Rscript -e "install.packages('argparse')"
 
 RUN /bin/bash ./setup.sh
 COPY requirements.txt /requirements.txt

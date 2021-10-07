@@ -195,8 +195,6 @@ def main():
             res = run_morpho_on_file(test_morph,'devel')
 
     ##here we run the gene data collection
-
-
     if args.get_genes:
         print("Collecting data from BU")
         command = 'Rscript /srpAnalytics/exposome_summary_stats.R'
