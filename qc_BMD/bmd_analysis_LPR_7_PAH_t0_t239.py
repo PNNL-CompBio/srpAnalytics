@@ -17,8 +17,6 @@ warnings.filterwarnings('ignore')
 starting_dir = os.getcwd()
 print (starting_dir)
 
-report = False
-
 def main():
 
     #complete_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH_zf_morphology/input/wide/7_PAH_zf_morphology_data_2020NOV11_wide_DNC_0.csv'
@@ -37,6 +35,8 @@ def main():
 def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel):
 
     lpr_all_data = pd.read_csv(complete_file_path_LPR, header = 0)
+    report = False
+
 
     #print(lpr_all_data.head())
     #display("lpr_all_data.shape:" + str(lpr_all_data.shape))
@@ -74,8 +74,6 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     morphology_all_data = pd.read_csv(morph_data_file_complete_path, header = 0)
     if (report):
         print(morphology_all_data.head())
-
-    # In[8]:
 
 
     # 1. Append additional identifier column (Plate_Well value) to lpr and morphology data
@@ -267,7 +265,7 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
         end_points_from_here = ['MOV1']
         #end_points_from_here = ['MOV1_2_3']
 
-    report = True
+    report = False
     #report = False
 
     for chemical_id in chemical_id_from_here:

@@ -32,7 +32,7 @@ def main():
 def runBmdPipeline(complete_file_path, full_devel):
     ##read in the data
     df_morpho = pd.read_csv(complete_file_path, header = 0)
-    
+
 
     ##let's collect the file names to return
     filenames = []
@@ -41,10 +41,10 @@ def runBmdPipeline(complete_file_path, full_devel):
         # Add aggregate endpoints
         # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
         df_morpho['ANY24'] = df_morpho[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
-        
+
         # 2. Any effect within 5 days (combination of all measurements at both time points)
         df_morpho['ANY120'] = df_morpho[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
-        
+
         # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
         df_morpho['TOT_MORT'] = df_morpho[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
 
@@ -60,7 +60,7 @@ def runBmdPipeline(complete_file_path, full_devel):
     os.chdir(output_folder)
 
     start_time = time.time()
-   
+
     # full -> 17 (without DNC) unlike phase_I_II (18 endpoints), 7_PAH lacks NC24
     if full_devel == "full":
         end_points = ['ANY24', 'ANY120', 'AXIS', 'ALL_BUT_MORT', 'BRN_',\
@@ -127,7 +127,7 @@ def runBmdPipeline(complete_file_path, full_devel):
                         filenames = ps.save_results_good_data_nounique_model(test_dose_response, qc_flag,\
                                                                  model_predictions, selected_model_params, \
                                                                  str(chemical_id), end_point)
-                        
+
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print("Done, it took:"+str(time_took))
