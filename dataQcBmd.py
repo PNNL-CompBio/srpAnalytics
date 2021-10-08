@@ -188,11 +188,11 @@ def main():
             print("Testing LPR code")
             test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2020NOV11_tall.csv'
             test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
-            res = run_lpr_on_file(test_lpr,test_morph,'devel')
+            res = run_lpr_on_file(test_lpr, test_morph, 'devel')
         elif args.test_morpho:
             test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
             print("Testing morphological code")
-            res = run_morpho_on_file(test_morph,'devel')
+            res = run_morpho_on_file(test_morph, 'devel')
 
     ##here we run the gene data collection
     if args.get_genes:
@@ -217,7 +217,7 @@ def main():
         print("Validating existing files for database ingest")
         ##get files
         for fval in allfiles:
-            valid.verify(pd.read_csv(fval, re.sub('.csv', '', fval)))
+            valid.verify(pd.read_csv(fval, quotechar='"', quoting=1), re.sub('.csv', '', fval))
         ##validate
     allfiles = ['README.md']+allfiles
 
