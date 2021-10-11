@@ -31,7 +31,7 @@ def main():
 
 def runBmdPipeline(complete_file_path, full_devel):
     ##read in the data
-    df_morpho = pd.read_csv(complete_file_path, header = 0)
+    df_morph = pd.read_csv(complete_file_path, header = 0)
 
 
     ##let's collect the file names to return
@@ -40,29 +40,28 @@ def runBmdPipeline(complete_file_path, full_devel):
     if(test_data_sim == 0):
         # Add aggregate endpoints
         # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
-        df_morpho['ANY24'] = df_morpho[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
+       # df_morph['ANY24'] = df_morph[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
 
         # 2. Any effect within 5 days (combination of all measurements at both time points)
-        df_morpho['ANY120'] = df_morpho[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
+        #df_morph['ANY120'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
 
         # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
-        df_morpho['TOT_MORT'] = df_morpho[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
+        #df_morph['TOT_MORT'] = df_morph[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
 
         # 4. Any effect except mortality (#2 minus MO24 and MORT) >> 'ALL_BUT_MORT'
-        df_morpho['ALL_BUT_MORT'] = df_morpho[['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM', \
-                                               'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']].sum(axis=1,skipna=True,min_count=1)
+        #df_morph['ALL_BUT_MORT'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM', \
+                                               #'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']].sum(axis=1,skipna=True,min_count=1)
         # Add aggregate endpoints for 7 PAH
 
         ## JUSTIFICATION: 7 PAH dataset doesn't have "BRAI" endpoint.
         ## On the other hand, extract/phase I,II have "BRAI" endpoint.
-
+##this was added ina merge conflict, i hope it's ok (Sara)
         if 'BRAI' not in df_morph.columns: # as 7 PAH
             # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
             df_morph['ANY24'] = df_morph[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
-            
             # 2. Any effect within 5 days (combination of all measurements at both time points)
             df_morph['ANY120'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
-            
+
             # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
             df_morph['TOT_MORT'] = df_morph[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
 
@@ -89,6 +88,7 @@ def runBmdPipeline(complete_file_path, full_devel):
             df_morph['SKIN'] = df_morph[['PIG_']]
             df_morph['TCHR'] = df_morph[['TR__']]
 
+### END Of merge conflict
 
     if os.path.isdir("output") is False:
         os.mkdir("output")
