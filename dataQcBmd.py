@@ -207,7 +207,8 @@ def main():
         os.system(command)
 
     else:
-        print("building database with new files")
+        print("building database with new files:")
+        print(files)
         build_db_with_files(files)
 
 
@@ -219,12 +220,12 @@ def main():
         for fval in allfiles:
             valid.verify(pd.read_csv(fval, quotechar='"', quoting=1), re.sub('.csv', '', fval))
         ##validate
-    allfiles = ['README.md']+allfiles
+    allfiles = ['/tmp/'+a for a in allfiles]+['/srpAnalytics/README.md']
 
     print('Now zipping up '+str(len(allfiles))+' files')
     tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
     for fname in allfiles:
-        tar.add('/tmp/'+fname)
+        tar.add(fname)
     tar.close()
 
     if args.update_db:

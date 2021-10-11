@@ -243,7 +243,8 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     full.bmd<-full.bmd%>%
       left_join(endpointDetails)%>%
       dplyr::select(-c('End_Point','tmpId'))%>%
-    distinct()
+    distinct()%>%
+      tidyr::replace_na(list(LocationName='None'))
 }
   else{
     full.bmd<-mid.bmd%>%
@@ -251,7 +252,8 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
       full_join(sampChem)%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
       left_join(endpointDetails)%>%
-      distinct()%>%select(-c('End_Point'))##should we remove endpoint YES
+      distinct()%>%select(-c('End_Point'))%>%
+      tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
   }
 
   ##now we fix QC values
@@ -348,18 +350,21 @@ main<-function(){
     for(chem in chem_dirs){
         path=paste0(data.dir,'/',chem,'/')
         bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_2021_04_26.csv',
-                                             'bmd_vals_2021_05_18_all_phase_III_morpho.csv')))
+                                             'bmd_vals_2021_05_18_all_phase_III_morpho.csv',
+                                             'bmd_vals_all_qc.csv')))
         dose.files<-c(dose.files,paste0(path,c('dose_response_vals_2021_04_26.csv',
-                                               'dose_response_vals_2021_05_10_all_phase_III_morpho.csv')))
+                                               'dose_response_vals_2021_05_10_all_phase_III_morpho.csv',
+                                               'dose_response_vals_all_qc.csv')))
         curv.files<-c(curv.files,paste0(path,c('fit_vals_2021_04_26.csv',
-                                               'fit_vals_2021_05_10_all_phase_III_morpho.csv')))
+                                               'fit_vals_2021_05_10_all_phase_III_morpho.csv',
+                                               'fit_vals_all_qc.csv')))
     }
 
     for(ext in extract_dirs){
         path=paste0(data.dir,'/',ext,'/')
-        e.bmd<-c(e.bmd,paste0(path,'bmd_vals_2021_04_09.csv'))
-        e.dose<-c(e.dose,paste0(path,'dose_response_vals_2021_04_09.csv'))
-        e.curve<-c(e.curve,paste0(path,'fit_vals_2021_04_09.csv'))
+        e.bmd<-c(e.bmd,paste0(path,'bmd_vals_2021_08_18.csv'))
+        e.dose<-c(e.dose,paste0(path,'dose_response_vals_2021_08_18.csv'))
+        e.curve<-c(e.curve,paste0(path,'fit_vals_2021_08_18.csv'))
     }
 
 
@@ -445,15 +450,21 @@ main<-function(){
       group_by(Chemical_ID)%>%
       summarize(`Number of samples`=n_distinct(Sample_ID))
 
-    chem.eps<-bmds%>%
+    chem.counts<-bmds%>%
       select(c('Chemical_ID','chemical_class','End Point Name','AUC_Norm'))%>%
-      subset(!is.na(AUC_Norm))%>%
-      group_by(Chemical_ID,chemical_class)%>%
-      summarize(`End Points`=n_distinct(`End Point Name`))%>%
-      full_join(samp.count)%>%
-      tidyr::replace_na(list(`End Points`=0,`Number of samples`=0,`chemical_class`='None'))%>%
-      group_by(chemical_class)%>%
-      summarize(`End Points`=sum(`End Points`),`Samples`=sum(`Number of samples`))
+        subset(!is.na(AUC_Norm))%>%
+        group_by(chemical_class)%>%
+        summarize(`Chemicals`=n_distinct(Chemical_ID))
+    
+    chem.eps<-bmds%>%
+        group_by(Chemical_ID,chemical_class)%>%
+        summarize(`End Points`=n_distinct(`End Point Name`))%>%
+        full_join(samp.count)%>%
+        tidyr::replace_na(list(`End Points`=0,`Number of samples`=0,`chemical_class`='None'))%>%
+        group_by(chemical_class)%>%
+        summarize(`End Points`=sum(`End Points`),`Samples`=sum(`Number of samples`))%>%
+        left_join(chem.counts)
+      
 
 
 
@@ -461,18 +472,23 @@ main<-function(){
       group_by(Sample_ID)%>%
       summarize(`Number of chemicals`=n_distinct(Chemical_ID))
 
+    samp.counts<-ebmds%>%
+      group_by(LocationName)%>%
+      summarize(`Number of samples`=n_distinct(Sample_ID))
+    
     samp.eps<-ebmds%>%
      select(c('Sample_ID','LocationName','End Point Name','AUC_Norm'))%>%
       subset(!is.na(AUC_Norm))%>%
     group_by(Sample_ID,LocationName)%>%
     summarize(`End Points`=n_distinct(`End Point Name`))%>%
     full_join(chem.count)%>%
-    tidyr::replace_na(list(`End Points`=0,`Number of chemicals`=0,LocationName='None'))%>%
+    tidyr::replace_na(list(`End Points`=0,`Number of chemicals`=0))%>%
       group_by(LocationName)%>%
-      summarize(`End Points`=sum(`End Points`),Chemicals=sum(`Number of chemicals`))
+      summarize(`End Points`=sum(`End Points`),Chemicals=sum(`Number of chemicals`))%>%
+      left_join(samp.counts)
 
-    write.table(chem.eps,'chemCounts.csv',row.names=F,col.names=T)
-    write.table(samp.eps,'sampCounts.csv',row.names=F,col.names=T)
+    write.table(chem.eps,paste0(out.dir,'chemCounts.csv'),row.names=F,col.names=T)
+    write.table(samp.eps,paste0(out.dir,'sampCounts.csv'),row.names=F,col.names=T)
 
 }
 

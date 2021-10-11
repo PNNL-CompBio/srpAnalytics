@@ -1,5 +1,4 @@
 FROM rocker/tidyverse
-
 # To setup other dependencies
 RUN apt-get update -qq && apt-get install -y net-tools \
         python3.7 \
