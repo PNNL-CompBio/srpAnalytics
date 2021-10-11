@@ -482,13 +482,13 @@ main<-function(){
     group_by(Sample_ID,LocationName)%>%
     summarize(`End Points`=n_distinct(`End Point Name`))%>%
     full_join(chem.count)%>%
-    tidyr::replace_na(list(`End Points`=0,`Number of chemicals`=0))%>%
+    tidyr::replace_na(list(`End Points`=0,`Number of chemicals`=0,`LocationName`='None'))%>%
       group_by(LocationName)%>%
       summarize(`End Points`=sum(`End Points`),Chemicals=sum(`Number of chemicals`))%>%
       left_join(samp.counts)
 
-    write.table(chem.eps,paste0(out.dir,'chemCounts.csv'),row.names=F,col.names=T)
-    write.table(samp.eps,paste0(out.dir,'sampCounts.csv'),row.names=F,col.names=T)
+    write.table(chem.eps,paste0(out.dir,'chemCounts.Rmd'),row.names=F,col.names=T,sep='|')
+    write.table(samp.eps,paste0(out.dir,'sampCounts.Rmd'),row.names=F,col.names=T,sep='|')
 
 }
 

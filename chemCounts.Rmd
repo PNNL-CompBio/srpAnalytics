@@ -1,0 +1,10 @@
+"chemical_class"|"End Points"|"Samples"|"Chemicals"
+"Flame Retardant"|139|0|8
+"Fungicide"|267|0|15
+"Herbicide"|160|0|9
+"Industrial"|284|0|16
+"Insecticide"|428|0|24
+"Natural"|72|0|4
+"PAH"|2791|2789|155
+"Pharmacological"|90|0|5
+"Unclassified"|5365|0|308
