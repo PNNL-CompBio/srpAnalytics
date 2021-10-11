@@ -34,14 +34,21 @@ extract data to store in SRP data analytics portal')
 parser.add_argument('--morpho',dest='morpho',\
                     help='Comma-delimited list of morphological files to be processed',\
                     default='')
+
 parser.add_argument('--LPR', dest='lpr', \
                     help='Comma-delimited list of LPR-related files to be processed. MUST correspond to similar files in the morpho argument',\
                     default='')
+
 parser.add_argument('--test-lpr', dest='test_lpr',\
                     help='Set this flag to run LPR test code instead of full analysis',\
                     action='store_true', default=False)
+
 parser.add_argument('--test-morpho', dest='test_morpho',\
-                    help='Set this flag to run LPR test code instead of full analysis',\
+                    help='Set this flag to run morpho test code instead of full analysis',\
+                    action='store_true', default=False)
+
+parser.add_argument('--test-extract',dest='test_extract',\
+                    help='Set this flag to run morpho test code with extract data',\
                     action='store_true', default=False)
 
 parser.add_argument('--validate', dest='validate', \
@@ -52,6 +59,7 @@ parser.add_argument('--update-db', dest='update_db', action='store_true', \
                     default=False)
 parser.add_argument('--get-genes', dest='get_genes', action='store_true',\
                     help='Get genes from BU REST API', default=False)
+parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
 
 ############ (developer comment)
 # for morphological data, only morphological data is needed as input
@@ -85,7 +93,7 @@ def merge_files(path, file_dict):
     return [path+'/new_bmds.csv',path+'/new_fits.csv',path+'/new_dose.csv']
 
 
-def run_lpr_on_file(lpr_file,morph_file, full_devel='full'):
+def run_lpr_on_file(lpr_file,morph_file, full_devel='devel'):
     """
     runs LPR code on a file
     Attributes
@@ -183,6 +191,7 @@ def main():
             for i in range(len(files)):
                 fname=lfiles[i]
                 files[fname] = run_lpr_on_file(fname,mfiles[i])
+
     if args.morpho=="":
         if args.test_lpr:
             print("Testing LPR code")
@@ -205,7 +214,6 @@ def main():
         print("Testing database rebuild")
         command = "Rscript /srpAnalytics/buildv1database.R"
         os.system(command)
-
     else:
         print("building database with new files:")
         print(files)
