@@ -31,7 +31,7 @@ extract data to store in SRP data analytics portal')
 #                    default='newdata')
 #parser.add_argument('files', nargs='?', default='',\
 #                    help='Morphological files for regular BMD input or LPR (with --LPR option)')
-parser.add_argument('--morpho',dest='morpho',\
+parser.add_argument('--morpho', dest='morpho',\
                     help='Comma-delimited list of morphological files to be processed',\
                     default='')
 
@@ -47,7 +47,7 @@ parser.add_argument('--test-morpho', dest='test_morpho',\
                     help='Set this flag to run morpho test code instead of full analysis',\
                     action='store_true', default=False)
 
-parser.add_argument('--test-extract',dest='test_extract',\
+parser.add_argument('--test-extract', dest='test_extract',\
                     help='Set this flag to run morpho test code with extract data',\
                     action='store_true', default=False)
 
@@ -59,7 +59,6 @@ parser.add_argument('--update-db', dest='update_db', action='store_true', \
                     default=False)
 parser.add_argument('--get-genes', dest='get_genes', action='store_true',\
                     help='Get genes from BU REST API', default=False)
-parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
 
 ############ (developer comment)
 # for morphological data, only morphological data is needed as input
