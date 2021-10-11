@@ -3,19 +3,21 @@ from jsonschema import Draft3Validator
 import pandas as pd
 import argparse
 
+workdir='/srpAnalytics'
+
 schemas = {
-    'chemdoseResponseVals': load(open('./schemas/chemdoseResponseVals.json')),
-    'chemicalsByExtractSample': load(open('./schemas/chemicalByExtractSample.json')),
-    'chemSummaryStats': load(open('./schemas/chemSummaryStats.json')),
-    'chemXYcoords': load(open('./schemas/chemXYcoords.json')),
-    'envSampdoseResponseVals': load(open('./schemas/envSampdoseResponseVals.json')),
-    'envSampSummaryStats': load(open('./schemas/envSampSummaryStats.json')),
-    'envSampXYcoords': load(open('./schemas/envSampXYcoords.json')),
+    'chemdoseResponseVals': load(open(workdir+'/schemas/chemdoseResponseVals.json')),
+    'chemicalsByExtractSample': load(open(workdir+'/schemas/chemicalByExtractSample.json')),
+    'chemSummaryStats': load(open(workdir+'/schemas/chemSummaryStats.json')),
+    'chemXYcoords': load(open(workdir+'/schemas/chemXYcoords.json')),
+    'envSampdoseResponseVals': load(open(workdir+'/schemas/envSampdoseResponseVals.json')),
+    'envSampSummaryStats': load(open(workdir+'/schemas/envSampSummaryStats.json')),
+    'envSampXYcoords': load(open(workdir+'/schemas/envSampXYcoords.json')),
 }
 
 proc_schemas = {
-    'envSample': load(open('./schemas/envSampleIntake.json')),
-    'zebrafish': load(open('./schemas/zebrafishDataIntake.json'))
+    'envSample': load(open(workdir+'/schemas/envSampleIntake.json')),
+    'zebrafish': load(open(workdir+'/schemas/zebrafishDataIntake.json'))
 }
 
 def verify(df, table_name):

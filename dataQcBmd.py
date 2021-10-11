@@ -212,15 +212,15 @@ def main():
         build_db_with_files(files)
 
 
-    allfiles = [a for a in os.listdir('/tmp') if 'csv' in a]
+    allfiles = ['/tmp/'+a for a in os.listdir('/tmp') if 'csv' in a]
     print(allfiles)
     if args.validate:
         print("Validating existing files for database ingest")
         ##get files
         for fval in allfiles:
-            valid.verify(pd.read_csv(fval, quotechar='"', quoting=1), re.sub('.csv', '', fval))
+            valid.verify(pd.read_csv(fval, quotechar='"', quoting=1), re.sub('.csv', '', os.path.basename(fval)))
         ##validate
-    allfiles = ['/tmp/'+a for a in allfiles]+['/srpAnalytics/README.md']
+    allfiles = allfiles+['/srpAnalytics/README.md']
 
     print('Now zipping up '+str(len(allfiles))+' files')
     tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
