@@ -15,9 +15,8 @@ build=$docker_FILE" build . -t srp-analytics"
 echo $build
 $build
 
-echo "
-Running db test"
-run=$docker_FILE" run -v "$PWD":/tmp srp-analytics"
+echo "Running gene and db test"
+run="/usr/bin/docker run -v "$PWD":/tmp srp-analytics --get-genes"
 echo $run
 $run
 

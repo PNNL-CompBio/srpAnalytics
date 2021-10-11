@@ -8,6 +8,7 @@ import seaborn as sns
 import os, sys, time
 import argparse
 import tarfile
+import re
 from ingest import pull_raw_data, test_connection
 import validate as valid
 
@@ -53,7 +54,11 @@ parser.add_argument('--test-extract',dest='test_extract',\
 parser.add_argument('--validate', dest='validate', \
                     help='If this tag is added, then we validate existing files',\
                     action='store_true', default=False)
-
+parser.add_argument('--update-db', dest='update_db', action='store_true', \
+                    help='Include --update-db if you want to update the database',\
+                    default=False)
+parser.add_argument('--get-genes', dest='get_genes', action='store_true',\
+                    help='Get genes from BU REST API', default=False)
 parser.add_argument('--update-db', dest='update_db', action='store_true', help='Include --update-db if you want to update the database', default=False)
 
 ############ (developer comment)
@@ -119,7 +124,7 @@ def run_lpr_on_file(lpr_file,morph_file, full_devel='devel'):
                                              LPR_input_csv_file_name_wide, full_devel)
     return res
 
-def run_morpho_on_file(morph_file,full_devel='full'):
+def run_morpho_on_file(morph_file, full_devel='full'):
     """
     formats and runs morphological BMD on file
     """
@@ -190,75 +195,45 @@ def main():
     if args.morpho=="":
         if args.test_lpr:
             print("Testing LPR code")
-            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-            res = run_lpr_on_file(test_lpr,test_morph,'devel')
+            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2020NOV11_tall.csv'
+            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+            res = run_lpr_on_file(test_lpr, test_morph, 'devel')
         elif args.test_morpho:
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-            print("Testing morphological code with 7 PAH data (single chemical)")
-            res = run_morpho_on_file(test_morph,'devel')
-        elif args.test_extract:
-            test_morph = '/srpAnalytics/test_files/Extracts_with_Dilution_Factors_2021MAY21_101.csv'
-            print("Testing morphological code with extract data (single chemical)")
-            res = run_morpho_on_file(test_morph,'devel')
-    
-    if len(files)==0:
+            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+            print("Testing morphological code")
+            res = run_morpho_on_file(test_morph, 'devel')
+
+    ##here we run the gene data collection
+    if args.get_genes:
+        print("Collecting data from BU")
+        command = 'Rscript /srpAnalytics/exposome_summary_stats.R'
+        os.system(command)
+
+    ##here we run R code to merge all the files togeter
+    if len(files) == 0:
         print("Testing database rebuild")
         command = "Rscript /srpAnalytics/buildv1database.R"
         os.system(command)
     else:
-        print("building database with new files")
+        print("building database with new files:")
+        print(files)
         build_db_with_files(files)
 
 
-    allfiles = [a for a in os.listdir('/tmp') if 'csv' in a]
+    allfiles = ['/tmp/'+a for a in os.listdir('/tmp') if 'csv' in a]
     print(allfiles)
     if args.validate:
-        print("Validating existing files")
+        print("Validating existing files for database ingest")
         ##get files
         for fval in allfiles:
-            valid.verify(pd.read_csv(fval,gsub('.csv','',fval)))
+            valid.verify(pd.read_csv(fval, quotechar='"', quoting=1), re.sub('.csv', '', os.path.basename(fval)))
         ##validate
-    allfiles = ['README.md']+allfiles
-#    else:
-#        for morpho_input_csv_file_name in flist:
-           #ull_devel = "full"
-           # print ("full_devel:" + str(full_devel)) # devel
-            ########## <begin> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
+    allfiles = allfiles+['/srpAnalytics/README.md']
 
-
-            # actual file is not saved here, but it is ok to be used at following procedures
-
-
- #           print ("args.LPR:" + str(args.LPR)) # True
-       #     if (args.LPR == True):
-                # for LPR reformatting (tall->wide), both morphological and LPR is needed
-
-        #          bypass_can = input()
-                #devel
-
-                #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall_wide_t0_t239_devel.csv
-            ########### <end> tall format (Oregon state original) -> wide format (so that BMD can be calculated)
-
-
-
-            ########### <begin> BMD calculation
-         #   if (args.LPR == True):
-          #                                            full_devel)
-           # else: # if (args.LPR == False):
-            #    files[morpho_input_csv_file_name] =
-            ########### <end> BMD calculation
-
-
-
-
-         #wd <- paste0(getwd(),'/')
-         ##UPDATE TO PYTHON
-
-    print('Now zipping up'+str(len(allfiles))+'files')
+    print('Now zipping up '+str(len(allfiles))+' files')
     tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
     for fname in allfiles:
-        tar.add('/tmp/'+fname)
+        tar.add(fname)
     tar.close()
 
     if args.update_db:

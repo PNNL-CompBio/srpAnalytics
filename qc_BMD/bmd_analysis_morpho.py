@@ -31,13 +31,26 @@ def main():
 
 def runBmdPipeline(complete_file_path, full_devel):
     ##read in the data
-    df_morph = pd.read_csv(complete_file_path, header = 0)
-    
+    df_morpho = pd.read_csv(complete_file_path, header = 0)
+
 
     ##let's collect the file names to return
     filenames = []
     test_data_sim = 0
     if(test_data_sim == 0):
+        # Add aggregate endpoints
+        # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
+        df_morpho['ANY24'] = df_morpho[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
+
+        # 2. Any effect within 5 days (combination of all measurements at both time points)
+        df_morpho['ANY120'] = df_morpho[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
+
+        # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
+        df_morpho['TOT_MORT'] = df_morpho[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
+
+        # 4. Any effect except mortality (#2 minus MO24 and MORT) >> 'ALL_BUT_MORT'
+        df_morpho['ALL_BUT_MORT'] = df_morpho[['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM', \
+                                               'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']].sum(axis=1,skipna=True,min_count=1)
         # Add aggregate endpoints for 7 PAH
 
         ## JUSTIFICATION: 7 PAH dataset doesn't have "BRAI" endpoint.
@@ -84,7 +97,7 @@ def runBmdPipeline(complete_file_path, full_devel):
     os.chdir(output_folder)
 
     start_time = time.time()
-   
+
     # full -> 17 (without DNC) unlike phase_I_II (18 endpoints), 7_PAH lacks NC24
     if full_devel == "full":
         if 'BRAI' not in df_morph.columns: # as 7 PATH
@@ -99,7 +112,7 @@ def runBmdPipeline(complete_file_path, full_devel):
         chemical_id_from_here = random.sample(set(np.unique(df_morph['chemical.id'])), 1)
 
     for chemical_id in chemical_id_from_here:
-        print("chemical_id:" + str(chemical_id))
+        #print("chemical_id:" + str(chemical_id))
         for end_point in end_points:
             os.chdir(output_folder)
             # subset original dataframe for a user-specified chemical and end_point pair
@@ -146,7 +159,7 @@ def runBmdPipeline(complete_file_path, full_devel):
                         filenames = ps.save_results_good_data_nounique_model(test_dose_response, qc_flag,\
                                                                  model_predictions, selected_model_params, \
                                                                  str(chemical_id), end_point)
-                        
+
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print("Done, it took:"+str(time_took))
