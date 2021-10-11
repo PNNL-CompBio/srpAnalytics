@@ -194,11 +194,11 @@ def main():
     if args.morpho=="":
         if args.test_lpr:
             print("Testing LPR code")
-            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2020NOV11_tall.csv'
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
+            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
             res = run_lpr_on_file(test_lpr, test_morph, 'devel')
         elif args.test_morpho:
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall.csv'
+            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
             print("Testing morphological code")
             res = run_morpho_on_file(test_morph, 'devel')
 
