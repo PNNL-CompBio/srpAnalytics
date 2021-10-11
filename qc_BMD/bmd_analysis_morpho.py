@@ -55,14 +55,13 @@ def runBmdPipeline(complete_file_path, full_devel):
 
         ## JUSTIFICATION: 7 PAH dataset doesn't have "BRAI" endpoint.
         ## On the other hand, extract/phase I,II have "BRAI" endpoint.
-
+##this was added ina merge conflict, i hope it's ok (Sara)
         if 'BRAI' not in df_morph.columns: # as 7 PAH
             # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
             df_morph['ANY24'] = df_morph[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
-            
             # 2. Any effect within 5 days (combination of all measurements at both time points)
             df_morph['ANY120'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
-            
+
             # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
             df_morph['TOT_MORT'] = df_morph[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
 
@@ -89,6 +88,7 @@ def runBmdPipeline(complete_file_path, full_devel):
             df_morph['SKIN'] = df_morph[['PIG_']]
             df_morph['TCHR'] = df_morph[['TR__']]
 
+### END Of merge conflict
 
     if os.path.isdir("output") is False:
         os.mkdir("output")
