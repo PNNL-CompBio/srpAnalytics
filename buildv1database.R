@@ -222,7 +222,10 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 
   mid.bmd<-do.call(rbind,files)%>%
     dplyr::select(cols)
-
+  
+  dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
+  if(length(dupes)>0)
+    mid.bmd<-mid.bmd[-dupes,]
   if(is_extract){
     sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
       select(-sub)
@@ -277,11 +280,18 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
     print(paste('Combining fit files:',paste(bmdfiles,collapse=',')))
     cols <- required_bmd_columns$fitVals
     files <- lapply(bmdfiles,function (x) read.csv(x)%>%dplyr::select(cols))
-    full.bmd<-do.call(rbind,files)%>%
+    
+    mid.bmd<-do.call(rbind,files)%>%
         dplyr::select(required_bmd_columns$fitVals)%>%
         mutate(zf.cid=as.character(Chemical_ID))%>%
         rename(ChemicalId='zf.cid')%>%
-        subset(X_vals!="NULL")%>%
+        subset(X_vals!="NULL")
+    
+    dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
+    if(length(dupes)>0)
+      mid.bmd<-mid.bmd[-dupes,]
+    
+    full.bmd<-mid.bmd%>%
         left_join(endpointDetails)%>%
         distinct()%>%
         select(-c(End_Point,Description,ChemicalId))
@@ -300,10 +310,16 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, endpointDetails){
 
     print(paste('Combining dose response files:',paste(bmdfiles,collapse=',')))
 
-    full.bmd<-do.call(rbind,files)%>%
+    mid.bmd<-do.call(rbind,files)%>%
         dplyr::select(required_bmd_columns$doseRep)%>%
         mutate(zf.cid=as.character(Chemical_ID))%>%
-        rename(ChemicalId='zf.cid')%>%
+        rename(ChemicalId='zf.cid')
+    
+    dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
+    if(length(dupes)>0)
+      mid.bmd<-mid.bmd[-dupes,]
+    
+    full.bmd<-mid.bmd%>%
         left_join(endpointDetails)%>%
         dplyr::select(-c(End_Point,Description))%>%
         distinct()%>%select(-ChemicalId)
@@ -349,15 +365,17 @@ main<-function(){
 
     for(chem in chem_dirs){
         path=paste0(data.dir,'/',chem,'/')
-        bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_2021_04_26.csv',
+        bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_all_qc.csv',
                                              'bmd_vals_2021_05_18_all_phase_III_morpho.csv',
-                                             'bmd_vals_all_qc.csv')))
-        dose.files<-c(dose.files,paste0(path,c('dose_response_vals_2021_04_26.csv',
+                                             'bmd_vals_2021_04_26.csv'
+                                             )))
+        dose.files<-c(dose.files,paste0(path,c('dose_response_vals_all_qc.csv',
                                                'dose_response_vals_2021_05_10_all_phase_III_morpho.csv',
-                                               'dose_response_vals_all_qc.csv')))
-        curv.files<-c(curv.files,paste0(path,c('fit_vals_2021_04_26.csv',
+                                               'dose_response_vals_2021_04_26.csv')))
+        curv.files<-c(curv.files,paste0(path,c('fit_vals_all_qc.csv',
                                                'fit_vals_2021_05_10_all_phase_III_morpho.csv',
-                                               'fit_vals_all_qc.csv')))
+                                               'fit_vals_2021_04_26.csv'
+                                               )))
     }
 
     for(ext in extract_dirs){
@@ -455,7 +473,7 @@ main<-function(){
         subset(!is.na(AUC_Norm))%>%
         group_by(chemical_class)%>%
         summarize(`Chemicals`=n_distinct(Chemical_ID))
-    
+
     chem.eps<-bmds%>%
         group_by(Chemical_ID,chemical_class)%>%
         summarize(`End Points`=n_distinct(`End Point Name`))%>%
@@ -464,7 +482,7 @@ main<-function(){
         group_by(chemical_class)%>%
         summarize(`End Points`=sum(`End Points`),`Samples`=sum(`Number of samples`))%>%
         left_join(chem.counts)
-      
+
 
 
 
@@ -475,7 +493,7 @@ main<-function(){
     samp.counts<-ebmds%>%
       group_by(LocationName)%>%
       summarize(`Number of samples`=n_distinct(Sample_ID))
-    
+
     samp.eps<-ebmds%>%
      select(c('Sample_ID','LocationName','End Point Name','AUC_Norm'))%>%
       subset(!is.na(AUC_Norm))%>%
