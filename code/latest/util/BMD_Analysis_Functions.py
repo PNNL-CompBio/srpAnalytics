@@ -81,7 +81,7 @@ class Logistic_BMD(GenericLikelihoodModel):
         return -log_lhood
     
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],**kwds)    
+        return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, full_output=False, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],**kwds)    
     
 # Gamma function
         

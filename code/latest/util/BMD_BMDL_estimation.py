@@ -14,6 +14,19 @@ import BMD_Analysis_Functions as baf
 import warnings
 warnings.filterwarnings('ignore')
 
+
+#https://stackoverflow.com/questions/8391411/how-to-block-calls-to-print
+import os, sys
+
+# Disable
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__
+    
+    
 BMR = "global"
 BMR = 0.1
 
@@ -61,11 +74,11 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             print(f"Model Convergence:{res.mle_retvals['converged']}")
             # True
             
-            a=b
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0
                 
+
                 pred_vals = baf.logistic_fun(test_dose_response.dose, res.params)
     
                 alpha_chi_square = 0.9
@@ -86,6 +99,7 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 pred_vals = np.nan
                 bmd = np.nan
                 bmd_50 = np.nan
+            
             
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
                 if (report):
@@ -109,7 +123,11 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                     # Examine the sign of (llv at bmdl_mid_val) - bmdl_llv_thresh
                     # and update bmdl_lo and hi values appropriately
                     model_logistic_bmd = baf.Logistic_BMD(test_dose_response[['dose','num_affected', 'total_num']].copy())
+                    
+                    
                     logistic_bmr_fit = model_logistic_bmd.profile_ll_fit([alpha_, bmdl_mid_val])
+                    # This generates too much printing
+                    
                     
                     # Check model convergence
                     if(logistic_bmr_fit.mle_retvals['converged'] is True):
