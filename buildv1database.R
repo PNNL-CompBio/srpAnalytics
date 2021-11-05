@@ -57,10 +57,11 @@ getChemMetadata<-function(data.dir){
         select(INPUT,DTXSID,PREFERRED_NAME,INCHIKEY,SMILES,MOLECULAR_FORMULA,
                AVERAGE_MASS,PUBCHEM_DATA_SOURCES)%>%
         rename(cas_number='INPUT')%>%
-        full_join(fullMapping)%>% ## add in ID mapping information
+        full_join(fullMapping)%>% ## add in ID mapping information -- THIS WILL INTRODUCE NAs
         left_join(getNewChemicalClass(data.dir))%>% ##add in chemical class
         left_join(curatedDesc)%>% ## add in description data
         tidyr::replace_na(list(newClass='Unclassified'))%>% ##allow for unclassified
+        tidyr::replace_na(list(PREFERRED_NAME='Chemical name unknown'))%>% ##should we call this something else?
         mutate(PREFERRED_NAME=stringr::str_replace_all(PREFERRED_NAME,'^-$',"Chemical name unknown"))%>%
         select(-c(chemical_class,Classification))%>%
         rename(chemical_class='newClass')
@@ -73,7 +74,7 @@ getChemMetadata<-function(data.dir){
 #' @return data.frame
 getEndpointMetadata<-function(data.dir){
                                         #here is our pre-defined dictionary
-    endpointDetails<-readxl::read_xlsx(paste0(data.dir,'SuperEndpoint Mapping 2020SEPT18.xlsx'),
+    endpointDetails<-readxl::read_xlsx(paste0(data.dir,'SuperEndpoint Mapping 2021NOV04.xlsx'),
                                        sheet='Dictionary')%>%
         subset(`Portal Display`=='Display')%>%
         rename(End_Point='Abbreviation',`End Point Name`='Simple name (<20char)')%>%
@@ -81,7 +82,6 @@ getEndpointMetadata<-function(data.dir){
         select(-`Portal Display`)%>%
       mutate(End_Point=stringr::str_trim(End_Point))
 
-#    message(endpointDetails)
     return(endpointDetails)
 }
 
