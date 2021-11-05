@@ -6,6 +6,6 @@
 "Insecticide"|240|0|24
 "Natural"|40|0|4
 "None"|0|26|NA
-"PAH"|1550|2763|155
+"PAH"|1620|2900|162
 "Pharmacological"|50|0|5
-"Unclassified"|3080|0|308
+"Unclassified"|3040|0|304

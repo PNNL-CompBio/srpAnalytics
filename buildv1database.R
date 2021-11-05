@@ -53,7 +53,7 @@ getChemMetadata<-function(data.dir){
     ##this file comes from COMPTOX
     ##here we join the chemical metadata from the comptox dashboard
     chemMeta<-readxl::read_xls(paste0(data.dir,
-                                      'CompToxChemicalsDashboard-Batch-Search_2021-07-14_17_49_42.xls'))%>%
+                                      'CompToxChemicalsDashboard-Batch-Search_2021-11-05_17_57_46.xls'))%>%
         select(INPUT,DTXSID,PREFERRED_NAME,INCHIKEY,SMILES,MOLECULAR_FORMULA,
                AVERAGE_MASS,PUBCHEM_DATA_SOURCES)%>%
         rename(cas_number='INPUT')%>%

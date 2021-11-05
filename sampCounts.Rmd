@@ -1,22 +1,22 @@
 "LocationName"|"End Points"|"Chemicals"|"Number of samples"
-"Columbia River Downstream"|60|150|6
-"Columbia River Upstream"|50|114|5
-"Grand Isle, Louisiana"|80|167|8
-"Gulf Seal No. 253 Henry Company"|30|79|3
-"Gulf Shores, Alabama"|70|161|7
-"Gulfport, Mississippi"|60|132|6
-"Henry Seal No. 532, Henry Company"|30|42|3
-"Johnson Creek"|10|46|1
-"McCormick and Baxter"|60|161|6
-"None"|170|324|18
-"Pensacola, Florida"|40|72|4
-"Portland Harbor RM 11 E"|20|56|2
-"Portland Harbor: Railroad Bridge"|110|237|11
-"Portland Harbor: RM 1 NW"|10|47|1
-"Portland Harbor: RM Eight West"|60|151|6
-"Portland Harbor: Sauvie East"|60|152|6
-"Portland Harbor: Sauvie West"|80|224|8
-"Portland Harbor: St. John's Bridge"|50|140|5
-"Portland Harbor: Steel Pipe"|50|102|5
-"Tarconite Neyra Industries Inc."|40|93|4
-"Wyckoff Co. Eagle Harbor"|60|139|6
+"Columbia River Downstream"|60|159|6
+"Columbia River Upstream"|50|120|5
+"Grand Isle, Louisiana"|80|173|8
+"Gulf Seal No. 253 Henry Company"|30|82|3
+"Gulf Shores, Alabama"|70|169|7
+"Gulfport, Mississippi"|60|139|6
+"Henry Seal No. 532, Henry Company"|30|43|3
+"Johnson Creek"|10|47|1
+"McCormick and Baxter"|60|170|6
+"None"|170|338|18
+"Pensacola, Florida"|40|75|4
+"Portland Harbor RM 11 E"|20|57|2
+"Portland Harbor: Railroad Bridge"|110|250|11
+"Portland Harbor: RM 1 NW"|10|48|1
+"Portland Harbor: RM Eight West"|60|161|6
+"Portland Harbor: Sauvie East"|60|162|6
+"Portland Harbor: Sauvie West"|80|236|8
+"Portland Harbor: St. John's Bridge"|50|148|5
+"Portland Harbor: Steel Pipe"|50|108|5
+"Tarconite Neyra Industries Inc."|40|97|4
+"Wyckoff Co. Eagle Harbor"|60|144|6
