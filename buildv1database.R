@@ -66,6 +66,11 @@ getChemMetadata<-function(data.dir){
         select(-c(chemical_class,Classification))%>%
         rename(chemical_class='newClass')
 
+    nocas=grep("NOCAS",chemMeta$cas_number)
+    if(length(nocas)>0){
+        message(paste0('removing ',length(nocas),'chems with no cas'))
+        chemMeta<-chemMeta[-nocas,]
+    }
     return(chemMeta)
 }
 
@@ -151,7 +156,7 @@ buildSampleData<-function(data.dir,chemMeta){
         distinct()
 
     sampChem <-sampChem%>%
-        left_join(chemDat,by='cas_number')%>%
+        inner_join(chemDat,by='cas_number')%>%
         left_join(ids,by='SampleNumber')%>%
         distinct()
 
@@ -231,12 +236,13 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
 
   mid.bmd<-do.call(rbind,files)%>%
-    dplyr::select(cols)
+      dplyr::select(cols)
+
 
   dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
-  if(length(dupes)>0)
+  if(length(dupes)>0){
     mid.bmd<-mid.bmd[-dupes,]
-
+  }
   if(is_extract){
     sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
       select(-sub)
@@ -263,7 +269,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   else{
     full.bmd<-mid.bmd%>%
       #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
-      full_join(sampChem)%>%
+      inner_join(sampChem)%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
       right_join(endpointDetails)%>%
       distinct()%>%select(-c('End_Point'))%>%
@@ -296,29 +302,42 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
         dplyr::select(required_bmd_columns$fitVals)%>%
         mutate(zf.cid=as.character(Chemical_ID))%>%
         rename(ChemicalId='zf.cid')%>%
-        subset(X_vals!="NULL")
+        subset(X_vals!="NULL")%>%
+        mutate(X_vals=as.numeric(X_vals))%>%
+        mutate(Y_vals=as.numeric(Y_vals))
 
-    dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point,X_vals)%>%duplicated())
-    if(length(dupes)>0)
+    dupes<-which(mid.bmd%>%
+                 select(Chemical_ID,End_Point,X_vals)%>%duplicated())
+    if(length(dupes)>0){
+       # print(mid.bmd[dupes,])
       mid.bmd<-mid.bmd[-dupes,]
+    }
 
     full.bmd<-mid.bmd%>%
         right_join(endpointDetails)%>%
         distinct()%>%
         select(-c(End_Point,Description,ChemicalId))
-  if(is_extract){
-    sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
+
+    if(is_extract){
+
+       ##make sure we get the information for the sample id
+      sdSamp<-sampChem%>%
+          tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
       select(Sample_ID,tmpId)%>%
       distinct()
 
+      ##now we join the data withi the updated sample information
     full.bmd<-full.bmd%>%
       dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
-      dplyr::select(-Chemical_ID)%>%
+        dplyr::select(-Chemical_ID)%>%
         full_join(sdSamp,by='tmpId')%>%
-                                        select(-tmpId)#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+        select(-tmpId)#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
 
     #full.bmd <- rename(full.bmd,Sample_ID='Chemical_ID')
-  }
+    }else{
+        full.bmd<-full.bmd%>%
+            subset(Chemical_ID%in%sampChem$Chemical_ID)
+    }
     return(full.bmd)
 }
 
@@ -339,13 +358,14 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
         mutate(zf.cid=as.character(Chemical_ID))%>%
         rename(ChemicalId='zf.cid')
 
+
     dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point,Dose)%>%
                  mutate(Dose=as.numeric(Dose))%>%
                  duplicated())
 
-    if(length(dupes)>0)
+    if(length(dupes)>0){
       mid.bmd<-mid.bmd[-dupes,]
-
+    }
     full.bmd<-mid.bmd%>%
         right_join(endpointDetails)%>%
         dplyr::select(-c(End_Point,Description))%>%
@@ -362,9 +382,11 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
           full_join(sdSamp,by='tmpId')%>%
                                         select(-tmpId)#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
 
-    }
+    }else{
+        full.bmd<-full.bmd%>%
+        subset(Chemical_ID%in%sampChem$Chemical_ID)
        # full.bmd <- rename(full.bmd,Sample_ID='Chemical_ID')
-
+   }
   return(unique(full.bmd))
 }
 
@@ -405,14 +427,17 @@ main<-function(){
         path=paste0(data.dir,'/',chem,'/')
         bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_all_qc.csv',
                                              'bmd_vals_2021_05_18_all_phase_III_morpho.csv',
-                                             'bmd_vals_2021_04_26.csv'
+                                             'bmd_vals_2021_04_26.csv',
+                                             'bmd_vals_2021_01_29.csv'
                                              )))
         dose.files<-c(dose.files,paste0(path,c('dose_response_vals_all_qc.csv',
                                                'dose_response_vals_2021_05_10_all_phase_III_morpho.csv',
-                                               'dose_response_vals_2021_04_26.csv')))
+                                               'dose_response_vals_2021_04_26.csv',
+                                               'dose_response_vals_2021_01_29.csv')))
         curv.files<-c(curv.files,paste0(path,c('fit_vals_all_qc.csv',
                                                'fit_vals_2021_05_10_all_phase_III_morpho.csv',
-                                               'fit_vals_2021_04_26.csv'
+                                               'fit_vals_2021_04_26.csv',
+                                               'fit_vals_2021_01_29.csv'
                                                )))
     }
 
@@ -484,6 +509,14 @@ main<-function(){
     curves<-curves%>%subset(!Chemical_ID%in%to.remove)
     doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
 
+    
+    ###
+    bdupes=curves%>%select('End Point Name','X_vals','Chemical_ID')%>%duplicated()
+    curves<-curves[-bdupes,]
+    
+    edupes<-ecurves%>%select('End Point Name','X_vals','Sample_ID')%>%duplicated()
+    ecurves<-ecurves[-edupes,]
+    
     ##there are mismatches, so we should figure out where those exists
     missing<-list(zebrafishNoChem=setdiff(ebmds$Sample_ID,as.character(sampChem$Sample_ID)),
                   chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))

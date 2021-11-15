@@ -12,10 +12,10 @@ import os, sys, time
 
 args = sys.argv[0:]
 
-print ("reformat_LPR starts----------------------")
+print ("reformat_LPR starts----------------------\n")
 
 starting_dir = os.getcwd()
-
+print(args)
 #complete_input_file_path = '/Users/kimd999/research/projects/toxicity/per_each_data/7_PAH/01_11_2021/input/tall/7_PAH_zf_LPR_data_2021JAN11.csv'
 complete_input_file_path = args[1]
 behav_all_data = pd.read_csv(complete_input_file_path, header = 0)
@@ -154,4 +154,3 @@ reformatted_data.to_csv(output_complete_file_path,index=False)
 print ("output_complete_file_path existence in same py code:" + str(os.path.isfile(output_complete_file_path)))
 
 print ("Reformat of wide data (LPR) is done")
-

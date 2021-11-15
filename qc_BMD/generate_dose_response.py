@@ -292,13 +292,12 @@ def BMD_feasibility_analysis(dose_response):
             print ("frac_response[0]:\n" + str(frac_response[0]))
             print ("data_corr:" + str(data_corr))
             print ("data_corr[0]:" + str(data_corr[0]))
-
-
         # <begin>
         # to rescue a case like PAH_7_3756_EPR_MOV1 that shows chemical is harmful \
         # with all non-zero doses
-
-        for i in range(len(frac_response)):
+#        print(frac_response)
+        for i in frac_response.keys():
+            #this was failing on a value missing a 1 range(len(frac_response)):
             if (i == 0):
                 if ((frac_response[i]) > 0.25):
                     BMD_may_need_to_be_calculated_by_new_rescue_method = False
