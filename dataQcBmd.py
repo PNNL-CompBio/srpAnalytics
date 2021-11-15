@@ -33,11 +33,11 @@ extract data to store in SRP data analytics portal')
 #                    help='Morphological files for regular BMD input or LPR (with --LPR option)')
 parser.add_argument('--morpho', dest='morpho',\
                     help='Comma-delimited list of morphological files to be processed',\
-                    default='')
+                    default=None)
 
 parser.add_argument('--LPR', dest='lpr', \
                     help='Comma-delimited list of LPR-related files to be processed. MUST correspond to similar files in the morpho argument',\
-                    default='')
+                    default=None)
 
 parser.add_argument('--test-lpr', dest='test_lpr',\
                     help='Set this flag to run LPR test code instead of full analysis',\
@@ -163,17 +163,24 @@ def main():
     """
     start_time = time.time()
     args = parser.parse_args()
+    #print(args)
     #flist = args.files.split(',')
     #print(flist)
 
     ##collecting a list of files to add to DB
     files = dict()
 
-    mfiles = args.morpho
-    lfiles = args.lpr
-    lfiles = args.lpr.split(',')
-    mfiles = args.morpho.split(',')
+    if args.lpr is None:
+        lfiles = ''
+    else:
+        lfiles = args.lpr.split(',')
+    if args.morpho is None:
+        mfiles = ''
+    else:
+        mfiles = args.morpho.split(',')
 
+    print(lfiles)
+    print(mfiles)
     fd = 'full'
     if args.test_lpr:
         print("Testing LPR code\n")
@@ -197,7 +204,6 @@ def main():
                 fname = lfiles[i]
                 files[fname] = run_lpr_on_file(fname, mfiles[i], fd)
     elif len(mfiles) > 0:
-        mfiles = args.morpho.split(',')
         print("Calculating morphological endpoints for "+str(len(mfiles))+' files')
         for f in mfiles:
             files[f] = run_morpho_on_file(f, fd)
