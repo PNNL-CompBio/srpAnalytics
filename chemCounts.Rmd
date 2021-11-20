@@ -3,9 +3,9 @@
 "Fungicide"|150|0|15
 "Herbicide"|90|0|9
 "Industrial"|160|0|16
-"Insecticide"|242|0|24
+"Insecticide"|240|0|24
 "Natural"|40|0|4
 "None"|0|26|NA
 "PAH"|1544|2900|153
 "Pharmacological"|50|0|5
-"Unclassified"|3222|0|296
+"Unclassified"|3040|0|304
