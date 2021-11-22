@@ -304,34 +304,39 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
         distinct()%>%
         mutate(combined=paste(Chemical_ID,End_Point))
       return(res$combined)})
-    
-    
+
+
     ##now iterate and remove those from earlier files (listed later)
     ##to avoid duplicaates
     newChemEps=chemEps
     ##for loop is messy but best i can do with set diff function
-    for(i in 2:length(chemEps)){
-      orig=c()
-      for(j in 1:(i-1))
-        orig=union(orig,chemEps[[j]])
-      newChemEps[[i]]<-setdiff(newChemEps[[i]],orig)
+
+    if(length(chemEps)>1){
+        for(i in 2:length(chemEps)){
+            orig=c()
+            for(j in 1:(i-1))
+                orig=union(orig,chemEps[[j]])
+            newChemEps[[i]]<-setdiff(newChemEps[[i]],orig)
+        }
     }
-    
+#    print(newChemEps)
     fixed.files<-lapply(1:length(files),function(i){
-      files[[i]]%>%
-        mutate(combined=paste(Chemical_ID,End_Point))%>% #get common index
-        subset(combined%in%newChemEps[[i]])%>% ##filter out those that we want
-        dplyr::select(required_bmd_columns$fitVals)%>%
+        #print(newChemEps[[i]])
+        f<-files[[i]]%>%
+            mutate(combined=paste(Chemical_ID,End_Point)) #get common index
+      f%>%
+       subset(combined%in%newChemEps[[i]])%>% ##filter out those that we want
+        dplyr::select(cols)%>%
         mutate(zf.cid=as.character(Chemical_ID))%>%
         rename(ChemicalId='zf.cid')%>%
         subset(X_vals!="NULL")%>%
         mutate(X_vals=as.numeric(X_vals))%>%
         mutate(Y_vals=as.numeric(Y_vals))
-      
+
     })
-    
+
     mid.bmd<-do.call(rbind,fixed.files)
-    
+
    # mid.bmd<-do.call(rbind,files)%>%
     #    dplyr::select(required_bmd_columns$fitVals)%>%
     #    mutate(zf.cid=as.character(Chemical_ID))%>%
@@ -348,12 +353,12 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
        # print(mid.bmd[dupes,])
     #  mid.bmd<-mid.bmd[-dupes,]
     #}
-
+    print(head(mid.bmd))
     full.bmd<-mid.bmd%>%
         right_join(endpointDetails)%>%
         distinct()%>%
         select(-c(End_Point,Description,ChemicalId))
-
+    print(head(full.bmd))
     if(is_extract){
 
        ##make sure we get the information for the sample id
@@ -395,11 +400,11 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
         distinct()%>%
         mutate(combined=paste(Chemical_ID,End_Point))
       return(res$combined)})
-    
-    
+
     ##now iterate and remove those from earlier files (listed later)
     ##to avoid duplicaates
     newChemEps=chemEps
+    if(length(chemEps)>1){
     ##for loop is messy but best i can do with set diff function
     for(i in 2:length(chemEps)){
       orig=c()
@@ -407,7 +412,8 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
         orig=union(orig,chemEps[[j]])
       newChemEps[[i]]<-setdiff(newChemEps[[i]],orig)
     }
-    
+        }
+
     fixed.files<-lapply(1:length(files),function(i){
       files[[i]]%>%
         mutate(combined=paste(Chemical_ID,End_Point))%>% #get common index
@@ -416,23 +422,23 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
          mutate(zf.cid=as.character(Chemical_ID))%>%
        rename(ChemicalId='zf.cid')
     })
-    
+
     mid.bmd<-do.call(rbind,fixed.files)
     # mid.bmd<-do.call(rbind,files)%>%
     #     dplyr::select(required_bmd_columns$doseRep)%>%
     #     mutate(zf.cid=as.character(Chemical_ID))%>%
     #     rename(ChemicalId='zf.cid')
-    # 
-    # 
+    #
+    #
     # dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point,Dose)%>%
     #              mutate(Dose=as.numeric(Dose))%>%
     #              duplicated())
-    # 
+    #
     # if(length(dupes)>0){
     #   mid.bmd<-mid.bmd[-dupes,]
     # }
-    # 
-    # 
+    #
+    #
     full.bmd<-mid.bmd%>%
         right_join(endpointDetails)%>%
         dplyr::select(-c(End_Point,Description))%>%
@@ -577,18 +583,23 @@ main<-function(){
     doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
 
 
-    ###
-    bdupes=curves%>%select('End Point Name','X_vals','Chemical_ID')%>%duplicated()
-    curves<-curves[-bdupes,]
+    #print(head(curves))
+### we used to delete duplicates here, but have pushed
+    #that back into other functions
+    #bdupes=curves%>%select('End Point Name','X_vals','Chemical_ID')%>%duplicated()
+    #print(bdupes)
+    #if(length(bdupes)>0)
+    #    curves<-curves[-bdupes,]
 
-    edupes<-ecurves%>%select('End Point Name','X_vals','Sample_ID')%>%duplicated()
-    ecurves<-ecurves[-edupes,]
-
+    #edupes<-ecurves%>%select('End Point Name','X_vals','Sample_ID')%>%duplicated()
+    #if(length(edupes)>0)
+    #    ecurves<-ecurves[-edupes,]
+    #print(head(curves))
     ##there are mismatches, so we should figure out where those exists
     missing<-list(zebrafishNoChem=setdiff(ebmds$Sample_ID,as.character(sampChem$Sample_ID)),
                   chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
 
-    print(missing)
+    #print(missing)
 
     ##Final output for the platform team is these 4 files
     write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),quote=T,row.names = FALSE)
