@@ -33,11 +33,11 @@ extract data to store in SRP data analytics portal')
 #                    help='Morphological files for regular BMD input or LPR (with --LPR option)')
 parser.add_argument('--morpho', dest='morpho',\
                     help='Comma-delimited list of morphological files to be processed',\
-                    default='')
+                    default=None)
 
 parser.add_argument('--LPR', dest='lpr', \
                     help='Comma-delimited list of LPR-related files to be processed. MUST correspond to similar files in the morpho argument',\
-                    default='')
+                    default=None)
 
 parser.add_argument('--test-lpr', dest='test_lpr',\
                     help='Set this flag to run LPR test code instead of full analysis',\
@@ -92,7 +92,7 @@ def merge_files(path, file_dict):
     return [path+'/new_bmds.csv',path+'/new_fits.csv',path+'/new_dose.csv']
 
 
-def run_lpr_on_file(lpr_file,morph_file, full_devel='devel'):
+def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     """
     runs LPR code on a file
     Attributes
@@ -100,10 +100,9 @@ def run_lpr_on_file(lpr_file,morph_file, full_devel='devel'):
     unformatted_file: str
     """
 
-    command = "python3 /srpAnalytics/format_LPR_input.py " + \
-        str(lpr_file) + " " + str(full_devel)
+    command = "python3 /srpAnalytics/format_LPR_input.py " + str(lpr_file) + " " + str(full_devel)
     print(command)
-    os.system(command)
+    res0 = os.system(command)
 
     LPR_input_csv_file_name_wide = lpr_file[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
 
@@ -111,10 +110,9 @@ def run_lpr_on_file(lpr_file,morph_file, full_devel='devel'):
 
     #print ("morpho_input_csv_file_name:" + str(morph_file))
     #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    command = "python3 /srpAnalytics/format_morpho_input.py " + \
-                    str(morph_file) + " " + str(full_devel)
+    command = "python3 /srpAnalytics/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
     print(command)
-    os.system(command)
+    res0 = os.system(command)
             #time.sleep(20)
 
     morpho_input_csv_file_name_wide = morph_file[:-4] + "_wide_DNC_0.csv"
@@ -127,17 +125,15 @@ def run_morpho_on_file(morph_file, full_devel='full'):
     """
     formats and runs morphological BMD on file
     """
-    print ("morpho_input_csv_file_name:" + str(morph_file))
+    print("morpho_input_csv_file_name:" + str(morph_file))
     #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    command = "python3 /srpAnalytics/format_morpho_input.py " + \
-                    str(morph_file) + " " + str(full_devel)
+    command = "python3 /srpAnalytics/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
     print(command)
     os.system(command)
-            #time.sleep(20)
 
     morpho_input_csv_file_name_wide = morph_file[:-4] + \
         "_wide_DNC_0.csv"
-    print ("morpho_input_csv_file_name_wide:" + str(morpho_input_csv_file_name_wide))
+    print("morpho_input_csv_file_name_wide:" + str(morpho_input_csv_file_name_wide))
     res = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, \
                                              full_devel)
     return res
@@ -156,9 +152,9 @@ def build_db_with_files(fdict):
     if len(merged_files) == 3:
         command = command + ','.join(merged_files)
         print(command)
-        os.system(command)
+        res0 = os.system(command)
         for m in merged_files:
-            os.system('rm '+m)
+            res0 = os.system('rm '+m)
 
 
 def main():
@@ -167,40 +163,52 @@ def main():
     """
     start_time = time.time()
     args = parser.parse_args()
+    #print(args)
     #flist = args.files.split(',')
     #print(flist)
 
     ##collecting a list of files to add to DB
     files = dict()
 
-    mfiles = []
-    lfiles = []
-    if args.morpho!='':
-        mfiles = args.morpho.split(',')
-        print("Calculating morphological endpoints for "+str(len(mfiles))+' files')
-        for f in mfiles:
-            files[f] = run_morpho_on_file(f)
-    if args.lpr!="":
+    if args.lpr is None:
+        lfiles = ''
+    else:
         lfiles = args.lpr.split(',')
-        if len(lfiles)!=len(mfiles):
+    if args.morpho is None:
+        mfiles = ''
+    else:
+        mfiles = args.morpho.split(',')
+
+    print(lfiles)
+    print(mfiles)
+    fd = 'full'
+    if args.test_lpr:
+        print("Testing LPR code\n")
+        lfiles = ['/srpAnalytics/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv']
+        mfiles = ['/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
+        fd = 'devel'
+ #       files['test'] = run_lpr_on_file(test_lpr, test_morph, 'devel')
+    elif args.test_morpho:
+        mfiles = ['/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
+        print("Testing morphological code\n")
+        fd = 'devel'
+#        files['test'] = run_morpho_on_file(test_morph, 'devel')
+
+    if len(lfiles) > 0:
+        if len(lfiles) != len(mfiles):
             print("Cannot calculate LPR without morphological files, please re-run with --morpho argument")
             sys.exit()
         else:
-            print( 'Calculating LPR endpoints for '+str(len(lfiles))+'LPR files')
-            for i in range(len(files)):
-                fname=lfiles[i]
-                files[fname] = run_lpr_on_file(fname,mfiles[i])
+            print('Calculating LPR endpoints for '+str(len(lfiles))+' LPR files')
+            for i in range(len(lfiles)):
+                fname = lfiles[i]
+                files[fname] = run_lpr_on_file(fname, mfiles[i], fd)
+    elif len(mfiles) > 0:
+        print("Calculating morphological endpoints for "+str(len(mfiles))+' files')
+        for f in mfiles:
+            files[f] = run_morpho_on_file(f, fd)
 
-    if args.morpho=="":
-        if args.test_lpr:
-            print("Testing LPR code")
-            test_lpr = '/srpAnalytics/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-            res = run_lpr_on_file(test_lpr, test_morph, 'devel')
-        elif args.test_morpho:
-            test_morph = '/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-            print("Testing morphological code")
-            res = run_morpho_on_file(test_morph, 'devel')
+#    if args.morpho == "":
 
     ##here we run the gene data collection
     if args.get_genes:
@@ -217,7 +225,6 @@ def main():
         print("building database with new files:")
         print(files)
         build_db_with_files(files)
-
 
     allfiles = ['/tmp/'+a for a in os.listdir('/tmp') if 'csv' in a]
     print(allfiles)

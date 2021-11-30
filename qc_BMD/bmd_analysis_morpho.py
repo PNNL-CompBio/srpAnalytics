@@ -144,7 +144,6 @@ def runBmdPipeline(complete_file_path, full_devel):
                 # Check if unique model is found
                 unique_model_flag = selected_model_params['no_unique_model_found_flag']
                 if(unique_model_flag == 0):
-
                     filenames = ps.save_results_good_data_unique_model(test_dose_response,\
                                                            qc_flag, model_predictions,\
                                                            selected_model_params,\
