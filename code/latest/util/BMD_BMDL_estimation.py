@@ -47,9 +47,13 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                                                 'BMDL10', 'BMD50', 'Scaled Residuals', \
                                                 'Optimized Params', 'Conv Flag', 'BMDL Conv'])
     if model_names is None:
+        # original full models
         model_names = ['logistic', 'gamma', 'weibull', 'log_logistic', \
                    'probit', 'log_probit', 'multistage_2', 'quantal_linear']
-    
+
+        # temporary model
+        #model_names = ['log_logistic']
+
    
     # Fit different models
     for model_index, model_name in enumerate(model_names):
@@ -128,7 +132,13 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                     logistic_bmr_fit = model_logistic_bmd.profile_ll_fit([alpha_, bmdl_mid_val])
                     # This generates too much printing
                     
+                    #print (f"logistic_bmr_fit:{logistic_bmr_fit}")
+                    #<statsmodels.base.model.GenericLikelihoodModelResults object at 0x12e4daa90>
+
+                    #print (f"logistic_bmr_fit.mle_retvals['converged']:{logistic_bmr_fit.mle_retvals['converged']}")
+                    #print (f"logistic_bmr_fit.mle_retvals:{logistic_bmr_fit.mle_retvals}")
                     
+                    '''
                     # Check model convergence
                     if(logistic_bmr_fit.mle_retvals['converged'] is True):
                         bmdl_converge_flag = 0
@@ -144,7 +154,7 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
                 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)
-                    
+                    '''
                 if (report):
                     print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
             

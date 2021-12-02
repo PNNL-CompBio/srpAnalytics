@@ -80,8 +80,13 @@ class Logistic_BMD(GenericLikelihoodModel):
                   + ((num_total - num_affected) * (np.log(1 - probs)))
         return -log_lhood
     
+    # trial to mute exccessive print, but caused 'TypeError: 'NoneType' object is not subscriptable'
+#    def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
+ #       return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, full_output=False, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],**kwds)    
+    
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, full_output=False, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],**kwds)    
+        return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],**kwds)    
+    
     
 # Gamma function
         

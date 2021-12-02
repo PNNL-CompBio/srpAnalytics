@@ -34,6 +34,7 @@ def gen_dose_response(data_ep_cid, end_point):
     dose_response = pd.DataFrame(columns = ['dose', 'num_affected', 'frac_affect', 'num_embryos', 'tot_wells'])
     # Remove all wells for plates for which number of hits for negative controls > 50% wells
     
+    print ("before processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
     for plate_id in np.unique(data_ep_cid['plate.id']):
         # print ("plate_id:\n"+str(plate_id))
         # Count number of wells corresponding to negative controls
@@ -44,8 +45,14 @@ def gen_dose_response(data_ep_cid, end_point):
         # -> number of wells whose chemical conc=0 in each plate.id
         # it counts # of NaNs as well
         
+        
+        print (f"neg_ctrl_wells[end_point]:\n{neg_ctrl_wells[end_point]}")
+        
         num_neg_ctrl_hits = (neg_ctrl_wells[end_point]).sum(axis=0,skipna=True,min_count=1)
+        print (f"num_neg_ctrl_hits:\n{num_neg_ctrl_hits}")
+        
         num_nonnan_wells_ctrl = sum(~np.isnan(neg_ctrl_wells[end_point]))
+        print (f"num_nonnan_wells_ctrl:\n{num_nonnan_wells_ctrl}")
 
         write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(plate_id) + "," + str(end_point) + "\n"
         # Katrina seems not sure whether a new criterion is better because the new criterion may be too harsh?
@@ -66,7 +73,7 @@ def gen_dose_response(data_ep_cid, end_point):
         #     file.close()
         #     
             
-    # print ("after processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
+    print ("after processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
     for concentration_id in np.unique(data_ep_cid['conc']):
         data_ep_cid_concs = data_ep_cid.loc[(data_ep_cid['conc'] == concentration_id)]
         # Get total number of wells for a given concentration
