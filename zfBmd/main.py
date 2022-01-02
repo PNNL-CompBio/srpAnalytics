@@ -9,20 +9,18 @@ import os, sys, time
 import argparse
 import tarfile
 import re
-from ingest import pull_raw_data, test_connection
-import validate as valid
 
 OUT_FOLDER='/tmp'
 IF_EXITS='replace' # options: "append", "replace", "fail"
 DB='develop' # options: "develop", "production"
 
 
-sys.path.insert(0, './qc_BMD')
+#sys.path.insert(0, './qc_BMD')
 
 
 ##impor  BMD files from directory
-from qc_BMD import bmd_analysis_morpho as bmd
-from qc_BMD import bmd_analysis_LPR_7_PAH_t0_t239 as bmd_LPR
+import bmd_analysis_morpho as bmd
+import bmd_analysis_LPR_7_PAH_t0_t239 as bmd_LPR
 
 parser = argparse.ArgumentParser('Run the QC and BMD analysis as well as join with \
 extract data to store in SRP data analytics portal')
@@ -50,15 +48,6 @@ parser.add_argument('--test-morpho', dest='test_morpho',\
 parser.add_argument('--test-extract', dest='test_extract',\
                     help='Set this flag to run morpho test code with extract data',\
                     action='store_true', default=False)
-
-parser.add_argument('--validate', dest='validate', \
-                    help='If this tag is added, then we validate existing files',\
-                    action='store_true', default=False)
-parser.add_argument('--update-db', dest='update_db', action='store_true', \
-                    help='Include --update-db if you want to update the database',\
-                    default=False)
-parser.add_argument('--get-genes', dest='get_genes', action='store_true',\
-                    help='Get genes from BU REST API', default=False)
 
 ############ (developer comment)
 # for morphological data, only morphological data is needed as input
@@ -100,8 +89,8 @@ def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     unformatted_file: str
     """
     LPR_input_csv_file_name_wide = lpr_file[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
-    
-    command = "python3 /srpAnalytics/format_LPR_input.py " + str(lpr_file) + " " + str(full_devel)
+
+    command = "python3 /zfBmd/format_LPR_input.py " + str(lpr_file) + " " + str(full_devel)
 
     if not os.path.exists(LPR_input_csv_file_name_wide):
         print(command)
@@ -114,7 +103,7 @@ def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     morpho_input_csv_file_name_wide = morph_file[:-4] + "_wide_DNC_0.csv"
 
     if not os.path.exists(morpho_input_csv_file_name_wide):
-        command = "python3 /srpAnalytics/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
+        command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
         print(command)
         res0 = os.system(command)
             #time.sleep(20)
@@ -130,7 +119,7 @@ def run_morpho_on_file(morph_file, full_devel='full'):
     """
     print("morpho_input_csv_file_name:" + str(morph_file))
     #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    command = "python3 /srpAnalytics/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
+    command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
     print(command)
     os.system(command)
 
@@ -140,24 +129,6 @@ def run_morpho_on_file(morph_file, full_devel='full'):
     res = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, \
                                              full_devel)
     return res
-
-def build_db_with_files(fdict):
-    """
-    Builds database from dictoary of of filelists
-    """
-    merged_files = merge_files(os.getcwd(), fdict)
-    command = "Rscript /srpAnalytics/buildv1database.R "
-
-    #if args.isSample:
-    #        command = command+'--samples  '
-    #    else:
-    command = command+'--chemicals '
-    if len(merged_files) == 3:
-        command = command + ','.join(merged_files)
-        print(command)
-        res0 = os.system(command)
-        for m in merged_files:
-            res0 = os.system('rm '+m)
 
 
 def main():
@@ -187,12 +158,12 @@ def main():
     fd = 'full'
     if args.test_lpr:
         print("Testing LPR code\n")
-        lfiles = ['/srpAnalytics/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv']
-        mfiles = ['/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
+        lfiles = ['/zfBmd/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv']
+        mfiles = ['/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
         fd = 'devel'
  #       files['test'] = run_lpr_on_file(test_lpr, test_morph, 'devel')
     elif args.test_morpho:
-        mfiles = ['/srpAnalytics/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
+        mfiles = ['/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
         print("Testing morphological code\n")
         fd = 'devel'
 #        files['test'] = run_morpho_on_file(test_morph, 'devel')
@@ -211,51 +182,6 @@ def main():
         for f in mfiles:
             files[f] = run_morpho_on_file(f, fd)
 
-#    if args.morpho == "":
-
-    ##here we run the gene data collection
-    if args.get_genes:
-        print("Collecting data from BU")
-        command = 'Rscript /srpAnalytics/exposome_summary_stats.R'
-        os.system(command)
-
-    ##here we run R code to merge all the files togeter
-    if len(files) == 0:
-        print("Testing database rebuild")
-        command = "Rscript /srpAnalytics/buildv1database.R"
-        os.system(command)
-    else:
-        print("building database with new files:")
-        print(files)
-        build_db_with_files(files)
-
-    allfiles = ['/tmp/'+a for a in os.listdir('/tmp') if 'csv' in a]
-    print(allfiles)
-    if args.validate:
-        print("Validating existing files for database ingest")
-        ##get files
-        for fval in allfiles:
-            valid.verify(pd.read_csv(fval, quotechar='"', quoting=1), re.sub('.csv', '', os.path.basename(fval)))
-        ##validate
-    allfiles = allfiles+['/srpAnalytics/README.md']
-
-    print('Now zipping up '+str(len(allfiles))+' files')
-    tar = tarfile.open("/tmp/srpAnalyticsCompendium.tar.gz", "w:gz")
-    for fname in allfiles:
-        tar.add(fname)
-    tar.close()
-
-    if args.update_db:
-        print('Saving to {}...'.format(DB))
-        pull_raw_data(folder=OUT_FOLDER, if_exists=IF_EXITS, database=DB)
-        print('Finished saving to database.')
-  #  else: # if not saving to database, check connection to DB is okay
-  #      print("Testing connection to database...", end='')
-  #      okay, error = test_connection(database=DB)
-  #      if okay:
-  #          print('Connection OK')
-  #      else:
-  #          print('Connection failed, {}'.format(error))
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print ("Done, it took:" + str(time_took))

@@ -25,16 +25,15 @@ print ("complete_file_path:" + str(complete_file_path))
 full_devel = args[2]
 
 
-
-
 df_morph = pd.read_csv(complete_file_path, header = 0)
-
-
 
 
 # Keep only relevant columns
 columns_to_keep = ['chemical.id', 'conc', 'plate.id', 'well', 'endpoint', 'value']
 df_morph_select = df_morph.loc[:,columns_to_keep]
+
+##not all plate ids are integers
+df_morph_select['plate.id'] = [str(a) for a in df_morph_select['plate.id']]
 df_morph_select.head()
 
 
@@ -48,7 +47,7 @@ if (full_devel == "full"):
     # all chemicals
     chemical_id_from_here = np.unique(df_morph['chemical.id'])
 else: # full_devel = "deve01l"
-    chemical_id_from_here = random.sample(set(np.unique(df_morph['chemical.id'])), 1)
+    chemical_id_from_here = random.sample(set(pd.unique(df_morph['chemical.id'])), 1)
 
 
 for chemical_index in chemical_id_from_here:
@@ -63,10 +62,10 @@ for chemical_index in chemical_id_from_here:
     for cpw in np.unique(morph_data_chemical.chemical_plate_well):
         total_number_of_chemical_plate_well += 1
         temp_df = morph_data_chemical.loc[morph_data_chemical.chemical_plate_well == cpw,:]
-        
+
         temp_df_grouped = temp_df.groupby(['chemical.id', 'plate.id', 'well'])
         for name, group in temp_df_grouped:
-            
+
             ## JUSTIFICATION: 7 PAH dataset doesn't have "BRAI" endpoint.
             ## On the other hand, extracts/phase I,II have "BRAI" endpoint.
 
@@ -74,11 +73,11 @@ for chemical_index in chemical_id_from_here:
                 try:
     #            if(len(group.endpoint) == 14):
                     temp = pd.DataFrame( {
-                            'chemical.id': np.unique(temp_df['chemical.id']),
-                            'plate.id': np.unique(temp_df['plate.id']),
-                            'well': np.unique(temp_df['well']),
-                            'chemical_plate_well': np.unique(temp_df['chemical_plate_well']),
-                            'conc': np.unique(temp_df['conc']),
+                            'chemical.id': pd.unique(temp_df['chemical.id']),
+                            'plate.id': pd.unique(temp_df['plate.id']),
+                            'well': pd.unique(temp_df['well']),
+                            'chemical_plate_well': pd.unique(temp_df['chemical_plate_well']),
+                            'conc': pd.unique(temp_df['conc']),
                             'AXIS': temp_df.value[temp_df.endpoint == 'AXIS'].values,
                             'BRN_': temp_df.value[temp_df.endpoint == 'BRN_'].values,
                             'CRAN': temp_df.value[temp_df.endpoint == 'CRAN'].values,
@@ -92,7 +91,7 @@ for chemical_index in chemical_id_from_here:
                             'NC__': temp_df.value[temp_df.endpoint == 'NC__'].values,
                             'SKIN': temp_df.value[temp_df.endpoint == 'SKIN'].values,
                             'SM24': temp_df.value[temp_df.endpoint == 'SM24'].values,
-                            'TCHR': temp_df.value[temp_df.endpoint == 'TCHR'].values,  
+                            'TCHR': temp_df.value[temp_df.endpoint == 'TCHR'].values,
                     }  )
                     df_reformatted = pd.concat([df_reformatted, temp])
                 except:
@@ -101,11 +100,11 @@ for chemical_index in chemical_id_from_here:
             else: #as extracts
                 temp = pd.DataFrame(
                         {
-                        'chemical.id': np.unique(temp_df['chemical.id']),
-                        'plate.id': np.unique(temp_df['plate.id']),
-                        'well': np.unique(temp_df['well']),
-                        'chemical_plate_well': np.unique(temp_df['chemical_plate_well']),
-                        'conc': np.unique(temp_df['conc']),
+                        'chemical.id': pd.unique(temp_df['chemical.id']),
+                        'plate.id': pd.unique(temp_df['plate.id']),
+                        'well': pd.unique(temp_df['well']),
+                        'chemical_plate_well': pd.unique(temp_df['chemical_plate_well']),
+                        'conc': pd.unique(temp_df['conc']),
                         'AXIS': temp_df.value[temp_df.endpoint == 'AXIS'].values,
                         'BRAI': temp_df.value[temp_df.endpoint == 'BRAI'].values,
                         'CFIN': temp_df.value[temp_df.endpoint == 'CFIN'].values,

@@ -19,7 +19,12 @@ require(xml2)
 #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
 data.dir<-'/srpAnalytics/data/'
-#data.dir='./data/'
+
+                                        #data.dir='./data/'
+##output directory is fixed
+out.dir<-'/tmp/'
+#out.dir<-'./'
+
 required_sample_columns<-c("SampleNumber","date_sampled","sample_matrix","technology",
                            "Sample_ID","ProjectName","SampleName","LocationLat",
                            "LocationLon","LocationName","LocationAlternateDescription",
@@ -35,9 +40,7 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
                           doseRep=c("Chemical_ID","End_Point","Dose","Response","CI_Lo","CI_Hi"),
                           fitVals=c("Chemical_ID","End_Point","X_vals","Y_vals"))
 
-##output directory is fixed
-out.dir<-'/tmp/'
-#out.dir<-'./'
+
 #' Get chemical metadata, which is stored in `data.dir`
 #' @param data.dir path to standardized data that enables matching across datasets
 #' @return data.frame
@@ -381,6 +384,25 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
     }
     return(full.bmd)
 }
+
+
+#' masvChemClass
+#' Reads in full MASV class annotations and assigns values to chemicals
+#' @return data.frame
+masvChemClass<-function(){
+  library(readxl)
+  library(tidyr)
+  library(dplyr)
+  classes<-readxl::read_xlsx('data/MASV Classifications 2021.xlsx')
+  chemClass<-classes%>%pivot_longer(cols=c(-ParameterName,-CASNumber),names_to='chemical_class',values_to='posNeg')%>%
+    subset(posNeg!='NULL')%>%
+    dplyr::select(-posNeg)
+
+  chemClass<-aggregate(chemical_class~CASNumber+ParameterName,chemClass,function(x) paste0(x,collapse=';'))
+  classmapping<-list()
+
+}
+
 
 #'combineChemicalDoseData combines the dose response points and joins them with metadata
 #'@param bmdfiles the output of files in the BMD pipeline describing the dose data
