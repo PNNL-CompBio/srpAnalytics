@@ -18,7 +18,7 @@ require(xml2)
 
 #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
-data.dir<-'/srpAnalytics/data/'
+data.dir<-'/bmd2Samps/data/'
 
                                         #data.dir='./data/'
 ##output directory is fixed

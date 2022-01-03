@@ -1,0 +1,15 @@
+FROM python:3.7
+# To setup other dependencies
+RUN apt-get update -qq && apt-get install -y net-tools \
+        curl \
+        unixodbc \
+        unixodbc-dev
+
+COPY requirements.txt /requirements.txt
+RUN pip3 install -r /requirements.txt
+
+COPY . validate
+WORKDIR validate
+
+ENTRYPOINT ["python3", "validate.py"]
+VOLUME ["/tmp"]
