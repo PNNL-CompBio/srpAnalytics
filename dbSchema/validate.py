@@ -3,7 +3,7 @@ from jsonschema import Draft3Validator
 import pandas as pd
 import argparse
 
-workdir='/validate/'
+workdir='/dbSchema/'
 
 schemas = {
     'chemdoseResponseVals': load(open(workdir+'/schemas/chemdoseResponseVals.json')),

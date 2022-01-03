@@ -8,8 +8,8 @@ RUN apt-get update -qq && apt-get install -y net-tools \
 COPY requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
 
-COPY . push2Db
-WORKDIR push2Db
+COPY . dbSchema
+WORKDIR dbSchema
 
 ENTRYPOINT ["python3", "main.py"]
 VOLUME ["/tmp"]
