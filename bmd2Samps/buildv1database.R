@@ -393,13 +393,34 @@ masvChemClass<-function(){
   library(readxl)
   library(tidyr)
   library(dplyr)
-  classes<-readxl::read_xlsx('data/MASV Classifications 2021.xlsx')
-  chemClass<-classes%>%pivot_longer(cols=c(-ParameterName,-CASNumber),names_to='chemical_class',values_to='posNeg')%>%
+  classes<-readxl::read_xlsx('data/MASV Classifications 2021.xlsx',sheet = 'MASV15 Classifications')
+  source=c("pharmacological","personalCare","industrial","pulpAndPaper","pestProduct","natural",'pestRodenticide',
+           "consumerProduct","pestHerbicide","pestInsecticide",'pestFungicide','pestGeneral','flameRetardant')
+  cc=c('PAH','OPAH','PCB','PBB','PBDE','deuterated','dioxinsAndFurans','haloEthers','OPFR','phenol','aniline','uncategorized')
+
+
+  ##first let's handle  the sources
+  chemSource<-classes%>%
+    dplyr::select(-cc)%>%
+    pivot_longer(cols=source,names_to='chem_source',values_to='posNeg')%>%
+  subset(posNeg!='NULL')%>%
+  dplyr::select(-posNeg)%>%
+    mutate(chem_source=gsub('pest.*','pesticide',chem_source))
+
+  chemSource<-aggregate(chem_source~CASNumber+ParameterName,chemSource,function(x) paste0(x,collapse=';'))
+
+
+  chemClass <- classes%>%pivot_longer(cols=cc,names_to='chemical_class',values_to='posNeg')%>%
+    dplyr::select(-source)%>%
     subset(posNeg!='NULL')%>%
-    dplyr::select(-posNeg)
+   dplyr::select(-posNeg)
 
   chemClass<-aggregate(chemical_class~CASNumber+ParameterName,chemClass,function(x) paste0(x,collapse=';'))
-  classmapping<-list()
+
+  chemComb <- chemSource%>%full_join(chemClass)%>%
+    replace_na(list(chemical_class='Uncategorized'))
+
+  write.csv(chemComb,'MASV_classAndSource.csv')
 
 }
 
@@ -488,7 +509,6 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
 
 chem_dirs=c('phase_I_II_III')#,'zf_morphology')
 extract_dirs=c('extracts')
-
 
 #' main method
 #' Parsers arguments

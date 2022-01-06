@@ -10,50 +10,40 @@ import argparse
 import tarfile
 import re
 
-OUT_FOLDER='/tmp'
-IF_EXITS='replace' # options: "append", "replace", "fail"
-DB='develop' # options: "develop", "production"
-
-
-#sys.path.insert(0, './qc_BMD')
-
-
 ##impor  BMD files from directory
+##TODO: combine bMD processing to single file, combine LPR processing to single file
 import bmd_analysis_morpho as bmd
 import bmd_analysis_LPR_7_PAH_t0_t239 as bmd_LPR
+import format_LPR_input as format_LPR
+import format_morpho_input as format_morpho
 
 parser = argparse.ArgumentParser('Run the QC and BMD analysis as well as join with \
 extract data to store in SRP data analytics portal')
 
-#parser.add_argument('--label', dest='label', help='Label to store data', \
-#                    default='newdata')
-#parser.add_argument('files', nargs='?', default='',\
-#                    help='Morphological files for regular BMD input or LPR (with --LPR option)')
 parser.add_argument('--morpho', dest='morpho',\
                     help='Comma-delimited list of morphological files to be processed',\
                     default=None)
-
 parser.add_argument('--LPR', dest='lpr', \
                     help='Comma-delimited list of LPR-related files to be processed. MUST correspond to similar files in the morpho argument',\
                     default=None)
+parser.add_argument('--test', dest='test',\
+                    help='Set this flag to test code with incoming files',\
+                    action='store_true', default='false')
+#parser.add_argument('--test-lpr', dest='test_lpr',\
+#                    help='Set this flag to run LPR test code instead of full analysis',\
+#                    action='store_true', default=False)
 
-parser.add_argument('--test-lpr', dest='test_lpr',\
-                    help='Set this flag to run LPR test code instead of full analysis',\
-                    action='store_true', default=False)
-
-parser.add_argument('--test-morpho', dest='test_morpho',\
-                    help='Set this flag to run morpho test code instead of full analysis',\
-                    action='store_true', default=False)
+#parser.add_argument('--test-morpho', dest='test_morpho',\
+#                    help='Set this flag to run morpho test code instead of full analysis',\
+#                    action='store_true', default=False)
 
 parser.add_argument('--test-extract', dest='test_extract',\
                     help='Set this flag to run morpho test code with extract data',\
                     action='store_true', default=False)
 
-############ (developer comment)
+############ (developer) comment
 # for morphological data, only morphological data is needed as input
 # for LPR processing, both morphological data and LPR data are needed as inputs
-
-
 def merge_files(path, file_dict):
     """
     merge_files takes a dictionary of files and joints them to a single file to
@@ -80,7 +70,6 @@ def merge_files(path, file_dict):
     pd.concat([pd.read_csv(f) for f in dose]).to_csv(path+'/new_dose.csv')
     return [path+'/new_bmds.csv',path+'/new_fits.csv',path+'/new_dose.csv']
 
-
 def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     """
     runs LPR code on a file
@@ -90,25 +79,24 @@ def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     """
     LPR_input_csv_file_name_wide = lpr_file[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
 
-    command = "python3 /zfBmd/format_LPR_input.py " + str(lpr_file) + " " + str(full_devel)
-
+    print ("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
+    ##first we reformat LPR if needed
+    chem_ind = None
     if not os.path.exists(LPR_input_csv_file_name_wide):
-        print(command)
-        res0 = os.system(command)
-
-    #print ("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
+       chem_ind = format_LPR.format(lpr_file, full_devel, LPR_input_csv_file_name_wide)
 
     #print ("morpho_input_csv_file_name:" + str(morph_file))
     #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    morpho_input_csv_file_name_wide = morph_file[:-4] + "_wide_DNC_0.csv"
-
+    ##then we reformat morphological file if needed
+    morpho_input_csv_file_name_wide = morph_file[:-4] + "_wide_DNC_0_"+full_devel+".csv"
     if not os.path.exists(morpho_input_csv_file_name_wide):
-        command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
-        print(command)
-        res0 = os.system(command)
+        #command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
+        #print(command)
+        #res0 = os.system(command)
+        res0 = format_morpho.format(morph_file, full_devel, morpho_input_csv_file_name_wide, chem_ind)
             #time.sleep(20)
 
-
+    ##then we take the reformatted files and run them
     res = bmd_LPR.runBmdPipeline(morpho_input_csv_file_name_wide, \
                                              LPR_input_csv_file_name_wide, full_devel)
     return res
@@ -118,13 +106,18 @@ def run_morpho_on_file(morph_file, full_devel='full'):
     formats and runs morphological BMD on file
     """
     print("morpho_input_csv_file_name:" + str(morph_file))
-    #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
-    print(command)
-    os.system(command)
 
     morpho_input_csv_file_name_wide = morph_file[:-4] + \
-        "_wide_DNC_0.csv"
+        "_wide_DNC_0_"+full_devel+".csv"
+
+    chem_ind = None
+    if not os.path.exists(morpho_input_csv_file_name_wide):
+        res0 = format_morpho.format(morph_file, full_devel, morpho_input_csv_file_name_wide, chem_ind)
+    #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
+    #command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
+    #print(command)
+    #os.system(command)
+
     print("morpho_input_csv_file_name_wide:" + str(morpho_input_csv_file_name_wide))
     res = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, \
                                              full_devel)
@@ -137,10 +130,6 @@ def main():
     """
     start_time = time.time()
     args = parser.parse_args()
-    #print(args)
-    #flist = args.files.split(',')
-    #print(flist)
-
     ##collecting a list of files to add to DB
     files = dict()
 
@@ -156,17 +145,14 @@ def main():
     print(lfiles)
     print(mfiles)
     fd = 'full'
-    if args.test_lpr:
-        print("Testing LPR code\n")
-        lfiles = ['/zfBmd/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv']
-        mfiles = ['/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
+    if args.test:
         fd = 'devel'
- #       files['test'] = run_lpr_on_file(test_lpr, test_morph, 'devel')
-    elif args.test_morpho:
-        mfiles = ['/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
-        print("Testing morphological code\n")
-        fd = 'devel'
-#        files['test'] = run_morpho_on_file(test_morph, 'devel')
+        if len(lfiles)==0: ##we can tests with no files
+            lfiles = ['/zfBmd/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv']
+            mfiles = ['/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
+        else:  ##or we can test with new files
+            lfiles = lfiles[:1]
+            mfiles = mfiles[:1]
 
     if len(lfiles) > 0:
         if len(lfiles) != len(mfiles):
@@ -182,10 +168,11 @@ def main():
         for f in mfiles:
             files[f] = run_morpho_on_file(f, fd)
 
+    merged_files = merge_files('/tmp/', files)
+    print(merged_files)
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
-    print ("Done, it took:" + str(time_took))
-
+    print("Done, it took:" + str(time_took))
 
 if __name__ == "__main__":
     main()

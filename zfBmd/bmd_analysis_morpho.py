@@ -106,7 +106,7 @@ def runBmdPipeline(complete_file_path, full_devel):
                       'NC__', 'SKIN', 'SM24', 'TCHR', 'TOT_MORT']
         else:
             end_points = ['ANY24','ANY120','AXIS','ALL_BUT_MORT','BRN_','CRAN','DP24','EDEM','LTRK','MO24','MORT','MUSC','NC24','NC__','SKIN','SM24','TCHR','TOT_MORT']
-        chemical_id_from_here = np.unique(df_morph['chemical.id'])
+        chemical_id_from_here = pd.unique(df_morph['chemical.id'])
     else:
         end_points = ['ANY24']
         chemical_id_from_here = random.sample(set(np.unique(df_morph['chemical.id'])), 1)

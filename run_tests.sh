@@ -20,7 +20,7 @@ echo $run
 
 echo "
 Running validate test"
-run=$docker_FILE" run -v "$PWD":/tmp ssgosline/srp-dbschema --validate"
+run=$docker_FILE" run -v "$PWD":/tmp sgosline/srp-dbschema --validate"
 echo $run
 #$run
 
@@ -50,3 +50,9 @@ END_TIME=$(date +%s)
 echo "
 LPR test took $(($END_TIME - $START_TIME)) seconds"
 # (when echoing, scp/rsync from my mac didn't work)
+
+echo "
+Combining all files into single db"
+run = $docker_FILE" run -v "$PWD":/tmp sgosline/srp-bmd2samps"
+echo $run
+$run

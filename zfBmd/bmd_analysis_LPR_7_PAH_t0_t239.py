@@ -9,7 +9,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import os, shutil, sys, time
+import os, shutil, sys, time, random
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -161,9 +161,8 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     fig, ax = plt.subplots()
     if report:
         print(lpr_filtered_data_in_minute.iloc[10:15, time_index_start:time_index_start + num_time_points])
-    # first ':' shows rows, second ':' shows columns
-
-    ax.plot(np.transpose(lpr_filtered_data_in_minute.iloc[10:223,time_index_start:time_index_start + num_time_points].values));
+        # first ':' shows rows, second ':' shows columns
+        ax.plot(np.transpose(lpr_filtered_data_in_minute.iloc[10:223,time_index_start:time_index_start + num_time_points].values));
 
     delta_mov_auc = lpr_filtered_data_in_minute[['chemical.id', 'conc', 'plate.id', 'well']].copy()
 
@@ -229,14 +228,13 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     #full_devel = "devel"
 
     if (full_devel == "full"):
-        chemical_id_from_here = np.unique(delta_mov_auc['Chemical.ID'])
+        chemical_id_from_here = pd.unique(delta_mov_auc['Chemical.ID'])
     else:
-        chemical_id_from_here = [3756]
+        chemical_id_from_here = random.sample(set(pd.unique(delta_mov_auc['Chemical.ID'])),1)
 
-    if (full_devel == "full"):
-        end_points_from_here = ['MOV1', 'AUC1']
-    else:
-        end_points_from_here = ['MOV1']
+    end_points_from_here = ['MOV1', 'AUC1']
+#    else:
+#        end_points_from_here = ['MOV1']
         #end_points_from_here = ['MOV1_2_3']
 
     report = False
