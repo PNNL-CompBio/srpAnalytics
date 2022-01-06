@@ -57,7 +57,7 @@ all_morph=$dpath"temp/morph0.csv,"$dpath"temp/morph0.csv,"$dpath"temp/morph1.csv
 ##then we run morph
 dpull="docker pull sgosline/srp-zfbmd"
 echo $dpull
-#$dpull
+$dpull
 
 drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph
 echo $drun

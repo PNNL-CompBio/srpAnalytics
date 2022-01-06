@@ -28,7 +28,7 @@ parser.add_argument('--LPR', dest='lpr', \
                     default=None)
 parser.add_argument('--test', dest='test',\
                     help='Set this flag to test code with incoming files',\
-                    action='store_true', default='false')
+                    action='store_true', default=False)
 #parser.add_argument('--test-lpr', dest='test_lpr',\
 #                    help='Set this flag to run LPR test code instead of full analysis',\
 #                    action='store_true', default=False)
