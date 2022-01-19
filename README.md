@@ -61,14 +61,18 @@ Below is a snapshot of the sample database from 2021/10/11:
 |Wyckoff Co. Eagle Harbor|108|139|6|
 
 
-## Docker image
-All code in this repository requires specific package components that are contained in a Docker image. The Docker image is built automatically and stored [on Docker Hub](https://hub.docker.com/repository/docker/sgosline/srp-analytics). As such it can be pulled locally using the following command:
+## System architecture
+The analytics pipeline was built with a module architecture stored in series of docker images to enable the pipeline to be processed in individual stages. Currently there are five modules:
+1. Validate: This module validates files when they are input into system and when they are pushed to the database to ensure they align to expected schemas.
+2. zfBmd: This module processes the zebrafsih benchmark dose data to assess the endpoints described below.
+3. bmd2Samps: This module combines existing zebrafish data with new data from the `zfBmd` module and also integratees environmental sample information
+4. exposome: This module pulls exposome data and creates an outputed file
+5. push2Db: This module will take validated files and push them to the internal database that serves as the backend to the SRP analytics web site.
 
-``` bash
-docker pull sgosline/srp-analytics
-```
+### To run pipeline
 
-Docker image is pulled
+Here we have one script that will run the modules above.
+
 
 ### Docker image testing
 Currently all changes to the repository trigger a build of the docker image and pushing it to DockerHub. If this fails you will be notified.
