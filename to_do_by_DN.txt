@@ -1,0 +1,5 @@
+
+1. Use DASK for parallel execution of BMD calculation
+
+2. Refactor Paritosh's tall->wide reformatting with pd.melt
+
