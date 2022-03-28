@@ -71,7 +71,7 @@ The analytics pipeline was built with a module architecture stored in series of 
 
 A depiction of the framework is shown below:
 
-<img src="schemaFig.png",width="300">
+<img src="schemaFig.png" width="300">
 
 ### To run pipeline
 
