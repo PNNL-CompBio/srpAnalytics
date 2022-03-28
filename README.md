@@ -27,7 +27,10 @@ A depiction of the framework is shown below:
 
 ### To run pipeline
 
-Here we have one script that will run the modules above.
+Here we have one script that will run the modules above. This script is still  a work in process but currently runs:
+```
+sh buildV1db.sh
+```
 
 
 ### Docker image testing
