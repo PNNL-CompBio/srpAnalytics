@@ -1,12 +1,13 @@
 # Superfund Research Program Analytics
 
-<img src="OSU-PNNLsuperfund_Small.png"  width="400">
+<img src="OSU-PNNLsuperfund_Small.png"  width="300">
 This repository contains the code necessary to process any new data for the Superfund Research Program Analytics Portal. Currently the portal displays two types of data:
 - Zebrafish measurements describing the response to zebrafish under various levels of chemical stressors
 - Environmental sample measurements that describe the relative concentration of specific chemicals in environmental samples.
+- Human differential expression measurements from each sample
 
 Furthermore we are in the process of adding two more types of data:
-- Human differential expression measurements for each chemical
+- Zebrafish differential expression measurements for each chemical
 - Human wristband measurements of chemical concentrations.
 
 The data can be browsed at http://srp.pnnl.gov
@@ -63,11 +64,13 @@ Below is a snapshot of the sample database from 2021/10/11:
 
 ## System architecture
 The analytics pipeline was built with a module architecture stored in series of docker images to enable the pipeline to be processed in individual stages. Currently there are five modules:
-1. Validate: This module validates files when they are input into system and when they are pushed to the database to ensure they align to expected schemas.
+1. dbSchema: This module validates files when they are input into system and when they are pushed to the database to ensure they align to expected schemas.
 2. zfBmd: This module processes the zebrafsih benchmark dose data to assess the endpoints described below.
 3. bmd2Samps: This module combines existing zebrafish data with new data from the `zfBmd` module and also integratees environmental sample information
 4. exposome: This module pulls exposome data and creates an outputed file
-5. push2Db: This module will take validated files and push them to the internal database that serves as the backend to the SRP analytics web site.
+
+A depiction of the framework is shown below:
+<img src="schemaFig.png",width="300">
 
 ### To run pipeline
 
