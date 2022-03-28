@@ -68,7 +68,7 @@ echo $drun
 
 ##then we concatentate them and run lpr
 drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph" --LPR="$all_lpr" --test"
-echo $drun
+#echo $drun
 #$drun
 
 drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph" --LPR="$all_lpr
