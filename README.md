@@ -70,6 +70,7 @@ The analytics pipeline was built with a module architecture stored in series of 
 4. exposome: This module pulls exposome data and creates an outputed file
 
 A depiction of the framework is shown below:
+
 <img src="schemaFig.png",width="300">
 
 ### To run pipeline
