@@ -20,10 +20,10 @@ require(xml2)
 ##setting these three parameters, can be appended
 data.dir<-'/bmd2Samps/data/'
 
-data.dir='./data/'
+#data.dir='./data/'
 ##output directory is fixed
 out.dir<-'/tmp/'
-out.dir<-'./'
+#out.dir<-'./'
 
 #########################################
 # Table schemas
@@ -773,4 +773,4 @@ main<-function(){
 
 }
 
-#main()
+main()
