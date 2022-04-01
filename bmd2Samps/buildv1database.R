@@ -327,7 +327,7 @@ buildSampleData<-function(data.dir,chemMeta){
       distinct()
     
     ##older files will have a missing projectName and require manual mapping of some terms
-    missing <- which(is.na(finalSampChem$projectName))  ##these are the older samples
+    nas <- which(is.na(finalSampChem$projectName))  ##these are the older samples
     finalSampChem$projectName[nas]<-finalSampChem$ProjectName[nas]
     finalSampChem$LocationName[nas]<-finalSampChem$NewLocationName[nas]
     finalSampChem$SampleName[nas]<-finalSampChem$NewSampleName[nas]
