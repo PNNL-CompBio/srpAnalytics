@@ -24,7 +24,8 @@ report = False
 def logistic_fun(dose, params):
     alpha_ = params[0].astype('float')
     beta_ = params[1].astype('float')
-    prob_dose = 1/(1 + np.exp(-alpha_ - beta_*dose.astype('float')))
+    dose = dose.astype('float')
+    prob_dose = 1/(1 + np.exp(-alpha_ - beta_*dose))
     return prob_dose
 
 class Logistic(GenericLikelihoodModel):
@@ -153,6 +154,7 @@ def weibull_fun(dose, params):
     g_ = params[0].astype('float')
     alpha_ = params[1].astype('float')
     beta_ = params[2].astype('float')
+    dose = dose.astype('float')
     prob_dose = g_ + (1 - g_) * (1 - np.exp(-beta_ * (dose.astype('float') ** alpha_)))
     return prob_dose
 
@@ -228,6 +230,7 @@ def log_logistic_fun(dose, params):
     g_ = params[0].astype('float')
     alpha_ = params[1].astype('float')
     beta_ = params[2].astype('float')
+    dose = dose.astype('float')
     dose_nonzero = dose.copy()
     dose_nonzero[dose_nonzero == 0] = 1e-9
     prob_dose = g_ + (1 - g_)/(1 + np.exp(-alpha_ - beta_*np.log(dose_nonzero.astype('float'))))
@@ -297,6 +300,7 @@ class Log_Logistic_BMD(GenericLikelihoodModel):
 def probit_fun(dose, params):
     alpha_ = params[0].astype('float')
     beta_ = params[1].astype('float')
+    dose = dose.astype('float')
     prob_dose = stats.norm.cdf((alpha_ + beta_ * dose), loc=0, scale=1)
     return prob_dose
 
@@ -364,7 +368,7 @@ def log_probit_fun(dose, params):
     g_ = params[0].astype('float')
     alpha_ = params[1].astype('float')
     beta_ = params[2].astype('float')
-    dose_nonzero = dose.copy()
+    dose_nonzero = dose.copy().astype('float')
     dose_nonzero[dose_nonzero == 0] = 1e-9
     prob_dose = g_ + (1 - g_) * stats.norm.cdf((alpha_ + beta_ * np.log(dose_nonzero)), loc=0, scale=1)
     return prob_dose
@@ -454,7 +458,7 @@ class Multistage_2(GenericLikelihoodModel):
         g_ = params[0].astype('float')
         beta1_ = params[1].astype('float')
         beta2_ = params[2].astype('float')
-        dose = self.endog[:,0].flatten()
+        dose = self.endog[:,0].flatten().astype('float')
 
         probs = multistage_2_fun(dose, [g_, beta1_, beta2_])
         num_affected = self.endog[:,1].flatten()
@@ -517,6 +521,7 @@ class Multistage_2_BMD(GenericLikelihoodModel):
 def quantal_linear_fun(dose, params):
     g_ = params[0].astype('float')
     beta_ = params[1].astype('float')
+    dose = dose.astype('float')
     prob_dose = g_ + (1 - g_) * (1 - np.exp(-(beta_ * dose)))
     return prob_dose
 
