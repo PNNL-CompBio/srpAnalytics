@@ -14,8 +14,12 @@ import os, shutil, sys, time, random
 import warnings
 warnings.filterwarnings('ignore')
 
+import generate_dose_response as gdr
+import BMD_BMDL_estimation as bmdest
+import Plot_Save as ps
+
 starting_dir = os.getcwd()
-print (starting_dir)
+print(starting_dir)
 
 def main():
 
@@ -26,29 +30,28 @@ def main():
     complete_file_path_morpho = args[1]
     complete_file_path_LPR = args[2]
 
-    print("Running command line bmd analysis on "+complete_file_path)
+    print("Running command line bmd analysis on "+complete_file_path_LPR)
     full_devel = args[3]
     files = runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel)
     print(files)
 
 
 def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel):
-
-    lpr_all_data = pd.read_csv(complete_file_path_LPR, header = 0)
-    report = False
-
+    report = True
+    lpr_all_data = pd.read_csv(complete_file_path_LPR, header=0)
     #print(lpr_all_data.head())
     #display("lpr_all_data.shape:" + str(lpr_all_data.shape))
     # Convert plate ids to ints
     lpr_all_data['plate.id'] = (lpr_all_data['plate.id'].values).astype(int)
     #print(lpr_all_data)
 
-    np.unique(lpr_all_data.well)
+    pd.unique(lpr_all_data.well)
 
-    unique_chemical_IDs = np.unique(lpr_all_data['chemical.id'])
+    unique_chemical_IDs = pd.unique(lpr_all_data['chemical.id'])
     count_wells_compounds_concentration = pd.DataFrame(columns = ['Compound', 'Concentration', 'Number_Wells'])
 
-    # Count number of wells for each chemical
+    # Count number of wells for each chemical, append to list
+    # SG: I think this is all this loop does?
     for chemical_ID in unique_chemical_IDs:
         lpr_data_subset = lpr_all_data.loc[lpr_all_data['chemical.id'] == chemical_ID]
         if (report):
@@ -61,7 +64,7 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
         for concentration_id in np.unique(lpr_data_subset['conc']):
             lpr_data_subset_concs = lpr_data_subset.loc[lpr_data_subset['conc'] == concentration_id]
             #print('Number of wells for compound ID', chemical_ID, 'and concentration', concentration_id, 'are', len((lpr_data_subset_concs['well'])))
-            count_wells_compounds_concentration = count_wells_compounds_concentration.append({'Compound': chemical_ID, 'Concentration': concentration_id, 'Number_Wells': len((lpr_data_subset_concs['well']))}, ignore_index = True)
+            count_wells_compounds_concentration = count_wells_compounds_concentration.append({'Compound': chemical_ID, 'Concentration': concentration_id, 'Number_Wells': len((lpr_data_subset_concs['well']))}, ignore_index=True)
 
     # ## Load morphological data for filtering wells that have dead fish
 
@@ -76,9 +79,8 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     # 1. Append additional identifier column (Plate_Well value) to lpr and morphology data
     # 2. Find rows in morphology data for which MORT end-point is not 1 or NA
     # 3. Using Plate_Well values, find corresponding rows in lpr data to filter the data
-    lpr_all_data['Chemical_Plate_WELL'] = lpr_all_data[['chemical.id','plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis = 1)
-    morphology_all_data['Chemical_Plate_WELL'] = morphology_all_data[['chemical.id','plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis = 1)
-
+    lpr_all_data['Chemical_Plate_WELL'] = lpr_all_data[['chemical.id', 'plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis=1)
+    morphology_all_data['Chemical_Plate_WELL'] = morphology_all_data[['chemical.id', 'plate.id', 'well']].apply(lambda x: '_'.join(x.map(str)), axis=1)
     morphology_nonna_data_plate_well = morphology_all_data.Chemical_Plate_WELL[~((morphology_all_data.MORT == 1) | (morphology_all_data.MORT.isnull()))]
     lpr_filtered_data = lpr_all_data.loc[lpr_all_data['Chemical_Plate_WELL'].isin(list(morphology_nonna_data_plate_well.values))]
 
@@ -113,41 +115,38 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     time_index_sec_start = 5
     max_time_index_sec = 240 # from 0 to 239
 
-    #report = True
-    report = False
-
     interval = "1 min"
     #interval = "30 sec"
     #interval = "12 sec"
     #print ("interval:" + str(interval))
-    if (interval == "1 min"):
+    if(interval == "1 min"):
         group_size = 10 # (10 X 6 sec/sample = 1 min/sample)
-    elif (interval == "30 sec"):
+    elif(interval == "30 sec"):
         group_size = 5 # (5 X 6 sec/sample = 1 min/sample)
     else: # interval = "12 sec"
         group_size = 2 # (2 X 6 sec/sample = 1 min/sample)
 
     for time_index in range(int(max_time_index_sec / group_size)):
-        if (report):
+        if(report):
             print("\ntime_index:" + str(time_index))
 
         start_index = time_index_sec_start + group_size * time_index
-        if (report):
+        if(report):
             print("start_index:" + str(start_index))
 
         end_index = start_index + group_size
-        if (report):
+        if(report):
             print("end_index:" + str(end_index))
 
         lpr_filtered_data_in_minutes_in_this_time_index = pd.DataFrame(np.sum(lpr_filtered_data.iloc[:,start_index:end_index], axis=1))
         if (report):
             print("lpr_filtered_data_in_minutes_in_this_time_index.shape:\n" + str(lpr_filtered_data_in_minutes_in_this_time_index.shape))
-            display(lpr_filtered_data_in_minutes_in_this_time_index.head())
-            display(lpr_filtered_data_in_minutes_in_this_time_index.tail())
+            print(lpr_filtered_data_in_minutes_in_this_time_index.head())
+            print(lpr_filtered_data_in_minutes_in_this_time_index.tail())
 
         lpr_filtered_data_in_minutes_in_this_time_index.columns = ['t' + str(time_index)]
         #lpr_filtered_data_in_minutes_in_this_time_index.columns = np.transpose(['t' + str(i) for i in range(int(max_time_index_sec / group_size))])
-        lpr_filtered_data_in_minute = pd.concat([lpr_filtered_data_in_minute, lpr_filtered_data_in_minutes_in_this_time_index], axis = 1)
+        lpr_filtered_data_in_minute = pd.concat([lpr_filtered_data_in_minute, lpr_filtered_data_in_minutes_in_this_time_index], axis=1)
     #pd.set_option('display.max_columns', None)
     #lpr_filtered_data_in_minute.head()
 
@@ -157,7 +156,6 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     num_time_points = 24 # >= 25 will not make any difference
 
     #print ("lpr_filtered_data_in_minute.shape:" + str(lpr_filtered_data_in_minute.shape)) #(223, 28)
-
     fig, ax = plt.subplots()
     if report:
         print(lpr_filtered_data_in_minute.iloc[10:15, time_index_start:time_index_start + num_time_points])
@@ -177,7 +175,7 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
     # but for now (portal establishment), only the first transition is needed.
 
     num_light = 3 # seems reasonable since interval between middle points of each peak ~= 6
-    num_dark  = 3
+    num_dark = 3
 
     #delta_mov_auc['MOV_1_2_3'] = 0 # just initial value
     #delta_mov_auc['AUC_1_2_3'] = 0 # just initial value
@@ -210,13 +208,9 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
         print(delta_mov_auc.tail())
 
 
-    import generate_dose_response as gdr
-    import BMD_BMDL_estimation as bmdest
-    import Plot_Save as ps
-
     start_time = time.time()
 
-    if (os.path.isdir("output") == True):
+    if(os.path.isdir("output") == True):
         shutil.rmtree("output")
     os.mkdir("output")
 
@@ -236,9 +230,6 @@ def runBmdPipeline(complete_file_path_morpho, complete_file_path_LPR, full_devel
 #    else:
 #        end_points_from_here = ['MOV1']
         #end_points_from_here = ['MOV1_2_3']
-
-    report = False
-    #report = False
 
     for chemical_id in chemical_id_from_here:
         if (report):
