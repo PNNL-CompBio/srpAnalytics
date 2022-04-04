@@ -79,9 +79,6 @@ def gen_dose_response(data_ep_cid, end_point):
             fraction_affected = num_affected / num_nonnan_wells
         dose_response = dose_response.append({'dose': concentration_id, 'num_affected': num_affected , 'frac_affect': fraction_affected, 'num_embryos': num_nonnan_wells, 'tot_wells': tot_wells}, ignore_index = True)
 
-
-
-
     # Delete dose groups if 'number of embryos' < '25% of total wells'
     # (number of embryos -> number of wells whose embryos are countable either 0/1)
 
@@ -284,7 +281,7 @@ def BMD_feasibility_analysis(dose_response):
     else:
         frac_response = dose_response['num_affected']/dose_response['num_embryos']
         #frac_response = dose_response['num_affected']/dose_response['frac_affect']
-        data_corr = stats.spearmanr(np.log10(dose_response['dose']+1e-15), frac_response)
+        data_corr = stats.spearmanr(np.log10(dose_response['dose'].astype('float')+1e-15), frac_response)
         if (global_report):
             print ("dose_response['num_affected']:\n" + str(dose_response['num_affected']))
             print ("dose_response['num_embryos']:\n" + str(dose_response['num_embryos']))

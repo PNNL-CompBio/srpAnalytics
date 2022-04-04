@@ -68,7 +68,7 @@ def merge_files(path, file_dict):
     pd.concat([pd.read_csv(f) for f in bmds]).to_csv(path+'/new_bmds.csv')
     pd.concat([pd.read_csv(f) for f in fits]).to_csv(path+'/new_fits.csv')
     pd.concat([pd.read_csv(f) for f in dose]).to_csv(path+'/new_dose.csv')
-    return [path+'/new_bmds.csv',path+'/new_fits.csv',path+'/new_dose.csv']
+    return [path+'/new_bmds.csv', path+'/new_fits.csv', path+'/new_dose.csv']
 
 def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     """
@@ -79,7 +79,7 @@ def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     """
     LPR_input_csv_file_name_wide = lpr_file[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
 
-    print ("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
+    print("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
     ##first we reformat LPR if needed
     chem_ind = None
     if not os.path.exists(LPR_input_csv_file_name_wide):

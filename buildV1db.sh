@@ -11,8 +11,14 @@ fi
 ##here we have the data from doo nam/lisa, we need to copy it into the temp directory
 #phase12 data
 p12_morph='raw_files/zf_morphology_data_335_chemicals_2020DEC16_fixed.csv'
-p12_lpr_1='raw_files/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_merged.csv'
-p12_lpr_2='raw_files/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_merged_full_240_timepoints.csv'
+p12_lpr_1='344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_merged.csv'
+p12_lpr_2='344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_merged_full_240_timepoints.csv'
+orig_lpr='raw_files/p12_lpr.tar.gz'
+
+
+cmd='tar -xvzf '$orig_lpr
+echo $cmd
+$cmd
 
 cp $p12_morph temp/morph0.csv
 cp $p12_lpr_1 temp/lpr0_1.csv
@@ -25,9 +31,9 @@ p3_morph='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AACFZprOKkbvydjfoDI3oZ
 p3_lpr='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AADd1QBStMguW9qYgzH2eatJa/Tanguay%20Phase%203%20zf%20LPR%20data%20PNNL%202021MAR23.csv -O temp/lpr1.csv'
 
 echo $p3_morph
-#i$p3_morph
+i$p3_morph
 echo $p3_lpr
-#$p3_lpr
+$p3_lpr
 
 #################################################### PFAS  data
 ##PFAS data is also on dropbox, we need to pull it
@@ -37,10 +43,10 @@ lpr_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABgzjaRPteU1EZIhnW9zv2
 mor_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABxsOLgwlv7-_HTZ0xaAIlNa/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv -O temp/morph2.csv'
 
 echo $lpr_cmd
-#$lpr_cmd
+$lpr_cmd
 
 echo $mor_cmd
-#$mor_cmd
+$mor_cmd
 
 ################################################## run pipeline
 #we have 4 pairs of files to run
