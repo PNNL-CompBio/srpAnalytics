@@ -45,9 +45,14 @@ library(drc)
 
 ggplot(MORT, aes(x = Dose, y = Response)) + geom_point()
 
+drm(formula = Response~Dose, data = MORT, type = "binomial", fct = LL.2()) %>%
+  summary()
 
-drm(formula = MORT[,c("Response", "Dose")], type = "event", fct = LL.2())
+glm(Response~Dose, family = "binomial", data = MORT) %>%
+  summary()
 
+glm(abs(Response)~abs(Dose), family = "Gamma", data = MORT) %>%
+  summary()
 
 
 
