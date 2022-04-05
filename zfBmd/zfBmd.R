@@ -15,13 +15,12 @@ Morpho <- fread("~/Desktop/Git_Repos/srpAnalytics/zfBmd/test_files/7_PAH_zf_morp
 AddEndpoints <- function(NewDose, Endpoints, Name) {
   NewDose %>%
     subset(End_Point %in% Endpoints) %>%
-    select(Chemical_ID, Dose, Response) %>%
     mutate(Chemical_ID, End_Point = Name, Dose, Response) %>%
     group_by(Chemical_ID, End_Point, Dose) %>%
     summarise(Response = sum(Response, na.rm = TRUE))
 }
 
-# Save a vector of endpoints of concern
+# Get all endpoints we care about
 AllEndpoints <- c("AXIS", "BRN_", "CRAN", "DP24", "EDEM", "LTRK", "MO24", "MORT", 
                   "MUSC", "NC__", "SKIN", "SM24", "TCHR")
 
@@ -33,12 +32,22 @@ NewDose <- Morpho %>%
   rename(Chemical_ID = chemical.id, End_Point = endpoint, Dose = conc) %>%
   rbind(
     AddEndpoints(., c("MO24", "DP24", "SM24"), "ANY24"),
-    AddEndpoints(., AllEndpoints, "ANY120"),
+    AddEndpoints(., c("AXIS", "BRN_", "CRAN", "EDEM", "LTRK", "MORT", "MUSC", "NC__", "SKIN", "TCHR", "ANY24"), "ANY120"),
     AddEndpoints(., c("MO24", "MORT"), "TOT_MORT"),
-    AddEndpoints(., AllEndpoints[AllEndpoints %in% c("MO24", "MORT") == FALSE], "ALL_BUT_MORT")
+    AddEndpoints(., c("AXIS", "BRN_", "CRAN", "DP24", "EDEM", 
+                      "LTRK", "MUSC", "NC__", "SKIN", "SM24", "TCHR"), "ALL_BUT_MORT")
   )
 
-  
+MORT <- NewDose[NewDose$End_Point == "MORT",]
+
+library(ggplot2)
+library(drc)
+
+ggplot(MORT, aes(x = Dose, y = Response)) + geom_point()
+
+
+drm(formula = MORT[,c("Response", "Dose")], type = "event", fct = LL.2())
+
 
 
 
