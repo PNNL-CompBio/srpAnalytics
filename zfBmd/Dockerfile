@@ -1,6 +1,6 @@
 FROM python:3.7
 # To setup other dependencies
-RUN apt-get update -qq && apt-get install -y net-tools \
+RUN apt-get update && apt-get install -y net-tools \
         curl \
         unixodbc \
         unixodbc-dev

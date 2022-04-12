@@ -49,3 +49,11 @@ analysis/latest/3_bmd_feasibility_BMD/*/running_time.txt
 tmp/
 
 .env
+
+####################
+## ADDED BY DAVID ##
+####################
+
+*.DS_Store
+new_*
+Reformatted*
