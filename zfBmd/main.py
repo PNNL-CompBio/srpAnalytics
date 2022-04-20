@@ -79,14 +79,8 @@ def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
 
 def run_morpho_on_file(morph_file, full_devel='full'):
     """
-    Reformats inputted morpohology file - will be combined with above 
+    Reformats and adds columns to inputted morpohology file - will be combined with above 
     """
-
-    morpho_input_csv_file_name_wide = morph_file[:-4] + "_wide_DNC_0_"+full_devel+".csv"
-
-    chem_ind = None
-    if not os.path.exists(morpho_input_csv_file_name_wide):
-        res0 = format_morpho.format(morph_file, full_devel, morpho_input_csv_file_name_wide, chem_ind)
 
     res = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, full_devel)
     return res
@@ -167,13 +161,10 @@ def main():
     elif len(mfiles) > 0:
         print("Calculating morphological endpoints for "+str(len(mfiles))+' files')
         for f in mfiles:
-            files[f] = run_morpho_on_file(f, )
+            files[f] = run_morpho_on_file(f)
 
-    
     # Merge each BMDS, Fits, and Dose data.frame together, and write to output files 
     merge_data_and_write_files(files, "/tmp")
-
-    
     end_time = time.time()
     time_took = str(round((end_time-start_time), 1)) + " seconds"
     print("zfBMD pipeline completed. It took:" + str(time_took))

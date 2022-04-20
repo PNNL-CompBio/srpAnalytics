@@ -17,6 +17,7 @@ warnings.filterwarnings('ignore')
 starting_dir = os.getcwd()
 print(starting_dir)
 
+import format_morpho_input as format_morpho
 import BMD_BMDL_estimation as bmdest
 import generate_dose_response as gdr
 import Plot_Save as ps
@@ -24,71 +25,26 @@ import Plot_Save as ps
 def main():
     args = sys.argv[0:]
     complete_file_path = args[1]
-    print("Running command line bmd analysis on "+complete_file_path)
     full_devel = args[2]
     files = runBmdPipeline(complete_file_path, full_devel)
-    print(files)
 
-def runBmdPipeline(complete_file_path, full_devel):
-    ##read in the data
-    df_morph = pd.read_csv(complete_file_path, header = 0)
+def runBmdPipeline(mfile):
+    """
+    Runs the zfBMD pipeline for a morphology file. The main steps are to:
+    
+    1. format_morpho: pivots the input dataframe wider, checks for endpoints, and adds missing endpoints 
+    2. generate_dose_response: 
+    3. get_quality_control_flags: 
+    
+    
+    """
 
-
-    ##let's collect the file names to return
-    filenames = []
-    test_data_sim = 0
-    if(test_data_sim == 0):
-        # Add aggregate endpoints
-        # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
-       # df_morph['ANY24'] = df_morph[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
-
-        # 2. Any effect within 5 days (combination of all measurements at both time points)
-        #df_morph['ANY120'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
-
-        # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
-        #df_morph['TOT_MORT'] = df_morph[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
-
-        # 4. Any effect except mortality (#2 minus MO24 and MORT) >> 'ALL_BUT_MORT'
-        #df_morph['ALL_BUT_MORT'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM', \
-                                               #'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']].sum(axis=1,skipna=True,min_count=1)
-        # Add aggregate endpoints for 7 PAH
-
-        ## JUSTIFICATION: 7 PAH dataset doesn't have "BRAI" endpoint.
-        ## On the other hand, extract/phase I,II have "BRAI" endpoint.
-##this was added ina merge conflict, i hope it's ok (Sara)
-        if 'BRAI' not in df_morph.columns: # as 7 PAH
-            # 1. Any effect at 24hrs (combination of MO24, DP24 and SM24) >> 'ANY24'
-            df_morph['ANY24'] = df_morph[['MO24','DP24','SM24']].sum(axis=1,skipna=True,min_count=1)
-            # 2. Any effect within 5 days (combination of all measurements at both time points)
-            df_morph['ANY120'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
-
-            # 3. Total mortality (MO24 + MORT) >> 'TOT_MORT'
-            df_morph['TOT_MORT'] = df_morph[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
-
-            # 4. Any effect except mortality (#2 minus MO24 and MORT) >> 'ALL_BUT_MORT'
-            df_morph['ALL_BUT_MORT'] = df_morph[['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM', \
-                                                   'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']].sum(axis=1,skipna=True,min_count=1)
-
-
-
-        else: # as extract
-            df_morph['ANY24'] = df_morph[['MO24','DP24','SM24','NC24']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['ANY120'] = df_morph[['MORT', 'YSE_', 'AXIS', 'EYE_', 'SNOU', 'JAW_', 'OTIC', \
-                                                               'PE__', 'BRAI', 'SOMI', 'PFIN', 'CFIN', 'PIG_', 'CIRC', \
-                                                               'TRUN', 'SWIM', 'NC__', 'TR__', 'ANY24']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['TOT_MORT'] = df_morph[['MO24','MORT']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['ALL_BUT_MORT'] = df_morph[['DP24','SM24','NC24', 'YSE_', 'AXIS', 'EYE_', 'SNOU', 'JAW_', 'OTIC', \
-                                                               'PE__', 'BRAI', 'SOMI', 'PFIN', 'CFIN', 'PIG_', 'CIRC','TRUN', 'SWIM', 'NC__', \
-                                                               'TR__']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['BRN_'] = df_morph[['BRAI','OTIC','PFIN']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['CRAN'] = df_morph[['EYE_', 'SNOU', 'JAW_']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['EDEM'] = df_morph[['YSE_','PE__']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['LTRK'] = df_morph[['TRUN','CFIN']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['MUSC'] = df_morph[['CIRC','SWIM','SOMI']].sum(axis=1,skipna=True,min_count=1)
-            df_morph['SKIN'] = df_morph[['PIG_']]
-            df_morph['TCHR'] = df_morph[['TR__']]
-
-### END Of merge conflict
+    # 1. Format morphology file with pivot wider and adding missing columns 
+    pivot_wider = format_morpho(mfile)
+    
+    # 2. 
+    
+    
 
     if os.path.isdir("output") is False:
         os.mkdir("output")
@@ -98,7 +54,7 @@ def runBmdPipeline(complete_file_path, full_devel):
 
     start_time = time.time()
 
-    # full -> 17 (without DNC) unlike phase_I_II (18 endpoints), 7_PAH lacks NC24
+  
     if full_devel == "full":
         if 'BRAI' not in df_morph.columns: # as 7 PATH
             end_points = ['ANY24', 'ANY120', 'AXIS', 'ALL_BUT_MORT', 'BRN_',\
