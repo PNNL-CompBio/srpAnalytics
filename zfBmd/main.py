@@ -64,7 +64,7 @@ def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
     # Reformat LPR if necessary
     chem_ind = None
     if not os.path.exists(LPR_input_csv_file_name_wide):
-       chem_ind = format_LPR.format(lpr_file, full_devel, LPR_input_csv_file_name_wide)
+        chem_ind = format_LPR.format(lpr_file, full_devel, LPR_input_csv_file_name_wide)
     
     # Generate a new name for the morphological file in wider format
     morpho_input_csv_file_name_wide = morph_file[:-4] + "_wide_DNC_0_"+full_devel+".csv"
@@ -167,7 +167,7 @@ def main():
     elif len(mfiles) > 0:
         print("Calculating morphological endpoints for "+str(len(mfiles))+' files')
         for f in mfiles:
-            files[f] = run_morpho_on_file(f, fd)
+            files[f] = run_morpho_on_file(f, )
 
     
     # Merge each BMDS, Fits, and Dose data.frame together, and write to output files 
