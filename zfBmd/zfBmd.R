@@ -1,63 +1,57 @@
 ## Zebrafish Benchmark Database
 
-## There are several defunct bmd packages. We are using this more recent one: https://github.com/DoseResponse/bmd
-## devtools::install_github("DoseResponse/drcData")
-## devtools::install_github("DoseResponse/drc")
-## devtools::install_github("DoseResponse/bmd")
-
 library(data.table)
 library(dplyr)
+library(tidyr)
 
-# Read in pre-zf_bmd morpohology data
-Morpho <- fread("~/Desktop/Git_Repos/srpAnalytics/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv")
+### Confirm the counts are correct----------------------------------------------
 
-# Add a function to calculate missing categories of ANY24, ANY120, TOT_MORT, and ALL_BUT_MORT 
-AddEndpoints <- function(NewDose, Endpoints, Name) {
-  NewDose %>%
-    subset(End_Point %in% Endpoints) %>%
-    mutate(Chemical_ID, End_Point = Name, Dose, Response) %>%
-    group_by(Chemical_ID, End_Point, Dose) %>%
-    summarise(Response = sum(Response, na.rm = TRUE))
-}
+pivot_wider <- data.table::fread("~/Desktop/srpTargets/zfBmd/pivot_wider.csv")
 
-# Get all endpoints we care about
-AllEndpoints <- c("AXIS", "BRN_", "CRAN", "DP24", "EDEM", "LTRK", "MO24", "MORT", 
-                  "MUSC", "NC__", "SKIN", "SM24", "TCHR")
+pivot_wider2 <- data.table(pivot_wider[,1:4], do.call(cbind, lapply(5:22, function(col) {
+  vals <- pivot_wider[,..col] %>% unlist()
+  vals[vals > 1] <- 1
+  return(vals)
+})))
+colnames(pivot_wider2) <- colnames(pivot_wider)
 
-# Group by chemical id, endpoint, and concentration. Sum counts with NA completely removed.
-NewDose <- Morpho %>%
-  subset(endpoint %in% AllEndpoints) %>%
-  group_by(chemical.id, endpoint, conc) %>%
-  summarise(Response = sum(value, na.rm = T) / length(value[!is.na(value)])) %>%
-  rename(Chemical_ID = chemical.id, End_Point = endpoint, Dose = conc) %>%
-  rbind(
-    AddEndpoints(., c("MO24", "DP24", "SM24"), "ANY24"),
-    AddEndpoints(., c("AXIS", "BRN_", "CRAN", "EDEM", "LTRK", "MORT", "MUSC", "NC__", "SKIN", "TCHR", "ANY24"), "ANY120"),
-    AddEndpoints(., c("MO24", "MORT"), "TOT_MORT"),
-    AddEndpoints(., c("AXIS", "BRN_", "CRAN", "DP24", "EDEM", 
-                      "LTRK", "MUSC", "NC__", "SKIN", "SM24", "TCHR"), "ALL_BUT_MORT")
+# Determine which data to filter based on NAs at 0 concentration - absolutely none should be filtered out
+FilterLow <- pivot_wider2 %>%
+  select(-well) %>%
+  pivot_longer(colnames(pivot_wider)[5:22]) %>%
+  group_by(chemical.id, conc, plate.id, name) %>%
+  summarise(
+    NACount = sum(is.na(value)),
+    Total = length(value),
+    Flag = NACount >= Total * 0.5
   )
 
-MORT <- NewDose[NewDose$End_Point == "MORT",]
 
-library(ggplot2)
-library(drc)
+Lies <- pivot_wider %>%
+  select(-c(plate.id, well)) %>%
+  pivot_longer(colnames(pivot_wider)[5:22]) %>%
+  group_by(chemical.id, conc, name) %>%
+  summarise(
+    NumAffected = sum(value, na.rm = T),
+    TotWells = length(value),
+    NumEmbryos = length(value[!is.na(value)]),
+    FractAffected = NumAffected / NumEmbryos
+  ) %>% 
+  arrange(name)
 
-ggplot(MORT, aes(x = Dose, y = Response)) + geom_point()
+Truth <- pivot_wider2 %>%
+  select(-c(plate.id, well)) %>%
+  pivot_longer(colnames(pivot_wider2)[5:22]) %>%
+  group_by(chemical.id, conc, name) %>%
+  summarise(
+    NumAffected = sum(value, na.rm = T),
+    TotWells = length(value),
+    NumEmbryos = length(value[!is.na(value)]),
+    FractAffected = NumAffected / NumEmbryos
+  ) %>% 
+  arrange(name)
 
-ll <- drm(formula = Response~Dose, data = MORT, type = "binomial", fct = LL.2()) 
-ll %>% summary()
-bmd(ll, 0.05, def = "excess")
-
-glm(Response~Dose, family = "binomial", data = MORT) %>%
-  summary()
-
-glm(abs(Response)~abs(Dose), family = "Gamma", data = MORT) %>%
-  summary()
-
-
-
-
+write.csv(RealNumAffected, "~/Desktop/srpTargets/zfBmd/RealNumAffected.csv")
 
 
 
