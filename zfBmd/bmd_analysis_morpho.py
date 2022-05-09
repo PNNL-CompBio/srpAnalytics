@@ -32,19 +32,16 @@ def runBmdPipeline(mfile):
     """
     Runs the zfBMD pipeline for a morphology file. The main steps are to:
     
-    1. format_morpho: pivots the input dataframe wider, checks for endpoints, and adds missing endpoints 
-    2. generate_dose_response: 
-    3. get_quality_control_flags: 
+    1. format_morpho: calculates missing endpoints and removes samples with >50% missingness in baseline
+    2. generate_dose_response: get response variables and set quality control flags 
     
     
     """
 
     # 1. Format morphology file by removing high missingness, pivoting wider, and adding missing columns 
-    pivot_wider = format_morpho(mfile)
+    chemical_groups = format_morpho(mfile)
     
-    # 2. Generate Dose Response calculations
-    
-    # 3. Get Quality Control Flags 
+    # 2. Generate Dose Response and Calculate Quality Control Flags 
     
     
 
