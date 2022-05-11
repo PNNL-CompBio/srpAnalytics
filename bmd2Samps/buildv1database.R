@@ -155,7 +155,7 @@ getChemMetadata<-function(data.dir,
       tidyr::replace_na(list(PREFERRED_NAME='Chemical name unknown'))%>% ##should we call this something else?
       mutate(PREFERRED_NAME=stringr::str_replace_all(PREFERRED_NAME,'^-$',"Chemical name unknown"))%>%
       select(-c(ParameterName))
-
+    
     nocas=grep("NOCAS",chemMeta$cas_number)
     if(length(nocas)>0){
         message(paste0('removing ',length(nocas),' chems with no cas'))
@@ -336,7 +336,9 @@ buildSampleData<-function(data.dir,chemMeta){
     finalSampChem$technology.x[nas]<-finalSampChem$technology.y[nas]
     
     finalSampChem<-select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
-      rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')
+      rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
+      distinct()
+    
     return(finalSampChem)
 
 }
@@ -395,7 +397,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   ##now we fix QC values
   full.bmd <- full.bmd%>%
     rename(qc_num='DataQC_Flag')%>%
-    mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num==4,'Moderate','Good')))%>%
+    mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num%in%c(4,5),'Moderate','Good')))%>%
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
       select(-c(qc_num,BMD_Analysis_Flag))
@@ -517,7 +519,7 @@ masvChemClass<-function(data.dir){
   chemClass<-aggregate(chemical_class~CASNumber+ParameterName,chemClass,function(x) paste0(x,collapse=';'))
 
   chemComb <- chemSource%>%full_join(chemClass)%>%
-    replace_na(list(chemical_class='Uncategorized'))%>%
+    replace_na(list(chemical_class='Unclassified'))%>%
     rename(cas_number='CASNumber')
 
   write.csv(chemComb,'MASV_classAndSource.csv')
@@ -732,19 +734,16 @@ buildDB<-function(chem.files=c(),extract.files=c()){
     group_by(LocationName)%>%
     summarize(`Number of samples`=n_distinct(Sample_ID))
   
-  samp.eps<-ebmds%>%
-    select(c('Sample_ID','LocationName','End Point Name','AUC_Norm'))%>%
-    subset(!is.na(AUC_Norm))%>%
-    group_by(Sample_ID,LocationName)%>%
-    summarize(`End Points`=n_distinct(`End Point Name`))%>%
-    full_join(chem.count)%>%
-    tidyr::replace_na(list(`End Points`=0,`Number of chemicals`=0,`LocationName`='None'))%>%
+  samp.eps<-sampChem%>%
+    subset(!measurement_value_qualifier%in%c("U","J"))%>%
+    dplyr::select(Sample_ID,LocationName,Chemical_ID)%>%distinct()%>%
+    full_join(ebmds,by=c('Sample_ID','LocationName','Chemical_ID'))%>%
+    select(c('Sample_ID','LocationName',Chemical_ID,'End Point Name','AUC_Norm'))%>%
     group_by(LocationName)%>%
-    summarize(`End Points`=sum(`End Points`),Chemicals=sum(`Number of chemicals`))%>%
-    left_join(samp.counts)
+    summarize(numSampls=n_distinct(Sample_ID),numChems=n_distinct(Chemical_ID),num_endpoints=n_distinct(`End Point Name`))
   
-  write.table(chem.eps,paste0(out.dir,'chemCounts.Rmd'),row.names=F,col.names=T,sep='|')
-  write.table(samp.eps,paste0(out.dir,'sampCounts.Rmd'),row.names=F,col.names=T,sep='|')
+  write.table(chem.eps,paste0(out.dir,'chemCounts.md'),row.names=F,col.names=T,sep='|')
+  write.table(samp.eps,paste0(out.dir,'sampCounts.md'),row.names=F,col.names=T,sep='|')
   
   
 }

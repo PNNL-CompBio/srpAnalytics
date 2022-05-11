@@ -32,7 +32,7 @@ p3_morph='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AACFZprOKkbvydjfoDI3oZ
 p3_lpr='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AADd1QBStMguW9qYgzH2eatJa/Tanguay%20Phase%203%20zf%20LPR%20data%20PNNL%202021MAR23.csv -O temp/lpr1.csv'
 
 echo $p3_morph
-i$p3_morph
+$p3_morph
 echo $p3_lpr
 $p3_lpr
 
