@@ -34,6 +34,7 @@ def runBmdPipeline(mfile):
     
     1. format_morpho: calculates missing endpoints and removes samples with >50% missingness in baseline
     2. generate_dose_response: get response variables and set quality control flags 
+    3.
     
     
     """
@@ -42,7 +43,8 @@ def runBmdPipeline(mfile):
     chemical_groups = format_morpho(mfile)
     
     # 2. Generate Dose Response and Calculate Quality Control Flags 
-    
+    dose_response = gdr(chemical_groups)
+
     
 
     if os.path.isdir("output") is False:
