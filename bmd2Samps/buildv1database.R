@@ -336,7 +336,9 @@ buildSampleData<-function(data.dir,chemMeta){
     finalSampChem$technology.x[nas]<-finalSampChem$technology.y[nas]
     
     finalSampChem<-select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
-      rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')
+      rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
+      distinct()
+    
     return(finalSampChem)
 
 }
@@ -395,7 +397,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   ##now we fix QC values
   full.bmd <- full.bmd%>%
     rename(qc_num='DataQC_Flag')%>%
-    mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num==4,'Moderate','Good')))%>%
+    mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num%in%c(4,5),'Moderate','Good')))%>%
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
       select(-c(qc_num,BMD_Analysis_Flag))
