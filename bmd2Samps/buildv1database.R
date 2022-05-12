@@ -745,7 +745,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   samp.eps<-sampChem%>%
     subset(!measurement_value_qualifier%in%c("U","J"))%>%
     dplyr::select(Sample_ID,LocationName,Chemical_ID)%>%distinct()%>%
-    full_join(ebmds,by=c('Sample_ID','LocationName','Chemical_ID'))%>%
+    full_join(ebmds,by=c('Sample_ID','LocationName'))%>%
     select(c('Sample_ID','LocationName',Chemical_ID,'End Point Name','AUC_Norm'))%>%
     group_by(LocationName)%>%
     summarize(numSampls=n_distinct(Sample_ID),numChems=n_distinct(Chemical_ID),num_endpoints=n_distinct(`End Point Name`))
