@@ -57,11 +57,11 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
                           fitVals=c("Chemical_ID","End_Point","X_vals","Y_vals"))
 
 
-envSampSumOutput<-c("Model,BMD10","BMD50","Min_Dose","Max_Dose","AUC_Norm",
+envSampSumOutput<-c("Model","BMD10","BMD50","Min_Dose","Max_Dose","AUC_Norm",
   "SampleNumber","date_sampled","sample_matrix","technology","Sample_ID","ClientName",
   "SampleName","LocationLat","LocationLon","LocationName","LocationAlternateDescription",
   "AlternateName","End Point Name","Description","endPointLink","DataQC_Flag",
-  "ProjectName","ProjectLink")
+  "projectName","projectLink")
 ##################################
 #Master ID tables
 #The database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
