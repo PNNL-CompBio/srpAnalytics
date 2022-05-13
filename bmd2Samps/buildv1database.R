@@ -56,6 +56,12 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
                           doseRep=c("Chemical_ID","End_Point","Dose","Response","CI_Lo","CI_Hi"),
                           fitVals=c("Chemical_ID","End_Point","X_vals","Y_vals"))
 
+
+envSampSumOutput<-c("Model","BMD10","BMD50","Min_Dose","Max_Dose","AUC_Norm",
+  "SampleNumber","date_sampled","sample_matrix","technology","Sample_ID","ClientName",
+  "SampleName","LocationLat","LocationLon","LocationName","LocationAlternateDescription",
+  "AlternateName","End Point Name","Description","endPointLink","DataQC_Flag",
+  "projectName","projectLink")
 ##################################
 #Master ID tables
 #The database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
@@ -362,7 +368,8 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     mid.bmd<-mid.bmd[-dupes,]
   }
   if(is_extract){
-    sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
+    sdSamp<-sampChem%>%
+      tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
       select(-sub)
 
     full.bmd<-mid.bmd%>%
@@ -666,6 +673,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   
   message('Processing extract response data')
   ebmds<-combineChemicalEndpointData(e.bmd,is_extract=TRUE,sampChem,endpointDetails)%>%
+    select(envSampSumOutput)%>%
     unique()
   ecurves <- combineChemicalFitData(e.curve,is_extract=TRUE, sampChem,endpointDetails)%>%
     unique()
@@ -737,7 +745,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   samp.eps<-sampChem%>%
     subset(!measurement_value_qualifier%in%c("U","J"))%>%
     dplyr::select(Sample_ID,LocationName,Chemical_ID)%>%distinct()%>%
-    full_join(ebmds,by=c('Sample_ID','LocationName','Chemical_ID'))%>%
+    full_join(ebmds,by=c('Sample_ID','LocationName'))%>%
     select(c('Sample_ID','LocationName',Chemical_ID,'End Point Name','AUC_Norm'))%>%
     group_by(LocationName)%>%
     summarize(numSampls=n_distinct(Sample_ID),numChems=n_distinct(Chemical_ID),num_endpoints=n_distinct(`End Point Name`))
