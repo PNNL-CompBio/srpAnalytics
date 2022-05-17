@@ -54,7 +54,6 @@ class Logistic(GenericLikelihoodModel):
             alpha_0 = -mu_0/s_0
             beta_0 = 1/s_0
             start_params = np.array([alpha_0, beta_0])
-            #print('start_params [alpha, beta]: ' + str(start_params))
 
         return super(Logistic, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None, None],[1e-5,None]], disp=0, **kwds)
 
