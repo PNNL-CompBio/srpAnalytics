@@ -246,7 +246,7 @@ buildSampleData<-function(data.dir,chemMeta){
         dplyr::select(required_sample_columns)
 
     chemDat<-chemMeta%>%
-        select(Chemical_ID,cas_number,AVERAGE_MASS,PREFERRED_NAME,chemDescription)%>%
+        select(Chemical_ID,cas_number,AVERAGE_MASS)%>%#,PREFERRED_NAME,chemDescription)%>%
         distinct()
 
     finalSampChem <-sampChem%>%
@@ -392,9 +392,9 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   else{
     full.bmd<-mid.bmd%>%
       #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
-      inner_join(sampChem)%>%
+      full_join(sampChem)%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
-      right_join(endpointDetails)%>%
+      full_join(endpointDetails)%>%
       distinct()%>%select(-c('End_Point'))%>%
       tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
   }
