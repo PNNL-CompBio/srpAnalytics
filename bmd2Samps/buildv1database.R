@@ -20,10 +20,10 @@ require(xml2)
 ##setting these three parameters, can be appended
 data.dir<-'/bmd2Samps/data/'
 
-#data.dir='./data/'
+data.dir='./data/'
 ##output directory is fixed
 out.dir<-'/tmp/'
-#out.dir<-'./'
+out.dir<-'./'
 
 #########################################
 # Table schemas
@@ -109,13 +109,10 @@ sampIdMasterTable<-function(existingSampNumbers){
 }
 
 
-
-
-
-
-
-
-
+###################################
+# Metadata collection
+# these functions import metadata
+###################################
 
 #' Get chemical metadata, which is stored in `data.dir`
 #' @param data.dir path to standardized data that enables matching across datasets
@@ -249,7 +246,7 @@ buildSampleData<-function(data.dir,chemMeta){
         dplyr::select(required_sample_columns)
 
     chemDat<-chemMeta%>%
-        select(Chemical_ID,cas_number,AVERAGE_MASS)%>%
+        select(Chemical_ID,cas_number,AVERAGE_MASS,PREFERRED_NAME,chemDescription)%>%
         distinct()
 
     finalSampChem <-sampChem%>%
@@ -259,7 +256,7 @@ buildSampleData<-function(data.dir,chemMeta){
     ids<-sampIdMasterTable(finalSampChem$SampleNumber)
 
     finalSampChem <- finalSampChem %>%
-      inner_join(chemDat,by='cas_number')%>%
+      left_join(chemDat,by='cas_number')%>%
       left_join(ids,by='SampleNumber')%>%
       distinct()
     ##now we have to fix duplicate sample names
@@ -316,6 +313,7 @@ buildSampleData<-function(data.dir,chemMeta){
         select(-concentration)
 
     finalSampChem<-rbind(nonblanks,fixed)%>%
+      subset(!is.na(cas_number))%>%
         select(-AVERAGE_MASS)%>%
         distinct()
 
@@ -780,4 +778,4 @@ main<-function(){
 
 }
 
-main()
+#main()
