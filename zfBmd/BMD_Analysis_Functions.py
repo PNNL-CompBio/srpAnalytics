@@ -13,10 +13,8 @@ from statsmodels.base.model import GenericLikelihoodModel
 import warnings
 warnings.filterwarnings('ignore')
 
-BMR = "global"
 BMR = 0.1
 
-#report = True
 report = False
 
 # Logistic function
@@ -117,8 +115,6 @@ class Gamma(GenericLikelihoodModel):
             beta_0 = self.endog[:,0].flatten().mean()/self.endog[:,0].flatten().var()
             alpha_0 = self.endog[:,0].flatten().mean() * beta_0
             start_params = np.array([g_0, alpha_0, beta_0])
-            if (report):
-                print('start_params [g, alpha, beta]: ' + str(start_params))
 
         return super(Gamma, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[1e-5, None]], **kwds)
 
@@ -145,7 +141,7 @@ class Gamma_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Gamma_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[start_params[2],start_params[2]]],**kwds)
+        return super(Gamma_BMD, self).fit(disp=0, start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[start_params[2],start_params[2]]],**kwds)
 
 # Weibull function
 

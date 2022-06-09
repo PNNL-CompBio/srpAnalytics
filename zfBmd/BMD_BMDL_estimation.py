@@ -127,9 +127,6 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
             model = baf.Gamma(test_dose_response[['dose','num_affected', 'total_num']].astype('float').copy())
             res = model.fit()
 
-            if (report):
-                print('Model Convergence: ' + str(res.mle_retvals['converged']))
-
             # Check model convergence
             if(res.mle_retvals['converged'] is True):
                 model_converge_flag = 0
@@ -146,18 +143,14 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                 # Estimate BMD
                 bmd = stats.gamma.ppf(BMR, alpha_, scale = 1/beta_)
                 bmd_50 = stats.gamma.ppf(BMR_50, alpha_, scale = 1/beta_)
-                if (report):
-                    print('Fit Paramas:' + str([g_,alpha_,beta_]))
-                    print('BMD 10: ' + str(bmd))
-                    print('BMD 50: ' + str(bmd_50))
+
             else:
                 pred_vals = np.nan
                 bmd = np.nan
                 bmd_50 = np.nan
 
             if((bmdl_analysis_flag) and (res.mle_retvals['converged'] is True)):
-                if (report):
-                    print('Estimating BMDL ...')
+
                 # Using a bisection method for finding the BMDL value
                 bmdl_val_lo = bmd/10
                 bmdl_val_hi = bmd
@@ -194,9 +187,6 @@ def analyze_dose_response_data(test_dose_response, model_names=None, bmdl_analys
                         bmdl_val_lo = bmdl_mid_val
 
                     tol = abs(bmdl_llv - bmdl_llv_thresh)
-
-                if (report):
-                    print('BMDL Convergence: ' + str(not(bool(bmdl_converge_flag))))
 
         elif(model_name == 'weibull'):
             model = baf.Weibull(test_dose_response[['dose','num_affected', 'total_num']].astype('float').copy())
