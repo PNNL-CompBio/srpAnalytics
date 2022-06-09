@@ -14,7 +14,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 BMR = 0.1
-report = False
+BMR_50 = 0.5
 
 ########################
 ## LOGISTIC FUNCTIONS ##
@@ -56,6 +56,7 @@ class Logistic(GenericLikelihoodModel):
 
         return super(Logistic, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None, None],[1e-5,None]], disp=0, **kwds)
 
+
 class Logistic_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
         super(Logistic_BMD, self).__init__(endog, exog=None, **kwds)
@@ -81,6 +82,7 @@ class Logistic_BMD(GenericLikelihoodModel):
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
         return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],  disp = 0, **kwds)
+
 
 # Gamma function
 
@@ -192,8 +194,6 @@ class Weibull(GenericLikelihoodModel):
             beta_0 = np.exp(betas[0])
 
             start_params = np.array([g_0, alpha_0, beta_0])
-            if (report):
-                print('start_params [gsdef, alpha, beta]: ' + str(start_params))
 
         return super(Weibull, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None],[1e-9,None]], disp = 0, **kwds)
 
@@ -262,8 +262,6 @@ class Log_Logistic(GenericLikelihoodModel):
             alpha_0 = -mu_0/s_0
             beta_0 = 1/s_0
             start_params = np.array([g_0, alpha_0, beta_0])
-            if (report):
-                print('start_params [g, alpha, beta]: ' + str(start_params))
 
         return super(Log_Logistic, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None, None],[None, None]],  disp = 0, **kwds)
 
@@ -327,8 +325,6 @@ class Probit(GenericLikelihoodModel):
             alpha_0 = stats.norm.ppf(num_affected[0]/num_total[0])
             beta_0 = (stats.norm.ppf(num_affected[-1]/num_total[-1]) - alpha_0)/dose[-1]
             start_params = np.array([alpha_0, beta_0])
-            if (report):
-                print('start_params [alpha, beta]: ' + str(start_params))
 
         return super(Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None, None],[1e-5,None]],  disp = 0, **kwds)
 
@@ -407,8 +403,6 @@ class Log_Probit(GenericLikelihoodModel):
 
             dose = self.endog[:,0].flatten()
             start_params = np.array([g_0, alpha_0, beta_0])
-            if (report):
-                print('start_params [g, alpha, beta]: ' + str(start_params))
 
         return super(Log_Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None,None],[1e-5,None]],  disp = 0, **kwds)
 
@@ -483,8 +477,6 @@ class Multistage_2(GenericLikelihoodModel):
             beta2_0 = betas[1]
 
             start_params = np.array([g_0, beta1_0, beta2_0])
-            if (report):
-                print('start_params [g, beta 1, beta 2]: ' + str(start_params))
 
         return super(Multistage_2, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[1e-9,None],[1e-9,None]],  disp = 0, **kwds)
 
@@ -545,8 +537,6 @@ class Quantal_Linear(GenericLikelihoodModel):
             g_0 = 0.1
             beta_0 = 1/((self.endog[:,0].flatten().mean()))/np.log(2)
             start_params = np.array([g_0, beta_0])
-            if (report):
-                print('start_params [g, beta]: ' + str(start_params))
 
         return super(Quantal_Linear, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None]],  disp = 0, **kwds)
 
