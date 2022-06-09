@@ -178,7 +178,10 @@ getEndpointMetadata<-function(data.dir){
         rename(End_Point='Abbreviation',`End Point Name`='Simple name (<20char)')%>%
         rename(endPointLink='Ontology Link')%>%
         select(-`Portal Display`)%>%
-      mutate(End_Point=stringr::str_trim(End_Point))
+      mutate(End_Point=stringr::str_trim(End_Point))%>%
+    ##add in endpoint detail for no data
+      rbind(list(End_Point='NoData',`End Point Name`=NA,Description='No data',endPointLink=''))
+    
 
     return(endpointDetails)
 }
@@ -243,7 +246,8 @@ buildSampleData<-function(data.dir,chemMeta){
 
     ##data added 1/19/2022
     newSamp <- readxl::read_xlsx(paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
-        dplyr::select(required_sample_columns)
+        dplyr::select(required_sample_columns)%>%
+      mutate(LocationLon=LocationLon*-1)
 
     chemDat<-chemMeta%>%
         select(Chemical_ID,cas_number,AVERAGE_MASS)%>%#,PREFERRED_NAME,chemDescription)%>%
@@ -343,6 +347,9 @@ buildSampleData<-function(data.dir,chemMeta){
       rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
       distinct()
     
+    
+    ##last thing
+    
     return(finalSampChem)
 
 }
@@ -353,6 +360,7 @@ buildSampleData<-function(data.dir,chemMeta){
 ##We will release an 'endpoint file for each condition'
 combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
 
+  ##read in the BMD files formatted by the zf module
   print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
   cols <- required_bmd_columns$bmd
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
@@ -360,11 +368,14 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
   mid.bmd<-do.call(rbind,files)%>%
       dplyr::select(cols)
 
-
+  ##some of the chemicals have BMDs that were computed twice and i'm not sure which
+  ##are which anymore. as such, i incorporate the files in chronological order
+  ##and remove the second values
   dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
   if(length(dupes)>0){
     mid.bmd<-mid.bmd[-dupes,]
   }
+  
   if(is_extract){
     sdSamp<-sampChem%>%
       tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
@@ -384,17 +395,19 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
 
     full.bmd<-full.bmd%>%
+      tidyr::replace_na(list(End_Point='NoData'))%>%
       right_join(endpointDetails)%>%
       dplyr::select(-c('End_Point','tmpId'))%>%
     distinct()%>%
       tidyr::replace_na(list(LocationName='None'))
-}
+  }
   else{
     full.bmd<-mid.bmd%>%
       #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
       full_join(sampChem)%>%
+      tidyr::replace_na(list(End_Point='NoData'))%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
-      full_join(endpointDetails)%>%
+      right_join(endpointDetails)%>%
       distinct()%>%select(-c('End_Point'))%>%
       tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
   }
@@ -712,44 +725,70 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   
   write.csv(sampChem,file=paste0(out.dir,'chemicalsByExtractSample.csv'),row.names=FALSE, quote = TRUE)
   
+
+}
+
+##moving summary stats to its own function
+generateSummaryStats<-function(){
+  
+  sampChem<-read.csv(paste0(out.dir,'chemicalsByExtractSample.csv'),check.names=F)
+  bmds <-read.csv(paste0(out.dir,'chemSummaryStats.csv'),check.names=F)
+  ebmds<-read.csv(paste0(out.dir,'envSampSummaryStats.csv'),check.names=F)
   ##let's do one last summary
-  samp.count<-sampChem%>%select(Sample_ID,Chemical_ID)%>%
+  samp.count<-sampChem%>%
+    mutate(meas=as.numeric(measurement_value))%>%
+      subset(!is.na(meas))%>%
+               select(Sample_ID,Chemical_ID)%>%
     group_by(Chemical_ID)%>%
     summarize(`Number of samples`=n_distinct(Sample_ID))
   
   chem.counts<-bmds%>%
     select(c('Chemical_ID','chemical_class','End Point Name','AUC_Norm'))%>%
-    subset(!is.na(AUC_Norm))%>%
+   # subset(!is.na(AUC_Norm))%>%
+  #  subset(!is.na(`End Point Name`))%>%
     group_by(chemical_class)%>%
     summarize(`Chemicals`=n_distinct(Chemical_ID))
   
+  
   chem.eps<-bmds%>%
     group_by(Chemical_ID,chemical_class)%>%
-    summarize(`End Points`=n_distinct(`End Point Name`))%>%
+    summarize(`Zebrafish`=n_distinct(`End Point Name`))%>%
     full_join(samp.count)%>%
-    tidyr::replace_na(list(`End Points`=0,`Number of samples`=0,`chemical_class`='None'))%>%
+    tidyr::replace_na(list(`Zebrafish`=0,`Number of samples`=0,`chemical_class`='None'))%>%
     group_by(chemical_class)%>%
-    summarize(`End Points`=sum(`End Points`),`Samples`=sum(`Number of samples`))%>%
+    summarize(`Zebrafish`=sum(`Zebrafish`),`Samples`=sum(`Number of samples`))%>%
     left_join(chem.counts)
   
-  chem.count<-sampChem%>%select(Sample_ID,Chemical_ID)%>%
+  chem.count<-sampChem%>%
+    mutate(meas=as.numeric(measurement_value))%>%
+    subset(!is.na(meas))%>%
+    select(Sample_ID,Chemical_ID)%>%
     group_by(Sample_ID)%>%
     summarize(`Number of chemicals`=n_distinct(Chemical_ID))
   
-  samp.counts<-ebmds%>%
-    group_by(LocationName)%>%
-    summarize(`Number of samples`=n_distinct(Sample_ID))
+#  samp.counts<-ebmds%>%
+#    group_by(LocationName)%>%
+#    summarize(`Number of samples`=n_distinct(Sample_ID))
   
-  samp.eps<-sampChem%>%
-    subset(!measurement_value_qualifier%in%c("U","J"))%>%
-    dplyr::select(Sample_ID,LocationName,Chemical_ID)%>%distinct()%>%
-    full_join(ebmds,by=c('Sample_ID','LocationName'))%>%
-    select(c('Sample_ID','LocationName',Chemical_ID,'End Point Name','AUC_Norm'))%>%
+  samp.chems<-sampChem%>%
+    mutate(meas=as.numeric(measurement_value))%>%
+    subset(!is.na(meas))%>%
     group_by(LocationName)%>%
-    summarize(numSampls=n_distinct(Sample_ID),numChems=n_distinct(Chemical_ID),num_endpoints=n_distinct(`End Point Name`))
+    summarize(Chemicals=n_distinct(Chemical_ID),Samples=n_distinct(Sample_ID))
   
-  write.table(chem.eps,paste0(out.dir,'chemCounts.md'),row.names=F,col.names=T,sep='|')
-  write.table(samp.eps,paste0(out.dir,'sampCounts.md'),row.names=F,col.names=T,sep='|')
+  samp.extr<-ebmds%>%
+    subset(!is.na(`End Point Name`))%>%
+    group_by(LocationName)%>%
+    summarize(Zebrafish=n_distinct(`End Point Name`))
+  
+  samp.eps<-samp.chems%>%
+    full_join(samp.extr)%>%
+    tidyr::replace_na(list(Zebrafish=0))%>%
+    arrange(desc(Samples))
+  
+  write.table(chem.eps,paste0(out.dir,'chemCounts.md'),row.names=F,col.names=T)
+  write.table(samp.eps,paste0(out.dir,'sampCounts.md'),row.names=F,col.names=T)
+  
   
   
 }
@@ -775,6 +814,7 @@ main<-function(){
     print(chem.files)
     print(extract.files)
   buildDB(chem.files,extract.files)
+  generateSummaryStats()
 
 }
 
