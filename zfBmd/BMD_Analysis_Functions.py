@@ -88,7 +88,8 @@ def gamma_fun(dose, params):
     g_ = params[0].astype('float')
     alpha_ = params[1].astype('float')
     beta_ = params[2].astype('float')
-    prob_dose = g_ + (1 - g_) * stats.gamma.cdf(dose.astype('float'), a = alpha_, scale = 1/beta_)
+    dose = dose.astype('float')
+    prob_dose = g_ + (1 - g_) * stats.gamma.cdf(dose, a = alpha_, scale = 1/beta_)
     return prob_dose
 
 class Gamma(GenericLikelihoodModel):
@@ -142,7 +143,7 @@ class Gamma_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Gamma_BMD, self).fit(disp=0, start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[start_params[2],start_params[2]]], disp = 0, **kwds)
+        return super(Gamma_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[start_params[2],start_params[2]]], disp = 0, **kwds)
 
 # Weibull function
 
