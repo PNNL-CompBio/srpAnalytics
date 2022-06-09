@@ -14,10 +14,11 @@ import warnings
 warnings.filterwarnings('ignore')
 
 BMR = 0.1
-
 report = False
 
-# Logistic function
+########################
+## LOGISTIC FUNCTIONS ##
+########################
 
 def logistic_fun(dose, params):
     alpha_ = params[0].astype('float')
@@ -79,7 +80,7 @@ class Logistic_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],**kwds)
+        return super(Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],  disp = 0, **kwds)
 
 # Gamma function
 
@@ -116,7 +117,7 @@ class Gamma(GenericLikelihoodModel):
             alpha_0 = self.endog[:,0].flatten().mean() * beta_0
             start_params = np.array([g_0, alpha_0, beta_0])
 
-        return super(Gamma, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[1e-5, None]], **kwds)
+        return super(Gamma, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[1e-5, None]],  disp = 0, **kwds)
 
 class Gamma_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -141,7 +142,7 @@ class Gamma_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Gamma_BMD, self).fit(disp=0, start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[start_params[2],start_params[2]]],**kwds)
+        return super(Gamma_BMD, self).fit(disp=0, start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[0.2, 18],[start_params[2],start_params[2]]], disp = 0, **kwds)
 
 # Weibull function
 
@@ -193,7 +194,7 @@ class Weibull(GenericLikelihoodModel):
             if (report):
                 print('start_params [gsdef, alpha, beta]: ' + str(start_params))
 
-        return super(Weibull, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None],[1e-9,None]], **kwds)
+        return super(Weibull, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None],[1e-9,None]], disp = 0, **kwds)
 
 class Weibull_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -217,7 +218,7 @@ class Weibull_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Weibull_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None],[start_params[2],start_params[2]]],**kwds)
+        return super(Weibull_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None],[start_params[2],start_params[2]]], disp = 0,**kwds)
 
 # Log-logistic function
 
@@ -263,7 +264,7 @@ class Log_Logistic(GenericLikelihoodModel):
             if (report):
                 print('start_params [g, alpha, beta]: ' + str(start_params))
 
-        return super(Log_Logistic, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None, None],[None, None]], **kwds)
+        return super(Log_Logistic, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None, None],[None, None]],  disp = 0, **kwds)
 
 class Log_Logistic_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -288,7 +289,7 @@ class Log_Logistic_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Log_Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[start_params[1]/2,start_params[1]*2],[start_params[2],start_params[2]]],**kwds)
+        return super(Log_Logistic_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[start_params[1]/2,start_params[1]*2],[start_params[2],start_params[2]]], disp = 0,**kwds)
 
 # Probit function
 
@@ -328,7 +329,7 @@ class Probit(GenericLikelihoodModel):
             if (report):
                 print('start_params [alpha, beta]: ' + str(start_params))
 
-        return super(Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None, None],[1e-5,None]], **kwds)
+        return super(Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None, None],[1e-5,None]],  disp = 0, **kwds)
 
 class Probit_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -355,7 +356,7 @@ class Probit_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Probit_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]],**kwds)
+        return super(Probit_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[None,None],[start_params[1],start_params[1]]], disp = 0,**kwds)
 
 # Log-probit function
 
@@ -408,7 +409,7 @@ class Log_Probit(GenericLikelihoodModel):
             if (report):
                 print('start_params [g, alpha, beta]: ' + str(start_params))
 
-        return super(Log_Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None,None],[1e-5,None]], **kwds)
+        return super(Log_Probit, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[None,None],[1e-5,None]],  disp = 0, **kwds)
 
 class Log_Probit_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -433,7 +434,7 @@ class Log_Probit_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Log_Probit_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[None,None],[start_params[2],start_params[2]]],**kwds)
+        return super(Log_Probit_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[None,None],[start_params[2],start_params[2]]],  disp = 0, **kwds)
 
 # Multistage(degree 2)
 
@@ -484,7 +485,7 @@ class Multistage_2(GenericLikelihoodModel):
             if (report):
                 print('start_params [g, beta 1, beta 2]: ' + str(start_params))
 
-        return super(Multistage_2, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[1e-9,None],[1e-9,None]], **kwds)
+        return super(Multistage_2, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[1e-9,None],[1e-9,None]],  disp = 0, **kwds)
 
 class Multistage_2_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -509,7 +510,7 @@ class Multistage_2_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Multistage_2_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[1e-9,None],[start_params[2],start_params[2]]],**kwds)
+        return super(Multistage_2_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-9,0.99],[1e-9,None],[start_params[2],start_params[2]]], disp = 0, **kwds)
 
 # Quantal-linear model
 
@@ -546,7 +547,7 @@ class Quantal_Linear(GenericLikelihoodModel):
             if (report):
                 print('start_params [g, beta]: ' + str(start_params))
 
-        return super(Quantal_Linear, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None]], **kwds)
+        return super(Quantal_Linear, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[1e-5,None]],  disp = 0, **kwds)
 
 class Quantal_Linear_BMD(GenericLikelihoodModel):
     def __init__(self, endog, exog=None, **kwds):
@@ -569,4 +570,4 @@ class Quantal_Linear_BMD(GenericLikelihoodModel):
         return -log_lhood
 
     def profile_ll_fit(self, start_params = None, maxiter = 10000, maxfun = 5000, **kwds):
-        return super(Quantal_Linear_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[start_params[1],start_params[1]]],**kwds)
+        return super(Quantal_Linear_BMD, self).fit(start_params = start_params, maxiter = maxiter, maxfun = maxfun, method = 'lbfgs', bounds = [[1e-5,0.99],[start_params[1],start_params[1]]], disp = 0, **kwds)
