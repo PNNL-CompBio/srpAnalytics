@@ -139,7 +139,7 @@ getChemMetadata<-function(data.dir,
         left_join(chemicalClasses)%>% ##add in chemical class
         left_join(curatedDesc)%>%
         subset(!is.na(cas_number))%>%
-        subset(cas_number!='NA')
+        subset(!cas_number%in%c('NA','N/A'))
         #rename(chemical_class='newClass')
 
 
@@ -345,7 +345,8 @@ buildSampleData<-function(data.dir,chemMeta){
     
     finalSampChem<-select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
       rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
-      distinct()
+      distinct()%>%
+      subset(cas_number!='N/A')
     
     
     ##last thing
@@ -398,6 +399,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
       tidyr::replace_na(list(End_Point='NoData'))%>%
       right_join(endpointDetails)%>%
       dplyr::select(-c('End_Point','tmpId'))%>%
+      subset(!is.na(Sample_ID))%>%
     distinct()%>%
       tidyr::replace_na(list(LocationName='None'))
   }
@@ -408,6 +410,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
       tidyr::replace_na(list(End_Point='NoData'))%>%
 #      rename(Chemical_ID<-'zf.cid')%>%
       right_join(endpointDetails)%>%
+      subset(!is.na(cas_number))%>%
       distinct()%>%select(-c('End_Point'))%>%
       tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
   }
@@ -419,6 +422,8 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
       select(-c(qc_num,BMD_Analysis_Flag))
+  
+
 
   return(full.bmd)
 }
