@@ -491,7 +491,7 @@ def save_results_good_data_nounique_model(test_dose_response, qc_flag,\
 
     bmd_analysis_flag_vals = {1 : 'Convergence not achieved for any dose-response model.',
                               2 : 'Model fit might be unreliable.' + '\n' + 'p-val for chi-squared statistic was < 0.1 for all converged models.',
-                              3 : 'A unique model could not be determined.' + '\n' + 'Multiple models had the same AIC and BMD values but no valid BMDL values.',
+                              3 : 'A unique model could not be determined.' + '\n' + 'Multiple models had the same AIC and BMD values but no valid BMDL values.', # Incorporate this, but ignore BMDL
                               4 : 'Multiple models found.' + '\n' + 'User advised to look at the results of analysis to choose the best model.'}
 
     #txt_for_model_selection = selected_models['model'].values + ' determined to be the best model'
