@@ -227,6 +227,7 @@ getNewChemicalClass<-function(data.dir){
 }
 
 #' buildSampleData - takes the curated information and selects the data we need
+#' to map the samples to the chemicals from the two FSES files we have from Mike
 #' @param data.dir
 #' @return data.frame
 buildSampleData<-function(data.dir,chemMeta){
@@ -240,8 +241,8 @@ buildSampleData<-function(data.dir,chemMeta){
         mutate(measurement_value_molar=stringr::str_replace_all(measurement_value_molar,'BLOD|NULL|BDL',"0"))%>%
         mutate(water_concentration=stringr::str_replace_all(water_concentration,'BLOD|NULL|BDL',"0"))%>%
                                         # subset(water_concentration_molar!='0.0')%>%
-        subset(!measurement_value_molar%in%c('0'))%>%
-        subset(!measurement_value%in%c("0","NULL",""))#%>%
+       # subset(!measurement_value_molar%in%c('0'))%>%
+        subset(!measurement_value%in%c("NULL",""))#%>%
 #        select(-c(Sample_ID))#,Chemical_ID)) ##These two are added in the 4/27 version of the file
 
     ##data added 1/19/2022
@@ -344,13 +345,13 @@ buildSampleData<-function(data.dir,chemMeta){
     finalSampChem$technology.x[nas]<-finalSampChem$technology.y[nas]
     
     finalSampChem<-select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
-      rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
+      rename(sample_matrix='sample_matrix.x',
+             date_sampled='date_sampled.x',
+             technology='technology.x')%>%
       distinct()%>%
       subset(cas_number!='N/A')
     
-    
-    ##last thing
-    
+
     return(finalSampChem)
 
 }
@@ -363,6 +364,7 @@ combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpoin
 
   ##read in the BMD files formatted by the zf module
   print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
+  
   cols <- required_bmd_columns$bmd
   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
 
@@ -600,7 +602,8 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
         distinct()%>%select(-ChemicalId)
 
     if(is_extract){
-      sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
+      sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),
+                                         sep='-',remove=FALSE)%>%
         select(Sample_ID,tmpId)%>%
         distinct()
 
@@ -704,10 +707,17 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   doseReps <-combineChemicalDoseData(dose.files, is_extract=FALSE, chemMeta,endpointDetails)%>%
     unique()
   
+  
+  ##we want to remove chemicals for which there is no data - either in the samples
   nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
   print(length(nas))
+  
   to.remove<-setdiff(nas,sampChem$Chemical_ID)
   print(length(to.remove))
+  
+  #sampnas<-which(is.na(as.numeric(sampChem$measurement_value)))
+  
+  
   bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
   curves<-curves%>%subset(!Chemical_ID%in%to.remove)
   doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
