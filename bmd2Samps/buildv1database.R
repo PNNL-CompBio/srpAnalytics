@@ -323,19 +323,19 @@ buildSampleData<-function(data.dir,chemMeta){
         distinct()
 
     ##now we have one more rename of samples and metadata
+    ##some are still off and so i created a manual mapping file
+    #step 1, read in mapping file
     sampleNameRemap<-readxl::read_xlsx(paste0(data.dir,'/envSampCleanMapping.xlsx'))%>%
-      dplyr::select(Sample_ID,date_sampled,sample_matrix,technology,#projectName='ProjectName',SampleName='NewSampleName',
-                    #LocationName='NewLocationName')%>%
+      dplyr::select(Sample_ID,date_sampled,sample_matrix,technology,
                     ProjectName,NewSampleName,NewLocationName)%>%
       distinct()
 
+    ##tstep 2 join with original file
     finalSampChem<-finalSampChem%>%
-    #  select(-c(sample_matrix,technology,SampleName,LocationName,date_sampled))%>% ### remove old names
-        #select(-c(sample_matrix,technology,date_sampled))%>% ### remove old names
       left_join(sampleNameRemap,by='Sample_ID')%>% ##add in updates
       distinct()
     
-    ##older files will have a missing projectName and require manual mapping of some terms
+    ##step 3 -rename files
     nas <- which(is.na(finalSampChem$projectName))  ##these are the older samples
     finalSampChem$projectName[nas]<-finalSampChem$ProjectName[nas]
     finalSampChem$LocationName[nas]<-finalSampChem$NewLocationName[nas]
@@ -344,7 +344,8 @@ buildSampleData<-function(data.dir,chemMeta){
     finalSampChem$sample_matrix.x[nas]<-finalSampChem$sample_matrix.y[nas]
     finalSampChem$technology.x[nas]<-finalSampChem$technology.y[nas]
     
-    finalSampChem<-select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
+    finalSampChem<-finalSampChem%>%
+      select(-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
       rename(sample_matrix='sample_matrix.x',
              date_sampled='date_sampled.x',
              technology='technology.x')%>%
