@@ -519,11 +519,13 @@ masvChemClass<-function(data.dir){
   library(tidyr)
   library(dplyr)
   classes<-readxl::read_xlsx(paste0(data.dir,'MASV Classifications 2021.xlsx'),
-                             sheet = 'MASV15 Classifications')
+                             sheet = 'MASV15 Classifications')%>%
+    dplyr::rename(Unclassified='uncategorized')
+    
   source=c("pharmacological","personalCare","industrial","pulpAndPaper","pestProduct","natural",'pestRodenticide',
            "consumerProduct","pestHerbicide","pestInsecticide",'pestFungicide','pestGeneral','flameRetardant')
 
-  cc=c('PAH','OPAH','PCB','PBB','PBDE','deuterated','dioxinsAndFurans','haloEthers','OPFR','phenol','aniline','uncategorized')
+  cc=c('PAH','OPAH','PCB','PBB','PBDE','deuterated','dioxinsAndFurans','haloEthers','OPFR','phenol','aniline','Unclassified')
 
 
   ##first let's handle  the sources
@@ -537,14 +539,17 @@ masvChemClass<-function(data.dir){
   chemSource<-aggregate(chem_source~CASNumber+ParameterName,chemSource,function(x) paste0(x,collapse=';'))
 
 
-  chemClass <- classes%>%pivot_longer(cols=cc,names_to='chemical_class',values_to='posNeg')%>%
+  chemClass <- classes%>%
+    pivot_longer(cols=cc,names_to='chemical_class',values_to='posNeg')%>%
     dplyr::select(-source)%>%
     subset(posNeg!='NULL')%>%
    dplyr::select(-posNeg)
 
+#  chemClass$chemical_class<-sapply(chemClass$chemical_class,function(x) gsub('uncategorized','Unclassified',x))
   chemClass<-aggregate(chemical_class~CASNumber+ParameterName,chemClass,function(x) paste0(x,collapse=';'))
 
-  chemComb <- chemSource%>%full_join(chemClass)%>%
+  chemComb <- chemSource%>%
+    full_join(chemClass)%>%
     replace_na(list(chemical_class='Unclassified'))%>%
     rename(cas_number='CASNumber')
 
@@ -729,7 +734,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   
   #print(missing)
   
-  ##Final output for the platform team is these 4 files
+  ##Final output for the platform team is these 7 files
   write.csv(bmds,file=paste0(out.dir,'chemSummaryStats.csv'),quote=T,row.names = FALSE)
   write.csv(ebmds,file=paste0(out.dir,'envSampSummaryStats.csv'),row.names=FALSE, quote = TRUE)
   
@@ -747,63 +752,46 @@ buildDB<-function(chem.files=c(),extract.files=c()){
 ##moving summary stats to its own function
 generateSummaryStats<-function(){
   
-  sampChem<-read.csv(paste0(out.dir,'chemicalsByExtractSample.csv'),check.names=F)
-  bmds <-read.csv(paste0(out.dir,'chemSummaryStats.csv'),check.names=F)
-  ebmds<-read.csv(paste0(out.dir,'envSampSummaryStats.csv'),check.names=F)
-  ##let's do one last summary
-  samp.count<-sampChem%>%
+  ##let's get all the chemicals first
+  chemMeta<-getChemMetadata(data.dir)
+  chemClasses<-chemMeta%>%
+    dplyr::select(Chemical_ID,chemical_class)%>%
+    distinct()%>%
+    replace_na(list(`chemical_class`='Unclassified'))
+  chemClasses$chemical_class<-sapply(chemClasses$chemical_class,function(x) gsub(';deuterated','',x))
+  
+  ##first let's get the total chemical counts
+  total.chems<-chemClasses%>%
+    group_by(chemical_class)%>%
+    summarize(`total chemicals`=n_distinct(Chemical_ID))
+  
+  ##how many samples is that chemical in? 
+  sampChem<-read.csv(paste0(out.dir,'chemicalsByExtractSample.csv'),check.names=F)%>%
     mutate(meas=as.numeric(measurement_value))%>%
-      subset(!is.na(meas))%>%
-               select(Sample_ID,Chemical_ID)%>%
+    subset(!is.na(meas))%>%
+    left_join(chemClasses)%>%
+    group_by(chemical_class)%>%
+    summarize(`Measured in samples`=n_distinct(Chemical_ID),`Number of Samples`=n_distinct(Sample_ID))
+  
+  #how many zebrafish experiments have that chemical?
+  bmds <-read.csv(paste0(out.dir,'chemSummaryStats.csv'),check.names=F)%>%
     group_by(Chemical_ID)%>%
-    summarize(`Number of samples`=n_distinct(Sample_ID))
-  
-  chem.counts<-bmds%>%
-    select(c('Chemical_ID','chemical_class','End Point Name','AUC_Norm'))%>%
-   # subset(!is.na(AUC_Norm))%>%
-  #  subset(!is.na(`End Point Name`))%>%
+    summarize(`Zebrafish endpoints`=n_distinct(`End Point Name`))%>%
+    left_join(chemClasses)%>%
     group_by(chemical_class)%>%
-    summarize(`Chemicals`=n_distinct(Chemical_ID))
+    summarize(`Evaluated in Zebrafish`=n_distinct(Chemical_ID),
+              `Endpoints Measured`=sum(`Zebrafish endpoints`))
   
+
+  #  ebmds<-read.csv(paste0(out.dir,'envSampSummaryStats.csv'),check.names=F)
+
+  chem.eps<-total.chems%>%
+    left_join(sampChem)%>%
+    left_join(bmds)%>%
+    mutate(across(where(is.numeric), ~ replace_na(.x, 0)))
   
-  chem.eps<-bmds%>%
-    group_by(Chemical_ID,chemical_class)%>%
-    summarize(`Zebrafish`=n_distinct(`End Point Name`))%>%
-    full_join(samp.count)%>%
-    tidyr::replace_na(list(`Zebrafish`=0,`Number of samples`=0,`chemical_class`='None'))%>%
-    group_by(chemical_class)%>%
-    summarize(`Zebrafish`=sum(`Zebrafish`),`Samples`=sum(`Number of samples`))%>%
-    left_join(chem.counts)
-  
-  chem.count<-sampChem%>%
-    mutate(meas=as.numeric(measurement_value))%>%
-    subset(!is.na(meas))%>%
-    select(Sample_ID,Chemical_ID)%>%
-    group_by(Sample_ID)%>%
-    summarize(`Number of chemicals`=n_distinct(Chemical_ID))
-  
-#  samp.counts<-ebmds%>%
-#    group_by(LocationName)%>%
-#    summarize(`Number of samples`=n_distinct(Sample_ID))
-  
-  samp.chems<-sampChem%>%
-    mutate(meas=as.numeric(measurement_value))%>%
-    subset(!is.na(meas))%>%
-    group_by(LocationName)%>%
-    summarize(Chemicals=n_distinct(Chemical_ID),Samples=n_distinct(Sample_ID))
-  
-  samp.extr<-ebmds%>%
-    subset(!is.na(`End Point Name`))%>%
-    group_by(LocationName)%>%
-    summarize(Zebrafish=n_distinct(`End Point Name`))
-  
-  samp.eps<-samp.chems%>%
-    full_join(samp.extr)%>%
-    tidyr::replace_na(list(Zebrafish=0))%>%
-    arrange(desc(Samples))
-  
-  write.table(chem.eps,paste0(out.dir,'chemCounts.md'),row.names=F,col.names=T)
-  write.table(samp.eps,paste0(out.dir,'sampCounts.md'),row.names=F,col.names=T)
+  write.table(chem.eps,paste0(out.dir,'chemCounts.tsv'),row.names=F,col.names=T,sep='\t')
+  #write.table(samp.eps,paste0(out.dir,'sampCounts.md'),row.names=F,col.names=T)
   
   
   

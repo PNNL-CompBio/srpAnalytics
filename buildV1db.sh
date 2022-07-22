@@ -40,12 +40,14 @@ $p3_lpr
 ##PFAS data is also on dropbox, we need to pull it
 ##downloading files from Lisa's dropbox PFAS data
 #epr_cmd="wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABgnmHtboM4LevxK1yxPIK-a/zf%20EPA%20PFAS%20EPR_PNNL_05-28-2021.csv" -O temp/epr.csv
-lpr_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABgzjaRPteU1EZIhnW9zv2Ka/zf%20EPA%20PFAS%20LPR_PNNL_05-28-2021.csv -O temp/lpr2.csv'
-mor_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABxsOLgwlv7-_HTZ0xaAIlNa/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv -O temp/morph2.csv'
+#lpr_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABgzjaRPteU1EZIhnW9zv2Ka/zf%20EPA%20PFAS%20LPR_PNNL_05-28-2021.csv -O temp/lpr2.csv'
+#mor_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABxsOLgwlv7-_HTZ0xaAIlNa/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv -O temp/morph2.csv'
 
+lpr_cmd="wget https://www.dropbox.com/s/ha7jduok03j82mf/zf%20EPA%20PFAS%20LPR_PNNL_05-28-2021.csv?dl=0 -O temp/lpr2.csv"
 echo $lpr_cmd
 $lpr_cmd
 
+mor_cmd="https://www.dropbox.com/s/jma3b9al3u8hcny/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv?dl=0 -O temp/morph2.csv"
 echo $mor_cmd
 $mor_cmd
 
