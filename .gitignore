@@ -1,4 +1,6 @@
+*~
 *.csv
+**/.DS_Store
 .ipynb_checkpoints
 *.pdf
 __pycache__
