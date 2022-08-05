@@ -93,4 +93,8 @@ $dpull
 drun="docker run -v"$PWD":/tmp sgosline/srp-bmd2samps --chemicals=/tmp/new_bmds.csv,/tmp/new_fits.csv,/tmp/new_dose.csv"
 echo $drun
 $drun
-##then validate again and add to db
+
+##then validate again and zip up to data package
+trun='tar -cvzf  srpCompendiumV1.tar.gz chemXYcoords.csv chemdoseResponseVals.csv chemicalsByExtractSample.csv envSampSummaryStats.csv envSampXYcoords.csv envSampdoseResponseVals.csv sigGeneStats.csv chemSummaryStats.csv'
+echo $trun
+$trun
