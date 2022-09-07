@@ -5,19 +5,9 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-### Confirm the counts are correct----------------------------------------------
-
-to_pivot <- fread("~/Git_Repos/srpAnalytics/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv")
-
-to_pivot %>%
-  pivot_wider(
-    id_cols = c(chemical.id, bottle.id, conc, plate.id, well, date), 
-    names_from = endpoint, 
-    values_from = value
-  ) %>%
-  write.csv("~/Downloads/pivot_wider.csv", quote = F, row.names = F)
-
-### Visualize LPR data 
+##########################
+## PRE-PROCESS & FILTER ##
+##########################
 
 toRM <- c('3756 0 20544 H02', '3756 0 20544 H08', '3756 0 20624 H05', 
           '3756 0 20624 H10', '3756 2.16 20544 G06', '3756 2.16 20625 G12', 
@@ -38,7 +28,107 @@ toRM <- c('3756 0 20544 H02', '3756 0 20544 H08', '3756 0 20624 H05',
 
 LPR_timepoints <- fread("~/Git_Repos/srpAnalytics/zfBmd/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv")
 
-# Add some minimal colu
+
+LPR_timepoints <- LPR_timepoints %>%
+  mutate(
+    time = (gsub("t", "", variable) %>% as.numeric()) / 10,
+    well.id = paste(chemical.id, conc, plate.id, well),
+    plate.id = as.factor(plate.id)
+  ) %>%
+  filter(well.id %in% toRM == FALSE) 
+
+#############
+## QC PLOT ##
+#############
+
+plot_data <- LPR_timepoints %>% 
+  group_by(time, conc, plate.id) %>%
+  summarise(
+    NewVal = sum(value, na.rm = T)
+  ) 
+
+ggplot(plot_data, aes(x = time, y = NewVal, color = plate.id)) + ylab("Movement") +
+ xlab("Minutes") + theme_bw() + ggtitle("Chemical ID = 3756. Wells are summed together.") +
+ annotate(geom = "rect", xmin = c(0, 6, 12, 18), xmax = c(2, 8, 14, 20), 
+          ymin = rep(-5, 4), ymax = rep(380, 4),
+          fill = "yellow", color = NA, alpha = 0.75) +
+ annotate(geom = "rect", xmin = c(3, 9, 15, 21), xmax = c(5, 11, 17, 23), 
+          ymin = rep(-5, 4), ymax = rep(380, 4),
+          fill = "gray50", color = NA, alpha = 0.5) +
+ geom_line() + facet_wrap(~conc)
+
+ 
+###################
+## CALCULATE MOV ##
+###################
+
+# MOV is the difference between the start of the dark cycle and the end of the light cycle
+# Here, the light cycles end at 2, 8, 14, and 20; and the dark cycles end at 5, 11, 17, 23. 
+
+Num_Cycles = 4 
+Assumed_Cycle_Time = 3 
+Assumed_Light_End = 2
+Assumed_Dark_Begin = 3
+
+MOV <- do.call(rbind, lapply(1:Num_Cycles, function(num) {
+  
+  Value <- (LPR_timepoints[LPR_timepoints$time == (Assumed_Dark_Begin + (Assumed_Cycle_Time * num - 1)), "value"] - 
+    LPR_timepoints[LPR_timepoints$time == (Assumed_Light_End + (Assumed_Cycle_Time * num - 1)), "value"]) %>% unlist()
+  
+  Res <- LPR_timepoints[LPR_timepoints$time == Assumed_Light_End, c("chemical.id", "conc", "plate.id", "well")] %>%
+    mutate(
+      endpoint = paste0("MOV", num),
+      Value = Value
+    )
+  
+  return(Res)
+  
+}))
+
+################################
+## CONVERT MOV TO DICHOTOMOUS ##
+################################
+
+# Negative control is the concentration at 0. If more than 50% of the abnormal (hypo) remain,
+# then remove the entire plate 
+MOV_0 <- MOV %>%
+  filter(conc == 0) %>%
+  group_by(chemical.id, plate.id, endpoint) %>%
+  mutate(
+    Quart1 = quantile(Value[Value > 0 & !is.na(Value)], 0.25),
+    Quart3 = quantile(Value[Value > 0 & !is.na(Value)], 0.75),
+    IQR_A = (Quart3 - Quart1) * 1.5
+  ) %>%
+  summarise(
+    Hypo = sum(Value < 0, na.rm = T),
+    Hyper = sum(Value <= (Quart1 - IQR_A) | Value >= (Quart3 + IQR_A), na.rm = T),
+    Total = length(Value),
+    ThresholdAt0 = Total * 0.5,
+    Remove = Hyper < ThresholdAt0 
+  ) %>%
+  dplyr::mutate(NewID = paste(chemical.id, plate.id, endpoint))
+
+PlatesToRm <- MOV_0 %>% filter(Remove) %>% ungroup() %>% select(NewID) %>% unlist()
+
+# Calculate final response
+MOV_Final <- MOV %>%
+  mutate(NewID = paste(chemical.id, plate.id, endpoint)) %>%
+  filter(NewID %in% PlatesToRm == FALSE) %>%
+  group_by(chemical.id, conc, endpoint) %>%
+  summarise(
+    Hypo = sum(Value < 0, na.rm = T),
+    Total = length(Value),
+    Response = Hypo / Total
+  )
+
+# Add that MOV 1 is missing
+ggplot(MOV_Final, aes(x = conc, y = Response, color = endpoint)) + geom_line() + theme_bw()
+
+###################
+## CALCULATE AUC ##
+###################
+
+#  Summation
 LPR_timepoints <- LPR_timepoints %>%
   mutate(
     time = (gsub("t", "", variable) %>% as.numeric()) / 10,
@@ -55,7 +145,7 @@ LPR_timepoints <- LPR_timepoints %>%
   ungroup() 
 
 ggplot(LPR_timepoints, aes(x = TimeBin, y = Sum)) + geom_smooth() + xlab("Minutes") + theme_bw() +
-  geom_vline(xintercept = c(2, 3), color = "black") + facet_wrap(.~conc) 
+  geom_vline(xintercept = c(2, 3), color = "black") + facet_wrap(.~conc) + ylab("Summed LPR, n = 3")
 
 # MOV1 (actually MOV2) is the movement at the start of light cycle 2
 MOV_test <- LPR_timepoints %>%
