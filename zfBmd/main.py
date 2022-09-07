@@ -14,12 +14,11 @@ import os, sys, time
 import argparse
 import tarfile
 import re
+import scipy.stats as stats
+from astropy import stats as astrostats
 
 # Import zfBMD specific functions 
-import bmd_analysis_morpho as bmd
-import bmd_analysis_LPR_7_PAH_t0_t239 as bmd_LPR
-import format_LPR_input as format_LPR
-import format_morpho_input as format_morpho
+import format_morpho_input as fmi
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
@@ -29,25 +28,24 @@ parser = argparse.ArgumentParser('Run the QC and BMD analysis as well as join wi
 extract data to store in SRP data analytics portal')
 
 parser.add_argument('--morpho', dest='morpho',\
-                    help='Comma-delimited list of morphological files to be processed. Required.',\
+                    help='Pathway to the morphological file to be processed. Required.',\
                     default=None)
 parser.add_argument('--LPR', dest='lpr', \
-                    help='Comma-delimited list of LPR-related files to be processed containing the same samples as morpho. Optional.',\
+                    help='Pathway to the light photometer response (LPR) file to be processed containing the same \
+                          samples as morpho. Optional. Unless both is True, only LPR data will be returned.',\
                     default=None)
+parser.add_argument('--both', dest='both', \
+                    help='Return both morpho and LPR endpoints. Optional. Default is False.',\
+                    default=False)
 parser.add_argument('--test', dest='test',\
-                    help='Set this flag to test code with internal files.',\
+                    help='Set this flag to test code with internal files. Default is False.',\
                     action='store_true', default=False)
-
-
-parser.add_argument('--test-extract', dest='test_extract',\
-                    help='Set this flag to run morpho test code with extract data',\
-                    action='store_true', default=False) # David: Do we need this? 
 
 ##############################
 ## DEFINE AND RUN FUNCTIONS ##
 ##############################
 
-def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
+def run_lpr_on_file(morph_file, lpr_file, full_devel='full'):
     """
     Reformats inputted morphology (required) or lpr (optional) files and runs main zfBMD pipeline
     
