@@ -19,6 +19,10 @@ def format_morpho_input(morpho_path):
     chemical.id, conc, endpoint, num.tot, num.nonna, num.affected, id, frac.affected
 
     2. all unique endpoints found in this file
+
+    3. a list of wells that experience mortality at 5 days
+
+    4. a list of wells that experience mortality at 24 hours
     
     Parameters
     ----
@@ -247,7 +251,7 @@ def format_morpho_input(morpho_path):
     ############################
     return([chemical_groups, theEndpoints, MortWells, Mort24Wells])
 
-def format_lpr_input(lpr_path, theEndpoints):
+def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
     """
     Formats an LPR file for the zfBMD pipeline. This involves:
         1. removing endpoints for fish that have experienced mortality
@@ -264,7 +268,8 @@ def format_lpr_input(lpr_path, theEndpoints):
     ----
     lpr_path: a string indicating the path to the lpr file 
     theEndpoints: all unique endpoints in the morphology file
-    MortWells: a list of wells from format_morpho_input 
+    MortWells: a list of wells with mortality from format_morpho_input 
+    Mort24Wells: a list of wells with mortality at 24 hours from format_morpho_input
     """
 
     ##########################################
@@ -351,7 +356,6 @@ def format_lpr_input(lpr_path, theEndpoints):
     LPR_Endpoints["AUC4"] = sum_endpoints([21,22,23]) - sum_endpoints([18,19,20])
 
     # Create a function to transform the numeric to dichotomous
-
     def to_dichotomous(toCalculate, endpoint):
         '''
 
