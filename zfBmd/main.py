@@ -75,8 +75,8 @@ def main():
 
     # Load test data if test is true 
     if args.test == True:
-        morpho_path = '/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-        lpr_path = '/zfBmd/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
+        morpho_path = './test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
+        lpr_path = './test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
     
     ### 1. Format data--------------------------------------------------------------------------
     dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
@@ -95,10 +95,10 @@ def main():
     ### 3. Select and run models----------------------------------------------------------------
 
     if (args.lpr is None or args.both):
-        model_selection, lowqual_model = model_fitting(dose_response, BMD_Flags)
+        model_selection, lowqual_model, BMD_Flags, model_results = model_fitting(dose_response, BMD_Flags)
     
     if (args.lpr is not None):
-        lpr_model_selection, lpr_lowqual_model = model_fitting(lpr_dose_response, lpr_BMD_Flags)
+        lpr_model_selection, lpr_lowqual_model, lpr_BMD_Flags, lpr_model_results = model_fitting(lpr_dose_response, lpr_BMD_Flags)
 
     ### 4. Format and export outputs------------------------------------------------------------
 
@@ -106,44 +106,45 @@ def main():
 
         # Benchmark Dose #
         BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
-        BMDS_Final.to_csv(print(args.output, "/new_bmds.csv", sep = ""))
+        BMDS_Final_Clean = BMDS_Final.drop("ids", axis = 1)
+        BMDS_Final_Clean.to_csv(args.output + "/new_bmds.csv", index = False)
 
         # Fits #
-        export_fits(model_selection, dose_response, BMDS_Final).to_csv(print(args.output, "/new_fits.csv", sep = ""))
+        export_fits(model_results, dose_response, BMDS_Final).to_csv(args.output + "/new_fits.csv", index = False)
 
         # Doses # 
-        export_doses(dose_response).to_csv(print(args.output, "/new_dose.csv", sep = ""))
+        export_doses(dose_response).to_csv(args.output + "/new_dose.csv", index = False)
 
     elif args.lpr is not None and args.both == False:
 
         # Benchmark Dose #
         lpr_BMDS_Final = export_BMDs(dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
-        lpr_BMDS_Final.to_csv(print(args.output, "/new_bmds.csv", sep = ""))
+        lpr_BMDS_Final.to_csv(args.output + "/new_bmds.csv")
 
         # Fits #
-        export_fits(lpr_model_selection, lpr_dose_response, lpr_BMDS_Final).to_csv(print(args.output, "/new_fits.csv", sep = ""))
+        export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final).to_csv(args.output + "/new_fits.csv")
         
         # Doses #
-        export_doses(lpr_dose_response).to_csv(print(args.output, "/new_dose.csv", sep = ""))
+        export_doses(lpr_dose_response).to_csv(args.output + "/new_dose.csv")
 
     elif args.both:
 
         # Benchmark Dose #
         BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
         lpr_BMDS_Final = export_BMDs(dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
-        pd.concat([BMDS_Final, lpr_BMDS_Final]).to_csv(print(args.output, "/new_bmds.csv", sep = ""))
+        pd.concat([BMDS_Final, lpr_BMDS_Final]).to_csv(args.output + "/new_bmds.csv")
 
         # Fits #
         pd.concat(
-            [export_fits(model_selection, dose_response, BMDS_Final),
-             export_fits(lpr_model_selection, lpr_dose_response, lpr_BMDS_Final)]
-        ).to_csv(print(args.output, "/new_fits.csv", sep = ""))
+            [export_fits(model_results, dose_response, BMDS_Final),
+             export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final)]
+        ).to_csv(args.output + "/new_fits.csv")
         
         # Doses # 
         pd.concat(
             [export_doses(dose_response),
              export_doses(lpr_dose_response)]
-        ).to_csv(print(args.output, "/new_doses.csv", sep = ""))
+        ).to_csv(args.output + "/new_doses.csv")
 
 if __name__ == "__main__":
     main()

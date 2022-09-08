@@ -318,7 +318,7 @@ def model_fitting(dose_response, BMD_Flags):
         BMDS_Model.append(rowDict)
 
     BMDS_Model = pd.DataFrame(BMDS_Model)
-    return(BMDS_Model)
+    return(BMDS_Model, BMDS_LowQual, BMD_Flags, model_results)
 
 
 def export_BMDs(dose_response, BMD_Flags, BMDS_LowQual, BMDS_Model):
@@ -354,12 +354,12 @@ def export_BMDs(dose_response, BMD_Flags, BMDS_LowQual, BMDS_Model):
     
     return(BMDS_Final)
 
-def export_fits(model_selection, dose_response, BMDS_Final):
+def export_fits(model_results, dose_response, BMDS_Final):
 
     def calc_fits(ID):
         
-        # If the ID is not found in the model_selection, then return blanks for x and y 
-        if ((ID in model_selection) == False):
+        # If the ID is not found in the model_results, then return blanks for x and y 
+        if ((ID in model_results) == False):
             return({
                 "Chemical_ID": ID.split(" ")[0],
                 "End_Point": ID.split(" ")[1],
@@ -375,10 +375,10 @@ def export_fits(model_selection, dose_response, BMDS_Final):
             return np.unique(dose_samples)
 
         # Get the model
-        model = model_selection[ID][2]
+        model = model_results[ID][2]
 
         # Get the parameters
-        params = model_selection[ID][1][1]
+        params = model_results[ID][1][1]
 
         # Define the uneven x values
         dose_x_vals = np.round(gen_uneven_spacing(dose_response[dose_response["ids"] == ID]["conc"].to_list()), 4)

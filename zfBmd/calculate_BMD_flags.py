@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import scipy.stats as stats
+import numpy as np
 
 def generate_BMD_flags(dose_response):
     '''This function performs feasibility analysis
