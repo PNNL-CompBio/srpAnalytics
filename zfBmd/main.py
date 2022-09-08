@@ -7,13 +7,15 @@
 
 # Import python libraries 
 import pandas as pd
-import os, sys, time
+import sys
 import argparse
 
 # Import zfBMD specific functions 
 from format_binary_data import format_morpho_input
 from format_binary_data import format_lpr_input 
-from calculate_dose_response import generate_dose_response
+from calculate_BMD_flags import generate_BMD_flags
+from select_and_run_models import model_fitting
+
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
@@ -76,21 +78,26 @@ def main():
         lpr_path = '/zfBmd/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
     
     ### 1. Format data--------------------------------------------------------------------------
-    chemical_groups, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
+    dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
 
     if (args.lpr is not None):
-        lpr_data = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
+        lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
 
     ### 2. Calculate dose response--------------------------------------------------------------
 
-    dose_response = generate_dose_response(chemical_groups)
+    if (args.lpr is None or args.both):
+        BMD_Flags = generate_BMD_flags(dose_response)
 
     if (args.lpr is not None):
-        lpr_dose_response = generate_dose_response() 
+        lpr_BMD_Flags = generate_BMD_flags(lpr_dose_response) 
 
     ### 3. Select and run models----------------------------------------------------------------
 
+    if (args.lpr is None or args.both):
+        model_selection = model_fitting(dose_response, BMD_Flags)
     
+    if (args.lpr is not None):
+        lpr_model_selection = model_fitting(lpr_dose_response, lpr_BMD_Flags)
 
     ### 4. Format outputs-----------------------------------------------------------------------
 

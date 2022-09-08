@@ -244,12 +244,12 @@ def format_morpho_input(morpho_path):
     chemical_groups = plate_groups.drop(columns = ["plate.id", "ids", "well.id"])
 
     # Group by chemical.id, concentration, and endpoint. Then, sum the results. 
-    chemical_groups = chemical_groups.groupby(by = ["chemical.id", "conc", "endpoint"]).sum().reset_index()
+    dose_response = chemical_groups.groupby(by = ["chemical.id", "conc", "endpoint"]).sum().reset_index()
 
     ############################
     ## RETURN FORMATTED TABLE ##
     ############################
-    return([chemical_groups, theEndpoints, MortWells, Mort24Wells])
+    return([dose_response, theEndpoints, MortWells, Mort24Wells])
 
 def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
     """
@@ -400,7 +400,7 @@ def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
         return(Endpoint)
 
 
-    LPR = pd.concat([
+    dose_response = pd.concat([
         to_dichotomous(LPR_Endpoints[["chemical.id", "conc", "plate.id", "MOV1"]], "MOV1"),
         to_dichotomous(LPR_Endpoints[["chemical.id", "conc", "plate.id", "MOV2"]], "MOV2"),
         to_dichotomous(LPR_Endpoints[["chemical.id", "conc", "plate.id", "MOV3"]], "MOV3"),
@@ -411,4 +411,4 @@ def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
         to_dichotomous(LPR_Endpoints[["chemical.id", "conc", "plate.id", "AUC4"]], "AUC4")
     ])
 
-    return(LPR)
+    return(dose_response)
