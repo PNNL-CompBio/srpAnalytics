@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
+from astropy import stats as astrostats
 
 import BMD_Analysis_Functions as baf
 
@@ -319,4 +320,124 @@ def model_fitting(dose_response, BMD_Flags):
     BMDS_Model = pd.DataFrame(BMDS_Model)
     return(BMDS_Model)
 
+
+def export_BMDs(dose_response, BMD_Flags, BMDS_LowQual, BMDS_Model):
+
+    def BMD_Range_Flag(id, BMD):
+        
+        # Get concentrations
+        concs = dose_response[dose_response["ids"] == id]["conc"]
+
+        if (np.isnan(BMD)):
+            return(np.nan)
+        elif (BMD <= max(concs) and BMD >= min(concs)):
+            return(0)
+        else:
+            return(1)
+
+    # Start final BMDS data frame 
+    BMDS_Final = pd.concat([BMDS_LowQual, BMDS_Model]).merge(BMD_Flags[["ids", "flag", "BMD_Analysis_Flag"]], on = "ids", how = "left").rename(columns = {"flag":"DataQC_Flag"})
+
+    # Change NaN data QC flag to 1
+    BMDS_Final["DataQC_Flag"][pd.isnull(BMDS_Final["DataQC_Flag"])] = 1
+
+    # Add BMD10 and BMD50 flags
+    BMDS_Final["BMD10_Flag"] = [BMD_Range_Flag(BMDS_Final["ids"][pos], BMDS_Final["BMD10"][pos]) for pos in range(len(BMDS_Final))]
+    BMDS_Final["BMD50_Flag"] = [BMD_Range_Flag(BMDS_Final["ids"][pos], BMDS_Final["BMD50"][pos]) for pos in range(len(BMDS_Final))]
+
+    # Add columns for printing
+    BMDS_Final["Chemical_ID"] = [x.split(" ")[0] for x in BMDS_Final["ids"].to_list()]
+    BMDS_Final["End_Point"] = [x.split(" ")[1] for x in BMDS_Final["ids"].to_list()]
+
+    BMDS_Final = BMDS_Final[["Chemical_ID", "End_Point", "Model", "BMD10", "BMDL", "BMD50", "AUC", "Min_Dose", "Max_Dose", "AUC_Norm", 
+                "DataQC_Flag", "BMD_Analysis_Flag", "BMD10_Flag", "BMD50_Flag", "ids"]]
+    
+    return(BMDS_Final)
+
+def export_fits(model_selection, dose_response, BMDS_Final):
+
+    def calc_fits(ID):
+        
+        # If the ID is not found in the model_selection, then return blanks for x and y 
+        if ((ID in model_selection) == False):
+            return({
+                "Chemical_ID": ID.split(" ")[0],
+                "End_Point": ID.split(" ")[1],
+                "X_vals": np.nan,
+                "Y_vals": np.nan
+            })
+
+        def gen_uneven_spacing(doses, int_steps = 10):
+            '''Generates ten steps of points between measurements'''
+            dose_samples = list()
+            for dose_index in range(len(doses) - 1):
+                dose_samples.extend(np.linspace(doses[dose_index],doses[dose_index + 1], int_steps).tolist())
+            return np.unique(dose_samples)
+
+        # Get the model
+        model = model_selection[ID][2]
+
+        # Get the parameters
+        params = model_selection[ID][1][1]
+
+        # Define the uneven x values
+        dose_x_vals = np.round(gen_uneven_spacing(dose_response[dose_response["ids"] == ID]["conc"].to_list()), 4)
+
+        def run_fitted_model(fittedfun, dose_x_vals = dose_x_vals, params = params):
+            '''Run modeled x values through the fit function'''
+            return(fittedfun(dose_x_vals, params))
+
+        # Define a y value holder
+        dose_y_vals = np.nan
+
+        # Get the y values 
+        if (model == "Logistic"):
+            dose_y_vals = run_fitted_model(baf.logistic_fun)
+        elif (model == "Gamma"):
+            dose_y_vals = run_fitted_model(baf.gamma_fun)
+        elif (model == "Weibull"):
+            dose_y_vals = run_fitted_model(baf.weibull_fun)
+        elif (model == "Log Logistic"):
+            dose_y_vals = run_fitted_model(baf.log_logistic_fun)
+        elif (model == "Probit"):
+            dose_y_vals = run_fitted_model(baf.probit_fun)
+        elif (model == "Log Probit"):
+            dose_y_vals = run_fitted_model(baf.log_probit_fun)
+        elif (model == "Multistage"):
+            dose_y_vals = run_fitted_model(baf.multistage_2_fun)
+        elif (model == "Quantal Linear"):
+            dose_y_vals = run_fitted_model(baf.quantal_linear_fun)
+
+        return({
+            "Chemical_ID": [ID.split(" ")[0]] * len(dose_x_vals),
+            "End_Point": [ID.split(" ")[1]] * len(dose_x_vals),
+            "X_vals": dose_x_vals,
+            "Y_vals": np.round(dose_y_vals, 8)
+        })
+
+    Fits_List = []
+    for ID in BMDS_Final["ids"]:
+        Fits_List.append(calc_fits(ID))
+
+    Fits_Final = pd.DataFrame(Fits_List).explode(["Chemical_ID", "End_Point", "X_vals", "Y_vals"])
+    return(Fits_Final)
+
+def export_doses(dose_response):
+
+    # Select required columns and rename 
+    Dose_Final = dose_response[["chemical.id", "endpoint", "conc", "frac.affected", "num.affected", "num.nonna", "ids"]].rename(columns = {"chemical.id":"Chemical_ID", "endpoint":"End_Point","conc":"Dose","frac.affected":"Response"})
+
+    # Round dose to 4 decimal points, and endpoint to 8
+    Dose_Final["Dose"] = round(Dose_Final["Dose"], 4)
+    Dose_Final["Response"] = round(Dose_Final["Response"], 8)
+
+    # Calculate confidence intervals 
+    CI = pd.DataFrame([np.abs(astrostats.binom_conf_interval(Dose_Final["num.affected"][row], Dose_Final["num.nonna"][row], confidence_level = 0.95) - Dose_Final["Response"][row]) for row in range(len(Dose_Final))]).rename(columns = {0:"CI_Lo", 1:"CI_Hi"})
+    CI["CI_Lo"] = round(CI["CI_Lo"], 6)
+    CI["CI_Hi"] = round(CI["CI_Hi"], 6)
+
+    # Set the range of possible values between 0 and 1
+    Dose_Final = pd.concat([Dose_Final, CI], axis = 1)
+    
+    return(Dose_Final)
 

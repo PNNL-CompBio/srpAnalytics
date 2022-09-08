@@ -15,14 +15,15 @@ from format_binary_data import format_morpho_input
 from format_binary_data import format_lpr_input 
 from calculate_BMD_flags import generate_BMD_flags
 from select_and_run_models import model_fitting
-
+from select_and_run_models import export_BMDs
+from select_and_run_models import export_fits
+from select_and_run_models import export_doses
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
 ###########################
 
-parser = argparse.ArgumentParser('Run the QC and BMD analysis as well as join with extract data to store \
-in SRP data analytics portal')
+parser = argparse.ArgumentParser('Run the QC and BMD analysis for the SRP analytics compendium')
 
 parser.add_argument('--morpho', dest='morpho',\
                     help='Pathway to the morphological file to be processed. Required.',\
@@ -94,17 +95,55 @@ def main():
     ### 3. Select and run models----------------------------------------------------------------
 
     if (args.lpr is None or args.both):
-        model_selection = model_fitting(dose_response, BMD_Flags)
+        model_selection, lowqual_model = model_fitting(dose_response, BMD_Flags)
     
     if (args.lpr is not None):
-        lpr_model_selection = model_fitting(lpr_dose_response, lpr_BMD_Flags)
+        lpr_model_selection, lpr_lowqual_model = model_fitting(lpr_dose_response, lpr_BMD_Flags)
 
-    ### 4. Format outputs-----------------------------------------------------------------------
+    ### 4. Format and export outputs------------------------------------------------------------
 
+    if args.lpr is None and args.both == False:
 
-    
+        # Benchmark Dose #
+        BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
+        BMDS_Final.to_csv(print(args.output, "/new_bmds.csv", sep = ""))
 
+        # Fits #
+        export_fits(model_selection, dose_response, BMDS_Final).to_csv(print(args.output, "/new_fits.csv", sep = ""))
 
+        # Doses # 
+        export_doses(dose_response).to_csv(print(args.output, "/new_dose.csv", sep = ""))
+
+    elif args.lpr is not None and args.both == False:
+
+        # Benchmark Dose #
+        lpr_BMDS_Final = export_BMDs(dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
+        lpr_BMDS_Final.to_csv(print(args.output, "/new_bmds.csv", sep = ""))
+
+        # Fits #
+        export_fits(lpr_model_selection, lpr_dose_response, lpr_BMDS_Final).to_csv(print(args.output, "/new_fits.csv", sep = ""))
+        
+        # Doses #
+        export_doses(lpr_dose_response).to_csv(print(args.output, "/new_dose.csv", sep = ""))
+
+    elif args.both:
+
+        # Benchmark Dose #
+        BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
+        lpr_BMDS_Final = export_BMDs(dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
+        pd.concat([BMDS_Final, lpr_BMDS_Final]).to_csv(print(args.output, "/new_bmds.csv", sep = ""))
+
+        # Fits #
+        pd.concat(
+            [export_fits(model_selection, dose_response, BMDS_Final),
+             export_fits(lpr_model_selection, lpr_dose_response, lpr_BMDS_Final)]
+        ).to_csv(print(args.output, "/new_fits.csv", sep = ""))
+        
+        # Doses # 
+        pd.concat(
+            [export_doses(dose_response),
+             export_doses(lpr_dose_response)]
+        ).to_csv(print(args.output, "/new_doses.csv", sep = ""))
 
 if __name__ == "__main__":
     main()
