@@ -10,8 +10,6 @@ import pandas as pd
 import sys
 import argparse
 
-import ipdb
-
 # Import zfBMD specific functions 
 from format_binary_data import format_morpho_input
 from format_binary_data import format_lpr_input 

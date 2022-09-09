@@ -6,8 +6,6 @@ import pandas as pd
 import scipy.stats as stats
 from astropy import stats as astrostats
 
-import ipdb
-
 import BMD_Analysis_Functions as baf
 
 def model_fitting(dose_response, BMD_Flags):
