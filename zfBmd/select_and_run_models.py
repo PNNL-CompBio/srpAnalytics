@@ -434,6 +434,11 @@ def export_doses(dose_response):
     # Select required columns and rename 
     Dose_Final = dose_response[["chemical.id", "endpoint", "conc", "frac.affected", "num.affected", "num.nonna", "ids"]].rename(columns = {"chemical.id":"Chemical_ID", "endpoint":"End_Point","conc":"Dose","frac.affected":"Response"}).reset_index()
 
+    if "Index" in dose_response.head():
+        dose_response = dose_response.drop(columns = ["Index"])
+    if "index" in dose_response.head():
+        dose_response = dose_response.drop(columns = ["index"])
+
     # Round dose to 4 decimal points, and endpoint to 8
     Dose_Final["Dose"] = round(Dose_Final["Dose"], 4)
     Dose_Final["Response"] = round(Dose_Final["Response"], 8)
