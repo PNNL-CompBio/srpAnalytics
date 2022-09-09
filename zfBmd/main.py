@@ -10,6 +10,8 @@ import pandas as pd
 import sys
 import argparse
 
+import ipdb
+
 # Import zfBMD specific functions 
 from format_binary_data import format_morpho_input
 from format_binary_data import format_lpr_input 
@@ -70,7 +72,7 @@ def main():
         sys.exit("--morpho cannot be blank, since morphological data is required to run zfBMD.")
     
     # Users must supply both morpho and lpr data if both is selected
-    if args.both and args.lpr is None:
+    if args.both and args.lpr is None and args.test == False:
         sys.exit("--lpr cannot be blank if args.both is True.")
 
     # Load test data if test is true 
@@ -81,7 +83,7 @@ def main():
     ### 1. Format data--------------------------------------------------------------------------
     dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
 
-    if (args.lpr is not None):
+    if (args.lpr is not None or (args.test and args.both)):
         lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
 
     ### 2. Calculate dose response--------------------------------------------------------------
@@ -89,7 +91,7 @@ def main():
     if (args.lpr is None or args.both):
         BMD_Flags = generate_BMD_flags(dose_response)
 
-    if (args.lpr is not None):
+    if (args.lpr is not None or (args.test and args.both)):
         lpr_BMD_Flags = generate_BMD_flags(lpr_dose_response) 
 
     ### 3. Select and run models----------------------------------------------------------------
@@ -97,7 +99,7 @@ def main():
     if (args.lpr is None or args.both):
         model_selection, lowqual_model, BMD_Flags, model_results = model_fitting(dose_response, BMD_Flags)
     
-    if (args.lpr is not None):
+    if args.lpr is not None or (args.test and args.both):
         lpr_model_selection, lpr_lowqual_model, lpr_BMD_Flags, lpr_model_results = model_fitting(lpr_dose_response, lpr_BMD_Flags)
 
     ### 4. Format and export outputs------------------------------------------------------------
@@ -118,33 +120,33 @@ def main():
     elif args.lpr is not None and args.both == False:
 
         # Benchmark Dose #
-        lpr_BMDS_Final = export_BMDs(dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
-        lpr_BMDS_Final.to_csv(args.output + "/new_bmds.csv")
+        lpr_BMDS_Final = export_BMDs(lpr_dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
+        lpr_BMDS_Final.to_csv(args.output + "/new_bmds.csv", index = False)
 
         # Fits #
-        export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final).to_csv(args.output + "/new_fits.csv")
+        export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final).to_csv(args.output + "/new_fits.csv", index = False)
         
         # Doses #
-        export_doses(lpr_dose_response).to_csv(args.output + "/new_dose.csv")
+        export_doses(lpr_dose_response).to_csv(args.output + "/new_dose.csv", index = False)
 
     elif args.both:
 
         # Benchmark Dose #
         BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
-        lpr_BMDS_Final = export_BMDs(dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
-        pd.concat([BMDS_Final, lpr_BMDS_Final]).to_csv(args.output + "/new_bmds.csv")
+        lpr_BMDS_Final = export_BMDs(lpr_dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
+        pd.concat([BMDS_Final, lpr_BMDS_Final]).to_csv(args.output + "/new_bmds.csv", index = False)
 
         # Fits #
         pd.concat(
             [export_fits(model_results, dose_response, BMDS_Final),
              export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final)]
-        ).to_csv(args.output + "/new_fits.csv")
+        ).to_csv(args.output + "/new_fits.csv", index = False)
         
         # Doses # 
         pd.concat(
             [export_doses(dose_response),
              export_doses(lpr_dose_response)]
-        ).to_csv(args.output + "/new_doses.csv")
+        ).to_csv(args.output + "/new_dose.csv", index = False)
 
 if __name__ == "__main__":
     main()

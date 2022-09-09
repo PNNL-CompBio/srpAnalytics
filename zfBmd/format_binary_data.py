@@ -393,10 +393,9 @@ def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
         Endpoint["num.nonna"] = preEndpoint.size().reset_index()[0]
         Endpoint["endpoint"] = endpoint
         Endpoint["num.tot"] = df_LPR_data[df_LPR_data["variable"] == "t0"].groupby(["chemical.id", "conc"]).size().reset_index()[0]
-        Endpoint["frac.affected"] = Endpoint["num.affected"] / Endpoint["num.nonna"]
 
         # Order and return endpoint
-        Endpoint = Endpoint[["chemical.id", "conc", "endpoint", "num.tot", "num.nonna", "num.affected", "frac.affected"]]
+        Endpoint = Endpoint[["chemical.id", "conc", "endpoint", "num.tot", "num.nonna", "num.affected"]]
         return(Endpoint)
 
 

@@ -23,10 +23,7 @@ def generate_BMD_flags(dose_response):
     ########################
 
     # Add an id column
-    ids = []
-    for row in range(len(dose_response)):
-        ids.append(str(dose_response["chemical.id"][row]) + " " + str(dose_response["endpoint"][row]))
-    dose_response["ids"] = ids
+    dose_response["ids"] = dose_response["chemical.id"].astype(str) + " " + dose_response["endpoint"].astype(str)
 
     # Response is the number affected over the number of embryos (non-na)
     dose_response["frac.affected"] = dose_response["num.affected"] / dose_response["num.nonna"]

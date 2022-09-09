@@ -6,6 +6,8 @@ import pandas as pd
 import scipy.stats as stats
 from astropy import stats as astrostats
 
+import ipdb
+
 import BMD_Analysis_Functions as baf
 
 def model_fitting(dose_response, BMD_Flags):
@@ -25,17 +27,22 @@ def model_fitting(dose_response, BMD_Flags):
     ## CALCULATE VALUES FOR LOW QUALITY DATA ##
     ###########################################
 
-    low_quality = dose_response[dose_response["ids"].isin(BMD_Flags[BMD_Flags["flag"].isin([0,1])]["ids"])].groupby("ids")
+    # If there is any low quality data, don't bother with the fits and just calculate the required values.
+    if (BMD_Flags["flag"].isin([0,1]).any()):
 
-    # Calculate low quality metrics and start new BMDS file 
-    BMDS_LowQual = low_quality.apply(lambda df: np.trapz(df["frac.affected"], x = df["conc"])).reset_index().rename(columns = {0: "AUC"})
-    BMDS_LowQual[["Model", "BMD10", "BMDL", "BMD50"]] = np.nan
-    BMDS_LowQual["Min_Dose"] = round(low_quality[["ids", "conc"]].min("conc").reset_index()["conc"], 4)
-    BMDS_LowQual["Max_Dose"] = round(low_quality[["ids", "conc"]].max("conc").reset_index()["conc"], 4)
-    BMDS_LowQual["AUC_Norm"] = BMDS_LowQual["AUC"] / (BMDS_LowQual["Max_Dose"] - BMDS_LowQual["Min_Dose"])
+        low_quality = dose_response[dose_response["ids"].isin(BMD_Flags[BMD_Flags["flag"].isin([0,1])]["ids"])].groupby("ids")
+    
+        BMDS_LowQual = low_quality.apply(lambda df: np.trapz(df["frac.affected"], x = df["conc"])).reset_index().rename(columns = {0: "AUC"})
+        BMDS_LowQual[["Model", "BMD10", "BMDL", "BMD50"]] = np.nan
+        BMDS_LowQual["Min_Dose"] = round(low_quality[["ids", "conc"]].min("conc").reset_index()["conc"], 4)
+        BMDS_LowQual["Max_Dose"] = round(low_quality[["ids", "conc"]].max("conc").reset_index()["conc"], 4)
+        BMDS_LowQual["AUC_Norm"] = BMDS_LowQual["AUC"] / (BMDS_LowQual["Max_Dose"] - BMDS_LowQual["Min_Dose"])
 
-    # Order columns
-    BMDS_LowQual = BMDS_LowQual[["ids", "Model", "BMD10", "BMDL", "BMD50", "AUC", "Min_Dose", "Max_Dose", "AUC_Norm"]]
+        # Order columns
+        BMDS_LowQual = BMDS_LowQual[["ids", "Model", "BMD10", "BMDL", "BMD50", "AUC", "Min_Dose", "Max_Dose", "AUC_Norm"]]
+
+    else:
+        BMDS_LowQual = None
 
     ################
     ## RUN MODELS ##
@@ -425,14 +432,21 @@ def export_fits(model_results, dose_response, BMDS_Final):
 def export_doses(dose_response):
 
     # Select required columns and rename 
-    Dose_Final = dose_response[["chemical.id", "endpoint", "conc", "frac.affected", "num.affected", "num.nonna", "ids"]].rename(columns = {"chemical.id":"Chemical_ID", "endpoint":"End_Point","conc":"Dose","frac.affected":"Response"})
+    Dose_Final = dose_response[["chemical.id", "endpoint", "conc", "frac.affected", "num.affected", "num.nonna", "ids"]].rename(columns = {"chemical.id":"Chemical_ID", "endpoint":"End_Point","conc":"Dose","frac.affected":"Response"}).reset_index()
 
     # Round dose to 4 decimal points, and endpoint to 8
     Dose_Final["Dose"] = round(Dose_Final["Dose"], 4)
     Dose_Final["Response"] = round(Dose_Final["Response"], 8)
 
     # Calculate confidence intervals 
-    CI = pd.DataFrame([np.abs(astrostats.binom_conf_interval(Dose_Final["num.affected"][row], Dose_Final["num.nonna"][row], confidence_level = 0.95) - Dose_Final["Response"][row]) for row in range(len(Dose_Final))]).rename(columns = {0:"CI_Lo", 1:"CI_Hi"})
+    interval = []
+    for row in range(len(Dose_Final)):
+        values = np.abs(astrostats.binom_conf_interval(Dose_Final["num.affected"][row], Dose_Final["num.nonna"][row], confidence_level = 0.95))
+        values[0] = values[0] - Dose_Final["Response"][row]
+        values[1] = values[1] - Dose_Final["Response"][row]
+        interval.append(values)
+
+    CI = pd.DataFrame(interval).rename(columns = {0:"CI_Lo", 1:"CI_Hi"})
     CI["CI_Lo"] = round(CI["CI_Lo"], 6)
     CI["CI_Hi"] = round(CI["CI_Hi"], 6)
 
