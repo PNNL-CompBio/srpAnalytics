@@ -1,10 +1,8 @@
 pandas
-sys
 argparse
 numpy
-scipy==1.4.1
+scipy
 statsmodels
-warnings
 astropy
 pyodbc
 jsonschema
