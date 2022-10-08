@@ -79,28 +79,49 @@ def main():
         lpr_path = './test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
     
     ### 1. Format data--------------------------------------------------------------------------
-    dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
+    print("...Formatting morphology data")
+    #dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
+
+    #dose_response.to_csv("./Results/dose_response.csv", index = False)
+    #pd.DataFrame(theEndpoints, columns = ["endpoints"]).to_csv("./Results/theEndpoints.csv", index = False)
+    #pd.DataFrame(MortWells, columns = ["theWells"]).to_csv("./Results/MortWells.csv", index = False)
+    #pd.DataFrame(Mort24Wells, columns = ["theWells"]).to_csv("./Results/Mort24Wells.csv", index = False)
+
+    dose_response = pd.read_csv("./Results/dose_response.csv")
+    theEndpoints = pd.read_csv("./Results/theEndpoints.csv")["endpoints"].to_list()
+    MortWells = pd.read_csv("./Results/MortWells.csv")["theWells"].to_list()
+    Mort24Wells = pd.read_csv("./Results/Mort24Wells.csv")["theWells"].to_list()
 
     if (args.lpr is not None or (args.test and args.both)):
-        lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
+        print("...Formatting LPR data")
+        #lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
+        #lpr_dose_response.to_csv("./Results/lpr_dose_response.csv", index = False)
+        lpr_dose_response = pd.read_csv("./Results/lpr_dose_response.csv")
 
     ### 2. Calculate dose response--------------------------------------------------------------
 
     if (args.lpr is None or args.both):
+        print("...Generating morphology flags")
         BMD_Flags = generate_BMD_flags(dose_response)
+        BMD_Flags = pd.read_csv("./Results/BMD_Flags.csv")
 
     if (args.lpr is not None or (args.test and args.both)):
-        lpr_BMD_Flags = generate_BMD_flags(lpr_dose_response) 
+        print("...Generating LPR flags")
+        lpr_BMD_Flags = generate_BMD_flags(lpr_dose_response)
 
     ### 3. Select and run models----------------------------------------------------------------
 
     if (args.lpr is None or args.both):
+        print("...Fitting models for morphology data")
         model_selection, lowqual_model, BMD_Flags, model_results = model_fitting(dose_response, BMD_Flags)
     
     if args.lpr is not None or (args.test and args.both):
+        print("...Fitting models for LPR data")
         lpr_model_selection, lpr_lowqual_model, lpr_BMD_Flags, lpr_model_results = model_fitting(lpr_dose_response, lpr_BMD_Flags)
 
     ### 4. Format and export outputs------------------------------------------------------------
+
+    print("...Exporting Results")
 
     if args.lpr is None and args.both == False:
 

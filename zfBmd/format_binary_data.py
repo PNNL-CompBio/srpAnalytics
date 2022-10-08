@@ -52,9 +52,10 @@ def format_morpho_input(morpho_path):
 
     # List the relevant endpoints, which is different for BRAIN samples  
     if "BRAI" in list(df_morph["endpoint"].unique()):
-        relevant_endpoints = ['AXIS', 'BRAI', 'CFIN', 'CIRC', 'DNC_', 'DP24', 'EYE_', 'JAW_', 'MO24', 
-                            'MORT', 'NC24', 'NC__', 'OTIC', 'PE__', 'PFIN', 'PIG_', 'SM24', 'SNOU', 
-                            'SOMI', 'SWIM', 'TRUN', 'TR__', 'YSE_']
+        relevant_endpoints = ['AXIS', 'BRAI', 'BRN_', 'CRAN', 'DNC_', 'CFIN', 'CIRC', 'DNC_', 
+                              'DP24', 'EYE_', 'EDEM', 'JAW_', 'LTRK', 'MO24', 'MORT', 'MUSC', 
+                              'NC24', 'NC__', 'OTIC', 'PE__', 'PFIN', 'PIG_', 'SKIN', 
+                              'SM24', 'SNOU', 'SOMI', 'SWIM', 'TCHR', 'TRUN', 'TR__', 'YSE_']
     else:
         relevant_endpoints = ['AXIS', 'BRN_', 'CRAN', 'DNC_', 'DP24', 'EDEM', 'LTRK', 'MO24', 'MORT', 
                             'MUSC', 'NC__', 'SKIN','SM24', 'TCHR']
