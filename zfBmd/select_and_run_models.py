@@ -445,10 +445,13 @@ def export_doses(dose_response):
     # Calculate confidence intervals 
     interval = []
     for row in range(len(Dose_Final)):
-        values = np.abs(astrostats.binom_conf_interval(Dose_Final["num.affected"][row], Dose_Final["num.nonna"][row], confidence_level = 0.95))
-        values[0] = values[0] - Dose_Final["Response"][row]
-        values[1] = values[1] - Dose_Final["Response"][row]
-        interval.append(values)
+        if (Dose_Final["num.nonna"][row] == 0):
+            interval.append([0,0])
+        else:
+            values = np.abs(astrostats.binom_conf_interval(Dose_Final["num.affected"][row], Dose_Final["num.nonna"][row], confidence_level = 0.95))
+            values[0] = values[0] - Dose_Final["Response"][row]
+            values[1] = values[1] - Dose_Final["Response"][row]
+            interval.append(values)
 
     CI = pd.DataFrame(interval).rename(columns = {0:"CI_Lo", 1:"CI_Hi"})
     CI["CI_Lo"] = round(CI["CI_Lo"], 6)
