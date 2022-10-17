@@ -1,0 +1,13 @@
+"chemical_class"	"total chemicals"	"Measured in samples"	"Number of Samples"	"Evaluated in Zebrafish"	"Endpoints Measured"
+"aniline"	43	0	0	43	88
+"deuterated"	1	0	0	0	0
+"dioxinsAndFurans"	50	2	36	50	68
+"haloEthers"	15	0	0	15	15
+"OPAH"	22	12	28	21	138
+"OPFR"	6	3	11	6	33
+"PAH"	99	71	172	98	823
+"PBB"	31	0	0	31	31
+"PBDE"	62	0	0	61	88
+"PCB"	208	2	2	207	207
+"phenol"	98	7	49	98	197
+"Unclassified"	1846	86	72	1239	5191
