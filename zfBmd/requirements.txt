@@ -6,3 +6,4 @@ statsmodels
 astropy
 pyodbc
 jsonschema
+ipdb
