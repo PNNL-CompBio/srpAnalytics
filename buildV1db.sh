@@ -85,7 +85,7 @@ echo $drun
 $drun
 
 ##then we use output to build database
-dpull="docker pull sgosline/srp-bmd2samps"
+dpull="docker pull sgosline/srp-bmd2samps:v1"
 echo $dpull
 $dpull
 
