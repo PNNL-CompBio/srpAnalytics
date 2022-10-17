@@ -1,178 +1,171 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import numpy as np
+######################
+## IMPORT LIBRARIES ##
+######################
+
+# Import python libraries 
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import os, sys, time
+import sys
 import argparse
-import tarfile
-import re
 
-##impor  BMD files from directory
-##TODO: combine bMD processing to single file, combine LPR processing to single file
-import bmd_analysis_morpho as bmd
-import bmd_analysis_LPR_7_PAH_t0_t239 as bmd_LPR
-import format_LPR_input as format_LPR
-import format_morpho_input as format_morpho
+# Import zfBMD specific functions 
+from format_binary_data import format_morpho_input
+from format_binary_data import format_lpr_input 
+from calculate_BMD_flags import generate_BMD_flags
+from select_and_run_models import model_fitting
+from select_and_run_models import export_BMDs
+from select_and_run_models import export_fits
+from select_and_run_models import export_doses
 
-parser = argparse.ArgumentParser('Run the QC and BMD analysis as well as join with \
-extract data to store in SRP data analytics portal')
+###########################
+## COLLECT CLI ARGUMENTS ##
+###########################
+
+parser = argparse.ArgumentParser('Run the QC and BMD analysis for the SRP analytics compendium')
 
 parser.add_argument('--morpho', dest='morpho',\
-                    help='Comma-delimited list of morphological files to be processed',\
+                    help='Pathway to the morphological file to be processed. Required.',\
                     default=None)
 parser.add_argument('--LPR', dest='lpr', \
-                    help='Comma-delimited list of LPR-related files to be processed. MUST correspond to similar files in the morpho argument',\
+                    help='Pathway to the light photometer response (LPR) file to be processed containing the same \
+                          samples as morpho. Optional. Unless both is True, only LPR data will be returned.',\
                     default=None)
+parser.add_argument('--both', dest='both', \
+                    help='Return both morpho and LPR endpoints. Optional. Default is False.',\
+                    default=False)
+parser.add_argument('--output', dest = 'output', \
+                    help = 'The output folder for files. Default is current directory.',\
+                    default = '.')
 parser.add_argument('--test', dest='test',\
-                    help='Set this flag to test code with incoming files',\
+                    help='Set this flag to test code with internal files. Default is False.',\
                     action='store_true', default=False)
-#parser.add_argument('--test-lpr', dest='test_lpr',\
-#                    help='Set this flag to run LPR test code instead of full analysis',\
-#                    action='store_true', default=False)
-
-#parser.add_argument('--test-morpho', dest='test_morpho',\
-#                    help='Set this flag to run morpho test code instead of full analysis',\
-#                    action='store_true', default=False)
-
-parser.add_argument('--test-extract', dest='test_extract',\
-                    help='Set this flag to run morpho test code with extract data',\
-                    action='store_true', default=False)
-
-############ (developer) comment
-# for morphological data, only morphological data is needed as input
-# for LPR processing, both morphological data and LPR data are needed as inputs
-def merge_files(path, file_dict):
-    """
-    merge_files takes a dictionary of files and joints them to a single file to
-    added to the next step of the algorithm
-
-    Attributes
-    ------
-    path : str
-    file_dict: dict
-    """
-
-    ## three lists of files to collect
-    bmds = []
-    fits = []
-    dose = []
-    for dataset, filelist in file_dict.items():
-        bmds.append(filelist[0])
-        fits.append(filelist[1])
-        dose.append(filelist[2])
-
-    ##concatenate all the files together
-    pd.concat([pd.read_csv(f) for f in bmds]).to_csv(path+'/new_bmds.csv')
-    pd.concat([pd.read_csv(f) for f in fits]).to_csv(path+'/new_fits.csv')
-    pd.concat([pd.read_csv(f) for f in dose]).to_csv(path+'/new_dose.csv')
-    return [path+'/new_bmds.csv', path+'/new_fits.csv', path+'/new_dose.csv']
-
-def run_lpr_on_file(lpr_file, morph_file, full_devel='full'):
-    """
-    runs LPR code on a file
-    Attributes
-    ----
-    unformatted_file: str
-    """
-    LPR_input_csv_file_name_wide = lpr_file[:-4] + "_wide_t0_t239_" + str(full_devel) + ".csv"
-
-    print("LPR_input_csv_file_name_wide:" + str(LPR_input_csv_file_name_wide))
-    ##first we reformat LPR if needed
-    chem_ind = None
-    if not os.path.exists(LPR_input_csv_file_name_wide):
-       chem_ind = format_LPR.format(lpr_file, full_devel, LPR_input_csv_file_name_wide)
-
-    #print ("morpho_input_csv_file_name:" + str(morph_file))
-    #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    ##then we reformat morphological file if needed
-    morpho_input_csv_file_name_wide = morph_file[:-4] + "_wide_DNC_0_"+full_devel+".csv"
-    if not os.path.exists(morpho_input_csv_file_name_wide):
-        #command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
-        #print(command)
-        #res0 = os.system(command)
-        res0 = format_morpho.format(morph_file, full_devel, morpho_input_csv_file_name_wide, chem_ind)
-            #time.sleep(20)
-
-    ##then we take the reformatted files and run them
-    res = bmd_LPR.runBmdPipeline(morpho_input_csv_file_name_wide, \
-                                             LPR_input_csv_file_name_wide, full_devel)
-    return res
-
-def run_morpho_on_file(morph_file, full_devel='full'):
-    """
-    formats and runs morphological BMD on file
-    """
-    print("morpho_input_csv_file_name:" + str(morph_file))
-
-    morpho_input_csv_file_name_wide = morph_file[:-4] + \
-        "_wide_DNC_0_"+full_devel+".csv"
-
-    chem_ind = None
-    if not os.path.exists(morpho_input_csv_file_name_wide):
-        res0 = format_morpho.format(morph_file, full_devel, morpho_input_csv_file_name_wide, chem_ind)
-    #to_be_processed/7_PAH_zf_LPR_data_2021JAN11_tall.csv
-    #command = "python3 /zfBmd/format_morpho_input.py " + str(morph_file) + " " + str(full_devel)
-    #print(command)
-    #os.system(command)
-
-    print("morpho_input_csv_file_name_wide:" + str(morpho_input_csv_file_name_wide))
-    res = bmd.runBmdPipeline(morpho_input_csv_file_name_wide, \
-                                             full_devel)
-    return res
-
+                    
+##############################
+## DEFINE AND RUN FUNCTIONS ##
+##############################
 
 def main():
     """
-    main method for command line
+    Gather the input arguments and run the zfBMD pipeline which: 
+
+    1. formats input data
+    2. calculate benchmark doses 
+    3. select and run models
+
+    Returns
+    ----
     """
-    start_time = time.time()
+    
+    # Parse inputted arguments from the command line 
     args = parser.parse_args()
-    ##collecting a list of files to add to DB
-    files = dict()
 
-    if args.lpr is None:
-        lfiles = ''
-    else:
-        lfiles = args.lpr.split(',')
-    if args.morpho is None:
-        mfiles = ''
-    else:
-        mfiles = args.morpho.split(',')
+    # Pull arguments
+    morpho_path = args.morpho
+    lpr_path = args.lpr
 
-    print(lfiles)
-    print(mfiles)
-    fd = 'full'
-    if args.test:
-        fd = 'devel'
-        if len(lfiles)==0: ##we can tests with no files
-            lfiles = ['/zfBmd/test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv']
-            mfiles = ['/zfBmd/test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv']
-        else:  ##or we can test with new files
-            lfiles = lfiles[:1]
-            mfiles = mfiles[:1]
+    # If there is no morphological data and this is not the test mode, stop. 
+    if args.morpho is None and args.test == False:
+        sys.exit("--morpho cannot be blank, since morphological data is required to run zfBMD.")
+    
+    # Users must supply both morpho and lpr data if both is selected
+    if args.both and args.lpr is None and args.test == False:
+        sys.exit("--lpr cannot be blank if args.both is True.")
 
-    if len(lfiles) > 0:
-        if len(lfiles) != len(mfiles):
-            print("Cannot calculate LPR without morphological files, please re-run with --morpho argument")
-            sys.exit()
-        else:
-            print('Calculating LPR endpoints for '+str(len(lfiles))+' LPR files')
-            for i in range(len(lfiles)):
-                fname = lfiles[i]
-                files[fname] = run_lpr_on_file(fname, mfiles[i], fd)
-    elif len(mfiles) > 0:
-        print("Calculating morphological endpoints for "+str(len(mfiles))+' files')
-        for f in mfiles:
-            files[f] = run_morpho_on_file(f, fd)
+    # Load test data if test is true 
+    if args.test == True:
+        morpho_path = './test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
+        lpr_path = './test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
+    
+    ### 1. Format data--------------------------------------------------------------------------
+    print("...Formatting morphology data")
+    #dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
 
-    merged_files = merge_files('/tmp/', files)
-    print(merged_files)
-    end_time = time.time()
-    time_took = str(round((end_time-start_time), 1)) + " seconds"
-    print("Done, it took:" + str(time_took))
+    #dose_response.to_csv("./Results/dose_response.csv", index = False)
+    #pd.DataFrame(theEndpoints, columns = ["endpoints"]).to_csv("./Results/theEndpoints.csv", index = False)
+    #pd.DataFrame(MortWells, columns = ["theWells"]).to_csv("./Results/MortWells.csv", index = False)
+    #pd.DataFrame(Mort24Wells, columns = ["theWells"]).to_csv("./Results/Mort24Wells.csv", index = False)
+
+    dose_response = pd.read_csv("./Results/dose_response.csv")
+    theEndpoints = pd.read_csv("./Results/theEndpoints.csv")["endpoints"].to_list()
+    MortWells = pd.read_csv("./Results/MortWells.csv")["theWells"].to_list()
+    Mort24Wells = pd.read_csv("./Results/Mort24Wells.csv")["theWells"].to_list()
+
+    if (args.lpr is not None or (args.test and args.both)):
+        print("...Formatting LPR data")
+        #lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
+        #lpr_dose_response.to_csv("./Results/lpr_dose_response.csv", index = False)
+        lpr_dose_response = pd.read_csv("./Results/lpr_dose_response.csv")
+
+    ### 2. Calculate dose response--------------------------------------------------------------
+
+    if (args.lpr is None or args.both):
+        print("...Generating morphology flags")
+        BMD_Flags = generate_BMD_flags(dose_response)
+        BMD_Flags = pd.read_csv("./Results/BMD_Flags.csv")
+
+    if (args.lpr is not None or (args.test and args.both)):
+        print("...Generating LPR flags")
+        lpr_BMD_Flags = generate_BMD_flags(lpr_dose_response)
+
+    ### 3. Select and run models----------------------------------------------------------------
+
+    if (args.lpr is None or args.both):
+        print("...Fitting models for morphology data")
+        model_selection, lowqual_model, BMD_Flags, model_results = model_fitting(dose_response, BMD_Flags)
+    
+    if args.lpr is not None or (args.test and args.both):
+        print("...Fitting models for LPR data")
+        lpr_model_selection, lpr_lowqual_model, lpr_BMD_Flags, lpr_model_results = model_fitting(lpr_dose_response, lpr_BMD_Flags)
+
+    ### 4. Format and export outputs------------------------------------------------------------
+
+    print("...Exporting Results")
+
+    if args.lpr is None and args.both == False:
+
+        # Benchmark Dose #
+        BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
+        BMDS_Final_Clean = BMDS_Final.drop("ids", axis = 1)
+        BMDS_Final_Clean.to_csv(args.output + "/new_bmds.csv", index = False)
+
+        # Fits #
+        export_fits(model_results, dose_response, BMDS_Final).to_csv(args.output + "/new_fits.csv", index = False)
+
+        # Doses # 
+        export_doses(dose_response).to_csv(args.output + "/new_dose.csv", index = False)
+
+    elif args.lpr is not None and args.both == False:
+
+        # Benchmark Dose #
+        lpr_BMDS_Final = export_BMDs(lpr_dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
+        lpr_BMDS_Final.to_csv(args.output + "/new_bmds.csv", index = False)
+
+        # Fits #
+        export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final).to_csv(args.output + "/new_fits.csv", index = False)
+        
+        # Doses #
+        export_doses(lpr_dose_response).to_csv(args.output + "/new_dose.csv", index = False)
+
+    elif args.both:
+
+        # Benchmark Dose #
+        BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
+        lpr_BMDS_Final = export_BMDs(lpr_dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
+        pd.concat([BMDS_Final, lpr_BMDS_Final]).to_csv(args.output + "/new_bmds.csv", index = False)
+
+        # Fits #
+        pd.concat(
+            [export_fits(model_results, dose_response, BMDS_Final),
+             export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final)]
+        ).to_csv(args.output + "/new_fits.csv", index = False)
+        
+        # Doses # 
+        pd.concat(
+            [export_doses(dose_response),
+             export_doses(lpr_dose_response)]
+        ).to_csv(args.output + "/new_dose.csv", index = False)
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,8 @@
 pandas
+argparse
 numpy
-sqlalchemy
-matplotlib
-seaborn
+scipy
 statsmodels
 astropy
-scipy==1.4.1
 pyodbc
 jsonschema
