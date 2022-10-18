@@ -192,10 +192,10 @@ getEndpointMetadata<-function(data.dir){
                                         #here is our pre-defined dictionary
     endpointDetails<-readxl::read_xlsx(paste0(data.dir,'SuperEndpoint Mapping 2021NOV04.xlsx'),
                                        sheet='Dictionary')%>%
-        subset(`Portal Display`=='Display')%>%
+        #subset(`Portal Display`=='Display')%>%
         rename(End_Point='Abbreviation',`End Point Name`='Simple name (<20char)')%>%
         rename(endPointLink='Ontology Link')%>%
-        select(-`Portal Display`)%>%
+        #select(-`Portal Display`)%>%
       mutate(End_Point=stringr::str_trim(End_Point))%>%
     ##add in endpoint detail for no data
       rbind(list(End_Point='NoData',`End Point Name`=NA,Description='No data',endPointLink=''))

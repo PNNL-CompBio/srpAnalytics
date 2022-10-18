@@ -33,6 +33,12 @@ jobs:
         with:
           context: bmd2Samps
           push: true
+          tags: sgosline/srp-bmd2samps:v1
+      - name: Build and push version 2 bmd2Samps
+        uses: docker/build-push-action@v2
+        with:
+          context: bmd2Samps_v2
+          push: true
           tags: sgosline/srp-bmd2samps:latest
       - name: Build and push exposome
         uses: docker/build-push-action@v2
