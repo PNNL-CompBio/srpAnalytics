@@ -16,7 +16,7 @@ print(paste('We now have data from',length(projects),'projects'))
 #portal_name=  'https://montilab.bu.edu/Xposome-API/portals'
 
 ##read in all chemicals
-all.chems <- read.table('/srpAnalytics/data/chemicalIdMapping.csv',sep=',',header=T,fileEncoding = "UTF-8-BOM")
+all.chems <- read.table('chemicalIdMapping.csv',sep=',',header=T,fileEncoding = "UTF-8-BOM")
 
 
 #' get GO terms for each chemical id

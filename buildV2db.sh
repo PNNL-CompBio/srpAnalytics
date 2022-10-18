@@ -63,24 +63,31 @@ all_morph=$dpath"temp/morph0.csv,"$dpath"temp/morph1.csv,"$dpath"temp/morph2.csv
 #docker pull sgosline/srp-schemadb
 #docker run -v $PWD:/tmp sgosline/schemadb $all_lpr
 
+##then we get the gene data
+gpull="docker pull sgosline/srp-exposome"
+echo $gpull
+
+grun="docker run sgosline/srp-exposome"
+echo $grun
+
 ##then we run morph
 dpull="docker pull sgosline/srp-zfbmd"
 echo $dpull
 #$dpull
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --ouput=/tmp --morpho="$all_morph
 echo $drun
-$drun
+#$drun
 
 ##now rename these files
 
 
 ##then we concatentate them and run lpr
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph" --LPR="$all_lpr" --test"
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho="$all_morph" --LPR="$all_lpr" --test"
 #echo $drun
 #$drun
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph" --LPR="$all_lpr
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho="$all_morph" --LPR="$all_lpr
 echo $drun
 $drun
 

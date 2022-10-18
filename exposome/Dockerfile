@@ -4,8 +4,8 @@ FROM rocker/tidyverse
 #COPY setup.sh /setup.sh
 RUN Rscript -e "install.packages('argparse')"
 
-COPY . bmd2Samps
-WORKDIR bmd2Samps
+COPY . exposome
+WORKDIR exposome
 
-ENTRYPOINT ["Rscript","buildv1database.R"]
+ENTRYPOINT ["Rscript","exposome_summary_stats.R"]
 VOLUME ["/tmp"]
