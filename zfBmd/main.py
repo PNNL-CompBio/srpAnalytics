@@ -10,7 +10,8 @@ import pandas as pd
 import sys
 import argparse
 
-# Import zfBMD specific functions 
+# Import zfBMD specific functions
+from format_binary_data import pre_launch_cleaning 
 from format_binary_data import format_morpho_input
 from format_binary_data import format_lpr_input 
 from calculate_BMD_flags import generate_BMD_flags
@@ -62,8 +63,8 @@ def main():
     args = parser.parse_args()
 
     # Pull arguments
-    morpho_path = args.morpho
-    lpr_path = args.lpr
+    morpho_paths = args.morpho
+    lpr_paths = args.lpr
 
     # If there is no morphological data and this is not the test mode, stop. 
     if args.morpho is None and args.test == False:
@@ -75,35 +76,33 @@ def main():
 
     # Load test data if test is true 
     if args.test == True:
-        morpho_path = './test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-        lpr_path = './test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
+        morpho_paths = './test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
+        lpr_paths = './test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
+
+    ### 0. Pre-launch data cleaning-------------------------------------------------------------
+
+    # Remove morphology duplicates with a simple "unique"
+    morpho_data = pre_launch_cleaning(morpho_paths, type = "morphology")
+
+    # remove LPR duplicates by converting NA to O, uniquing, and averaging total duplicates
+    lpr_data = pre_launch_cleaning(lpr_paths, type = "lpr")
+
+
+
     
     ### 1. Format data--------------------------------------------------------------------------
     print("...Formatting morphology data")
-    #dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
-
-    #dose_response.to_csv("./Results/dose_response.csv", index = False)
-    #pd.DataFrame(theEndpoints, columns = ["endpoints"]).to_csv("./Results/theEndpoints.csv", index = False)
-    #pd.DataFrame(MortWells, columns = ["theWells"]).to_csv("./Results/MortWells.csv", index = False)
-    #pd.DataFrame(Mort24Wells, columns = ["theWells"]).to_csv("./Results/Mort24Wells.csv", index = False)
-
-    dose_response = pd.read_csv("./Results/dose_response.csv")
-    theEndpoints = pd.read_csv("./Results/theEndpoints.csv")["endpoints"].to_list()
-    MortWells = pd.read_csv("./Results/MortWells.csv")["theWells"].to_list()
-    Mort24Wells = pd.read_csv("./Results/Mort24Wells.csv")["theWells"].to_list()
+    dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Formatting LPR data")
-        #lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
-        #lpr_dose_response.to_csv("./Results/lpr_dose_response.csv", index = False)
-        lpr_dose_response = pd.read_csv("./Results/lpr_dose_response.csv")
+        lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
 
     ### 2. Calculate dose response--------------------------------------------------------------
 
     if (args.lpr is None or args.both):
         print("...Generating morphology flags")
         BMD_Flags = generate_BMD_flags(dose_response)
-        BMD_Flags = pd.read_csv("./Results/BMD_Flags.csv")
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Generating LPR flags")
