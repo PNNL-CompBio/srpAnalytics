@@ -4,7 +4,6 @@
 import pandas as pd
 import numpy as np
 import sys
-from icecream import ic
 
 def pre_launch_cleaning(thePaths, theDataType):
     """
@@ -346,12 +345,8 @@ def format_lpr_input(lpr_data, theEndpoints, MortWells, Mort24Wells):
     ## CONFIRM FISH THAT EXPERIENCE MORTALITY ARE NA ##
     ###################################################
 
-    ic()
-
     # Make an ID column
     df_LPR["well.id"] = df_LPR["chemical.id"].astype(str) + " " + df_LPR["conc"].astype(str) + " " + df_LPR["plate.id"].astype(str) + " " + df_LPR["well"].astype(str)
-
-    ic()
 
     # Remove wells that experience mortality
     if "MORT" in theEndpoints:
@@ -362,8 +357,6 @@ def format_lpr_input(lpr_data, theEndpoints, MortWells, Mort24Wells):
     ####################################
     ## SUM INTENSITIES AND GET COUNTS ##
     ####################################
-
-    ic()
 
     # Group LPR data by chemical id, concentration, plate id, well and timepoint
     df_LPR_grouped = df_LPR.groupby(by = ["chemical.id", "conc", "plate.id", "well", "timepoint"], as_index = False)
@@ -379,8 +372,6 @@ def format_lpr_input(lpr_data, theEndpoints, MortWells, Mort24Wells):
     #######################################
     ## ADD ENDPOINT NUMERIC CALCULATIONS ##
     #######################################
-
-    ic()
 
     # Group data frames for endpoint calculations 
     df_LPR_sum_grouped = df_LPR_sum.groupby(by = ["chemical.id", "conc", "plate.id", "well"])
@@ -446,8 +437,6 @@ def format_lpr_input(lpr_data, theEndpoints, MortWells, Mort24Wells):
         # Order and return endpoint
         Endpoint = Endpoint[["chemical.id", "conc", "endpoint", "num.tot", "num.nonna", "num.affected"]]
         return(Endpoint)
-
-    ic()
 
     dose_response = pd.concat([
         to_dichotomous(LPR_Endpoints[["chemical.id", "conc", "plate.id", "MOV1"]], "MOV1"),

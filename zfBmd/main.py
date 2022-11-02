@@ -9,7 +9,6 @@
 import pandas as pd
 import sys
 import argparse
-from icecream import ic
 
 # Import zfBMD specific functions
 from format_binary_data import pre_launch_cleaning 
@@ -59,8 +58,6 @@ def main():
     Returns
     ----
     """
-    
-    ic()
 
     # Parse inputted arguments from the command line 
     args = parser.parse_args()
@@ -169,8 +166,6 @@ def main():
             [export_doses(dose_response),
              export_doses(lpr_dose_response)]
         ).to_csv(args.output + "/new_dose.csv", index = False)
-
-        ic()
 
 if __name__ == "__main__":
     main()

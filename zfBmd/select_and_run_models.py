@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 from astropy import stats as astrostats
-import ipdb
 
 import BMD_Analysis_Functions as baf
 
