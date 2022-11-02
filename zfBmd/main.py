@@ -9,6 +9,7 @@
 import pandas as pd
 import sys
 import argparse
+from icecream import ic
 
 # Import zfBMD specific functions
 from format_binary_data import pre_launch_cleaning 
@@ -26,10 +27,10 @@ from select_and_run_models import export_doses
 
 parser = argparse.ArgumentParser('Run the QC and BMD analysis for the SRP analytics compendium')
 
-parser.add_argument('--morpho', dest='morpho',\
+parser.add_argument('--morpho', dest='morpho', nargs = "+", \
                     help='Pathway to the morphological file to be processed. Required.',\
                     default=None)
-parser.add_argument('--LPR', dest='lpr', \
+parser.add_argument('--LPR', dest='lpr', nargs = "+", \
                     help='Pathway to the light photometer response (LPR) file to be processed containing the same \
                           samples as morpho. Optional. Unless both is True, only LPR data will be returned.',\
                     default=None)
@@ -59,6 +60,8 @@ def main():
     ----
     """
     
+    ic()
+
     # Parse inputted arguments from the command line 
     args = parser.parse_args()
 
@@ -82,21 +85,22 @@ def main():
     ### 0. Pre-launch data cleaning-------------------------------------------------------------
 
     # Remove morphology duplicates with a simple "unique"
-    morpho_data = pre_launch_cleaning(morpho_paths, type = "morphology")
+    print("...Removing duplicates in morphology data")
+    morpho_data = pre_launch_cleaning(morpho_paths, "morphology")
 
-    # remove LPR duplicates by converting NA to O, uniquing, and averaging total duplicates
-    lpr_data = pre_launch_cleaning(lpr_paths, type = "lpr")
+    # Remove LPR duplicates by converting NA to O, uniquing, and averaging total duplicates
+    if (args.lpr is not None or (args.test and args.both)):
+        print("...Removing duplicates in LPR data")
+        lpr_data = pre_launch_cleaning(lpr_paths, "lpr")
 
 
-
-    
     ### 1. Format data--------------------------------------------------------------------------
     print("...Formatting morphology data")
-    dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_path)
+    dose_response, theEndpoints, MortWells, Mort24Wells = format_morpho_input(morpho_data)
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Formatting LPR data")
-        lpr_dose_response = format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells)
+        lpr_dose_response = format_lpr_input(lpr_data, theEndpoints, MortWells, Mort24Wells)
 
     ### 2. Calculate dose response--------------------------------------------------------------
 
@@ -165,6 +169,8 @@ def main():
             [export_doses(dose_response),
              export_doses(lpr_dose_response)]
         ).to_csv(args.output + "/new_dose.csv", index = False)
+
+        ic()
 
 if __name__ == "__main__":
     main()
