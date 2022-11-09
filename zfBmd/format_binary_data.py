@@ -5,7 +5,51 @@ import pandas as pd
 import numpy as np
 import sys
 
-def format_morpho_input(morpho_path):
+def pre_launch_cleaning(thePaths, theDataType):
+    """
+    Compiles csvs and removes duplicates from datasets. 
+
+    If theData is "morphology", the dataframe is simply uniqued.
+    If theData is "lpr", NA measurements are converted to 0, NA concentrations are removed, 
+        and an average is taken over duplicates. 
+    """
+    # Create a vector to hold data
+    theData = []
+
+    # Read all files 
+    for thePath in thePaths:
+        theData.append(pd.read_csv(thePath))
+
+    # Combine dataframes 
+    theData = pd.concat(theData)
+
+    # Now, do filetype specific cleaning
+    if theDataType == "morphology":
+
+        # Set the plate.id to a string for correct uniquing
+        theData["plate.id"] = theData["plate.id"].astype("string") 
+        
+        # Remove duplicates in the data
+        theData = theData.drop_duplicates()
+
+        # Return results
+        return(theData)
+
+    if theDataType == "lpr":
+
+        # Convert NA measurements to 0
+        theData["value"] = theData["value"].fillna(0)
+
+        # Remove NA concentrations
+        theData = theData.dropna(subset = ["conc"])
+
+        # Average values in duplicates
+        theData = theData.groupby(by = ["chemical.id", "conc", "plate.id", "well", "variable"]).agg({'value':'mean'}).reset_index()
+
+        # Return results
+        return(theData)
+
+def format_morpho_input(morpho_data):
     """
     Formats morphology file for the zfBMD pipeline. This involves:
         1. checking input columns and endpoints
@@ -34,7 +78,7 @@ def format_morpho_input(morpho_path):
     ##############################################
 
     # Read morphology file 
-    df_morph = pd.read_csv(morpho_path, header = 0)
+    df_morph = morpho_data.reset_index()
 
     # List relevant column names
     relevant_columns = ['chemical.id', 'conc', 'plate.id', 'well', 'endpoint', 'value']
@@ -78,8 +122,7 @@ def format_morpho_input(morpho_path):
     #################################
 
     # Generate well id for subsetting endpoints
-    df_morph["well.id"] = [str(df_morph["chemical.id"][x]) + " " + str(df_morph["conc"][x]) + " " +
-                        str(df_morph["plate.id"][x]) + " " + str(df_morph["well"][x]) for x in range(len(df_morph))]
+    df_morph["well.id"] = df_morph["chemical.id"].astype(str) + " " + df_morph["conc"].astype(str) + " " + df_morph["plate.id"].astype(str) + " " + df_morph["well"].astype(str)
 
     # If there's a do not count category, remove data 
     if ("DNC_" in theEndpoints):
@@ -214,10 +257,7 @@ def format_morpho_input(morpho_path):
     plate_groups = pd.merge(pd.merge(num_tot_samples, num_nonna), num_affected)
 
     # Create IDs of chemical.id, plate.id, and endpoint in plate_groups 
-    ids = []
-    for row in range(len(plate_groups)):
-        ids.append(str(plate_groups["chemical.id"][row]) + " " + str(plate_groups["plate.id"][row]) + " " + str(plate_groups["endpoint"][row]))
-    plate_groups["ids"] = ids
+    plate_groups["ids"] = plate_groups["chemical.id"].astype(str) + " " + plate_groups["plate.id"].astype(str) + " " + plate_groups["endpoint"].astype(str)
 
     #########################################################################
     ## REMOVE VARIABLES WITH HIGH MEASURED EFFECT IN BASELINE MEASUREMENTS ##
@@ -252,7 +292,7 @@ def format_morpho_input(morpho_path):
     ############################
     return([dose_response, theEndpoints, MortWells, Mort24Wells])
 
-def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
+def format_lpr_input(lpr_data, theEndpoints, MortWells, Mort24Wells):
     """
     Formats an LPR file for the zfBMD pipeline. This involves:
         1. removing endpoints for fish that have experienced mortality
@@ -278,8 +318,8 @@ def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
     ##########################################
 
     # Read LPR data
-    df_LPR_data = pd.read_csv(lpr_path, header = 0)
-    df_LPR = df_LPR_data
+    df_LPR = lpr_data.reset_index()
+    df_LPR_data = lpr_data.reset_index()
 
     # List relevant column names
     relevant_LPR_columns = ['chemical.id', 'conc', 'plate.id', 'well', 'variable', 'value']
@@ -305,9 +345,8 @@ def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
     ## CONFIRM FISH THAT EXPERIENCE MORTALITY ARE NA ##
     ###################################################
 
-    # Add a well ID to the LPR data 
-    df_LPR["well.id"] = [str(df_LPR["chemical.id"].iloc[x]) + " " + str(df_LPR["conc"].iloc[x]) + " " +
-                        str(df_LPR["plate.id"].iloc[x]) + " " + str(df_LPR["well"].iloc[x]) for x in range(len(df_LPR))]
+    # Make an ID column
+    df_LPR["well.id"] = df_LPR["chemical.id"].astype(str) + " " + df_LPR["conc"].astype(str) + " " + df_LPR["plate.id"].astype(str) + " " + df_LPR["well"].astype(str)
 
     # Remove wells that experience mortality
     if "MORT" in theEndpoints:
@@ -398,7 +437,6 @@ def format_lpr_input(lpr_path, theEndpoints, MortWells, Mort24Wells):
         # Order and return endpoint
         Endpoint = Endpoint[["chemical.id", "conc", "endpoint", "num.tot", "num.nonna", "num.affected"]]
         return(Endpoint)
-
 
     dose_response = pd.concat([
         to_dichotomous(LPR_Endpoints[["chemical.id", "conc", "plate.id", "MOV1"]], "MOV1"),
