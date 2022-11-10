@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 from astropy import stats as astrostats
-import ipdb
 
 import BMD_Analysis_Functions as baf
 
@@ -257,7 +256,10 @@ def model_fitting(dose_response, BMD_Flags):
             elif (Model == "Weibull"):
                 ModelObj = baf.Weibull_BMD(Data).profile_ll_fit([params[0], params[1], BMDL]) # Value is g and alpha
             elif (Model == "Log Logistic"):
-                ModelObj = baf.Log_Logistic_BMD(Data).profile_ll_fit([params[0], params[2], BMDL]) # Value is g and beta
+                try:
+                    ModelObj = baf.Log_Logistic_BMD(Data).profile_ll_fit([params[0], params[2], BMDL]) # Value is g and beta
+                except:
+                    return(np.nan)
             elif (Model == "Probit"):
                 ModelObj = baf.Probit_BMD(Data).profile_ll_fit([params[0], BMDL]) # Value is alpha
             elif (Model == "Log Probit"):
