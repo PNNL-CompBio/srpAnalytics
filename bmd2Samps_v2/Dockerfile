@@ -2,7 +2,7 @@ FROM rocker/tidyverse
 # To setup other dependencies
 
 #COPY setup.sh /setup.sh
-RUN Rscript -e "install.packages('argparse')"
+RUN R -e "install.packages('argparse', dependencies=TRUE,repos='http://cran.rstudio.com');"
 
 COPY . bmd2Samps
 WORKDIR bmd2Samps

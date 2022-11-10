@@ -75,12 +75,6 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
                           fitVals=c('Chemical_ID',"End_Point","X_vals","Y_vals"))
 
 
-#envSampSumOutput<-c("Model","BMD10","BMD50","Min_Dose","Max_Dose","AUC_Norm",
-#  "SampleNumber","date_sampled","sample_matrix","technology","Sample_ID","ClientName",
-#  "SampleName","LocationLat","LocationLon","LocationName","LocationAlternateDescription",
-#  "AlternateName","End Point Name","Description","endPointLink","DataQC_Flag",
-#  "projectName","projectLink")
-
 
 ##################################
 #Master ID tables
@@ -193,12 +187,12 @@ getEndpointMetadata<-function(data.dir){
     endpointDetails<-readxl::read_xlsx(paste0(data.dir,'SuperEndpoint Mapping 2021NOV04.xlsx'),
                                        sheet='Dictionary')%>%
         #subset(`Portal Display`=='Display')%>%
-        rename(End_Point='Abbreviation',`End Point Name`='Simple name (<20char)')%>%
+        rename(End_Point='Abbreviation',`End_Point_Name`='Simple name (<20char)')%>%
         rename(endPointLink='Ontology Link')%>%
         #select(-`Portal Display`)%>%
       mutate(End_Point=stringr::str_trim(End_Point))%>%
     ##add in endpoint detail for no data
-      rbind(list(End_Point='NoData',`End Point Name`=NA,Description='No data',endPointLink=''))
+      rbind(list(IncludeInPortal='No',End_Point='NoData',`End_Point_Name`=NA,Description='No data',endPointLink=''))
     
 
     return(endpointDetails)
@@ -874,7 +868,7 @@ generateSummaryStats<-function(){
   #how many zebrafish experiments have that chemical?
   bmds <-read.csv(paste0(out.dir,'zebrafishChemDoseResponse.csv'),check.names=F)%>%
     group_by(Chemical_ID)%>%
-    summarize(`Zebrafish endpoints`=n_distinct(`End Point Name`))%>%
+    summarize(`Zebrafish endpoints`=n_distinct(`End_Point_Name`))%>%
     left_join(chemClasses)%>%
     group_by(chemical_class)%>%
     summarize(`Evaluated in Zebrafish`=n_distinct(Chemical_ID),

@@ -47,7 +47,7 @@ lpr_cmd="wget https://www.dropbox.com/s/ha7jduok03j82mf/zf%20EPA%20PFAS%20LPR_PN
 echo $lpr_cmd
 $lpr_cmd
 
-mor_cmd="https://www.dropbox.com/s/jma3b9al3u8hcny/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv?dl=0 -O temp/morph2.csv"
+mor_cmd="wget https://www.dropbox.com/s/jma3b9al3u8hcny/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv?dl=0 -O temp/morph2.csv"
 echo $mor_cmd
 $mor_cmd
 
@@ -73,11 +73,11 @@ echo $grun
 ##then we run morph
 dpull="docker pull sgosline/srp-zfbmd"
 echo $dpull
-#$dpull
+$dpull
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --ouput=/tmp --morpho="$all_morph
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho="$all_morph
 echo $drun
-#$drun
+$drun
 
 ##now rename these files
 
