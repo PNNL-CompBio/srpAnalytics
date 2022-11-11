@@ -56,8 +56,8 @@ $mor_cmd
 
 dpath='/tmp/' ##path to files in docker images
 
-all_lpr=$dpath"temp/lpr0_1.csv,"$dpath"temp/lpr1.csv,"$dpath"temp/lpr2.csv"
-all_morph=$dpath"temp/morph0.csv,"$dpath"temp/morph1.csv,"$dpath"temp/morph2.csv"
+all_lpr=$dpath"temp/lpr0_1.csv "$dpath"temp/lpr1.csv "$dpath"temp/lpr2.csv"
+all_morph=$dpath"temp/morph0.csv "$dpath"temp/morph1.csv "$dpath"temp/morph2.csv"
 
 ##first we run validation on each
 #docker pull sgosline/srp-schemadb
@@ -67,7 +67,7 @@ all_morph=$dpath"temp/morph0.csv,"$dpath"temp/morph1.csv,"$dpath"temp/morph2.csv
 gpull="docker pull sgosline/srp-exposome"
 echo $gpull
 
-grun="docker run sgosline/srp-exposome"
+grun="docker run -v "$PWD":/tmp sgosline/srp-exposome"
 echo $grun
 
 ##then we run morph
@@ -75,7 +75,7 @@ dpull="docker pull sgosline/srp-zfbmd"
 echo $dpull
 $dpull
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho="$all_morph
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho "$all_morph
 echo $drun
 $drun
 
@@ -83,11 +83,11 @@ $drun
 
 
 ##then we concatentate them and run lpr
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho="$all_morph" --LPR="$all_lpr" --test"
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output /tmp --morpho "$all_morph" --LPR "$all_lpr" --test"
 #echo $drun
 #$drun
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho="$all_morph" --LPR="$all_lpr
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output /tmp --morpho "$all_morph" --LPR "$all_lpr
 echo $drun
 $drun
 
