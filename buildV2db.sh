@@ -66,9 +66,11 @@ all_morph=$dpath"temp/morph0.csv "$dpath"temp/morph1.csv "$dpath"temp/morph2.csv
 ##then we get the gene data
 gpull="docker pull sgosline/srp-exposome"
 echo $gpull
+$gpull
 
 grun="docker run -v "$PWD":/tmp sgosline/srp-exposome"
 echo $grun
+$grun
 
 ##then we run morph
 dpull="docker pull sgosline/srp-zfbmd"
@@ -80,7 +82,17 @@ echo $drun
 $drun
 
 ##now rename these files
+cpcmdb='mv new_bmds.csv new_bmds1.csv'
+echo $cpcmdb
+$cpcmdb
 
+cpcmdf='mv new_fits.csv new_fits1.csv'
+echo $cpcmdf
+$cpcmdf
+
+cpcmdd='mv new_dose.csv new_dose1.csv'
+echo $cmcmdd
+$cpcmdd
 
 ##then we concatentate them and run lpr
 drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output /tmp --morpho "$all_morph" --LPR "$all_lpr" --test"
@@ -90,6 +102,23 @@ drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output /tmp --morpho "$all_
 drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output /tmp --morpho "$all_morph" --LPR "$all_lpr
 echo $drun
 $drun
+
+catcmd() {
+   cat $1 >> $2
+}
+
+
+catcmdf='catcmd(new_fits1.csv,new_fits.csv)'
+echo $catcmdf
+$catcmdf
+
+catcmdd='catcmd(new_dose1.csv,new_dose.csv)'
+echo $catcmdd
+$catcmdd
+
+catcmdb='catcmd(new_bmds1.csv,new_bmds.csv)'
+echo $catcmdd
+$catcmdd
 
 ##then we use output to build database
 dpull="docker build bmd2samps_v2 -t sgosline/srp-bmd2samps:latest"
