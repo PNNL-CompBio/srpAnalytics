@@ -108,15 +108,15 @@ catcmd() {
 }
 
 
-catcmdf='catcmd(new_fits1.csv,new_fits.csv)'
+catcmdf='catcmd new_fits1.csv new_fits.csv'
 echo $catcmdf
 $catcmdf
 
-catcmdd='catcmd(new_dose1.csv,new_dose.csv)'
+catcmdd='catcmd new_dose1.csv new_dose.csv'
 echo $catcmdd
 $catcmdd
 
-catcmdb='catcmd(new_bmds1.csv,new_bmds.csv)'
+catcmdb='catcmd new_bmds1.csv new_bmds.csv'
 echo $catcmdd
 $catcmdd
 
