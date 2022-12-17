@@ -1,12 +1,11 @@
-pip install pandas
+# pip install -r at_linux.txt
+Pandas
+Matplotlib
+astropy
 
-pip install matplotlib
-
-python -m pip install --user astropy
-
-pip install scipy==1.4.1
+scipy==1.4.1
 #“scipy 1.4.1 runs well but newer version (1.5.x) doesn’t work”
 # scipy 1.4.1 can be installed with miniconda3.7 (not possible with 3.8 and 3.9)
 
-python -m pip install statsmodels 
-pip install seaborn
+statsmodels 
+seaborn
