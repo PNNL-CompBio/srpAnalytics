@@ -7,4 +7,8 @@ statsmodels
 seaborn
 
 # using miniconda3.7 (e.g. made for intel) got stuck at M1 during BMD derivation
-# using miniconda3.9 (e.g. made for M1) also got stuck at M1 during BMD derivation
+
+# using miniconda3.9 (e.g. made for M1) at M1 enabled 53_ANY24,
+  53_ANY120 BMD calculation, but got stuck during 53_AXIS probably
+  because of NaN value
+
