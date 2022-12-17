@@ -1,11 +1,3 @@
-# pip install -r library_to_install_at_M1.txt
-Pandas
-Matplotlib
-astropy
-scipy
-statsmodels 
-seaborn
-
 # using miniconda3.7 (e.g. made for intel) got stuck at M1 during BMD derivation
 
 # using miniconda3.9 (e.g. made for M1) at M1 enabled 53_ANY24,

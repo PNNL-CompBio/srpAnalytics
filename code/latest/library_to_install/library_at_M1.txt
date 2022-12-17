@@ -1,0 +1,7 @@
+# pip install -r library_to_install_at_M1.txt
+Pandas
+Matplotlib
+astropy
+scipy
+statsmodels 
+seaborn
