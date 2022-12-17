@@ -34,7 +34,7 @@ def gen_dose_response(data_ep_cid, end_point):
     dose_response = pd.DataFrame(columns = ['dose', 'num_affected', 'frac_affect', 'num_embryos', 'tot_wells'])
     # Remove all wells for plates for which number of hits for negative controls > 50% wells
     
-    print ("before processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
+    #print ("before processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
     for plate_id in np.unique(data_ep_cid['plate.id']):
         # print ("plate_id:\n"+str(plate_id))
         # Count number of wells corresponding to negative controls
@@ -46,13 +46,13 @@ def gen_dose_response(data_ep_cid, end_point):
         # it counts # of NaNs as well
         
         
-        print (f"neg_ctrl_wells[end_point]:\n{neg_ctrl_wells[end_point]}")
+        #print (f"neg_ctrl_wells[end_point]:\n{neg_ctrl_wells[end_point]}")
         
         num_neg_ctrl_hits = (neg_ctrl_wells[end_point]).sum(axis=0,skipna=True,min_count=1)
-        print (f"num_neg_ctrl_hits:\n{num_neg_ctrl_hits}")
+        #print (f"num_neg_ctrl_hits:\n{num_neg_ctrl_hits}")
         
         num_nonnan_wells_ctrl = sum(~np.isnan(neg_ctrl_wells[end_point]))
-        print (f"num_nonnan_wells_ctrl:\n{num_nonnan_wells_ctrl}")
+        #print (f"num_nonnan_wells_ctrl:\n{num_nonnan_wells_ctrl}")
 
         write_this = str(np.unique(data_ep_cid_plate['chemical.id'])[0]) + "," + str(plate_id) + "," + str(end_point) + "\n"
         # Katrina seems not sure whether a new criterion is better because the new criterion may be too harsh?
@@ -73,7 +73,7 @@ def gen_dose_response(data_ep_cid, end_point):
         #     file.close()
         #     
             
-    print ("after processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
+    #print ("after processing,, np.unique(data_ep_cid['plate.id']:" + str(np.unique(data_ep_cid['plate.id'])))
     for concentration_id in np.unique(data_ep_cid['conc']):
         data_ep_cid_concs = data_ep_cid.loc[(data_ep_cid['conc'] == concentration_id)]
         # Get total number of wells for a given concentration
@@ -279,11 +279,25 @@ def BMD_feasibility_analysis(dose_response):
     for dose response data. The value returned is a 
     flag indicating data quality as defined below:
     0: Not enough dose groups for BMD analysis. BMD analysis not performed
-    1: No trend detected in dose-response data.. BMD Analysis not performed
+    1: No trend detected in dose-response data. BMD Analysis not performed
     2: Good dose-response data
     3: Dose-response data quality poor. BMD analysis might be unreliable
     4: Data resolution poor. BMD analysis might be unreliable
     5: No trend detected in dose-response data. BMD analysis not performed'''
+    
+    # from best to worst
+    #2->3->4       ->(0,1,5)
+
+    # count per this QC
+    #31->721->1908->3370
+
+    '''
+    Doo Nam thinks that we consider
+    QC=2/3 as good
+    QC=4 as moderate
+    QC=0,1,5 as poor
+    in the first paper'''
+
     if (global_report):
         print ("dose_response:\n"+str(dose_response))
     if(dose_response.shape[0] < 3):
