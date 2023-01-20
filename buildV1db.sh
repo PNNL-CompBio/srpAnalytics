@@ -46,8 +46,8 @@ $p3_lpr
 lpr_cmd="wget https://www.dropbox.com/s/ha7jduok03j82mf/zf%20EPA%20PFAS%20LPR_PNNL_05-28-2021.csv?dl=0 -O temp/lpr2.csv"
 echo $lpr_cmd
 $lpr_cmd
-
 mor_cmd="https://www.dropbox.com/s/jma3b9al3u8hcny/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv?dl=0 -O temp/morph2.csv"
+#mor_cmd="https://www.dropbox.com/s/jma3b9al3u8hcny/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv?dl=0 -O temp/morph2.csv"
 echo $mor_cmd
 $mor_cmd
 
@@ -56,8 +56,8 @@ $mor_cmd
 
 dpath='/tmp/' ##path to files in docker images
 
-all_lpr=$dpath"temp/lpr0_1.csv,"$dpath"temp/lpr1.csv,"$dpath"temp/lpr2.csv"
-all_morph=$dpath"temp/morph0.csv,"$dpath"temp/morph1.csv,"$dpath"temp/morph2.csv"
+all_lpr=$dpath"temp/lpr0_1.csv "$dpath"temp/lpr1.csv "$dpath"temp/lpr2.csv"
+all_morph=$dpath"temp/morph0.csv "$dpath"temp/morph1.csv "$dpath"temp/morph2.csv"
 
 ##first we run validation on each
 #docker pull sgosline/srp-schemadb
@@ -66,23 +66,50 @@ all_morph=$dpath"temp/morph0.csv,"$dpath"temp/morph1.csv,"$dpath"temp/morph2.csv
 ##then we run morph
 dpull="docker pull sgosline/srp-zfbmd"
 echo $dpull
-#$dpull
+$dpull
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho "$all_morph" --output /tmp"
 echo $drun
 $drun
 
 ##now rename these files
+cpcmdb='mv new_bmds.csv new_bmds1.csv'
+echo $cpcmdb
+$cpcmdb
 
+cpcmdf='mv new_fits.csv new_fits1.csv'
+echo $cpcmdf
+$cpcmdf
+
+cpcmdd='mv new_dose.csv new_dose1.csv'
+echo $cmcmdd
+$cpcmdd
 
 ##then we concatentate them and run lpr
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph" --LPR="$all_lpr" --test"
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho "$all_morph" --LPR "$all_lpr" --test"
 #echo $drun
 #$drun
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho="$all_morph" --LPR="$all_lpr
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --morpho "$all_morph" --LPR "$all_lpr" --output /tmp"
 echo $drun
 $drun
+
+catcmd() {
+    cat $1 >> $2
+}
+
+
+catcmdf='catcmd new_fits1.csv new_fits.csv'
+echo $catcmdf
+$catcmdf
+
+catcmdd='catcmd new_dose1.csv new_dose.csv'
+echo $catcmdd
+$catcmdd
+
+catcmdb='catcmd new_bmds1.csv new_bmds.csv'
+echo $catcmdb
+$catcmdb
 
 ##then we use output to build database
 dpull="docker pull sgosline/srp-bmd2samps:v1"
@@ -90,11 +117,15 @@ echo $dpull
 $dpull
 
 ##now build the database files
-drun="docker run -v"$PWD":/tmp sgosline/srp-bmd2samps --chemicals=/tmp/new_bmds.csv,/tmp/new_fits.csv,/tmp/new_dose.csv"
+drun="docker run -v"$PWD":/tmp sgosline/srp-bmd2samps:v1 --chemicals=/tmp/new_bmds.csv,/tmp/new_fits.csv,/tmp/new_dose.csv"
 echo $drun
 $drun
 
+cpc='cp dbSchema/schemas/databaseIngestSchema.xlsx v1Schema.xlsx'
+echo $cpc
+$cpc
+
 ##then validate again and zip up to data package
-trun='tar -cvzf  srpCompendiumV1.tar.gz chemXYcoords.csv chemdoseResponseVals.csv chemicalsByExtractSample.csv envSampSummaryStats.csv envSampXYcoords.csv envSampdoseResponseVals.csv sigGeneStats.csv chemSummaryStats.csv'
+trun='tar -cvzf  srpCompendiumV1.tar.gz chemXYcoords.csv chemdoseResponseVals.csv chemicalsByExtractSample.csv envSampSummaryStats.csv envSampXYcoords.csv envSampdoseResponseVals.csv sigGeneStats.csv chemSummaryStats.csv v1Schema.xlsx'
 echo $trun
 $trun

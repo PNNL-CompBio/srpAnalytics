@@ -79,30 +79,34 @@ $dpull
 
 drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output=/tmp --morpho "$all_morph
 echo $drun
-$drun
+#$drun
 
 ##now rename these files
 cpcmdb='mv new_bmds.csv new_bmds1.csv'
 echo $cpcmdb
-$cpcmdb
+#$cpcmdb
 
 cpcmdf='mv new_fits.csv new_fits1.csv'
 echo $cpcmdf
-$cpcmdf
+#$cpcmdf
 
 cpcmdd='mv new_dose.csv new_dose1.csv'
 echo $cmcmdd
-$cpcmdd
+#$cmcmdd
 
 ##then we concatentate them and run lpr
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output /tmp --morpho "$all_morph" --LPR "$all_lpr" --test"
-#echo $drun
-#$drun
 
-drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --output /tmp --morpho "$all_morph" --LPR "$all_lpr
+drun="docker run -v "$PWD":/tmp sgosline/srp-zfbmd --both True --output /tmp --morpho "$all_morph" --LPR "$all_lpr
 echo $drun
 $drun
+echo "BMDs\n"
+cc='wc -l new_bmds.csv'
+$cc
 
+echo "Dose response\n"
+wc -l new_dose.csv
+echo "New Fits"
+wc -l new_fits.csv
 catcmd() {
    cat $1 >> $2
 }
@@ -110,23 +114,23 @@ catcmd() {
 
 catcmdf='catcmd new_fits1.csv new_fits.csv'
 echo $catcmdf
-$catcmdf
+#$catcmdf
 
 catcmdd='catcmd new_dose1.csv new_dose.csv'
 echo $catcmdd
-$catcmdd
+#$catcmdd
 
 catcmdb='catcmd new_bmds1.csv new_bmds.csv'
-echo $catcmdd
-$catcmdd
+echo $catcmdb
+#$catcmdb
 
 ##then we use output to build database
-dpull="docker build bmd2samps_v2 -t sgosline/srp-bmd2samps:latest"
+dpull="docker pull sgosline/bmd2samps:latest" # -t sgosline/srp-bmd2samps:latest"
 echo $dpull
 $dpull
 
 ##now build the database files
-drun="docker run -v"$PWD":/tmp sgosline/srp-bmd2samps --chemicals=/tmp/new_bmds.csv,/tmp/new_fits.csv,/tmp/new_dose.csv"
+drun="docker run -v"$PWD":/tmp sgosline/srp-bmd2samps:latest --chemicals=/tmp/new_bmds.csv,/tmp/new_fits.csv,/tmp/new_dose.csv"
 echo $drun
 $drun
 ##then validate again and add to db
