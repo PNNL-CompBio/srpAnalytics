@@ -6,25 +6,49 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, error = FALSE)
+library(data.table)
+library(plotly)
 ```
 
-## R Markdown
+## Read data 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+transcriptomics <- fread("~/Downloads/transcriptomics_out.txt")
 ```
 
-## Including Plots
+## Chemical Page Level
 
-You can also embed plots, for example:
+#### Counts of Significant Genes per Concentration
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+# As an example, pull chemical
+ChemicalID <- "50-32-8"
+
+# Data at the chemical level
+chem_level <- transcriptomics[transcriptomics$CASNO == ChemicalID,]
+
+chem_level %>%
+  filter(adj_p_value <= 0.05) %>%
+  count(Concentration) %>%
+  mutate(Concentration = as.factor(Concentration)) %>%
+  plot_ly(x = ~Concentration, 
+          color = ~Concentration,
+          y = ~n,
+          type = "bar") %>%
+  layout(yaxis = list(title = "Number of Significant Genes"),
+         xaxis = list(title = "Concentration in uM"))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#### Expression of significant genes 
+
+```{r}
+chem_level %>%
+  filter(adj_p_value <= 0.05) 
+
+
+
+
+```
+
+
