@@ -22,15 +22,19 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
   ## FORMAT TABLE ##
   ##################
   
-  # Merge chemical information, remove missing gene information
+  # Merge chemical information, remove missing gene information, add flag 
   transcript_data <- left_join(transcripts, chemical_table, by = "condition") %>%
-    filter(!is.na(GeneID))
+    filter(!is.na(GeneID)) %>%
+    mutate(
+      flag = factor(ifelse(adj_p_value <= 0.05, 1, 0) * ifelse(Log2FoldChange >= 0, 1, -1), levels = c(-1, 0, 1))
+    )
   
   ####################
   ## OUTPUT RESULTS ##
   ####################
   
-  fwrite(transcript_data, out_path, sep = "\t", row.names = F, quote = F)
+  fwrite(transcript_data %>% dplyr::select(GeneID, Gene, condition, Log2FoldChange, adj_p_value, CASNO, Concentration, flag), 
+         out_path, sep = "\t", row.names = F, quote = F)
   
 }
 

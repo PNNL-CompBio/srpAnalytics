@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, error = FALSE)
 library(data.table)
 library(plotly)
+library(DT)
 ```
 
 ## Read data 
@@ -37,18 +38,46 @@ chem_level %>%
           y = ~n,
           type = "bar") %>%
   layout(yaxis = list(title = "Number of Significant Genes"),
-         xaxis = list(title = "Concentration in uM"))
+         xaxis = list(title = "Concentration in uM"),
+         legend = list(title = list(text = "Concentration")))
 ```
+
+Clicking on this bar chart will trigger changes for the significantly expressed genes.
+In other words, all of the following plots in this section "Chemical Page Level"
+should change depending on the selected concentration, with the exception of table of 
+all genes. 
 
 #### Expression of significant genes 
 
 ```{r}
+# Concentration selection
+Concentration <- 1
+
 chem_level %>%
-  filter(adj_p_value <= 0.05) 
-
-
-
-
+  filter(Concentration == 1) %>%
+  mutate(
+    flag = factor(ifelse(adj_p_value <= 0.05, 1, 0) * ifelse(Log2FoldChange >= 0, 1, -1), levels = c(-1, 0, 1)), 
+    adj_p_value = -1 * log10(adj_p_value)
+  ) %>%
+  plot_ly(x = ~Log2FoldChange,
+          y = ~adj_p_value,
+          color = ~flag) %>%
+  layout(yaxis = list(title = "-Log10 P-Value"),
+         xaxis = list(title = "Log2 Fold Change"),
+         legend = list(title = list(text = "Direction")),
+         title = list(text = "Selected Concentration is 1uM"))
 ```
+
+#### Table of all genes 
+
+```{r}
+chem_level %>%
+  filter(Concentration == 1) %>%
+  dplyr::select(-c(condition)) %>%
+  dplyr::rename(`Gene ID` = GeneID, `Log2 Fold Change` = Log2FoldChange, `P Value` = adj_p_value, Flag = flag) %>%
+  datatable(options = list(scrollX = TRUE))
+```
+
+Clicking a row on the table will open a "Gene Page". 
 
 
