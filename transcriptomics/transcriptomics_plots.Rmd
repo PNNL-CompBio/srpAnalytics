@@ -16,7 +16,32 @@ library(DT)
 
 ```{r}
 transcriptomics <- fread("~/Downloads/transcriptomics_out.txt")
+chemical_table <- fread("~/Git_Repos/srpAnalytics/transcriptomics/chemical_table.txt")
 ```
+
+#### Transcriptomics Data Post Formatting
+
+```{r}
+transcriptomics %>%
+  head() %>%
+  knitr::kable()
+```
+
+#### Gene Ontology Post Formatting 
+
+
+
+#### Chemical Table
+
+Connects the "comparisons" column to chemical IDs. I have included CAS numbers I 
+could find for now. 
+
+```{r}
+chemical_table %>%
+  head() %>%
+  knitr::kable()
+```
+
 
 ## Chemical Page Level
 
@@ -79,5 +104,23 @@ chem_level %>%
 ```
 
 Clicking a row on the table will open a "Gene Page". 
+
+#### Top Ontology of Significant Genes 
+
+
+
+#### Top Pathways of Significant Genes
+
+## Chemical Page Level
+
+Users select their concentration of interest with a drop down. 
+
+#### Expression Across Chemicals: Count
+
+#### Expression Across Chemicals: Fold Change
+
+#### Expression Across Chemicals: Table
+
+Clicking a gene in this table will take the user back to the chemical pages. 
 
 
