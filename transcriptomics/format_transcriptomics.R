@@ -30,6 +30,9 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
   ## ONTOLOGY ##
   ##############
   
+  # Pull list of GO terms
+  GO_Terms <- as.list(zebrafishGO)
+  
   # Pull entrez IDs using zebra fish db
   Entrez <- as.list(zebrafishENTREZID)
   Entrez_DB <- data.table(
@@ -37,8 +40,30 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
     EntrezID = Entrez %>% unlist()
   ) %>%
     filter(!is.na(EntrezID)) %>%
-    mutate(EntrezID = paste0("GeneID:", EntrezID))
+    mutate(
+      EntrezID = paste0("GeneID:", EntrezID),
+      GOTerm = purrr::map(ManufacturerID, function(x) {
+        names(GO_Terms[[x]]) %>% paste0(collapse = " ")
+      }) %>% unlist()
+    ) 
   
+  # Pivot longer and unique
+  Entrez_DB <- data.table(
+    EntrezID = lapply(1:nrow(Entrez_DB), function(x) {
+      theLength <- Entrez_DB$GOTerm[x] %>% strsplit(" ") %>% length()
+      if (theLength == 0) {theLength == 1}
+      rep(Entrez_DB$EntrezID[x], theLength)
+    }) %>% unlist(),
+    GOTerm = lapply(1:nrow(Entrez_DB), function(x) {
+      theGos <- Entrez_DB$GOTerm[x]
+      ifelse(theGos != "", strsplit(theGos, " ") %>% unlist(), NA)
+    }) %>% unlist() 
+  ) %>% 
+    unique()
+  
+  browser()
+
+
   ####################
   ## OUTPUT RESULTS ##
   ####################
