@@ -1,4 +1,4 @@
-condition	CASNO	Concentration	Species 
+condition	Chemical_ID	Concentration	Species 
 Comp_FRC_DMSO_FRC_v_TPP_FRC	917-23-7	1	Zebrafish
 Comp_FRC_DMSO_FRC_v_TiBP_FRC	126-71-6	1	Zebrafish
 Comp_FRC_DMSO_FRC_v_TDBPP_FRC	126-72-7	1	Zebrafish

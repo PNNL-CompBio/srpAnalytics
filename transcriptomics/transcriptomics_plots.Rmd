@@ -119,6 +119,8 @@ Users select their concentration of interest with a drop down.
 
 #### Expression Across Chemicals: Fold Change
 
+I'm not sure I want the volcano plots again here - I don't want to confuse people. 
+
 #### Expression Across Chemicals: Table
 
 Clicking a gene in this table will take the user back to the chemical pages. 
