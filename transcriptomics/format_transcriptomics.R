@@ -1,6 +1,12 @@
+# Basic formatting libraries 
 library(dplyr)
 library(data.table)
+
+# Zebrafish database information
 library(zebrafish.db)
+
+# Gene Ontology Enrichment Package
+library(clusterProfiler)
 
 #' Format transcriptomics data 
 #' 
@@ -88,44 +94,53 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
   # Pull list of GO terms
   GO_Terms <- as.list(zebrafishGO)
   
-  # Pull entrez IDs using zebra fish db
-  Entrez <- as.list(zebrafishENTREZID)
-  Entrez_DB <- data.table(
-    ManufacturerID = names(Entrez) %>% unlist(),
-    EntrezID = Entrez %>% unlist()
+  # Make GO_Term Table 
+  GO_Table <- data.table(
+    ManufacturerID = names(GO_Terms) %>% unlist()
   ) %>%
-    filter(!is.na(EntrezID)) %>%
-    mutate(
-      EntrezID = paste0("GeneID:", EntrezID),
-      GOTerm = purrr::map(ManufacturerID, function(x) {
-        names(GO_Terms[[x]]) %>% paste0(collapse = " ")
-      }) %>% unlist()
-    ) 
+    mutate(GO_ID = lapply(ManufacturerID, function(x) {
+      names(GO_Terms[[x]]) %>% unlist() %>% paste0(collapse = " ")
+    }) %>% unlist()) %>%
+    filter(GO_ID != "")
   
   # Pivot longer and unique
-  Entrez_DB <- data.table(
-    EntrezID = lapply(1:nrow(Entrez_DB), function(x) {
-      theLength <- Entrez_DB$GOTerm[x] %>% strsplit(" ") %>% length()
+  GO_Table <- data.table(
+    ManufacturerID = lapply(1:nrow(GO_Table), function(x) {
+      theLength <- GO_Table$GO_ID[x] %>% strsplit(" ") %>% length()
       if (theLength == 0) {theLength == 1}
-      rep(Entrez_DB$EntrezID[x], theLength)
+      rep(GO_Table$ManufacturerID[x], theLength)
     }) %>% unlist(),
-    GOTerm = lapply(1:nrow(Entrez_DB), function(x) {
-      theGos <- Entrez_DB$GOTerm[x]
+    GOTerm = lapply(1:nrow(GO_Table), function(x) {
+      theGos <- GO_Table$GO_ID[x]
       ifelse(theGos != "", strsplit(theGos, " ") %>% unlist(), NA)
     }) %>% unlist() 
   ) %>% 
-    unique()
-  
-  
-  
+    unique() %>%
+    left_join(Gene_Conversion_Table, by = "ManufacturerID")
 
+  # 1. Remove any p-values greater than 0.05
+  
+  browser()
+  
+  transcript_data %>% 
+    filter(AdjPValue <= 0.05) %>%
+    dplyr::select(Comparison, GeneID) %>%
+    dplyr::mutate(GeneID = gsub("GeneID:", "", GeneID)) 
+  
+  #res <- enrichGO(de, 'zebrafish.db', ont="ALL", pvalueCutoff=0.01, pAdjustMethod = "bonferroni")
+  # res@result %>% dplyr::select(ID, Description, Count, ONTOLOGY) %>% arrange(-Count) %>% head(10)
 
   ####################
   ## OUTPUT RESULTS ##
   ####################
   
+  # Write transcript table
   fwrite(transcript_data %>% dplyr::select(GeneID, Gene, condition, Log2FoldChange, adj_p_value, flag), 
          file.path(out_path, "transcriptomics_out.txt"), sep = "\t", row.names = F, quote = F)
+  
+  # Write ontology table
+  
+  # Write pathway table 
   
 }
 

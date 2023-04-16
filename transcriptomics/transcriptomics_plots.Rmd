@@ -105,11 +105,11 @@ chem_level %>%
 
 Clicking a row on the table will open a "Gene Page". 
 
-#### Top Ontology of Significant Genes 
+#### Top 10 Ontologies of Significant Genes 
 
 
 
-#### Top Pathways of Significant Genes
+#### Top 10 Pathways of Significant Genes
 
 ## Chemical Page Level
 
