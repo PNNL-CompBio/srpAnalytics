@@ -108,12 +108,8 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
   ## ONTOLOGY ##
   ##############
 
-  browser()
-  
   # Run an enrichment analysis per comparison 
   if (messages) {message("...Running gene ontology enrichment")}
-  
-  registerDoParallel(detectCores())
   
   GO_Enrichment <- do.call(rbind, lapply(unique(GenesOfInterest$Comparison), function(comp) {
     
@@ -125,7 +121,7 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
     # Run the enrichment analysis
     Enriched <- enrichGO(DE, 'zebrafish.db', ont = "ALL", pvalueCutoff = 0.05, pAdjustMethod = "bonferroni")
     
-    if (nrow(Enriched@result) == 0) {
+    if (is.null(Enriched) || nrow(Enriched@result) == 0 || nrow(Enriched@result[Enriched@result$p.adjust <= 0.05,]) == 0) {
       return(
         data.frame(Comparison = comp, Ontology = NA, OntologyCount = NA, OntologyType = NA, OntologyPValue = NA)
       )
@@ -133,10 +129,10 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
     
     # Build the appropriate table of the top 10 hits  
     EnrichTable <- Enriched@result %>% 
-      dplyr::select(Description, Count, ONTOLOGY) %>% 
-      rename(Ontology = Description, OntologyCount = Count, OntologyType = ONTOLOGY, PValue = p.adjust) %>%
-      arrange(-PValue) %>% 
-      filter(PValue <= 0.05) %>%
+      dplyr::select(Description, Count, ONTOLOGY, p.adjust) %>% 
+      rename(Ontology = Description, OntologyCount = Count, OntologyType = ONTOLOGY, OntologyPValue = p.adjust) %>%
+      arrange(-OntologyPValue) %>% 
+      filter(OntologyPValue <= 0.05) %>%
       head(10) %>%
       mutate(OntologyType = ifelse(OntologyType == "BP", "Biological Process",
                             ifelse(OntologyType == "MF", "Molecular Function", "Cellular Component")),
@@ -158,8 +154,6 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
   # Run an enrichment analysis per comparison 
   if (messages) {message("...Running pathway enrichment")}
   
-  registerDoParallel(detectCores())
-  
   Pathway_Enrichment <- do.call(rbind, lapply(unique(GenesOfInterest$Comparison), function(comp) {
     
     if (messages) {message(paste0("......on comparison: ", comp))}
@@ -170,29 +164,26 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
     # Run the enrichment analysis
     Pathways <- enrichKEGG(DE, organism = "dre", pvalueCutoff = 0.05, pAdjustMethod = "bonferroni")
     
-    if (nrow(Pathwaysd@result) == 0) {
+    if (is.null(Pathways) || nrow(Pathways@result) == 0 || nrow(Pathways@result[Pathways@result$p.adjust <= 0.05,]) == 0) {
       return(
         data.frame(Comparison = comp, Pathway = NA, PathwayCount = NA, PathwayPValue = NA)
       )
     }
     
     # Build the appropriate table of the top 10 hits  
-    PathwayTable <- Enriched@result %>% 
-      dplyr::select(Description, Count, ONTOLOGY) %>% 
-      rename(Ontology = Description, OntologyCount = Count, OntologyType = ONTOLOGY, PValue = p.adjust) %>%
-      arrange(-PValue) %>% 
-      filter(PValue <= 0.05) %>%
+    PathwayTable <- Pathways@result %>% 
+      dplyr::select(Description, Count, p.adjust) %>% 
+      rename(Pathway = Description, PathwayCount = Count, PathwayPValue = p.adjust) %>%
+      arrange(PathwayPValue) %>% 
+      filter(PathwayPValue <= 0.05) %>%
       head(10) %>%
-      mutate(OntologyType = ifelse(OntologyType == "BP", "Biological Process",
-                                   ifelse(OntologyType == "MF", "Molecular Function", "Cellular Component")),
-             Comparison = comp
-      ) %>%
-      dplyr::select(Comparison, Ontology, OntologyCount, OntologyType, OntologyPValue)
+      mutate(Comparison = comp) %>%
+      dplyr::select(Comparison, Pathway, PathwayCount, PathwayPValue)
     
     # Remove gene ontology IDs
-    row.names(EnrichTable) <- 1:nrow(EnrichTable)
+    row.names(PathwayTable) <- 1:nrow(PathwayTable)
     
-    return(EnrichTable)
+    return(PathwayTable)
     
   }))
   
@@ -207,6 +198,7 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
   fwrite(GO_Enrichment, file.path(out_path, "ontology.txt"), sep = "\t", row.names = F, quote = F, na = "NA")
   
   # Write pathway table 
+  fwrite(Pathway_Enrichment, file.path(out_path, "pathway.txt"), sep = "\t", row.names = F, quote = F, na = "NA")
   
 }
 

@@ -15,33 +15,36 @@ library(DT)
 ## Read data 
 
 ```{r}
-transcriptomics <- fread("~/Downloads/transcriptomics_out.txt")
-chemical_table <- fread("~/Git_Repos/srpAnalytics/transcriptomics/chemical_table.txt")
+transcriptomics <- fread("~/Downloads/gene.txt")
+ontology <- fread("~/Downloads/ontology.txt")
+pathway <- fread("~/Downloads/pathway.txt")
 ```
 
-#### Transcriptomics Data Post Formatting
+#### Transcriptomics Data
+
+I could not find chemical IDs for everything, so I just used CASNO (CAS numbers) for now. 
 
 ```{r}
 transcriptomics %>%
-  head() %>%
-  knitr::kable()
+  head(10) %>%
+  datatable(options = list(scrollX = TRUE))
 ```
 
-#### Gene Ontology Post Formatting 
-
-
-
-#### Chemical Table
-
-Connects the "comparisons" column to chemical IDs. I have included CAS numbers I 
-could find for now. 
+#### Gene Ontology Data
 
 ```{r}
-chemical_table %>%
-  head() %>%
-  knitr::kable()
+ontology %>% 
+  head(10) %>% 
+  datatable(options = list(scrollX = TRUE))
 ```
 
+#### Pathway Data
+
+```{r}
+pathway %>%
+  head(10) %>%
+  datatable(options = list(scrollX = TRUE))
+```
 
 ## Chemical Page Level
 
@@ -52,11 +55,11 @@ chemical_table %>%
 ChemicalID <- "50-32-8"
 
 # Data at the chemical level
-chem_level <- transcriptomics[transcriptomics$CASNO == ChemicalID,]
+chem_level <- transcriptomics[transcriptomics$Chemical_ID == ChemicalID,]
 
 chem_level %>%
-  filter(adj_p_value <= 0.05) %>%
-  count(Concentration) %>%
+  filter(AdjPValue <= 0.05) %>%
+  dplyr::count(Concentration) %>%
   mutate(Concentration = as.factor(Concentration)) %>%
   plot_ly(x = ~Concentration, 
           color = ~Concentration,
@@ -76,30 +79,28 @@ all genes.
 
 ```{r}
 # Concentration selection
-Concentration <- 1
+SelectComparison <- "50-32-8 1 Zebrafish"
 
 chem_level %>%
-  filter(Concentration == 1) %>%
+  filter(Comparison == SelectComparison) %>%
   mutate(
-    flag = factor(ifelse(adj_p_value <= 0.05, 1, 0) * ifelse(Log2FoldChange >= 0, 1, -1), levels = c(-1, 0, 1)), 
-    adj_p_value = -1 * log10(adj_p_value)
+    Flag = as.factor(Flag),
+    AdjPValue = -1 * log10(AdjPValue)
   ) %>%
   plot_ly(x = ~Log2FoldChange,
-          y = ~adj_p_value,
-          color = ~flag) %>%
+          y = ~AdjPValue,
+          color = ~Flag) %>%
   layout(yaxis = list(title = "-Log10 P-Value"),
          xaxis = list(title = "Log2 Fold Change"),
          legend = list(title = list(text = "Direction")),
-         title = list(text = "Selected Concentration is 1uM"))
+         title = list(text = paste("The comparison is: ", SelectComparison)))
 ```
 
 #### Table of all genes 
 
 ```{r}
 chem_level %>%
-  filter(Concentration == 1) %>%
-  dplyr::select(-c(condition)) %>%
-  dplyr::rename(`Gene ID` = GeneID, `Log2 Fold Change` = Log2FoldChange, `P Value` = adj_p_value, Flag = flag) %>%
+  filter(Comparison == SelectComparison) %>%
   datatable(options = list(scrollX = TRUE))
 ```
 
@@ -107,9 +108,39 @@ Clicking a row on the table will open a "Gene Page".
 
 #### Top 10 Ontologies of Significant Genes 
 
-
+```{r}
+ontology %>%
+  filter(Comparison == SelectComparison) %>%
+  arrange(OntologyType, OntologyCount) %>%
+    mutate(Ontology = factor(Ontology, levels = Ontology)) %>%
+  plot_ly(x = ~OntologyCount, 
+          color = ~OntologyType,
+          y = ~Ontology,
+          type = "bar",
+          hovertext = ~OntologyPValue)  %>%
+  layout(xaxis = list(title = "Count"),
+         yaxis = list(title = ""),
+         legend = list(title = list(text = "Ontology Type")),
+         title = list(text = paste("The comparison is: ", SelectComparison)))
+```
 
 #### Top 10 Pathways of Significant Genes
+
+```{r}
+pathway %>%
+  filter(Comparison == "126-72-7 1 Zebrafish") %>%
+  arrange(PathwayCount) %>%
+  mutate(Pathway = factor(Pathway, levels = Pathway),
+         PathwayPValue = as.numeric(PathwayPValue)) %>%
+  plot_ly(x = ~PathwayCount,
+          y = ~Pathway,
+          type = "bar",
+          hovertext = ~PathwayPValue)  %>%
+  layout(xaxis = list(title = "Count"),
+         yaxis = list(title = ""),
+         legend = list(title = list(text = "P Value")),
+         title = list(text = paste("The comparison is: 126-72-7 1 Zebrafish")))
+```
 
 ## Chemical Page Level
 
@@ -117,12 +148,36 @@ Users select their concentration of interest with a drop down.
 
 #### Expression Across Chemicals: Count
 
+```{r}
+SelectGene <- "GeneID:414331"
+
+transcriptomics %>%
+  filter(GeneID == SelectGene & Flag != 0) %>%
+  dplyr::count(Flag) %>%
+  rename(Count = n) %>%
+  mutate(Gene = SelectGene,
+         Flag = as.factor(Flag)) %>%
+  plot_ly(x = ~Gene,
+          y = ~Count,  
+          color = ~Flag,
+          type = 'bar') %>%
+  layout(yaxis = list(title = 'Count'), legend = list(title = list(text = "Direction")))
+  
+```
+
 #### Expression Across Chemicals: Fold Change
 
 I'm not sure I want the volcano plots again here - I don't want to confuse people. 
 
 #### Expression Across Chemicals: Table
 
-Clicking a gene in this table will take the user back to the chemical pages. 
+Clicking a gene in this table will take the user back to the chemical pages with
+the proper comparison selected. 
 
+```{r}
+transcriptomics %>%
+  filter(GeneID == SelectGene) %>%
+  select(-c(GeneID, Gene, Gene_URL, Chemical_ID, Species, Concentration)) %>%
+  datatable(options = list(scrollX = TRUE))
+```
 

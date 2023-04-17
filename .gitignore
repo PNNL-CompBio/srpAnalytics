@@ -58,3 +58,5 @@ tmp/
 new_*
 Reformatted*
 .vscode
+
+*.html
