@@ -5,7 +5,7 @@ library(data.table)
 # Zebrafish database information
 library(zebrafish.db)
 
-# Gene Ontology Enrichment Package
+# Gene Ontology & Pathway Enrichment Package
 library(clusterProfiler)
 
 #' Format transcriptomics data 
@@ -15,12 +15,16 @@ library(clusterProfiler)
 #' @param chemical_table_path A metadata file with "condition", "Chemical_ID", "Concentration"
 #'    written in uM, and "Species" 
 #' @param out_path Path for resulting CSVs to be written to
+#' @param messages TRUE/FALSE to indicate whetere 
 format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/bmd2Samps_v3/srpDEGstats.tsv",
                                    chemical_table_path = "~/Git_Repos/srpAnalytics/transcriptomics/chemical_table.txt",
-                                   out_path = "~/Downloads/") {
+                                   out_path = "~/Downloads/",
+                                   messages = TRUE) {
   ###############
   ## READ DATA ##
   ###############
+  
+  if (messages) {message("...Reading data")}
   
   # Read data 
   transcripts <- fread(transcripts_path)
@@ -29,6 +33,8 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
   ################################
   ## MAKE GENE CONVERSION TABLE ##
   ################################
+  
+  if (messages) {message("...Making transcript table")}
   
   # Expand the provided Entrez ID's to include manufacturer and zfin
   
@@ -87,58 +93,118 @@ format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/
     dplyr::select(Chemical_ID, Comparison, Species, Concentration, GeneID, Gene, 
                   Gene_URL, Log2FoldChange, AdjPValue, Flag)
   
-  ##############
-  ## ONTOLOGY ##
-  ##############
-  
-  # Pull list of GO terms
-  GO_Terms <- as.list(zebrafishGO)
-  
-  # Make GO_Term Table 
-  GO_Table <- data.table(
-    ManufacturerID = names(GO_Terms) %>% unlist()
-  ) %>%
-    mutate(GO_ID = lapply(ManufacturerID, function(x) {
-      names(GO_Terms[[x]]) %>% unlist() %>% paste0(collapse = " ")
-    }) %>% unlist()) %>%
-    filter(GO_ID != "")
-  
-  # Pivot longer and unique
-  GO_Table <- data.table(
-    ManufacturerID = lapply(1:nrow(GO_Table), function(x) {
-      theLength <- GO_Table$GO_ID[x] %>% strsplit(" ") %>% length()
-      if (theLength == 0) {theLength == 1}
-      rep(GO_Table$ManufacturerID[x], theLength)
-    }) %>% unlist(),
-    GOTerm = lapply(1:nrow(GO_Table), function(x) {
-      theGos <- GO_Table$GO_ID[x]
-      ifelse(theGos != "", strsplit(theGos, " ") %>% unlist(), NA)
-    }) %>% unlist() 
-  ) %>% 
-    unique() %>%
-    left_join(Gene_Conversion_Table, by = "ManufacturerID")
+  ##############################################
+  ## ISOLATE SIGNIFICANT GENES PER COMPARISON ##
+  ##############################################
 
   # 1. Remove any p-values greater than 0.05
-  
-  browser()
-  
-  transcript_data %>% 
+  # 2. Returns gene per comparison without GeneID tag
+  GenesOfInterest <- transcript_data %>% 
     filter(AdjPValue <= 0.05) %>%
     dplyr::select(Comparison, GeneID) %>%
     dplyr::mutate(GeneID = gsub("GeneID:", "", GeneID)) 
-  
-  #res <- enrichGO(de, 'zebrafish.db', ont="ALL", pvalueCutoff=0.01, pAdjustMethod = "bonferroni")
-  # res@result %>% dplyr::select(ID, Description, Count, ONTOLOGY) %>% arrange(-Count) %>% head(10)
+    
+  ##############
+  ## ONTOLOGY ##
+  ##############
 
+  browser()
+  
+  # Run an enrichment analysis per comparison 
+  if (messages) {message("...Running gene ontology enrichment")}
+  
+  registerDoParallel(detectCores())
+  
+  GO_Enrichment <- do.call(rbind, lapply(unique(GenesOfInterest$Comparison), function(comp) {
+    
+    if (messages) {message(paste0("......on comparison: ", comp))}
+    
+    # Select the genes 
+    DE <- GenesOfInterest %>% filter(Comparison == comp) %>% select(GeneID) %>% unlist()
+    
+    # Run the enrichment analysis
+    Enriched <- enrichGO(DE, 'zebrafish.db', ont = "ALL", pvalueCutoff = 0.05, pAdjustMethod = "bonferroni")
+    
+    if (nrow(Enriched@result) == 0) {
+      return(
+        data.frame(Comparison = comp, Ontology = NA, OntologyCount = NA, OntologyType = NA, OntologyPValue = NA)
+      )
+    }
+    
+    # Build the appropriate table of the top 10 hits  
+    EnrichTable <- Enriched@result %>% 
+      dplyr::select(Description, Count, ONTOLOGY) %>% 
+      rename(Ontology = Description, OntologyCount = Count, OntologyType = ONTOLOGY, PValue = p.adjust) %>%
+      arrange(-PValue) %>% 
+      filter(PValue <= 0.05) %>%
+      head(10) %>%
+      mutate(OntologyType = ifelse(OntologyType == "BP", "Biological Process",
+                            ifelse(OntologyType == "MF", "Molecular Function", "Cellular Component")),
+             Comparison = comp
+      ) %>%
+      dplyr::select(Comparison, Ontology, OntologyCount, OntologyType, OntologyPValue)
+    
+    # Remove gene ontology IDs
+    row.names(EnrichTable) <- 1:nrow(EnrichTable)
+    
+    return(EnrichTable)
+    
+  }))
+  
+  ##############
+  ## PATHWAYS ##
+  ##############
+  
+  # Run an enrichment analysis per comparison 
+  if (messages) {message("...Running pathway enrichment")}
+  
+  registerDoParallel(detectCores())
+  
+  Pathway_Enrichment <- do.call(rbind, lapply(unique(GenesOfInterest$Comparison), function(comp) {
+    
+    if (messages) {message(paste0("......on comparison: ", comp))}
+    
+    # Select the genes 
+    DE <- GenesOfInterest %>% filter(Comparison == comp) %>% select(GeneID) %>% unlist()
+    
+    # Run the enrichment analysis
+    Pathways <- enrichKEGG(DE, organism = "dre", pvalueCutoff = 0.05, pAdjustMethod = "bonferroni")
+    
+    if (nrow(Pathwaysd@result) == 0) {
+      return(
+        data.frame(Comparison = comp, Pathway = NA, PathwayCount = NA, PathwayPValue = NA)
+      )
+    }
+    
+    # Build the appropriate table of the top 10 hits  
+    PathwayTable <- Enriched@result %>% 
+      dplyr::select(Description, Count, ONTOLOGY) %>% 
+      rename(Ontology = Description, OntologyCount = Count, OntologyType = ONTOLOGY, PValue = p.adjust) %>%
+      arrange(-PValue) %>% 
+      filter(PValue <= 0.05) %>%
+      head(10) %>%
+      mutate(OntologyType = ifelse(OntologyType == "BP", "Biological Process",
+                                   ifelse(OntologyType == "MF", "Molecular Function", "Cellular Component")),
+             Comparison = comp
+      ) %>%
+      dplyr::select(Comparison, Ontology, OntologyCount, OntologyType, OntologyPValue)
+    
+    # Remove gene ontology IDs
+    row.names(EnrichTable) <- 1:nrow(EnrichTable)
+    
+    return(EnrichTable)
+    
+  }))
+  
   ####################
   ## OUTPUT RESULTS ##
   ####################
   
   # Write transcript table
-  fwrite(transcript_data %>% dplyr::select(GeneID, Gene, condition, Log2FoldChange, adj_p_value, flag), 
-         file.path(out_path, "transcriptomics_out.txt"), sep = "\t", row.names = F, quote = F)
+  fwrite(transcript_data, file.path(out_path, "gene.txt"), sep = "\t", row.names = F, quote = F, na = "NA")
   
   # Write ontology table
+  fwrite(GO_Enrichment, file.path(out_path, "ontology.txt"), sep = "\t", row.names = F, quote = F, na = "NA")
   
   # Write pathway table 
   
