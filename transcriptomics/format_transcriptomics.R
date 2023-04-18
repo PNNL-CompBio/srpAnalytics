@@ -15,7 +15,7 @@ library(clusterProfiler)
 #' @param chemical_table_path A metadata file with "condition", "Chemical_ID", "Concentration"
 #'    written in uM, and "Species" 
 #' @param out_path Path for resulting CSVs to be written to
-#' @param messages TRUE/FALSE to indicate whetere 
+#' @param messages TRUE/FALSE to indicate whether progress messages should be printed
 format_transcriptomics <- function(transcripts_path = "~/Git_Repos/srpAnalytics/bmd2Samps_v3/srpDEGstats.tsv",
                                    chemical_table_path = "~/Git_Repos/srpAnalytics/transcriptomics/chemical_table.txt",
                                    out_path = "~/Downloads/",

@@ -144,8 +144,6 @@ pathway %>%
 
 ## Chemical Page Level
 
-Users select their concentration of interest with a drop down. 
-
 #### Expression Across Chemicals: Count
 
 ```{r}
