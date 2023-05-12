@@ -73,6 +73,16 @@ grun="docker run -v "$PWD":/tmp sgosline/srp-exposome"
 echo $grun
 $grun
 
+##get the zf expression data
+gpull='docker pull sogsline/srp-zfexp'
+echo $gpull
+$gpull
+
+grun='docker run -v '$PWD':/tmp sgosline/srp-zfexp'
+echo $grun
+$grun
+
+
 ##then we run morph
 dpull="docker pull sgosline/srp-zfbmd"
 echo $dpull
