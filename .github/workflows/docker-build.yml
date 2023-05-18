@@ -50,13 +50,13 @@ jobs:
           push: true
           tags: sgosline/srp-exposome:latest     
           platforms: linux/amd64,linux/arm64  
-      - name: Build and push dbSchema
-        uses: docker/build-push-action@v3
-        with:
-          context: dbSchema
-          push: true
-          tags: sgosline/srp-dbschema
-          platforms: linux/amd64,linux/arm64
+#      - name: Build and push dbSchema
+#        uses: docker/build-push-action@v3
+#        with:
+#          context: dbSchema
+#          push: true
+#          tags: sgosline/srp-dbschema
+#          platforms: linux/amd64,linux/arm64
       - name: Build and push expression
         uses: docker/build-push-action@v3
         with:
