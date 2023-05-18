@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9-alpine3.18
 # To setup other dependencies
 RUN apt-get update -qq && apt-get install -y net-tools \
         curl \
