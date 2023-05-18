@@ -64,11 +64,12 @@ treat_names=data.frame(treatment=c('Acenaph_16PAH','BbF_16PAH', 'BjF_16PAH','BkF
 res<-diffex|>
   left_join(treat_names)|>
   dplyr::select(-c(control,treatment))|>
-  mutate(Project='Zebrafish',Link=c())|>
-  left_join(chem)
+  mutate(Project='Zebrafish',Link='')|>
+  left_join(chem)|>
+  dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)
               
 ##need to get mapping to drug name
-write.table(full_tab,file ='srpDEGstats.tsv',sep='\t',quote=F,row.names=F,col.names=T)
+write.table(res,file ='srpDEGstats.csv',sep=',',quote=F,row.names=F,col.names=T)
 
   
   
