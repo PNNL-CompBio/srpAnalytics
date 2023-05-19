@@ -1,4 +1,4 @@
-FROM rocker/tidyverse
+FROM bioconductor/bioconductor_docker
 # To setup other dependencies
 
 #COPY setup.sh /setup.sh
