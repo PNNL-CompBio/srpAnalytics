@@ -8,6 +8,11 @@ else
     mkdir temp
 fi
 
+##Catcmd adds two files together
+catcmd() {
+   cat $1 >> $2
+}
+
 #################################################### phase I,II data
 ##here we have the data from doo nam/lisa, we need to copy it into the temp directory
 #phase12 data
@@ -73,6 +78,7 @@ grun="docker run -v "$PWD":/tmp sgosline/srp-exposome"
 echo $grun
 $grun
 
+
 ##get the zf expression data
 gpull='docker pull sogsline/srp-zfexp'
 echo $gpull
@@ -82,6 +88,10 @@ grun='docker run -v '$PWD':/tmp sgosline/srp-zfexp'
 echo $grun
 $grun
 
+##then we have to concatenate the two together
+catg='catcmd srpDEGstats.csv sigGeneStats.csv'
+echo $catg
+$catg
 
 ##then we run morph
 dpull="docker pull sgosline/srp-zfbmd"
@@ -119,9 +129,7 @@ echo "Dose response\n"
 wc -l new_dose.csv
 echo "New Fits"
 wc -l new_fits.csv
-catcmd() {
-   cat $1 >> $2
-}
+
 
 
 catcmdf='catcmd new_fits1.csv new_fits.csv'

@@ -69,7 +69,7 @@ res<-diffex|>
   dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)
               
 ##need to get mapping to drug name
-write.table(res,file ='srpDEGstats.csv',sep=',',quote=F,row.names=F,col.names=T)
+write.table(res,file ='/tmp/srpDEGstats.csv',sep=',',quote=F,row.names=F,col.names=T)
 
   
   
