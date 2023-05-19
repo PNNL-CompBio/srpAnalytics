@@ -11,6 +11,10 @@ stop_for_status(res)
 
 projects <- fromJSON(fromJSON(rawToChar(res$content)))
 
+##create a mapping to friendly names for projects
+project_map<-data.frame(Project=c('ADIPO','HEPG2','MCF10A','TF-GATEs'),
+			friendlyName=c('Human adipocyte cell lines','Human Hepg2 cell lines','Human MCF10A cell lines','Human TF-GATEs'))
+
 print(paste('We now have data from',length(projects),'projects'))
 
 #portal_name=  'https://montilab.bu.edu/Xposome-API/portals'
@@ -134,7 +138,12 @@ map <-all.chems%>%
 sg.stats <- sig.genes%>%
   group_by(Project,cas_number,Conc,Link)%>%
   summarize(nGenes=n_distinct(Gene))%>%
-  left_join(map)
+  left_join(map)|>
+  left_join(project_map)|>
+  ungroup()|>
+  dplyr::select(-Project)|>
+  dplyr::rename(Project=friendlyName)|>
+  dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)
 
 write.table(sg.stats,file='/tmp/sigGeneStats.csv',sep=',',row.names=F)
 ##not using this for now:
