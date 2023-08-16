@@ -85,7 +85,7 @@ tab<- deg2 |>
   left_join(chems)|>
   distinct()|>
   arrange(desc(nGenes))|>
-  dplyr::select(PREFERRED_NAME,AVERAGE_MASS,MOLECULAR_FORMULA,Conc,nGenes,chemical_class)|>
+  dplyr::select(PREFERRED_NAME,AVERAGE_MASS,MOLECULAR_FORMULA,Concentration,nGenes,chemical_class)|>
   distinct()
 
 tab$AVERAGE_MASS<-tidyr::replace_na(as.numeric(tab$AVERAGE_MASS),0)
@@ -93,7 +93,7 @@ tab$AVERAGE_MASS<-tidyr::replace_na(as.numeric(tab$AVERAGE_MASS),0)
 
 tab
 
-ggplot(tab,aes(x=AVERAGE_MASS,y=nGenes,col=chemical_class))+geom_point()
+ggplot(tab,aes(x=AVERAGE_MASS,y=nGenes,col=chemical_class,size=Concentration))+geom_point()
 
 ```
 
@@ -136,22 +136,25 @@ for(genename in fintab$Gene[1:5]){
   genevals<-subset(deg,Gene==genename)|>
     distinct()
  
-  p<-ggplot(genevals,aes(x=cas_number,y=Log2FoldChange,fill=cas_number))+geom_bar(stat='identity',position='dodge')+
-    ggtitle(paste('Chemicals that induce significant changes in',genename))+
+  
+  p<-ggplot(genevals,aes(x=reorder(cas_number,Log2FoldChange),                  
+                         y=Log2FoldChange,fill=Concentration))+
+    geom_bar(stat='identity',position='dodge')+
+    ggtitle(paste('Fold change of',genename,'by chemical'))+
       theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
   tab<-subset(exp,Gene==genename)|>
     left_join(chems)|>
     distinct()|>
     arrange(adj_p_value)|>
-  dplyr::select(PREFERRED_NAME,Conc,Log2FoldChange,adj_p_value)|>
+  dplyr::select(PREFERRED_NAME,Concentration,Log2FoldChange,adj_p_value)|>
   distinct()
   
   p2<-kableExtra::kbl(tab) %>%
     kable_paper() %>%
     scroll_box(width = "100%", height = "400px")
 
-  print(p2)
+ # print(p2)
   print(p)
 }
 
