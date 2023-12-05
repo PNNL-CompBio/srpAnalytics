@@ -26,54 +26,6 @@ data.dir<-'/bmd2Samps/data/'
 out.dir<-'/tmp/'
 #out.dir<-'./'
 
-#########################################
-# Table schemas
-##########################################
-##required from OSU database of sample values, currently a mishmash
-required_sample_columns<-c("ClientName","SampleNumber","date_sampled","sample_matrix","technology",
-                          # "Sample_ID",
-                           "projectName","SampleName","LocationLat","projectLink",
-                           "LocationLon","LocationName","LocationAlternateDescription",
-                           "AlternateName","cas_number","date_sample_start",
-                           "measurement_value","measurement_value_qualifier","measurement_value_unit",
-                           "measurement_value_molar","measurement_value_molar_unit",
-                           "water_concentration","water_concentration_qualifier","water_concentration_unit",
-                           "water_concentration_molar","water_concentration_molar_unit")
-
-##required for comptox-derived mapping files
-required_comptox_columns <- c("INPUT","DTXSID","PREFERRED_NAME","INCHIKEY","SMILES","MOLECULAR_FORMULA",
-                              "AVERAGE_MASS","PUBCHEM_DATA_SOURCES")
-
-
-##output tables
-sample_chem_columns <-c('Sample_ID','Chemical_ID',"measurement_value","measurement_value_qualifier","measurement_value_unit",
-                           "measurement_value_molar","measurement_value_molar_unit",
-                           "water_concentration","water_concentration_qualifier","water_concentration_unit",
-                           "water_concentration_molar","water_concentration_molar_unit")
-
-samp_columns <-c("Sample_ID","ClientName","SampleNumber","date_sampled","sample_matrix","technology",
-                "projectName","SampleName","LocationLat","projectLink",
-                "LocationLon","LocationName","LocationAlternateDescription",
-                "AlternateName","date_sample_start")
-
-
-
-##new for the chemical table
-required_chem_columns<-c('Chemical_ID','cas_number','DTXSID','PREFERRED_NAME','INCHIKEY',
-                         'SMILES','MOLECULAR_FORMULA','AVERAGE_MASS','PUBCHEM_DATA_SOURCES',
-                         'chem_source','chemical_class','chemDescription')
-
-required_mapping_columns<-c("SampleNumber","Sample_ID",'zf_lims_id')## added these to complete mapping
-#extra columns: "bioassay_sample_from_lims","parent_samples_from_lims","child_samples_from_lims")
-
-
-##required from bmd calculation
-##add in Sample_ID or Chemical_ID depending on table
-required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD50',"Min_Dose","Max_Dose",
-                                "AUC_Norm","DataQC_Flag","BMD_Analysis_Flag"),#,"BMD10_Flag","BMD50_Flag"),
-                          doseRep=c('Chemical_ID',"End_Point","Dose","Response","CI_Lo","CI_Hi"),
-                          fitVals=c('Chemical_ID',"End_Point","X_vals","Y_vals"))
-
 
 
 ##################################
@@ -89,6 +41,10 @@ chemIdMasterTable<-function(casIds){
       distinct()%>%
       subset(!is.na(cas_number))
 
+  ###there are some acceptable duplicates:
+  ## 3144, 3143 - same cas, different BMD
+  ## 1161, 1171
+  ## 441,447
   missing <- setdiff(casIds,map$cas_number)
   if(length(missing)>0){
     message("Missing ",length(missing),' chemical IDs, adding them now')
@@ -124,6 +80,47 @@ sampIdMasterTable<-function(existingSampNumbers){
 }
 
 
+###################################
+# Duplicate removal
+# there are two causes of duplicates in the data
+# First, there are samples that are evaluated from multiple files, so we need to remove
+# those that are duplicated
+# Second, there are multiple chemical ids mapping to a single CAS id. In this case,
+# We need to select a single chemical ids
+###################################
+
+#' Remove duplicates from anything with a Chemical_ID in the field
+#' @param tab Table to be de-duplicated
+#' @param chemIds Mapping of chemical_IDs to CAS ids
+#' @param cols List of columsn that make the data distinct
+#' @return data.frame of de-duplicated table
+removeChemIdDuplicates<-function(tab, chemIds,cols=c('AUC_Norm','End_Point_Name','Model')){
+  
+  #first get all duplicaetd chemical ids
+  dupes<-chemIds|>group_by(cas_number)|>summarize(nc=n_distinct(Chemical_ID))|>subset(nc>1)
+  chem_ids=subset(chemIds,cas_number%in%dupes$cas_number)|>
+    dplyr::select(cas_number,Chemical_ID)|>
+    mutate(inDataset=Chemical_ID%in%tab$Chemical_ID)|>
+    subset(inDataset)
+  
+  ##now which ones are actually in the data?
+
+  #create a distinct table
+  dist.tab<-tab|>
+    left_join(chemIds)|>
+    dplyr::select(c('cas_number','Chemical_ID',cols))
+  
+#  dupe.counts<- dist.tab|>group_by(c(cols,'cas_number'))|>
+#    summarize(chemCounts=n_distinct(Chemical_ID))
+
+  dupe.counts<- dist.tab|>
+    group_by(cas_number,End_Point_Name,Model)|>
+    summarize(nIds=n_distinct(Chemical_ID))|>
+    subset(nIds>1)
+  
+  dupe.cas<-unique(dupe.counts$cas_number)
+  
+}
 ###################################
 # Metadata collection
 # these functions import metadata
@@ -371,73 +368,73 @@ buildSampleData<-function(data.dir,chemMeta){
 #'@param is_extract - if our chemical id is an extract we use a different metadata
 #'@return a data.frame
 ##We will release an 'endpoint file for each condition'
-combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
-
-  ##read in the BMD files formatted by the zf module
-  print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
-  cols <- required_bmd_columns$bmd
-  files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
-
-  mid.bmd<-do.call(rbind,files)%>%
-      dplyr::select(cols)
-
-  ##some of the chemicals have BMDs that were computed twice and i'm not sure which
-  ##are which anymore. as such, i incorporate the files in chronological order
-  ##and remove the second values
-  dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
-  if(length(dupes)>0){
-    mid.bmd<-mid.bmd[-dupes,]
-  }
-  
-  if(is_extract){
-    sdSamp<-sampChem%>%
-      tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
-      select(-sub)
-
-    full.bmd<-mid.bmd%>%
-      dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
-      dplyr::select(-Chemical_ID)%>%
-      full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
-
-    #fix up sample ids
-    nas<-which(is.na(full.bmd$Sample_ID))
-    full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
-
-    #now fix up sample names
-    new.nas<-which(is.na(full.bmd$SampleName))
-    full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
-
-    full.bmd<-full.bmd%>%
-      tidyr::replace_na(list(End_Point='NoData'))%>%
-      right_join(endpointDetails)%>%
-      dplyr::select(-c('End_Point','tmpId'))%>%
-      subset(!is.na(Sample_ID))%>%
-    distinct()%>%
-      tidyr::replace_na(list(LocationName='None'))
-  }
-  else{
-    full.bmd<-mid.bmd%>%
-      #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
-      full_join(sampChem)%>%
-      tidyr::replace_na(list(End_Point='NoData'))%>%
-#      rename(Chemical_ID<-'zf.cid')%>%
-      right_join(endpointDetails)%>%
-      subset(!is.na(cas_number))%>%
-      distinct()%>%select(-c('End_Point'))%>%
-      tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
-  }
-
-  ##now we fix QC values
-  full.bmd <- full.bmd%>%
-    mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num%in%c(4,5),'Moderate','Good')))%>%
-    rowwise()%>%
-    mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
-      select(-c(qc_num,BMD_Analysis_Flag))
-  
-
-
-  return(full.bmd)
-}
+# combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
+# 
+#   ##read in the BMD files formatted by the zf module
+#   print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
+#   cols <- required_bmd_columns$bmd
+#   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
+# 
+#   mid.bmd<-do.call(rbind,files)%>%
+#       dplyr::select(cols)
+# 
+#   ##some of the chemicals have BMDs that were computed twice and i'm not sure which
+#   ##are which anymore. as such, i incorporate the files in chronological order
+#   ##and remove the second values
+#   dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
+#   if(length(dupes)>0){
+#     mid.bmd<-mid.bmd[-dupes,]
+#   }
+#   
+#   if(is_extract){
+#     sdSamp<-sampChem%>%
+#       tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
+#       select(-sub)
+# 
+#     full.bmd<-mid.bmd%>%
+#       dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
+#       dplyr::select(-Chemical_ID)%>%
+#       full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+# 
+#     #fix up sample ids
+#     nas<-which(is.na(full.bmd$Sample_ID))
+#     full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
+# 
+#     #now fix up sample names
+#     new.nas<-which(is.na(full.bmd$SampleName))
+#     full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
+# 
+#     full.bmd<-full.bmd%>%
+#       tidyr::replace_na(list(End_Point='NoData'))%>%
+#       right_join(endpointDetails)%>%
+#       dplyr::select(-c('End_Point','tmpId'))%>%
+#       subset(!is.na(Sample_ID))%>%
+#     distinct()%>%
+#       tidyr::replace_na(list(LocationName='None'))
+#   }
+#   else{
+#     full.bmd<-mid.bmd%>%
+#       #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
+#       full_join(sampChem)%>%
+#       tidyr::replace_na(list(End_Point='NoData'))%>%
+# #      rename(Chemical_ID<-'zf.cid')%>%
+#       right_join(endpointDetails)%>%
+#       subset(!is.na(cas_number))%>%
+#       distinct()%>%select(-c('End_Point'))%>%
+#       tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
+#   }
+# 
+#   ##now we fix QC values
+#   full.bmd <- full.bmd%>%
+#     mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num%in%c(4,5),'Moderate','Good')))%>%
+#     rowwise()%>%
+#     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
+#       select(-c(qc_num,BMD_Analysis_Flag))
+#   
+# 
+# 
+#   return(full.bmd)
+# }
 
 
 #'combineChemicalEndpointDataV2 produces the summary statistics from the BMD analysis
@@ -555,7 +552,7 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
       f%>%
        subset(combined%in%newChemEps[[i]])%>% ##filter out those that we want
         dplyr::select(cols)%>%
-        mutate(zf.cid=as.character(Chemical_ID))%>%
+        mutate(zf.cid=as.character(Chemical_ID))%>% ##why did i do this?
         rename(ChemicalId='zf.cid')%>%
         subset(X_vals!="NULL")%>%
         mutate(X_vals=as.numeric(X_vals))%>%
@@ -677,7 +674,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
         mutate(combined=paste(Chemical_ID,End_Point))%>% #get common index
         subset(combined%in%newChemEps[[i]])%>% ##filter out those that we want
         dplyr::select(required_bmd_columns$doseRep)%>%
-         mutate(zf.cid=as.character(Chemical_ID))%>%
+         mutate(zf.cid=as.character(Chemical_ID))%>% ##why did i do this?
        rename(ChemicalId='zf.cid')
     })
 
@@ -714,9 +711,13 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
 #' @param chem.files new chemical bmd files
 #' @param extract.files new extract bmd files
 buildDB<-function(chem.files=c(),extract.files=c()){
+  
+  ##these are the subdirectories where we store the original data (Small enough for github)
   chem_dirs=c('phase_I_II_III')#,'zf_morphology')
   extract_dirs=c('extracts')
   
+  
+  ##here are the files we need in the end - bmds, dose response, and curv fit files for chemicals and extracts
   bmd.files<-c()
   dose.files<-c()
   curv.files<-c()
@@ -725,6 +726,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   e.dose<-c()
   e.curve<-c()
   
+  ##first we collect the files that are output from the bmd code
   for(chem in chem_dirs){
     path=paste0(data.dir,'/',chem,'/')
     bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_all_qc.csv',
@@ -751,19 +753,20 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   }
   
   
-  ##read in files
+  ## now we read read in files
   if(length(chem.files)==3){
     #path=paste0(data.dir,'/',chem,'/')
+    ##TODO: fix this to use a named list
     bmd.files<-c(bmd.files,chem.files[1])#paste0(path,'bmd_vals_all_qc.csv'))
     dose.files<-c(dose.files,chem.files[3])#paste0(path)'dose_response_vals_all_qc.csv'
     curv.files<-c(curv.files,chem.files[2])#paste0(path,'fit_vals_all_qc.csv'))
-  }
-  else{
+  }else{
     message("Not adding any chemical files")
   }
   #for(ext in extract.dirs){
   if(length(extract.files)==3){
     #        path=paste0(data.dir,'/',ext,'/')
+    ##TODO fix this to add a named list
     e.bmd<-c(e.bmd,extract.files[1])#paste0(path,'bmd_vals_all_qc.csv'))
     e.dose<-c(e.dose,extract.files[3])##paste0(path,'dose_response_vals_all_qc.csv'))
     e.curve<-c(e.curve,extract.files[2])#paste0(path,'fit_vals_all_qc.csv'))
@@ -796,6 +799,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   
   nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
   print(length(nas))
+  
   to.remove<-setdiff(nas,sampChem$Chemical_ID)
   print(length(to.remove))
   bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
