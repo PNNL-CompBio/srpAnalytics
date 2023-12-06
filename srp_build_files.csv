@@ -1,7 +1,0 @@
-name,data_type,sample_type,location,version
-p12,morphology,chemical,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/raw_files/zf_morphology_data_335_chemicals_2020DEC16_fixed.csv,1
-p12,behavior,chemical,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/raw_files/344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_merged.csv.gz,1
-p3,morphology,chemical,https://www.dropbox.com/sh/zg0q6wl13a3uo99/AACFZprOKkbvydjfoDI3oZo-a/Tanguay%20Phase%203%20zf%20morphology%20data%20PNNL%202021MAR23.csv,1
-p3,behavior,chemical,https://www.dropbox.com/sh/zg0q6wl13a3uo99/AADd1QBStMguW9qYgzH2eatJa/Tanguay%20Phase%203%20zf%20LPR%20data%20PNNL%202021MAR23.csv,1
-pfas,morphology,chemical,https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABxsOLgwlv7-_HTZ0xaAIlNa/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv,1
-pfas,behavior,chemical,https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABgzjaRPteU1EZIhnW9zv2Ka/zf%20EPA%20PFAS%20LPR_PNNL_05-28-2021.csv,1
