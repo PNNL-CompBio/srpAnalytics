@@ -1,0 +1,167 @@
+---
+title: "Home page markup"
+author: "Sara Gosline"
+date: "2023-07-11"
+output: html_document
+---
+
+Here we evaluate the zebrafish gene expression data to determine how best to summarize in website
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(ggplot2)
+library(dplyr)
+
+##og gernes
+exp<-read_csv('allGeneEx.csv')
+deg<-subset(exp,indication==1)
+##summaries
+deg2<-read_csv('srpDEGstats.csv')
+
+
+expo<-read_csv('../exposome/sigGeneStats.csv')
+
+
+```
+
+## Evaluate gene-related plots
+
+We have a lot of different types of plots we can do, the main goal is to figure out which visualizations work best for each type of data
+
+
+## Chemicals measured
+
+```{r human data}
+expo|>
+  subset(!is.na(Project))|>
+           group_by(Project)|>
+    summarize(numChems=n_distinct(Chemical_ID))|>
+  ggplot(aes(x=Project,y=numChems))+geom_bar(stat='identity')
+
+```
+Only one drug has multiple concentrations...
+
+
+## Zebrafish genes measured
+
+```{r genes}
+
+deg |> 
+  subset(adj_p_value<0.05)|>
+  mutate(UpOrDown=ifelse(Log2FoldChange>0,'Up','Down'))|>
+  group_by(cas_number,UpOrDown)|>
+  summarize(NumDiffEx=n_distinct(Gene))|>
+  ggplot(aes(x=cas_number,y=NumDiffEx,fill=UpOrDown))+geom_bar(stat='identity',position='dodge')+
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+  ggtitle("Number of differentially expressed genes by chemical")
+
+```
+
+## Overlap between chemicals
+
+```{r overlap}
+
+library(UpSetR)
+
+emat <- deg |>
+  #subset(!is.na(Project))|>
+  dplyr::select(cas_number,Gene)|>
+  distinct()|>
+  dplyr::mutate(present=1)|>
+  tidyr::pivot_wider(names_from=cas_number,values_from=present,values_fill=list(present=0))
+
+upset(as.data.frame(emat),nsets=21,
+       order.by = c("freq"), decreasing = c(TRUE))
+
+```
+
+
+## List of chemicals with gene info
+
+```{r table}
+chems<-read_csv('../chemicals.csv')
+tab<- deg2 |>
+  left_join(chems)|>
+  distinct()|>
+  arrange(desc(nGenes))|>
+  dplyr::select(PREFERRED_NAME,AVERAGE_MASS,MOLECULAR_FORMULA,Concentration,nGenes,chemical_class)|>
+  distinct()
+
+tab$AVERAGE_MASS<-tidyr::replace_na(as.numeric(tab$AVERAGE_MASS),0)
+
+
+tab
+
+ggplot(tab,aes(x=AVERAGE_MASS,y=nGenes,col=chemical_class,size=Concentration))+geom_point()
+
+```
+
+## List of genes
+
+I"m not sure how to evaluate this - put the gene name, the species, and a link? 
+
+```{r gene table}
+library(kableExtra)
+
+fintab<-deg|>
+  subset(Gene!='None')|>
+  subset(adj_p_value<0.05)|>
+  group_by(GeneID,Gene)|>
+  summarize(NumChems=n_distinct(cas_number))|>
+  subset(NumChems>0)|>
+  distinct()|>
+  arrange(desc(NumChems))
+
+ kableExtra::kbl(fintab)|>
+  kable_paper() %>%
+  scroll_box(width = "100%", height = "400px")
+ 
+
+```
+
+This should be the main table - list all the genes by number of experiments they show up in!
+
+
+## Gene specific values
+
+David proposed two gene-specific figure - summary of drug activity in table and bar plot. 
+
+
+```{r gene specific plot}
+library(kableExtra)
+
+#doGenePlot<-function(genename='itchb'){
+for(genename in fintab$Gene[1:5]){
+  genevals<-subset(deg,Gene==genename)|>
+    distinct()
+ 
+  
+  p<-ggplot(genevals,aes(x=reorder(cas_number,Log2FoldChange),                  
+                         y=Log2FoldChange,fill=Concentration))+
+    geom_bar(stat='identity',position='dodge')+
+    ggtitle(paste('Fold change of',genename,'by chemical'))+
+      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+  tab<-subset(exp,Gene==genename)|>
+    left_join(chems)|>
+    distinct()|>
+    arrange(adj_p_value)|>
+  dplyr::select(PREFERRED_NAME,Concentration,Log2FoldChange,adj_p_value)|>
+  distinct()
+  
+  p2<-kableExtra::kbl(tab) %>%
+    kable_paper() %>%
+    scroll_box(width = "100%", height = "400px")
+
+ # print(p2)
+  print(p)
+}
+
+#sapply(fintab$Gene[1:5],doGenePlot)
+
+```
+
+```{r gene specific table}
+
+```
