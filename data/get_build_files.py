@@ -27,7 +27,7 @@ def get_build_files(version='1'):
         if ver !=  version:
             next
         print(fname)
-        new_fname = '/tmp/'+fname+'_'+dtype+'.csv'
+        new_fname = fname+'_'+dtype+'.csv'
         tmpfile=wget.download(loc)
         os.rename(tmpfile,new_fname)
         if dtype=='morphology':
@@ -40,7 +40,8 @@ def get_build_files(version='1'):
 def get_processed_files():
     '''
     this function gets previously processed data to be added to portal. these
-    files will all have `bmd` `dose_response` or `fit` in the title
+    files will all have `bmd` `dose_response` or `fit` in the title to be used
+    in the database build
     '''
     fdict = dict()
     return fdict()
@@ -48,7 +49,7 @@ def get_processed_files():
 
 def get_sample_files():
     '''
-    this function downloads sample files
+    this function downloads sample files as part of the database build
     '''
 rawfiles = get_build_files()
 

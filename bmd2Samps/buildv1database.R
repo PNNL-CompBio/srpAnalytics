@@ -233,7 +233,6 @@ getNewChemicalClass<-function(data.dir){
 buildSampleData<-function(data.dir,chemMeta){
     ##New data provided by michael
     sampChem <- read.csv(paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'),fileEncoding="UTF-8-BOM")%>%
-                                        #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         dplyr::select(required_sample_columns)%>%
         subset(SampleNumber!='None')%>%
         subset(cas_number!='NULL')%>%
