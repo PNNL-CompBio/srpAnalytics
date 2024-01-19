@@ -26,8 +26,6 @@ data.dir<-'/bmd2Samps/data/'
 out.dir<-'/tmp/'
 #out.dir<-'./'
 
-
-
 ##################################
 #Master ID tables
 #The database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
@@ -363,79 +361,6 @@ buildSampleData<-function(data.dir,chemMeta){
     return(finalSampChem)
 
 }
-#'combineChemicalEndpointData produces the summary statistics from the BMD analysis
-#'@param bmdfiles a list of files that come from the BMD pipeline
-#'@param is_extract - if our chemical id is an extract we use a different metadata
-#'@return a data.frame
-##We will release an 'endpoint file for each condition'
-# combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
-# 
-#   ##read in the BMD files formatted by the zf module
-#   print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
-#   cols <- required_bmd_columns$bmd
-#   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
-# 
-#   mid.bmd<-do.call(rbind,files)%>%
-#       dplyr::select(cols)
-# 
-#   ##some of the chemicals have BMDs that were computed twice and i'm not sure which
-#   ##are which anymore. as such, i incorporate the files in chronological order
-#   ##and remove the second values
-#   dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
-#   if(length(dupes)>0){
-#     mid.bmd<-mid.bmd[-dupes,]
-#   }
-#   
-#   if(is_extract){
-#     sdSamp<-sampChem%>%
-#       tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
-#       select(-sub)
-# 
-#     full.bmd<-mid.bmd%>%
-#       dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
-#       dplyr::select(-Chemical_ID)%>%
-#       full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
-# 
-#     #fix up sample ids
-#     nas<-which(is.na(full.bmd$Sample_ID))
-#     full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
-# 
-#     #now fix up sample names
-#     new.nas<-which(is.na(full.bmd$SampleName))
-#     full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
-# 
-#     full.bmd<-full.bmd%>%
-#       tidyr::replace_na(list(End_Point='NoData'))%>%
-#       right_join(endpointDetails)%>%
-#       dplyr::select(-c('End_Point','tmpId'))%>%
-#       subset(!is.na(Sample_ID))%>%
-#     distinct()%>%
-#       tidyr::replace_na(list(LocationName='None'))
-#   }
-#   else{
-#     full.bmd<-mid.bmd%>%
-#       #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
-#       full_join(sampChem)%>%
-#       tidyr::replace_na(list(End_Point='NoData'))%>%
-# #      rename(Chemical_ID<-'zf.cid')%>%
-#       right_join(endpointDetails)%>%
-#       subset(!is.na(cas_number))%>%
-#       distinct()%>%select(-c('End_Point'))%>%
-#       tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
-#   }
-# 
-#   ##now we fix QC values
-#   full.bmd <- full.bmd%>%
-#     mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num%in%c(4,5),'Moderate','Good')))%>%
-#     rowwise()%>%
-#     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
-#       select(-c(qc_num,BMD_Analysis_Flag))
-#   
-# 
-# 
-#   return(full.bmd)
-# }
-
 
 #'combineChemicalEndpointDataV2 produces the summary statistics from the BMD analysis
 #'@param bmdfiles a list of files that come from the BMD pipeline
@@ -696,11 +621,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
           full_join(sdSamp,by='tmpId')%>%
                                         select(-tmpId)#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
 
-    }#else{
-    #    full.bmd<-full.bmd%>%
-    #    subset(Chemical_ID%in%sampChem$Chemical_ID)
-       # full.bmd <- rename(full.bmd,Sample_ID='Chemical_ID')
-  # }
+    }
   return(unique(full.bmd))
 }
 
@@ -835,7 +756,6 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   write.csv(doseReps,file=paste0(out.dir,'zebrafishChemDoseResponse.csv'),row.names = FALSE, quote = TRUE)
   write.csv(edrs,file=paste0(out.dir,'zebrafishSampDoseResponse.csv'),row.names = FALSE, quote = TRUE)
   
-  
   ##chemical to sample
   chemSamp<-sampChem%>%
     dplyr::select(sample_chem_columns)%>%
@@ -878,18 +798,13 @@ generateSummaryStats<-function(){
     summarize(`Evaluated in Zebrafish`=n_distinct(Chemical_ID),
               `Endpoints Measured`=sum(`Zebrafish endpoints`))
   
-  
-
   chem.eps<-total.chems%>%
     left_join(sampChem)%>%
     left_join(bmds)%>%
     mutate(across(where(is.numeric), ~ replace_na(.x, 0)))
   
   write.table(chem.eps,paste0(out.dir,'chemCounts_v2.tsv'),row.names=F,col.names=T,sep='\t')
-
-  
 }
-
 
 #' main method
 #' Parsers arguments
@@ -900,7 +815,6 @@ main<-function(){
                         help='The subsequent files are samples')
     parser$add_argument('-c','--chemicals',dest='chem_files',default='',
                         help='The subsequent files are chemicals')
-
 
     args <- parser$parse_args()
                                           #if we are adding new data, add to additional data in repo

@@ -7,5 +7,5 @@ RUN R -e "install.packages('argparse', dependencies=TRUE,repos='http://cran.rstu
 COPY . bmd2Samps
 WORKDIR bmd2Samps
 
-ENTRYPOINT ["Rscript","buildv2database.R"]
+ENTRYPOINT ["Rscript","buildv3database.R"]
 VOLUME ["/tmp"]
