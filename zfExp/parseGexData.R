@@ -1,6 +1,6 @@
 ##loadGeneExpressionDAta
 
-library(readxl)
+library(rio)
 library(dplyr)
 library(tidyr)
 
@@ -12,9 +12,12 @@ schema<-data.frame(Project=c(),
                    Chemical_ID=c())
 
 
-tab<-readxl::read_xlsx('./ZF_gex.xlsx',skip=1)
+data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
 
-chem<-read.csv('./chemicals.csv')|>
+tab<-rio::import(paste0(data.dir,'/ZF_gex.xlsx'),skip=1)
+args = commandArgs(trailingOnly=TRUE)
+
+chem<-readr::read_csv(args[1])|>
   dplyr::select(Chemical_ID,cas_number)|>distinct()
 
 ind_res<-tab%>% tidyr::pivot_longer(ends_with("Indication"),
@@ -23,10 +26,10 @@ ind_res<-tab%>% tidyr::pivot_longer(ends_with("Indication"),
   mutate(condition=stringr::str_remove(condition,'_DEG_Indication'))
 
 ##gene info - need to get basic info about gene and link to zfin db
-geneinfo<-readr::read_csv('allianceGenomeInfo.csv',col_names=c('zfinId','secondId','symbol','name','organism','description'))
+geneinfo<-readr::read_csv(paste0(data.dir,'/allianceGenomeInfo.csv'),col_names=c('zfinId','secondId','symbol','name','organism','description'))
 
 
-fc_res<-tab%>% 
+fc_res<-tab%>%
   tidyr::pivot_longer(ends_with("Log2FoldChange"),names_to='condition',values_to='Log2FoldChange')%>%
   dplyr::select(GeneID,Gene,condition,Log2FoldChange)%>%
   mutate(condition=stringr::str_remove(condition,'_Log2FoldChange'))
@@ -46,7 +49,7 @@ full_tab<-ind_res%>%
 ##one concentration is in ng/mL
 ## it is for 1746-01-6 (chem 283) - and mW is 322 g/mol
 ## so 1ng/mL = 1000 ug/mL 322 ~ 3 uM
-## ( µg/mL ) = ( µM ) * ( MW in KD) 
+## ( µg/mL ) = ( µM ) * ( MW in KD)
 
 treat_names=data.frame(treatment=c('Acenaph_16PAH','BbF_16PAH', 'BjF_16PAH','BkF_16PAH',
                                    'DBahP_16PAH','DBaiP_16PAH','Fluoran_16PAH','Phenan_16PAH',
@@ -77,7 +80,7 @@ allgenes<-full_tab|>
   left_join(chem)|>
   mutate(Concentration=as.numeric(stringr::str_replace(Conc,'uM','')))|>
   select(-Conc)
-  
+
 
 diffex <- allgenes|>
   subset(indication==1)
@@ -96,7 +99,7 @@ res<-res|>
 
 
 ##need to get mapping to drug name
-write.table(res,file ='srpDEGstats.csv',sep=',',quote=F,row.names=F,col.names=T)
-write.table(allgenes,file='allGeneEx.csv',sep=',',quote=F,row.names=F,col.names=T)
-  
-  
+write.table(res,file ='/tmp/srpDEGstats.csv',sep=',',quote=F,row.names=F,col.names=T)
+write.table(allgenes,file='/tmp/allGeneEx.csv',sep=',',quote=F,row.names=F,col.names=T)
+
+
