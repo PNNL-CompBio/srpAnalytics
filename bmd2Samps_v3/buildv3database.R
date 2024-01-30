@@ -17,6 +17,56 @@ library(tidyr)
 #' 7- ZF curves to plot for samples
 #' 8- new for v2: chemical metdata
 #' 9- new for v2: sample metadata
+#'
+#########################################
+# Table schemas
+##########################################
+##required from OSU database of sample values, currently a mishmash
+required_sample_columns<-c("ClientName","SampleNumber","date_sampled","sample_matrix","technology",
+                          # "Sample_ID",
+                           "projectName","SampleName","LocationLat","projectLink",
+                           "LocationLon","LocationName","LocationAlternateDescription",
+                           "AlternateName","cas_number","date_sample_start",
+                           "measurement_value","measurement_value_qualifier","measurement_value_unit",
+                           "measurement_value_molar","measurement_value_molar_unit",
+                           "water_concentration","water_concentration_qualifier","water_concentration_unit",
+                           "water_concentration_molar","water_concentration_molar_unit")
+
+##required for comptox-derived mapping files
+required_comptox_columns <- c("INPUT","DTXSID","PREFERRED_NAME","INCHIKEY","SMILES","MOLECULAR_FORMULA",
+                              "AVERAGE_MASS","PUBCHEM_DATA_SOURCES")
+
+
+##output tables
+sample_chem_columns <-c('Sample_ID','Chemical_ID',"measurement_value","measurement_value_qualifier","measurement_value_unit",
+                           "measurement_value_molar","measurement_value_molar_unit",
+                           "water_concentration","water_concentration_qualifier","water_concentration_unit",
+                           "water_concentration_molar","water_concentration_molar_unit")
+
+samp_columns <-c("Sample_ID","ClientName","SampleNumber","date_sampled","sample_matrix","technology",
+                "projectName","SampleName","LocationLat","projectLink",
+                "LocationLon","LocationName","LocationAlternateDescription",
+                "AlternateName","date_sample_start")
+
+
+
+##new for the chemical table
+required_chem_columns<-c('Chemical_ID','cas_number','DTXSID','PREFERRED_NAME','INCHIKEY',
+                         'SMILES','MOLECULAR_FORMULA','AVERAGE_MASS','PUBCHEM_DATA_SOURCES',
+                         'chem_source','chemical_class','chemDescription')
+
+required_mapping_columns<-c("SampleNumber","Sample_ID",'zf_lims_id')## added these to complete mapping
+#extra columns: "bioassay_sample_from_lims","parent_samples_from_lims","child_samples_from_lims")
+
+
+##required from bmd calculation
+##add in Sample_ID or Chemical_ID depending on table
+required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD50',"Min_Dose","Max_Dose",
+                                "AUC_Norm","DataQC_Flag","BMD_Analysis_Flag"),#,"BMD10_Flag","BMD50_Flag"),
+                          doseRep=c('Chemical_ID',"End_Point","Dose","Response","CI_Lo","CI_Hi"),
+                          fitVals=c('Chemical_ID',"End_Point","X_vals","Y_vals"))
+
+
 
 #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
@@ -143,7 +193,7 @@ getChemMetadata<-function(data.dir,
     ##here we join the chemical metadata from the comptox dashboard
 
 
-    chemMeta<-do.call(rbind,lapply(comptoxfiles,function(x) rio::import(paste0(data.dir,'/',x),which=2)|>#,
+    chemMeta<-do.call(rbind,lapply(comptoxfiles,function(x) rio::import(paste0(data.dir,'/',x))|>#,
                                                                               #sheet='Main Data')%>%
                                       select(required_comptox_columns)))%>%
         rename(cas_number='INPUT')%>%
@@ -180,7 +230,7 @@ getChemMetadata<-function(data.dir,
 #' @return data.frame
 getEndpointMetadata<-function(data.dir){
                                         #here is our pre-defined dictionary
-    endpointDetails<-rio::import(paste0(data.dir,'/SuperEndpoint Mapping 2021NOV04.xlsx'),which=1)|>#,
+    endpointDetails<-rio::import(paste0(data.dir,'/SuperEndpoint%20Mapping%202021NOV04.xlsx'),which=4)|>#,
                                        #sheet='Dictionary')%>%
         #subset(`Portal Display`=='Display')%>%
         rename(End_Point='Abbreviation',`End_Point_Name`='Simple name (<20char)')%>%
@@ -202,7 +252,7 @@ getEndpointMetadata<-function(data.dir){
 #'@return data.frame
 getNewChemicalClass<-function(data.dir){
 
-  pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=1)|>#,
+  pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=4)|>#,
                     #     sheet='Master summary-PAHs')%>%
       dplyr::select(cas_number='casrn')%>%
       mutate(Classification='PAH')
@@ -210,7 +260,7 @@ getNewChemicalClass<-function(data.dir){
   extras<-data.frame(cas_number=c("3074-03-01","7496-02-08","6373-11-01"),
                      Classification='PAH')
 
-  non.pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=2)|>#,
+  non.pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=4)|>#,
 #                             sheet='Master Summary-Non-PAHs')%>%
     dplyr::select(cas_number='casrn',Classification='classification')
 
