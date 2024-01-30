@@ -5,6 +5,7 @@ require(dplyr)
 require(rio)
 require(argparse)
 require(xml2)
+library(tidyr)
 
 ##The data release will be comprised of 9 files (note change from v1!)
 #' 1- list of environmental samples and the chemical composition (curated sample data)
@@ -19,7 +20,7 @@ require(xml2)
 
 #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
-data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/'
+data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
 
 #data.dir='./data/'
 ##output directory is fixed
@@ -33,8 +34,7 @@ out.dir<-'/tmp/'
 ##################################
 
 chemIdMasterTable<-function(casIds){
-  map <- read.csv2(paste0(data.dir,'chemicalIdMapping.csv'),header=TRUE,sep=',',
-                   fileEncoding="UTF-8-BOM")%>%
+  map <- rio::import(paste0(data.dir,'/chemicalIdMapping.csv'))%>%
     dplyr::select(cas_number,zf.cid,Chemical_ID,chemical_class)%>%
       distinct()%>%
       subset(!is.na(cas_number))
@@ -51,7 +51,8 @@ chemIdMasterTable<-function(casIds){
     newMap <- rbind(map, data.frame(cas_number=missing,zf.cid=rep('',length(missing)),
                                     Chemical_ID=seq(maxId,newMax),
                                     chemical_class=rep('',length(missing))))
-    write.csv(newMap,paste0(data.dir,'chemicalIdMapping.csv'),row.names = F)
+    #TODO: how do we update with new ids?
+    #write.csv(newMap,paste0(data.dir,'chemicalIdMapping.csv'),row.names = F)
     map <- newMap
   }
   return(map)
@@ -60,7 +61,7 @@ chemIdMasterTable<-function(casIds){
 
 sampIdMasterTable<-function(existingSampNumbers){
 
-  map <- read.csv(paste0(data.dir,'sampleIdMapping.csv'),fileEncoding="UTF-8-BOM")%>%
+  map <- rio::import(paste0(data.dir,'/sampleIdMapping.csv'))%>%
     select(Sample_ID,SampleNumber)%>%
     distinct()
 
@@ -71,7 +72,7 @@ sampIdMasterTable<-function(existingSampNumbers){
     newMax <- maxId + length(missing)-1
     newMap <- rbind(map, data.frame(Sample_ID=seq(maxId,newMax),
                                     SampleNumber=missing))
-    write.csv(newMap,paste0(data.dir,'sampleIdMapping.csv'),row.names = F)
+    ##write.csv(newMap,paste0(data.dir,'sampleIdMapping.csv'),row.names = F)
     map <- newMap
   }
   return(map)
@@ -133,7 +134,7 @@ getChemMetadata<-function(data.dir,
                                          'CCD-Batch-Search_2022-01-26_10_28_30.xlsx')){    ##This mapping file consumes data from OSU to match identifiers to CAS
 
      ##we have curated descriptions for each chemical
-   curatedDesc <- rio::import(paste0(data.dir,'ChemicalDescriptions.xlsx'))%>%
+   curatedDesc <- rio::import(file=paste0(data.dir,'/ChemicalDescriptions.xlsx'),which=1)%>%
         select(cas_number='CASRN',chemDescription='USE CATEGORY/DESCRIPTION')
 
    ##we have chemical source and class information
@@ -142,8 +143,8 @@ getChemMetadata<-function(data.dir,
     ##here we join the chemical metadata from the comptox dashboard
 
 
-    chemMeta<-do.call(rbind,lapply(comptoxfiles,function(x) readxl::read_xlsx(paste0(data.dir,x),
-                                                                              sheet='Main Data')%>%
+    chemMeta<-do.call(rbind,lapply(comptoxfiles,function(x) rio::import(paste0(data.dir,'/',x),which=2)|>#,
+                                                                              #sheet='Main Data')%>%
                                       select(required_comptox_columns)))%>%
         rename(cas_number='INPUT')%>%
         left_join(chemicalClasses)%>% ##add in chemical class
@@ -179,8 +180,8 @@ getChemMetadata<-function(data.dir,
 #' @return data.frame
 getEndpointMetadata<-function(data.dir){
                                         #here is our pre-defined dictionary
-    endpointDetails<-readxl::read_xlsx(paste0(data.dir,'SuperEndpoint Mapping 2021NOV04.xlsx'),
-                                       sheet='Dictionary')%>%
+    endpointDetails<-rio::import(paste0(data.dir,'/SuperEndpoint Mapping 2021NOV04.xlsx'),which=1)|>#,
+                                       #sheet='Dictionary')%>%
         #subset(`Portal Display`=='Display')%>%
         rename(End_Point='Abbreviation',`End_Point_Name`='Simple name (<20char)')%>%
         rename(endPointLink='Ontology Link')%>%
@@ -201,16 +202,16 @@ getEndpointMetadata<-function(data.dir){
 #'@return data.frame
 getNewChemicalClass<-function(data.dir){
 
-  pahs<-readxl::read_xlsx(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),
-                         sheet='Master summary-PAHs')%>%
+  pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=1)|>#,
+                    #     sheet='Master summary-PAHs')%>%
       dplyr::select(cas_number='casrn')%>%
       mutate(Classification='PAH')
 
   extras<-data.frame(cas_number=c("3074-03-01","7496-02-08","6373-11-01"),
                      Classification='PAH')
 
-  non.pahs<-readxl::read_xlsx(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),
-                             sheet='Master Summary-Non-PAHs')%>%
+  non.pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=2)|>#,
+#                             sheet='Master Summary-Non-PAHs')%>%
     dplyr::select(cas_number='casrn',Classification='classification')
 
   full.class<-rbind(pahs,extras,non.pahs)
@@ -238,7 +239,7 @@ getNewChemicalClass<-function(data.dir){
 #' @return data.frame
 buildSampleData<-function(data.dir,chemMeta){
     ##New data provided by michael
-    sampChem <- read.csv(paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'),fileEncoding="UTF-8-BOM")%>%
+    sampChem <- rio::import(paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'))%>%
                                         #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         dplyr::select(required_sample_columns)%>%
         subset(SampleNumber!='None')%>%
@@ -252,7 +253,7 @@ buildSampleData<-function(data.dir,chemMeta){
 #        select(-c(Sample_ID))#,Chemical_ID)) ##These two are added in the 4/27 version of the file
 
     ##data added 1/19/2022
-    newSamp <- readxl::read_xlsx(paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
+    newSamp <- rio::import(paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
         dplyr::select(required_sample_columns)%>%
       mutate(LocationLon=LocationLon*-1)
 
@@ -329,7 +330,7 @@ buildSampleData<-function(data.dir,chemMeta){
         distinct()
 
     ##now we have one more rename of samples and metadata
-    sampleNameRemap<-readxl::read_xlsx(paste0(data.dir,'/envSampCleanMapping.xlsx'))%>%
+    sampleNameRemap<-rio::import(paste0(data.dir,'/envSampCleanMapping.xlsx'),which=1)%>%
       dplyr::select(Sample_ID,date_sampled,sample_matrix,technology,#projectName='ProjectName',SampleName='NewSampleName',
                     #LocationName='NewLocationName')%>%
                     ProjectName,NewSampleName,NewLocationName)%>%
@@ -372,7 +373,7 @@ combineV2ChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpo
   ##read in the BMD files formatted by the zf module
   print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
   cols <- required_bmd_columns$bmd
-  files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
+  files <- lapply(bmdfiles,function(x) rio::import(x)%>%dplyr::select(cols))
 
   mid.bmd<-do.call(rbind,files)
 
@@ -446,7 +447,7 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
 
     print(paste('Combining fit files:',paste(bmdfiles,collapse=',')))
     cols <- required_bmd_columns$fitVals
-    files <- lapply(bmdfiles,function (x) read.csv(x)%>%dplyr::select(cols))
+    files <- lapply(bmdfiles,function (x) rio::import(x)%>%dplyr::select(cols))
 
     ##get chemicals and EPs in each file, so we can only keep the newest ones
     chemEps<-lapply(files,function(x){
@@ -522,10 +523,10 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
 #' Reads in full MASV class annotations and assigns values to chemicals
 #' @return data.frame
 masvChemClass<-function(data.dir){
-  library(tidyr)
-  library(dplyr)
-  classes<-rio::import(paste0(data.dir,'MASV Classifications 2021.xlsx'),
-                             sheet = 'MASV15 Classifications')
+ # library(tidyr)
+ # library(dplyr)
+  classes<-rio::import(paste0(data.dir,'/MASV%20Classifications%202021.xlsx'),which=1)
+#                             sheet = 'MASV15 Classifications')
   source=c("pharmacological","personalCare","industrial","pulpAndPaper","pestProduct","natural",'pestRodenticide',
            "consumerProduct","pestHerbicide","pestInsecticide",'pestFungicide','pestGeneral','flameRetardant')
 
@@ -648,7 +649,8 @@ buildDB<-function(chem.files=c(),extract.files=c()){
 
   ##first we collect the files that are output from the bmd code
   for(chem in chem_dirs){
-    path=paste0(data.dir,'/',chem,'/')
+      path=paste0(data.dir,'/',chem,'/')
+#print(path)
     bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_all_qc.csv',
                                          'bmd_vals_2021_05_18_all_phase_III_morpho.csv',
                                          'bmd_vals_2021_04_26.csv',
@@ -768,7 +770,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
 generateSummaryStats<-function(){
 
   ##let's get all the chemicals first
-  chemMeta<-read.csv(paste0(out.dir,'chemicals.csv'))
+  chemMeta<-rio::import(paste0(out.dir,'chemicals.csv'))
   chemClasses<-chemMeta%>%
     dplyr::select(Chemical_ID,chemical_class)%>%
     distinct()%>%
@@ -781,7 +783,7 @@ generateSummaryStats<-function(){
     summarize(`total chemicals`=n_distinct(Chemical_ID))
 
   ##how many samples is that chemical in?
-  sampChem<-read.csv(paste0(out.dir,'sampleToChemicals.csv'),check.names=F)%>%
+  sampChem<-rio::import(paste0(out.dir,'sampleToChemicals.csv'),check.names=F)%>%
     mutate(meas=as.numeric(measurement_value))%>%
     subset(!is.na(meas))%>%
     left_join(chemClasses)%>%
@@ -789,7 +791,7 @@ generateSummaryStats<-function(){
     summarize(`Measured in samples`=n_distinct(Chemical_ID),`Number of Samples`=n_distinct(Sample_ID))
 
   #how many zebrafish experiments have that chemical?
-  bmds <-read.csv(paste0(out.dir,'zebrafishChemDoseResponse.csv'),check.names=F)%>%
+  bmds <-rio::import(paste0(out.dir,'zebrafishChemDoseResponse.csv'),check.names=F)%>%
     group_by(Chemical_ID)%>%
     summarize(`Zebrafish endpoints`=n_distinct(`End_Point_Name`))%>%
     left_join(chemClasses)%>%
