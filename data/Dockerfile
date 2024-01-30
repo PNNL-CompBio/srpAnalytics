@@ -9,8 +9,8 @@ COPY requirements.txt /requirements.txt
 RUN /usr/local/bin/python -m pip install --upgrade pip
 RUN pip3 install -r /requirements.txt
 
-ADD *.py .
-ADD srp_build_files.csv .
+COPY srp_build_files.csv .
+COPY get_build_files.py .
 
-ENTRYPOINT ["python3", "get_build_files.py"]
+ENTRYPOINT ["python3", "main.py"]
 VOLUME ["/tmp"]

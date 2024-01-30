@@ -28,7 +28,7 @@ cp $p12_lpr_1 temp/lpr0_1.csv
 #################################################### phase III data
 ##phase 3 data is on dropbox, we need to pull it to temp directory
 #https://www.dropbox.com/sh/zg0q6wl13a3uo99/AAA0cdAK_fJwkJqpvF_HH6DWa?dl=0/
-p3_morph='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AACFZprOKkbvydjfoDI3oZo-a/Tanguay%20Phase%203%20zf%20morphology%20data%20PNNL%202021MAR23.csv -O temp/morph1.csv'
+p3_morph='curl https://www.dropbox.com/sh/zg0q6wl13a3uo99/AACFZprOKkbvydjfoDI3oZo-a/Tanguay%20Phase%203%20zf%20morphology%20data%20PNNL%202021MAR23.csv -O temp/morph1.csv'
 p3_lpr='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AADd1QBStMguW9qYgzH2eatJa/Tanguay%20Phase%203%20zf%20LPR%20data%20PNNL%202021MAR23.csv -O temp/lpr1.csv'
 
 echo $p3_morph

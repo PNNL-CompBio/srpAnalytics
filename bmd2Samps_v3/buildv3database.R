@@ -2,9 +2,10 @@
 ## gene, chemical, and sample metadata
 
 require(dplyr)
-require(readxl)
+require(rio)
 require(argparse)
 require(xml2)
+library(tidyr)
 
 ##The data release will be comprised of 9 files (note change from v1!)
 #' 1- list of environmental samples and the chemical composition (curated sample data)
@@ -19,14 +20,12 @@ require(xml2)
 
 #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
-data.dir<-'/bmd2Samps/data/'
+data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
 
 #data.dir='./data/'
 ##output directory is fixed
 out.dir<-'/tmp/'
 #out.dir<-'./'
-
-
 
 ##################################
 #Master ID tables
@@ -35,8 +34,7 @@ out.dir<-'/tmp/'
 ##################################
 
 chemIdMasterTable<-function(casIds){
-  map <- read.csv2(paste0(data.dir,'chemicalIdMapping.csv'),header=TRUE,sep=',',
-                   fileEncoding="UTF-8-BOM")%>%
+  map <- rio::import(paste0(data.dir,'/chemicalIdMapping.csv'))%>%
     dplyr::select(cas_number,zf.cid,Chemical_ID,chemical_class)%>%
       distinct()%>%
       subset(!is.na(cas_number))
@@ -53,7 +51,8 @@ chemIdMasterTable<-function(casIds){
     newMap <- rbind(map, data.frame(cas_number=missing,zf.cid=rep('',length(missing)),
                                     Chemical_ID=seq(maxId,newMax),
                                     chemical_class=rep('',length(missing))))
-    write.csv(newMap,paste0(data.dir,'chemicalIdMapping.csv'),row.names = F)
+    #TODO: how do we update with new ids?
+    #write.csv(newMap,paste0(data.dir,'chemicalIdMapping.csv'),row.names = F)
     map <- newMap
   }
   return(map)
@@ -62,7 +61,7 @@ chemIdMasterTable<-function(casIds){
 
 sampIdMasterTable<-function(existingSampNumbers){
 
-  map <- read.csv(paste0(data.dir,'sampleIdMapping.csv'),fileEncoding="UTF-8-BOM")%>%
+  map <- rio::import(paste0(data.dir,'/sampleIdMapping.csv'))%>%
     select(Sample_ID,SampleNumber)%>%
     distinct()
 
@@ -73,7 +72,7 @@ sampIdMasterTable<-function(existingSampNumbers){
     newMax <- maxId + length(missing)-1
     newMap <- rbind(map, data.frame(Sample_ID=seq(maxId,newMax),
                                     SampleNumber=missing))
-    write.csv(newMap,paste0(data.dir,'sampleIdMapping.csv'),row.names = F)
+    ##write.csv(newMap,paste0(data.dir,'sampleIdMapping.csv'),row.names = F)
     map <- newMap
   }
   return(map)
@@ -95,21 +94,21 @@ sampIdMasterTable<-function(existingSampNumbers){
 #' @param cols List of columsn that make the data distinct
 #' @return data.frame of de-duplicated table
 removeChemIdDuplicates<-function(tab, chemIds,cols=c('AUC_Norm','End_Point_Name','Model')){
-  
+
   #first get all duplicaetd chemical ids
   dupes<-chemIds|>group_by(cas_number)|>summarize(nc=n_distinct(Chemical_ID))|>subset(nc>1)
   chem_ids=subset(chemIds,cas_number%in%dupes$cas_number)|>
     dplyr::select(cas_number,Chemical_ID)|>
     mutate(inDataset=Chemical_ID%in%tab$Chemical_ID)|>
     subset(inDataset)
-  
+
   ##now which ones are actually in the data?
 
   #create a distinct table
   dist.tab<-tab|>
     left_join(chemIds)|>
     dplyr::select(c('cas_number','Chemical_ID',cols))
-  
+
 #  dupe.counts<- dist.tab|>group_by(c(cols,'cas_number'))|>
 #    summarize(chemCounts=n_distinct(Chemical_ID))
 
@@ -117,9 +116,9 @@ removeChemIdDuplicates<-function(tab, chemIds,cols=c('AUC_Norm','End_Point_Name'
     group_by(cas_number,End_Point_Name,Model)|>
     summarize(nIds=n_distinct(Chemical_ID))|>
     subset(nIds>1)
-  
+
   dupe.cas<-unique(dupe.counts$cas_number)
-  
+
 }
 ###################################
 # Metadata collection
@@ -135,17 +134,17 @@ getChemMetadata<-function(data.dir,
                                          'CCD-Batch-Search_2022-01-26_10_28_30.xlsx')){    ##This mapping file consumes data from OSU to match identifiers to CAS
 
      ##we have curated descriptions for each chemical
-   curatedDesc <- readxl::read_xlsx(paste0(data.dir,'ChemicalDescriptions.xlsx'))%>%
+   curatedDesc <- rio::import(file=paste0(data.dir,'/ChemicalDescriptions.xlsx'),which=1)%>%
         select(cas_number='CASRN',chemDescription='USE CATEGORY/DESCRIPTION')
 
    ##we have chemical source and class information
    chemicalClasses <- masvChemClass(data.dir)
     ##this file comes from COMPTOX
     ##here we join the chemical metadata from the comptox dashboard
-   
 
-    chemMeta<-do.call(rbind,lapply(comptoxfiles,function(x) readxl::read_xlsx(paste0(data.dir,x),
-                                                                              sheet='Main Data')%>%
+
+    chemMeta<-do.call(rbind,lapply(comptoxfiles,function(x) rio::import(paste0(data.dir,'/',x),which=2)|>#,
+                                                                              #sheet='Main Data')%>%
                                       select(required_comptox_columns)))%>%
         rename(cas_number='INPUT')%>%
         left_join(chemicalClasses)%>% ##add in chemical class
@@ -154,12 +153,12 @@ getChemMetadata<-function(data.dir,
         subset(!cas_number%in%c('NA','N/A'))
         #rename(chemical_class='newClass')
       ##we have a mapping of cas to chemical_ids - add in extra if not there
-    
+
     ##manual list of chemical ids - some from OSU, some I created
     chemIds <- chemIdMasterTable(chemMeta$cas_number)%>%
       select(cas_number,Chemical_ID)%>%distinct()
-    
-    
+
+
     chemMeta <- chemMeta%>%
       left_join(chemIds)%>%
       full_join(chemicalClasses)%>% ## add in description data
@@ -167,7 +166,7 @@ getChemMetadata<-function(data.dir,
       tidyr::replace_na(list(PREFERRED_NAME='Chemical name unknown'))%>% ##should we call this something else?
       mutate(PREFERRED_NAME=stringr::str_replace_all(PREFERRED_NAME,'^-$',"Chemical name unknown"))%>%
       select(-c(ParameterName))
-    
+
     nocas=grep("NOCAS",chemMeta$cas_number)
     if(length(nocas)>0){
         message(paste0('removing ',length(nocas),' chems with no cas'))
@@ -181,8 +180,8 @@ getChemMetadata<-function(data.dir,
 #' @return data.frame
 getEndpointMetadata<-function(data.dir){
                                         #here is our pre-defined dictionary
-    endpointDetails<-readxl::read_xlsx(paste0(data.dir,'SuperEndpoint Mapping 2021NOV04.xlsx'),
-                                       sheet='Dictionary')%>%
+    endpointDetails<-rio::import(paste0(data.dir,'/SuperEndpoint Mapping 2021NOV04.xlsx'),which=1)|>#,
+                                       #sheet='Dictionary')%>%
         #subset(`Portal Display`=='Display')%>%
         rename(End_Point='Abbreviation',`End_Point_Name`='Simple name (<20char)')%>%
         rename(endPointLink='Ontology Link')%>%
@@ -190,7 +189,7 @@ getEndpointMetadata<-function(data.dir){
       mutate(End_Point=stringr::str_trim(End_Point))%>%
     ##add in endpoint detail for no data
       rbind(list(IncludeInPortal='No',End_Point='NoData',`End_Point_Name`=NA,Description='No data',endPointLink=''))
-    
+
 
     return(endpointDetails)
 }
@@ -203,16 +202,16 @@ getEndpointMetadata<-function(data.dir){
 #'@return data.frame
 getNewChemicalClass<-function(data.dir){
 
-  pahs<-readxl::read_xlsx(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),
-                         sheet='Master summary-PAHs')%>%
+  pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=1)|>#,
+                    #     sheet='Master summary-PAHs')%>%
       dplyr::select(cas_number='casrn')%>%
       mutate(Classification='PAH')
 
   extras<-data.frame(cas_number=c("3074-03-01","7496-02-08","6373-11-01"),
                      Classification='PAH')
 
-  non.pahs<-readxl::read_xlsx(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),
-                             sheet='Master Summary-Non-PAHs')%>%
+  non.pahs<-rio::import(paste0(data.dir,'/PAH_and_1530_SRP_Summary.xlsx'),which=2)|>#,
+#                             sheet='Master Summary-Non-PAHs')%>%
     dplyr::select(cas_number='casrn',Classification='classification')
 
   full.class<-rbind(pahs,extras,non.pahs)
@@ -240,7 +239,7 @@ getNewChemicalClass<-function(data.dir){
 #' @return data.frame
 buildSampleData<-function(data.dir,chemMeta){
     ##New data provided by michael
-    sampChem <- read.csv(paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'),fileEncoding="UTF-8-BOM")%>%
+    sampChem <- rio::import(paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'))%>%
                                         #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         dplyr::select(required_sample_columns)%>%
         subset(SampleNumber!='None')%>%
@@ -254,7 +253,7 @@ buildSampleData<-function(data.dir,chemMeta){
 #        select(-c(Sample_ID))#,Chemical_ID)) ##These two are added in the 4/27 version of the file
 
     ##data added 1/19/2022
-    newSamp <- readxl::read_xlsx(paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
+    newSamp <- rio::import(paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
         dplyr::select(required_sample_columns)%>%
       mutate(LocationLon=LocationLon*-1)
 
@@ -284,13 +283,13 @@ buildSampleData<-function(data.dir,chemMeta){
     dupe.samp.names<-all.samp.names%>%
       subset(isDupe)%>%
       arrange(SampleName)
-    
+
     #get number
     num.dupes<-dupe.samp.names%>%
       group_by(SampleName)%>%
       summarize(nid=n_distinct(Sample_ID))%>%
       left_join(dupe.samp.names)
-    
+
     #paste sequence to end of each name
     new.names<-num.dupes%>%
       select(SampleName,nid)%>%
@@ -300,7 +299,7 @@ buildSampleData<-function(data.dir,chemMeta){
       tidyr::separate_rows(newName,sep=':')%>%
       select(oldSN='SampleName',newName)%>%
       arrange(oldSN)
-    
+
     #combine in new data frame
     full.rep=data.frame(dupe.samp.names,new.names)%>%
       select(Sample_ID,SampleName='newName')
@@ -331,7 +330,7 @@ buildSampleData<-function(data.dir,chemMeta){
         distinct()
 
     ##now we have one more rename of samples and metadata
-    sampleNameRemap<-readxl::read_xlsx(paste0(data.dir,'/envSampCleanMapping.xlsx'))%>%
+    sampleNameRemap<-rio::import(paste0(data.dir,'/envSampCleanMapping.xlsx'),which=1)%>%
       dplyr::select(Sample_ID,date_sampled,sample_matrix,technology,#projectName='ProjectName',SampleName='NewSampleName',
                     #LocationName='NewLocationName')%>%
                     ProjectName,NewSampleName,NewLocationName)%>%
@@ -342,7 +341,7 @@ buildSampleData<-function(data.dir,chemMeta){
         #select(-c(sample_matrix,technology,date_sampled))%>% ### remove old names
       left_join(sampleNameRemap,by='Sample_ID')%>% ##add in updates
       distinct()
-    
+
     ##older files will have a missing projectName and require manual mapping of some terms
     nas <- which(is.na(finalSampChem$projectName))  ##these are the older samples
     finalSampChem$projectName[nas]<-finalSampChem$ProjectName[nas]
@@ -351,91 +350,18 @@ buildSampleData<-function(data.dir,chemMeta){
     finalSampChem$date_sampled.x[nas]<-finalSampChem$date_sampled.y[nas]
     finalSampChem$sample_matrix.x[nas]<-finalSampChem$sample_matrix.y[nas]
     finalSampChem$technology.x[nas]<-finalSampChem$technology.y[nas]
-    
+
     finalSampChem<-select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
       rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
       distinct()%>%
       subset(cas_number!='N/A')
-    
-    
+
+
     ##last thing
-    
+
     return(finalSampChem)
 
 }
-#'combineChemicalEndpointData produces the summary statistics from the BMD analysis
-#'@param bmdfiles a list of files that come from the BMD pipeline
-#'@param is_extract - if our chemical id is an extract we use a different metadata
-#'@return a data.frame
-##We will release an 'endpoint file for each condition'
-# combineChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
-# 
-#   ##read in the BMD files formatted by the zf module
-#   print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
-#   cols <- required_bmd_columns$bmd
-#   files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
-# 
-#   mid.bmd<-do.call(rbind,files)%>%
-#       dplyr::select(cols)
-# 
-#   ##some of the chemicals have BMDs that were computed twice and i'm not sure which
-#   ##are which anymore. as such, i incorporate the files in chronological order
-#   ##and remove the second values
-#   dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
-#   if(length(dupes)>0){
-#     mid.bmd<-mid.bmd[-dupes,]
-#   }
-#   
-#   if(is_extract){
-#     sdSamp<-sampChem%>%
-#       tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
-#       select(-sub)
-# 
-#     full.bmd<-mid.bmd%>%
-#       dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
-#       dplyr::select(-Chemical_ID)%>%
-#       full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
-# 
-#     #fix up sample ids
-#     nas<-which(is.na(full.bmd$Sample_ID))
-#     full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
-# 
-#     #now fix up sample names
-#     new.nas<-which(is.na(full.bmd$SampleName))
-#     full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
-# 
-#     full.bmd<-full.bmd%>%
-#       tidyr::replace_na(list(End_Point='NoData'))%>%
-#       right_join(endpointDetails)%>%
-#       dplyr::select(-c('End_Point','tmpId'))%>%
-#       subset(!is.na(Sample_ID))%>%
-#     distinct()%>%
-#       tidyr::replace_na(list(LocationName='None'))
-#   }
-#   else{
-#     full.bmd<-mid.bmd%>%
-#       #dplyr::mutate(`Chemical_ID`=as.character(Chemical_ID))%>%
-#       full_join(sampChem)%>%
-#       tidyr::replace_na(list(End_Point='NoData'))%>%
-# #      rename(Chemical_ID<-'zf.cid')%>%
-#       right_join(endpointDetails)%>%
-#       subset(!is.na(cas_number))%>%
-#       distinct()%>%select(-c('End_Point'))%>%
-#       tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
-#   }
-# 
-#   ##now we fix QC values
-#   full.bmd <- full.bmd%>%
-#     mutate(DataQC_Flag=ifelse(qc_num%in%c(0,1),'Poor',ifelse(qc_num%in%c(4,5),'Moderate','Good')))%>%
-#     rowwise()%>%
-#     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
-#       select(-c(qc_num,BMD_Analysis_Flag))
-#   
-# 
-# 
-#   return(full.bmd)
-# }
-
 
 #'combineChemicalEndpointDataV2 produces the summary statistics from the BMD analysis
 #'@param bmdfiles a list of files that come from the BMD pipeline
@@ -443,43 +369,43 @@ buildSampleData<-function(data.dir,chemMeta){
 #'@return a data.frame
 ##We will release an 'endpoint file for each condition'
 combineV2ChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpointDetails){
-  
+
   ##read in the BMD files formatted by the zf module
   print(paste('Combining bmd files:',paste(bmdfiles,collapse=',')))
   cols <- required_bmd_columns$bmd
-  files <- lapply(bmdfiles,function(x) read.csv(x)%>%dplyr::select(cols))
-  
+  files <- lapply(bmdfiles,function(x) rio::import(x)%>%dplyr::select(cols))
+
   mid.bmd<-do.call(rbind,files)
-  
+
   ##some of the chemicals have BMDs that were computed twice and i'm not sure which
   ##are which anymore. as such, i incorporate the files in chronological order
   ##and remove the second values
   dupes<-which(mid.bmd%>%select(Chemical_ID,End_Point)%>%duplicated())
-  
+
   if(length(dupes)>0){
     mid.bmd<-mid.bmd[-dupes,]
   }
-  
+
   if(is_extract){
     sdSamp<-sampChem%>%
       tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
       #select(-sub)
       select(tmpId,Sample_ID)%>%distinct()
-    
+
     full.bmd<-mid.bmd%>%
       dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
       dplyr::select(-Chemical_ID)%>%
       full_join(sdSamp,by='tmpId')#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
-    
+
     #fix up sample ids
     nas<-which(is.na(full.bmd$Sample_ID))
     full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
-    
+
     #now fix up sample names
     new.nas<-which(is.na(full.bmd$SampleName))
     if(length(new.nas)>0)
       full.bmd$SampleName[new.nas]<-paste('Sample',full.bmd$Sample_ID[new.nas])
-    
+
     full.bmd<-full.bmd%>%
       tidyr::replace_na(list(End_Point='NoData'))%>%
       right_join(endpointDetails)%>%
@@ -498,7 +424,7 @@ combineV2ChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpo
       select(-c('End_Point'))%>%
       tidyr::replace_na(list(chemical_class='Unclassified'))##should we remove endpoint YES
   }
-  
+
   ##now we fix QC values
   full.bmd <- full.bmd%>%
     rename(qc_num='DataQC_Flag')%>%
@@ -506,9 +432,9 @@ combineV2ChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpo
     rowwise()%>%
     mutate(Model=stringr::str_replace_all(Model,"NULL","None"))%>%
     select(-c(qc_num))
-  
-  
-  
+
+
+
   return(full.bmd)
 }
 
@@ -521,7 +447,7 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
 
     print(paste('Combining fit files:',paste(bmdfiles,collapse=',')))
     cols <- required_bmd_columns$fitVals
-    files <- lapply(bmdfiles,function (x) read.csv(x)%>%dplyr::select(cols))
+    files <- lapply(bmdfiles,function (x) rio::import(x)%>%dplyr::select(cols))
 
     ##get chemicals and EPs in each file, so we can only keep the newest ones
     chemEps<-lapply(files,function(x){
@@ -567,7 +493,7 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
         right_join(endpointDetails)%>%
         distinct()%>%
         select(-c(End_Point,Description,ChemicalId))
-    
+
     ###TODO: update for reduce data...
     if(is_extract){
 
@@ -597,11 +523,10 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
 #' Reads in full MASV class annotations and assigns values to chemicals
 #' @return data.frame
 masvChemClass<-function(data.dir){
-  library(readxl)
-  library(tidyr)
-  library(dplyr)
-  classes<-readxl::read_xlsx(paste0(data.dir,'MASV Classifications 2021.xlsx'),
-                             sheet = 'MASV15 Classifications')
+ # library(tidyr)
+ # library(dplyr)
+  classes<-rio::import(paste0(data.dir,'/MASV%20Classifications%202021.xlsx'),which=1)
+#                             sheet = 'MASV15 Classifications')
   source=c("pharmacological","personalCare","industrial","pulpAndPaper","pestProduct","natural",'pestRodenticide',
            "consumerProduct","pestHerbicide","pestInsecticide",'pestFungicide','pestGeneral','flameRetardant')
 
@@ -658,7 +583,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
     ##now iterate and remove those from earlier files (listed later)
     ##to avoid duplicaates
     newChemEps=chemEps
-    
+
     if(length(chemEps)>1){
       ##for loop is messy but best i can do with set diff function
       for(i in 2:length(chemEps)){
@@ -696,11 +621,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
           full_join(sdSamp,by='tmpId')%>%
                                         select(-tmpId)#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
 
-    }#else{
-    #    full.bmd<-full.bmd%>%
-    #    subset(Chemical_ID%in%sampChem$Chemical_ID)
-       # full.bmd <- rename(full.bmd,Sample_ID='Chemical_ID')
-  # }
+    }
   return(unique(full.bmd))
 }
 
@@ -711,24 +632,25 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
 #' @param chem.files new chemical bmd files
 #' @param extract.files new extract bmd files
 buildDB<-function(chem.files=c(),extract.files=c()){
-  
+
   ##these are the subdirectories where we store the original data (Small enough for github)
   chem_dirs=c('phase_I_II_III')#,'zf_morphology')
   extract_dirs=c('extracts')
-  
-  
+
+
   ##here are the files we need in the end - bmds, dose response, and curv fit files for chemicals and extracts
   bmd.files<-c()
   dose.files<-c()
   curv.files<-c()
-  
+
   e.bmd<-c()
   e.dose<-c()
   e.curve<-c()
-  
+
   ##first we collect the files that are output from the bmd code
   for(chem in chem_dirs){
-    path=paste0(data.dir,'/',chem,'/')
+      path=paste0(data.dir,'/',chem,'/')
+#print(path)
     bmd.files<-c(bmd.files,paste0(path,c('bmd_vals_all_qc.csv',
                                          'bmd_vals_2021_05_18_all_phase_III_morpho.csv',
                                          'bmd_vals_2021_04_26.csv',
@@ -744,15 +666,15 @@ buildDB<-function(chem.files=c(),extract.files=c()){
                                            'fit_vals_2021_01_29.csv'
     )))
   }
-  
+
   for(ext in extract_dirs){
     path=paste0(data.dir,'/',ext,'/')
     e.bmd<-c(e.bmd,paste0(path,'bmd_vals_2021_08_18.csv'))
     e.dose<-c(e.dose,paste0(path,'dose_response_vals_2021_08_18.csv'))
     e.curve<-c(e.curve,paste0(path,'fit_vals_2021_08_18.csv'))
   }
-  
-  
+
+
   ## now we read read in files
   if(length(chem.files)==3){
     #path=paste0(data.dir,'/',chem,'/')
@@ -773,13 +695,13 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   }else{
     message("Not adding any environmental files")
   }
-  
+
   chemMeta<-getChemMetadata(data.dir)
-  
+
   sampChem<-buildSampleData(data.dir,chemMeta)
-  
+
   endpointDetails<-getEndpointMetadata(data.dir)%>%unique()
-  
+
   message('Processing extract response data')
   ebmds<-combineV2ChemicalEndpointData(e.bmd,is_extract=TRUE,sampChem,endpointDetails)%>%
    # select(envSampSumOutput)%>%
@@ -788,7 +710,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
     unique()
   edrs<- combineChemicalDoseData(e.dose,is_extract=TRUE, sampChem,endpointDetails)%>%
     unique()
-  
+
   message('Processing chemical response data')
   bmds<-combineV2ChemicalEndpointData(bmd.files,is_extract=FALSE,chemMeta,endpointDetails)%>%
     unique()
@@ -796,22 +718,22 @@ buildDB<-function(chem.files=c(),extract.files=c()){
     unique()
   doseReps <-combineChemicalDoseData(dose.files, is_extract=FALSE, chemMeta,endpointDetails)%>%
     unique()
-  
+
   nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
   print(length(nas))
-  
+
   to.remove<-setdiff(nas,sampChem$Chemical_ID)
   print(length(to.remove))
   bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
   curves<-curves%>%subset(!Chemical_ID%in%to.remove)
   doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
-  
+
   ##there are mismatches, so we should figure out where those exists
   missing<-list(zebrafishNoChem=setdiff(ebmds$Sample_ID,as.character(sampChem$Sample_ID)),
                 chemDataNoZebrafish=setdiff(as.character(sampChem$Sample_ID),ebmds$Sample_ID))
-  
+
   #print(missing)
-  
+
   ##Final output for the platform team is these 9 files
   ##chemical file - double check columns
   chems <- chemMeta%>%dplyr::select(required_chem_columns)
@@ -820,76 +742,70 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   samps<-sampChem%>%
     select(samp_columns)%>%
     distinct()
-  
+
   write.csv(samps,file=paste0(out.dir,'samples.csv'),quote=T,row.names=FALSE)
-  
-  ##bmds 
+
+  ##bmds
   write.csv(bmds,file=paste0(out.dir,'zebrafishChemBMDs.csv'),quote=T,row.names = FALSE)
   write.csv(ebmds,file=paste0(out.dir,'zebrafishSampBMDs.csv'),row.names=FALSE, quote = TRUE)
-  
+
   ##xy coords
   write.csv(curves,file=paste0(out.dir,'zebrafishChemXYCoords.csv'),row.names = FALSE, quote = TRUE)
   write.csv(ecurves,file=paste0(out.dir,'zebrafishSampXYCoords.csv'),row.names = FALSE, quote = TRUE)
-  
+
   ##dose response
   write.csv(doseReps,file=paste0(out.dir,'zebrafishChemDoseResponse.csv'),row.names = FALSE, quote = TRUE)
   write.csv(edrs,file=paste0(out.dir,'zebrafishSampDoseResponse.csv'),row.names = FALSE, quote = TRUE)
-  
-  
+
   ##chemical to sample
   chemSamp<-sampChem%>%
     dplyr::select(sample_chem_columns)%>%
     distinct()
   write.csv(chemSamp,file=paste0(out.dir,'sampleToChemicals.csv'),row.names=FALSE, quote = TRUE)
-  
+
 
 }
 
 ##moving summary stats to its own function
 generateSummaryStats<-function(){
-  
+
   ##let's get all the chemicals first
-  chemMeta<-read.csv(paste0(out.dir,'chemicals.csv'))
+  chemMeta<-rio::import(paste0(out.dir,'chemicals.csv'))
   chemClasses<-chemMeta%>%
     dplyr::select(Chemical_ID,chemical_class)%>%
     distinct()%>%
     replace_na(list(`chemical_class`='Unclassified'))
   chemClasses$chemical_class<-sapply(chemClasses$chemical_class,function(x) gsub(';deuterated','',x))
-  
+
   ##first let's get the total chemical counts
   total.chems<-chemClasses%>%
     group_by(chemical_class)%>%
     summarize(`total chemicals`=n_distinct(Chemical_ID))
-  
-  ##how many samples is that chemical in? 
-  sampChem<-read.csv(paste0(out.dir,'sampleToChemicals.csv'),check.names=F)%>%
+
+  ##how many samples is that chemical in?
+  sampChem<-rio::import(paste0(out.dir,'sampleToChemicals.csv'),check.names=F)%>%
     mutate(meas=as.numeric(measurement_value))%>%
     subset(!is.na(meas))%>%
     left_join(chemClasses)%>%
     group_by(chemical_class)%>%
     summarize(`Measured in samples`=n_distinct(Chemical_ID),`Number of Samples`=n_distinct(Sample_ID))
-  
+
   #how many zebrafish experiments have that chemical?
-  bmds <-read.csv(paste0(out.dir,'zebrafishChemDoseResponse.csv'),check.names=F)%>%
+  bmds <-rio::import(paste0(out.dir,'zebrafishChemDoseResponse.csv'),check.names=F)%>%
     group_by(Chemical_ID)%>%
     summarize(`Zebrafish endpoints`=n_distinct(`End_Point_Name`))%>%
     left_join(chemClasses)%>%
     group_by(chemical_class)%>%
     summarize(`Evaluated in Zebrafish`=n_distinct(Chemical_ID),
               `Endpoints Measured`=sum(`Zebrafish endpoints`))
-  
-  
 
   chem.eps<-total.chems%>%
     left_join(sampChem)%>%
     left_join(bmds)%>%
     mutate(across(where(is.numeric), ~ replace_na(.x, 0)))
-  
+
   write.table(chem.eps,paste0(out.dir,'chemCounts_v2.tsv'),row.names=F,col.names=T,sep='\t')
-
-  
 }
-
 
 #' main method
 #' Parsers arguments
@@ -901,7 +817,6 @@ main<-function(){
     parser$add_argument('-c','--chemicals',dest='chem_files',default='',
                         help='The subsequent files are chemicals')
 
-
     args <- parser$parse_args()
                                           #if we are adding new data, add to additional data in repo
                                         #files that we're reading in
@@ -910,7 +825,7 @@ main<-function(){
 
     print(chem.files)
     print(extract.files)
-    
+
   buildDB(chem.files,extract.files)
   generateSummaryStats()
 

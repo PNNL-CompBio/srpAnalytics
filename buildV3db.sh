@@ -13,52 +13,30 @@ catcmd() {
    cat $1 >> $2
 }
 
-#################################################### phase I,II data
-##here we have the data from doo nam/lisa, we need to copy it into the temp directory
-#phase12 data
-p12_morph='raw_files/zf_morphology_data_335_chemicals_2020DEC16_fixed.csv'
-p12_lpr_1='344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_merged.csv'
-#this second file was just a duplicate with data from chemicals that only had 15 time points or so
-#p12_lpr_2='344_zf_LPR_data_phase_1_2_2020JUNE25_updated_plate_id_for_TX_tall_fixed_merged_full_240_timepoints.csv'
-orig_lpr='raw_files/p12_lpr.tar.gz'
 
-
-cmd='tar -xvzf '$orig_lpr
+##build docker file for data
+cmd='docker build -f data/Dockerfile -t srp-data data/ --build-arg HTTPS_PROXY=$HTTPS_PROXY temp/'
+##run docker file for data
 echo $cmd
 $cmd
 
-cp $p12_morph temp/morph0.csv
-cp $p12_lpr_1 temp/lpr0_1.csv
-#cp $p12_lpr_2 temp/lpr0_2.csv
 
-#################################################### phase III data
-##phase 3 data is on dropbox, we need to pull it to temp directory
-#https://www.dropbox.com/sh/zg0q6wl13a3uo99/AAA0cdAK_fJwkJqpvF_HH6DWa?dl=0/
-p3_morph='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AACFZprOKkbvydjfoDI3oZo-a/Tanguay%20Phase%203%20zf%20morphology%20data%20PNNL%202021MAR23.csv -O temp/morph1.csv'
-p3_lpr='wget https://www.dropbox.com/sh/zg0q6wl13a3uo99/AADd1QBStMguW9qYgzH2eatJa/Tanguay%20Phase%203%20zf%20LPR%20data%20PNNL%202021MAR23.csv -O temp/lpr1.csv'
+##run docker file for data
+cmd='docker run srp-data'
+echo $cmd
+$cmd
 
-echo $p3_morph
-$p3_morph
-echo $p3_lpr
-$p3_lpr
 
-#################################################### PFAS  data
-##PFAS data is also on dropbox, we need to pull it
-##downloading files from Lisa's dropbox PFAS data
-#epr_cmd="wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABgnmHtboM4LevxK1yxPIK-a/zf%20EPA%20PFAS%20EPR_PNNL_05-28-2021.csv" -O temp/epr.csv
-#lpr_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABgzjaRPteU1EZIhnW9zv2Ka/zf%20EPA%20PFAS%20LPR_PNNL_05-28-2021.csv -O temp/lpr2.csv'
-#mor_cmd='wget https://www.dropbox.com/sh/69ootcq7yyvvx2h/AABxsOLgwlv7-_HTZ0xaAIlNa/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv -O temp/morph2.csv'
+##all data should be loaded into temp file
 
-lpr_cmd="wget https://www.dropbox.com/s/ha7jduok03j82mf/zf%20EPA%20PFAS%20LPR_PNNL_05-28-2021.csv?dl=0 -O temp/lpr2.csv"
-echo $lpr_cmd
-$lpr_cmd
+##build docker file for zfbmd
+cmd='docker build -f zfbmd/Dockerfile -t srp-zfbmd zfbmd/ --build-arg HTTPS_PROXY=$HTTPS_PROXY'
+##add in data path so it knows file files to run
 
-mor_cmd="wget https://www.dropbox.com/s/jma3b9al3u8hcny/zf%20EPA%20PFAS%20morphology_PNNL_05-28-2021.csv?dl=0 -O temp/morph2.csv"
-echo $mor_cmd
-$mor_cmd
+echo $cmd
+$cmd
 
-################################################## run pipeline
-#we have 3 pairs of files to run
+##run docker file for zfbmd
 
 dpath='/tmp/' ##path to files in docker images
 
