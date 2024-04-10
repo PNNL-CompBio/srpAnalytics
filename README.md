@@ -18,8 +18,9 @@ This repository contains the code to handle various aspects of this portal, each
 The analytics pipeline was built with a module architecture stored in series of docker images to enable the pipeline to be processed in individual stages. Currently there are five modules:
 1. dbSchema: This module validates files when they are input into system and when they are pushed to the database to ensure they align to expected schemas.
 2. zfBmd: This module processes the zebrafsih benchmark dose data to assess the endpoints described below.
-3. bmd2Samps: This module combines existing zebrafish data with new data from the `zfBmd` module and also integratees environmental sample information
-4. exposome: This module pulls exposome data and creates an outputed file
+3. zfExp: This module formats gene expression data
+4. bmd2Samps: This module combines existing zebrafish data with new data from the `zfBmd` module and also integratees environmental sample information
+5. exposome: This module pulls exposome data and creates an outputed file
 
 A depiction of the framework is shown below:
 
