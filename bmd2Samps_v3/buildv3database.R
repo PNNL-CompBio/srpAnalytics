@@ -62,7 +62,7 @@ required_mapping_columns<-c("SampleNumber","Sample_ID",'zf_lims_id')## added the
 ##required from bmd calculation
 ##add in Sample_ID or Chemical_ID depending on table
 required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD50',"Min_Dose","Max_Dose",
-                                "AUC_Norm","DataQC_Flag","BMD_Analysis_Flag"),#,"BMD10_Flag","BMD50_Flag"),
+                                "AUC_Norm","DataQC_Flag","BMD_Analysis_Flag"),#,"BMD10_Flag","BMD50_Flag{"),
                           doseRep=c('Chemical_ID',"End_Point","Dose","Response","CI_Lo","CI_Hi"),
                           fitVals=c('Chemical_ID',"End_Point","X_vals","Y_vals"))
 
@@ -70,12 +70,28 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
 
 #These pathways refer to absolute pathways in the docker image
 ##setting these three parameters, can be appended
-data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
+#data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
 
 #data.dir='./data/'
 ##output directory is fixed
 out.dir<-'/tmp/'
 #out.dir<-'./'
+
+
+
+#################################
+# online data files
+# most data files are stored on github
+# and can be editted there if they change, then this will be rerun
+#################################
+getDataFiles<-function(data.dir='https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data',filename='srp_build_files.csv'){
+
+    dflist<-rio::import(paste0(data.dir,'/',filename))
+
+    return(dflist)
+
+}
+
 
 ##################################
 #Master ID tables
@@ -83,8 +99,9 @@ out.dir<-'/tmp/'
 #so i automatically update these tables below
 ##################################
 
-chemIdMasterTable<-function(casIds){
-  map <- rio::import(paste0(data.dir,'/chemicalIdMapping.csv'))%>%
+chemIdMasterTable<-function(casIds,cmap){
+
+  map <- rio::import(cmap)%>%
     dplyr::select(cas_number,zf.cid,Chemical_ID,chemical_class)%>%
       distinct()%>%
       subset(!is.na(cas_number))
@@ -109,9 +126,9 @@ chemIdMasterTable<-function(casIds){
 
 }
 
-sampIdMasterTable<-function(existingSampNumbers){
+sampIdMasterTable<-function(existingSampNumbers,smap){
 
-  map <- rio::import(paste0(data.dir,'/sampleIdMapping.csv'))%>%
+  map <- rio::import(smap)%>%
     select(Sample_ID,SampleNumber)%>%
     distinct()
 
@@ -287,9 +304,10 @@ getNewChemicalClass<-function(data.dir){
 #' buildSampleData - takes the curated information and selects the data we need
 #' @param data.dir
 #' @return data.frame
-buildSampleData<-function(data.dir,chemMeta){
+buildSampleData<-function(data.dir,chemMeta,sampTab){
     ##New data provided by michael
-    sampChem <- rio::import(paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'))%>%
+    fses1<-subset(sampTab,name=='fses1')[['location']]
+    sampChem <- rio::import(fses1)|>#paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'))%>%
                                         #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
         dplyr::select(required_sample_columns)%>%
         subset(SampleNumber!='None')%>%
@@ -303,7 +321,8 @@ buildSampleData<-function(data.dir,chemMeta){
 #        select(-c(Sample_ID))#,Chemical_ID)) ##These two are added in the 4/27 version of the file
 
     ##data added 1/19/2022
-    newSamp <- rio::import(paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
+    fses2<-subset(sampTab,name=='fses2')[['location']]
+    newSamp <- rio::import(fses2)|>#paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
         dplyr::select(required_sample_columns)%>%
       mutate(LocationLon=LocationLon*-1)
 
@@ -315,7 +334,8 @@ buildSampleData<-function(data.dir,chemMeta){
         rbind(newSamp)
 
     ##This mapipng file maps tanguay lab identifiers to those in the anderson lab
-    ids<-sampIdMasterTable(finalSampChem$SampleNumber)
+    sampMap<-subset(sampTab,data_type=='mapping')[['location']]
+    ids<-sampIdMasterTable(finalSampChem$SampleNumber,sampMap)
 
     finalSampChem <- finalSampChem %>%
       left_join(chemDat,by='cas_number')%>%
@@ -572,10 +592,11 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
 #' masvChemClass
 #' Reads in full MASV class annotations and assigns values to chemicals
 #' @return data.frame
-masvChemClass<-function(data.dir){
+masvChemClass<-function(chemTab){
  # library(tidyr)
- # library(dplyr)
-  classes<-rio::import(paste0(data.dir,'/MASV%20Classifications%202021.xlsx'),which=1)
+                                        # library(dplyr)
+    classfile<-subset(chemTab,data_type=='classification')[['location']]
+  classes<-rio::import(classfile,which=1)#paste0(data.dir,'/MASV%20Classifications%202021.xlsx'),which=1)
 #                             sheet = 'MASV15 Classifications')
   source=c("pharmacological","personalCare","industrial","pulpAndPaper","pestProduct","natural",'pestRodenticide',
            "consumerProduct","pestHerbicide","pestInsecticide",'pestFungicide','pestGeneral','flameRetardant')

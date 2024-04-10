@@ -17,6 +17,10 @@ data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data
 tab<-rio::import(paste0(data.dir,'/ZF_gex.xlsx'),which=1,skip=1)
 args = commandArgs(trailingOnly=TRUE)
 
+if(length(args)!=1){
+    print('Need to call script with chemicals.csv')
+    quit()
+}
 chem<-readr::read_csv(args[1])|>
   dplyr::select(Chemical_ID,cas_number)|>distinct()
 
