@@ -25,16 +25,6 @@ def fitCurveFiles(morpho_behavior_tuples):
     '''
     
 
-def endpointMetadata(endpointmappingfile):
-    '''
-    retrieve endpoint mapping
-    '''
-
-
-def chemicalClass(chem_class_mapping_file):
-    '''
-    get chemical classes
-    '''
 
 def combineFiles(location_list,ftype):
     '''
@@ -72,12 +62,32 @@ def main():
     ##get output in bmds, fits, and curves
 
     #add chemical BMDS, fits, curves to existing data
+    chemfiles=[]
+    sampfiles=[]
     for st in ['chemical','extract']:
         for dt in ['bmd','fit','dose']:
             fdf = combineFiles(df.loc[df.sample_type==st].loc[df.data_type==dt],dt)
             fname = 'tmp_'+st+'_'+dt+'.csv'
             fdf.to_csv(fname,index=False)
+            if st=='chemical':
+                chemfiles.append(fname)
+            else:
+                sampfiles.append(fname)
 
-            ##now map sample information
+    ##now map sample information
+    smap = df.loc[df.name=='sampMap'].location
+    cmap = df.loc[df.name=='chemMap'].location
+    cclass = df.loc[df.name=='class1'].location
+    emap = df.loc[df.name=='endpointMap'].location
+    fses = ','.join(df.loc[df.data_type=='sample'].location)
+    ctfile = df.loc[df.name=='colmpTox'].location
 
+    ##call script with sample files
+    cmd = "Rscript bmd2Samps_v3/buildV3database.R --sample --drcFile="+','.join(sampfiles)+\
+        ' --sampMap='+smap+' --chemMap='+cmap+' --epMap='+emap+' --chemClass='+cclass+\
+        ' --compToxFile='+ctfile+' --sampleFiles='+fses
+    print(cmd)
+    os.system(cmd)
+    ##call script with chemical files
+            
 main()
