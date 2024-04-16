@@ -197,8 +197,8 @@ removeChemIdDuplicates<-function(tab, chemIds,cols=c('AUC_Norm','End_Point_Name'
 #' @param comptoxfiles Files downloaded from the EPA website
 #' @return data.frame
 getChemMetadata<-function(desc_file='ChemicalDescriptions.xlsx',chemicalClasses,
-                          comptoxfiles=c('CompToxChemicalsDashboard-Batch-Search_2021-11-05_17_57_46.xlsx',
-                                         'CCD-Batch-Search_2022-01-26_10_28_30.xlsx')){    ##This mapping file consumes data from OSU to match identifiers to CAS
+                          comptoxfile=''){#c('CompToxChemicalsDashboard-Batch-Search_2021-11-05_17_57_46.xlsx',
+                                         #'CCD-Batch-Search_2022-01-26_10_28_30.xlsx')){    ##This mapping file consumes data from OSU to match identifiers to CAS
 
      ##we have curated descriptions for each chemical
    curatedDesc <- rio::import(file=desc_file,which=1)%>%
@@ -210,9 +210,9 @@ getChemMetadata<-function(desc_file='ChemicalDescriptions.xlsx',chemicalClasses,
     ##here we join the chemical metadata from the comptox dashboard
 
 
-    chemMeta<-do.call(rbind,lapply(comptoxfiles,function(x) rio::import(paste0(data.dir,'/',x))|>#,
+    chemMeta<-rio::import(comptoxfile)|>#,
                                                                               #sheet='Main Data')%>%
-                                      select(required_comptox_columns)))%>%
+                                      select(required_comptox_columns)%>%
         rename(cas_number='INPUT')%>%
         left_join(chemicalClasses)%>% ##add in chemical class
         left_join(curatedDesc)%>%
@@ -245,9 +245,9 @@ getChemMetadata<-function(desc_file='ChemicalDescriptions.xlsx',chemicalClasses,
 #' getEndpointMetadata
 #' @param data.dir directory where standard endpoint data is stored
 #' @return data.frame
-getEndpointMetadata<-function(data.dir){
+getEndpointMetadata<-function(epfile){
                                         #here is our pre-defined dictionary
-    endpointDetails<-rio::import(paste0(data.dir,'/SuperEndpoint%20Mapping%202021NOV04.xlsx'),which=4)|>#,
+    endpointDetails<-rio::import(epfile,which=4)#paste0(data.dir,'/SuperEndpoint%20Mapping%202021NOV04.xlsx'),which=4)|>#,
                                        #sheet='Dictionary')%>%
         #subset(`Portal Display`=='Display')%>%
         rename(End_Point='Abbreviation',`End_Point_Name`='Simple name (<20char)')%>%
@@ -304,27 +304,33 @@ getNewChemicalClass<-function(data.dir){
 #' buildSampleData - takes the curated information and selects the data we need
 #' @param data.dir
 #' @return data.frame
-buildSampleData<-function(data.dir,chemMeta,sampTab){
+buildSampleData<-function(fses_files,chemMeta,sampMapping){
     ##New data provided by michael
-    fses1<-subset(sampTab,name=='fses1')[['location']]
-    sampChem <- rio::import(fses1)|>#paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'))%>%
+
+    sampChem<-do.call(rbind,lapply(fses_files,function(fs){
+
+#    fses1<-subset(sampTab,name=='fses1')[['location']]
+        sc <- rio::import(fs)|>#paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'))%>%
                                         #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
-        dplyr::select(required_sample_columns)%>%
-        subset(SampleNumber!='None')%>%
-        subset(cas_number!='NULL')%>%
-        mutate(water_concentration_molar=stringr::str_replace_all(water_concentration_molar,'BLOD|NULL|nc:BDL',"0"))%>%
-        mutate(measurement_value_molar=stringr::str_replace_all(measurement_value_molar,'BLOD|NULL|BDL',"0"))%>%
-        mutate(water_concentration=stringr::str_replace_all(water_concentration,'BLOD|NULL|BDL',"0"))%>%
+            dplyr::select(required_sample_columns)%>%
+            subset(SampleNumber!='None')%>%
+            subset(cas_number!='NULL')%>%
+            mutate(water_concentration_molar=stringr::str_replace_all(water_concentration_molar,'BLOD|NULL|nc:BDL',"0"))%>%
+            mutate(measurement_value_molar=stringr::str_replace_all(measurement_value_molar,'BLOD|NULL|BDL',"0"))%>%
+            mutate(water_concentration=stringr::str_replace_all(water_concentration,'BLOD|NULL|BDL',"0"))%>%
                                         # subset(water_concentration_molar!='0.0')%>%
-        subset(!measurement_value_molar%in%c('0'))%>%
-        subset(!measurement_value%in%c("0","NULL",""))#%>%
+            subset(!measurement_value_molar%in%c('0'))%>%
+            subset(!measurement_value%in%c("0","NULL",""))#%>%
 #        select(-c(Sample_ID))#,Chemical_ID)) ##These two are added in the 4/27 version of the file
 
     ##data added 1/19/2022
-    fses2<-subset(sampTab,name=='fses2')[['location']]
-    newSamp <- rio::import(fses2)|>#paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
-        dplyr::select(required_sample_columns)%>%
-      mutate(LocationLon=LocationLon*-1)
+        #fses2<-subset(sampTab,name=='fses2')[['location']]
+        #newSamp <- rio::import(fses2)|>#paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
+                                        #dplyr::select(required_sample_columns)
+###if there is negative
+        if(any(sc$LocationLon>0))
+            sc<-sc|>mutate(LocationLon=LocationLon*-1)
+    })   )
 
     chemDat<-chemMeta%>%
         select(Chemical_ID,cas_number,AVERAGE_MASS)%>%#,PREFERRED_NAME,chemDescription)%>%
@@ -334,7 +340,7 @@ buildSampleData<-function(data.dir,chemMeta,sampTab){
         rbind(newSamp)
 
     ##This mapipng file maps tanguay lab identifiers to those in the anderson lab
-    sampMap<-subset(sampTab,data_type=='mapping')[['location']]
+    #sampMap<-subset(sampTab,data_type=='mapping')[['location']]
     ids<-sampIdMasterTable(finalSampChem$SampleNumber,sampMap)
 
     finalSampChem <- finalSampChem %>%
@@ -878,19 +884,21 @@ generateSummaryStats<-function(){
   write.table(chem.eps,paste0(out.dir,'chemCounts_v2.tsv'),row.names=F,col.names=T,sep='\t')
 }
 
-#' main method
+#' main methodbm
 #' Parsers arguments
 main<-function(){
     ##now we check for additional files
     parser <- ArgumentParser()
-    parser$add_argument('-s','--sample',dest='is_sample',action='store_true',default=FALSE)
-    parser$add_argument('-c','--chemical',dest='is_chem',default=FALSE,action='store_True',
-                        help='The subsequent files are chemical')
-    parser$add_argument('-d','--drcStat',dest='dose_res_stat',default=c('bmd','dose','fit'),help='which file is it')
-    parser$add_argument('-p','--sampMap',dest='sample_mapping_file',default='')
-    parser$add_argument('-m','--chemMap',dest='chem_meta_file',default='')
-    parser$add_argument('-e','--epMap',dest='endpoint_mapping_file',default='')
-    parser$add_argument('-l','--chemClass',dest='chem_class_file',default='')
+    parser$add_argument('-s','--sample',dest='is_sample',action='store_true',default=FALSE,help='Flag to indicate file are for samples')
+    parser$add_argument('-c','--chemical',dest='is_chem',default=FALSE,action='store_true',
+                        help='Flag to indicate file is for chemicals')
+    parser$add_argument('-d','--drcFile',dest='dose_res_stat',default'',help='dose response curve file')
+    parser$add_argument('-p','--sampMap',dest='sample_mapping_file',default='',help='Sample mapping file location')
+    parser$add_argument('-m','--chemMap',dest='chem_meta_file',default='',help='Chemical metadata file location')
+    parser$add_argument('-e','--epMap',dest='endpoint_mapping_file',default='',help='Endpoint naming file location')
+    parser$add_argument('-l','--chemClass',dest='chem_class_file',default='',help='chemical class file location')
+    parser$add_argument('-x','--compToxFile',dest='comp_tox_mapping',default='',help='comptox data file location')
+    parser$add_argument('-f','--sampleFiles',dest='sample_files',default='',help='comma dlimited list of fses files to merge' )
 
 
     args <- parser$parse_args()
@@ -899,16 +907,16 @@ main<-function(){
 
     chemClass<-masvChemClass(args$chem_class_file)
 
-    chemMeta<-getChemMetadata(args$chem_meta_file,chemClass)
+    chemMeta<-getChemMetadata(args$chem_meta_file,chemClass,args$comp_tox_mapping)
 
-    sampChem<-buildSampleData(args$sample_mapping_file,chemMeta)
+    sampChem<-buildSampleData(args$fses_files,chemMeta,args$sample_mapping_file)
 
     endpointDetails<-getEndpointMetadata(args$endpoint_mapping_file)%>%unique()
 
     ##now, depending on what combination of data type and statistic, we can redo file
 
 
-    generateSummaryStats()
+    #generateSummaryStats()
 
 }
 
