@@ -196,16 +196,16 @@ removeChemIdDuplicates<-function(tab, chemIds,cols=c('AUC_Norm','End_Point_Name'
 #' @param data.dir path to standardized data that enables matching across datasets
 #' @param comptoxfiles Files downloaded from the EPA website
 #' @return data.frame
-getChemMetadata<-function(data.dir,
+getChemMetadata<-function(desc_file='ChemicalDescriptions.xlsx',chemicalClasses,
                           comptoxfiles=c('CompToxChemicalsDashboard-Batch-Search_2021-11-05_17_57_46.xlsx',
                                          'CCD-Batch-Search_2022-01-26_10_28_30.xlsx')){    ##This mapping file consumes data from OSU to match identifiers to CAS
 
      ##we have curated descriptions for each chemical
-   curatedDesc <- rio::import(file=paste0(data.dir,'/ChemicalDescriptions.xlsx'),which=1)%>%
+   curatedDesc <- rio::import(file=desc_file,which=1)%>%
         select(cas_number='CASRN',chemDescription='USE CATEGORY/DESCRIPTION')
 
    ##we have chemical source and class information
-   chemicalClasses <- masvChemClass(data.dir)
+   #chemicalClasses <- masvChemClass(data.dir)
     ##this file comes from COMPTOX
     ##here we join the chemical metadata from the comptox dashboard
 
@@ -592,10 +592,10 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
 #' masvChemClass
 #' Reads in full MASV class annotations and assigns values to chemicals
 #' @return data.frame
-masvChemClass<-function(chemTab){
+masvChemClass<-function(classfile){
  # library(tidyr)
                                         # library(dplyr)
-    classfile<-subset(chemTab,data_type=='classification')[['location']]
+#    classfile<-subset(chemTab,data_type=='classification')[['location']]
   classes<-rio::import(classfile,which=1)#paste0(data.dir,'/MASV%20Classifications%202021.xlsx'),which=1)
 #                             sheet = 'MASV15 Classifications')
   source=c("pharmacological","personalCare","industrial","pulpAndPaper","pestProduct","natural",'pestRodenticide',
@@ -883,22 +883,32 @@ generateSummaryStats<-function(){
 main<-function(){
     ##now we check for additional files
     parser <- ArgumentParser()
-    parser$add_argument('-s','--samples',dest='samp_files',default="",
-                        help='The subsequent files are samples')
-    parser$add_argument('-c','--chemicals',dest='chem_files',default='',
-                        help='The subsequent files are chemicals')
+    parser$add_argument('-s','--sample',dest='is_sample',action='store_true',default=FALSE)
+    parser$add_argument('-c','--chemical',dest='is_chem',default=FALSE,action='store_True',
+                        help='The subsequent files are chemical')
+    parser$add_argument('-d','--drcStat',dest='dose_res_stat',default=c('bmd','dose','fit'),help='which file is it')
+    parser$add_argument('-p','--sampMap',dest='sample_mapping_file',default='')
+    parser$add_argument('-m','--chemMap',dest='chem_meta_file',default='')
+    parser$add_argument('-e','--epMap',dest='endpoint_mapping_file',default='')
+    parser$add_argument('-l','--chemClass',dest='chem_class_file',default='')
+
 
     args <- parser$parse_args()
                                           #if we are adding new data, add to additional data in repo
                                         #files that we're reading in
-    chem.files<-unlist(strsplit(args$chem_files,split=','))
-    extract.files<-unlist(strsplit(args$samp_files,split=','))
 
-    print(chem.files)
-    print(extract.files)
+    chemClass<-masvChemClass(args$chem_class_file)
 
-  buildDB(chem.files,extract.files)
-  generateSummaryStats()
+    chemMeta<-getChemMetadata(args$chem_meta_file,chemClass)
+
+    sampChem<-buildSampleData(args$sample_mapping_file,chemMeta)
+
+    endpointDetails<-getEndpointMetadata(args$endpoint_mapping_file)%>%unique()
+
+    ##now, depending on what combination of data type and statistic, we can redo file
+
+
+    generateSummaryStats()
 
 }
 

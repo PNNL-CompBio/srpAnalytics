@@ -1,0 +1,83 @@
+'''
+Build script moved to python for better extendability and interoperability.
+
+'''
+
+
+import os
+import subprocess
+import pandas as pd
+
+
+
+def collectFiles(data_dir='https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data',filename='srp_build_files.csv'):
+    '''
+    every time the build file is updated, this script will collect the files and return
+    a dictionary of files to be fed into each module
+    '''
+    df = pd.read_csv(data_dir+'/'+filename)
+    return df
+
+
+def fitCurveFiles(morpho_behavior_tuples):
+    '''
+    get new curve fits, list of tuples of morpho/behavior pairs
+    '''
+    
+
+def endpointMetadata(endpointmappingfile):
+    '''
+    retrieve endpoint mapping
+    '''
+
+
+def chemicalClass(chem_class_mapping_file):
+    '''
+    get chemical classes
+    '''
+
+def combineFiles(location_list,ftype):
+    '''
+    helper function to combine duplicates
+    '''
+    dflist=[]
+    required_columns = {'bmd':['Chemical_ID','End_Point','Model','BMD10','BMD50',"Min_Dose","Max_Dose",\
+                                "AUC_Norm","DataQC_Flag","BMD_Analysis_Flag"],#,"BMD10_Flag","BMD50_Flag{"),
+                          'dose':['Chemical_ID',"End_Point","Dose","Response","CI_Lo","CI_Hi"],\
+                          'fit':['Chemical_ID',"End_Point","X_vals","Y_vals"]}
+
+    print('concatenating '+ftype)
+    for loc in location_list.location:
+        f = pd.read_csv(loc)[required_columns[ftype]]
+        dflist.append(f)
+    fulldf=pd.concat(dflist)
+    fulldf = fulldf.drop_duplicates()
+
+    
+    return fulldf.drop_duplicates()
+
+def main():
+    df = collectFiles()
+
+    ##first find the morphology and behavior pairs for chemical sources
+    chemdf = df.loc[df.sample_type=='chemical']
+    morph = chemdf.loc[chemdf.data_type=='morphology']
+    beh = chemdf.loc[chemdf.data_type=='behavior']
+    tupes =[]
+    for n in morph.name:
+        tupes.append([morph.loc[morph.name==n].location,beh.loc[beh.name==n].location])
+
+    ##call bmdrc on all morphology/behavior pairs for sample sources
+    newbmds,newfits,newdoses =[],[],[]
+    ##get output in bmds, fits, and curves
+
+    #add chemical BMDS, fits, curves to existing data
+    for st in ['chemical','extract']:
+        for dt in ['bmd','fit','dose']:
+            fdf = combineFiles(df.loc[df.sample_type==st].loc[df.data_type==dt],dt)
+            fname = 'tmp_'+st+'_'+dt+'.csv'
+            fdf.to_csv(fname,index=False)
+
+            ##now map sample information
+
+main()
