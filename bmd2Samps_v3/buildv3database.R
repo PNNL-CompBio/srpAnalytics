@@ -892,13 +892,14 @@ main<-function(){
     parser$add_argument('-s','--sample',dest='is_sample',action='store_true',default=FALSE,help='Flag to indicate file are for samples')
     parser$add_argument('-c','--chemical',dest='is_chem',default=FALSE,action='store_true',
                         help='Flag to indicate file is for chemicals')
-    parser$add_argument('-d','--drcFile',dest='dose_res_stat',default'',help='dose response curve file')
+    parser$add_argument('-d','--drcFiles',dest='dose_res_stat',default='',help='dose response curve file')
     parser$add_argument('-p','--sampMap',dest='sample_mapping_file',default='',help='Sample mapping file location')
     parser$add_argument('-m','--chemMap',dest='chem_meta_file',default='',help='Chemical metadata file location')
     parser$add_argument('-e','--epMap',dest='endpoint_mapping_file',default='',help='Endpoint naming file location')
     parser$add_argument('-l','--chemClass',dest='chem_class_file',default='',help='chemical class file location')
     parser$add_argument('-x','--compToxFile',dest='comp_tox_mapping',default='',help='comptox data file location')
     parser$add_argument('-f','--sampleFiles',dest='sample_files',default='',help='comma dlimited list of fses files to merge' )
+    parser$add_argument('-h','--chemDesc',dest='chem_desc',default='',help='Descriptions of chemicals')
 
 
     args <- parser$parse_args()
