@@ -75,18 +75,21 @@ def main():
                 sampfiles.append(fname)
 
     ##now map sample information
-    smap = list(df.loc[df.name=='sampMap'].location)[0]
-    cmap = list(df.loc[df.name=='chemMap'].location)[0]
+    sid = list(df.loc[df.name=='sampId'].location)[0]
+    cid = list(df.loc[df.name=='chemId'].location)[0]
     cclass = list(df.loc[df.name=='class1'].location)[0]
     emap = list(df.loc[df.name=='endpointMap'].location)[0]
     fses = ','.join(list(df.loc[df.data_type=='sample'].location))
     ctfile = list(df.loc[df.name=='compTox'].location)[0]
     desfile = list(df.loc[df.name=='chemdesc'].location)[0]
-
+    smap = list(df.loc[df.name=='sampMap'].location)[0]
+                
     ##call script with sample files
     cmd = "Rscript bmd2Samps_v3/buildV3database.R --sample --drcFiles="+','.join(sampfiles)+\
-        ' --sampMap='+smap+' --chemMap='+cmap+' --epMap='+emap+' --chemClass='+cclass+\
-        ' --compToxFile='+ctfile+' --sampleFiles='+fses+' --chemDesc='+desfile
+        ' --sampId='+smap+' --chemId='+cid+' --epMap='+emap+' --chemClass='+cclass+\
+        ' --compToxFile='+ctfile+' --sampleFiles='+fses+' --chemDesc='+desfile+\
+        ' --sampMap='+smap
+    
     print(cmd)
     os.system(cmd)
     ##call script with chemical files
