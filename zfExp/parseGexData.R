@@ -18,7 +18,7 @@ data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data
 
 
 args = commandArgs(trailingOnly=TRUE)
-
+#print(args)
 if(length(args)<3){
     print('Need to call script with path to GEX files (comma delimited) and chemicals.csv and gene info file')
     quit()
@@ -27,7 +27,7 @@ if(length(args)<3){
 
 tab<-rio::import(args[1],which=1,skip=1)###so far only equipped to handle one gene expression file
 
-chem<-readr::read_csv(args[1])|>
+chem<-readr::read_csv(args[2])|>
   dplyr::select(Chemical_ID,cas_number)|>distinct()
 
 ind_res<-tab%>% tidyr::pivot_longer(ends_with("Indication"),
@@ -36,7 +36,7 @@ ind_res<-tab%>% tidyr::pivot_longer(ends_with("Indication"),
   mutate(condition=stringr::str_remove(condition,'_DEG_Indication'))
 
 ##gene info - need to get basic info about gene and link to zfin db
-geneinfo<-readr::read_csv(args[3]),col_names=c('zfinId','secondId','symbol','name','organism','description'))
+geneinfo<-readr::read_csv(args[3],col_names=c('zfinId','secondId','symbol','name','organism','description'))
 
 
 fc_res<-tab%>%
@@ -109,7 +109,7 @@ res<-res|>
 
 
 ##need to get mapping to drug name
-write.table(res,file ='/tmp/srpDEGstats.csv',sep=',',quote=F,row.names=F,col.names=T)
-write.table(allgenes,file='/tmp/allGeneEx.csv',sep=',',quote=F,row.names=F,col.names=T)
+write.table(res,file ='srpDEGstats.csv',sep=',',quote=F,row.names=F,col.names=T)
+write.table(allgenes,file='allGeneEx.csv',sep=',',quote=F,row.names=F,col.names=T)
 
 
