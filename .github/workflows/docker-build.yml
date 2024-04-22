@@ -32,17 +32,24 @@ jobs:
       - name: Build and push bmd2Samps
         uses: docker/build-push-action@v3
         with:
-          context: bmd2Samps
+          context: old/bmd2Samps
           push: true
           tags: sgosline/srp-bmd2samps:v1
           platforms: linux/amd64,linux/arm64       
       - name: Build and push version 2 bmd2Samps
         uses: docker/build-push-action@v3
         with:
-          context: bmd2Samps_v2
+          context: old/bmd2Samps_v2
+          push: true
+          tags: sgosline/srp-bmd2samps:2
+          platforms: linux/amd64,linux/arm64  
+      - name: Build and push version 3 bmd2Samps
+        uses: docker/build-push-action@v3
+        with:
+          context: sampleChemMapping
           push: true
           tags: sgosline/srp-bmd2samps:latest
-          platforms: linux/amd64,linux/arm64       
+          platforms: linux/amd64,linux/arm64   
       - name: Build and push exposome
         uses: docker/build-push-action@v3
         with:
