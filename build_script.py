@@ -74,14 +74,15 @@ def runExposome(chem_id_file):
     '''
     run exposome data pull
     '''
-    ##TODO: make this work with chemical id file as argument
-    cmd = 'Rscript exposome/exposome_summary_stats.R'
+    cmd = 'Rscript exposome/exposome_summary_stats.R '+chem_id_file
+    print(cmd)
+    os.system(cmd)
 
-def runExpression(gex,chem):
+def runExpression(gex,chem,ginfo):
     '''
     run expression parsing
     '''
-    cmd = 'Rscript zfExp/parseGexData.R '+gex+' '+chem
+    cmd = 'Rscript zfExp/parseGexData.R '+gex+' '+chem+' '+ginfo
     print(cmd)
     os.system(cmd)
 
@@ -161,13 +162,13 @@ def main():
         ##now we run validation
         runSchemaCheck()
     if args.expo:
-        runExposome()
+        runExposome(cid)
         runSchemaCheck()
     if args.geneEx:
         if not os.path.exists("chemicals.csv"):
             runSampMap(False,[],smap,cid,emap,cclass,ctfile,fses,desfile)
         
-        runExpresion(gene1,'chemicals.csv',ginfo)
+        runExpression(gex1,'chemicals.csv',ginfo)
         runSchemaCheck()
     
     
