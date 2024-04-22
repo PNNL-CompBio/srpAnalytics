@@ -32,9 +32,10 @@ fit7,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/mai
 fit8,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/extracts/fit_vals_all_qc.csv,1
 gene1,expression,zebrafish,,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp/ZF_gex.xlsx,3
 geneInfo,mapping,zebrafish,,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp/allianceGenomeInfo.csv,3
-chemMap,mapping,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/chemicalIdMapping.csv,1
-sampMap,mapping,sample,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/sampleIdMapping.csv,1
+chemId,mapping,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/chemicalIdMapping.csv,1
+sampId,mapping,sample,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/sampleIdMapping.csv,1
 class1,classification,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/MASV%20Classifications%202021.xlsx,1
-compTox,mapping,chemical,https://github.com/PNNL-CompBio/srpAnalytics/blob/main/data/CCDBatch_2022-01-26_AND_2021_11_05.xlsx,1
-endpointMap,mapping,endpoint,https://github.com/PNNL-CompBio/srpAnalytics/blob/main/data/SuperEndpoint%20Mapping%202021NOV04.xlsx,1
-chemdesc,classification,chemical,https://github.com/PNNL-CompBio/srpAnalytics/blob/main/data/ChemicalDescriptions.xlsx,1
+compTox,mapping,chemical,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/data/CCDBatch_2022-01-26_AND_2021_11_05.xlsx,1
+endpointMap,mapping,endpoint,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/data/SuperEndpoint%20Mapping%202021NOV04.xlsx,1
+chemdesc,classification,chemical,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/data/ChemicalDescriptions.xlsx,1
+sampMap,mapping,sample,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/data/envSampCleanMapping.xlsx,1
