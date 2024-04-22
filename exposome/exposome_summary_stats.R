@@ -4,7 +4,18 @@ library(jsonlite)
 library(httr)
 library(dplyr)
 library(tidyr)
-#library(cowplot)
+
+args = commandArgs(trailingOnly=TRUE)
+
+if(length(args)<1){
+    print('Need to call script with path to chemcial mapping file')
+    quit()
+}
+
+
+
+
+                                        #library(cowplot)
 url <- "https://montilab.bu.edu/Xposome-API/projects?all=Yes"
 res <- GET(url = url, encode = 'json')
 stop_for_status(res)
@@ -20,7 +31,7 @@ print(paste('We now have data from',length(projects),'projects'))
 #portal_name=  'https://montilab.bu.edu/Xposome-API/portals'
 
 ##read in all chemicals
-all.chems <- read.table('chemicalIdMapping.csv',sep=',',header=T,fileEncoding = "UTF-8-BOM")
+all.chems <- read.table(args[1]',sep=',',header=T,fileEncoding = "UTF-8-BOM")
 
 
 #' get GO terms for each chemical id
@@ -145,6 +156,6 @@ sg.stats <- sig.genes%>%
   dplyr::rename(Project=friendlyName)|>
   dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)
 
-write.table(sg.stats,file='/tmp/sigGeneStats.csv',sep=',',row.names=F)
+write.table(sg.stats,file='sigGeneStats.csv',sep=',',row.names=F)
 ##not using this for now:
 #write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)
