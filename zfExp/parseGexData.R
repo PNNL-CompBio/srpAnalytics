@@ -12,15 +12,21 @@ schema<-data.frame(Project=c(),
                    Chemical_ID=c())
 
 
+
+
 data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp'
 
-tab<-rio::import(paste0(data.dir,'/ZF_gex.xlsx'),which=1,skip=1)
+
 args = commandArgs(trailingOnly=TRUE)
 
-if(length(args)!=1){
-    print('Need to call script with chemicals.csv')
+if(length(args)<3){
+    print('Need to call script with path to GEX files (comma delimited) and chemicals.csv and gene info file')
     quit()
 }
+
+
+tab<-rio::import(args[1],which=1,skip=1)###so far only equipped to handle one gene expression file
+
 chem<-readr::read_csv(args[1])|>
   dplyr::select(Chemical_ID,cas_number)|>distinct()
 
@@ -30,7 +36,7 @@ ind_res<-tab%>% tidyr::pivot_longer(ends_with("Indication"),
   mutate(condition=stringr::str_remove(condition,'_DEG_Indication'))
 
 ##gene info - need to get basic info about gene and link to zfin db
-geneinfo<-readr::read_csv(paste0(data.dir,'/allianceGenomeInfo.csv'),col_names=c('zfinId','secondId','symbol','name','organism','description'))
+geneinfo<-readr::read_csv(args[3]),col_names=c('zfinId','secondId','symbol','name','organism','description'))
 
 
 fc_res<-tab%>%

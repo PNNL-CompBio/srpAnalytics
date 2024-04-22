@@ -474,7 +474,7 @@ combineV2ChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpo
     mid.bmd<-mid.bmd[-dupes,]
   }
 
-            print(head(mid.bmd))
+   #         print(head(mid.bmd))
 
     if(is_extract){
     sdSamp<-sampChem%>%
@@ -536,11 +536,13 @@ combineV2ChemicalEndpointData<-function(bmdfiles,is_extract=FALSE,sampChem,endpo
 ##We will release an 'endpoint file for each condition'
 combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointDetails){
 
+
     print(paste('Combining fit files:',paste(bmdfiles,collapse=',')))
+   # print(head(sampChem))
     cols <- required_bmd_columns$fitVals
     files <- lapply(bmdfiles,function (x) rio::import(x)%>%dplyr::select(all_of(cols)))
 
-    print(head(files))
+   # print(head(files[[1]]))
 
     ##get chemicals and EPs in each file, so we can only keep the newest ones
     chemEps<-lapply(files,function(x){
@@ -572,8 +574,8 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
       f%>%
        subset(combined%in%newChemEps[[i]])%>% ##filter out those that we want
         dplyr::select(all_of(cols))%>%
-        mutate(zf.cid=as.character(Chemical_ID))%>% ##why did i do this?
-        dplyr::rename(ChemicalId='zf.cid')%>%
+       # mutate(zf.cid=as.character(Chemical_ID))%>% ##why did i do this?
+       # dplyr::rename(ChemicalId='zf.cid')%>%
         subset(X_vals!="NULL")%>%
         mutate(X_vals=as.numeric(X_vals))%>%
         mutate(Y_vals=as.numeric(Y_vals))
@@ -582,11 +584,11 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
 
     mid.bmd<-do.call(rbind,fixed.files)
 
-    print(head(mid.bmd))
+    #print(head(mid.bmd))
     full.bmd<-mid.bmd%>%
         right_join(endpointDetails)%>%
         distinct()%>%
-        select(-c(End_Point,Description,ChemicalId))
+        select(-c(End_Point,Description))#,ChemicalId))
 
     ###TODO: update for reduce data...
     if(is_extract){
@@ -597,18 +599,23 @@ combineChemicalFitData<-function(bmdfiles, is_extract=FALSE, sampChem, endpointD
       select(Sample_ID,tmpId)%>%
       distinct()
 
+#        print(head(sdSamp))
       ##now we join the data withi the updated sample information
     full.bmd<-full.bmd%>%
       dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
         dplyr::select(-Chemical_ID)%>%
-        full_join(sdSamp,by='tmpId')%>%
-        select(-tmpId)#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+        full_join(sdSamp,by='tmpId')
 
+        nas<-which(is.na(full.bmd$Sample_ID))
+        full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
+        full.bmd<-full.bmd|>
+            select(-tmpId)#remover this because wekept the original
     #full.bmd <- rename(full.bmd,Sample_ID='Chemical_ID')
     }else{
         full.bmd<-full.bmd%>%
             subset(Chemical_ID%in%sampChem$Chemical_ID)
     }
+#print(head(full.bmd))
     return(full.bmd)
 }
 
@@ -667,7 +674,7 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
     files <- lapply(bmdfiles,function(x) read.csv(x)%>%select(cols))
 
     print(paste('Combining dose response files:',paste(bmdfiles,collapse=',')))
-    print(head(files))
+   # print(head(files[[1]]))
 
     ##get chemicals and EPs in each file, so we can only keep the newest ones
     chemEps<-lapply(files,function(x){
@@ -694,17 +701,17 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
       files[[i]]%>%
         mutate(combined=paste(Chemical_ID,End_Point))%>% #get common index
         subset(combined%in%newChemEps[[i]])%>% ##filter out those that we want
-        dplyr::select(required_bmd_columns$doseRep)%>%
-         mutate(zf.cid=as.character(Chemical_ID))%>% ##why did i do this?
-       dplyr::rename(ChemicalId='zf.cid')
+        dplyr::select(required_bmd_columns$doseRep)#%>%
+     #    mutate(zf.cid=as.character(Chemical_ID))%>% ##why did i do this?
+     #  dplyr::rename(ChemicalId='zf.cid')
     })
 
     mid.bmd<-do.call(rbind,fixed.files)
-
+   # print(head(mid.bmd))
     full.bmd<-mid.bmd%>%
         right_join(endpointDetails)%>%
         dplyr::select(-c(End_Point,Description))%>%
-        distinct()%>%select(-ChemicalId)
+        distinct()#%>%select(-ChemicalId)
 
     if(is_extract){
       sdSamp<-sampChem%>%tidyr::separate('Sample_ID',into=c('tmpId','sub'),sep='-',remove=FALSE)%>%
@@ -714,10 +721,17 @@ combineChemicalDoseData<-function(bmdfiles, is_extract=FALSE, sampChem,endpointD
       full.bmd<-full.bmd%>%
         dplyr::mutate(tmpId=as.character(Chemical_ID))%>%
         dplyr::select(-Chemical_ID)%>%
-          full_join(sdSamp,by='tmpId')%>%
-                                        select(-tmpId)#%>%#%>%mutate(Chemical_ID<-as.character(zaap_cid)))%>%
+          full_join(sdSamp,by='tmpId')
+
+
+        nas<-which(is.na(full.bmd$Sample_ID))
+        full.bmd$Sample_ID[nas]<-full.bmd$tmpId[nas]
+        full.bmd<-full.bmd|>
+            select(-tmpId)#remover this because wekept the original
+
 
     }
+ #   print(head(full.bmd))
   return(unique(full.bmd))
 }
 
@@ -816,10 +830,10 @@ buildDB<-function(chem.files=c(),extract.files=c()){
     unique()
 
   nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
-  print(length(nas))
+#  print(length(nas))
 
   to.remove<-setdiff(nas,sampChem$Chemical_ID)
-  print(length(to.remove))
+#  print(length(to.remove))
   bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
   curves<-curves%>%subset(!Chemical_ID%in%to.remove)
   doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
@@ -940,71 +954,73 @@ main<-function(){
 
     out.dir='./'
 
-    ### we can now write out the base line tables
-      ##chemical file - double check columns
-    chems <- chemMeta%>%dplyr::select(all_of(required_chem_columns))
-    write.csv(chems,file=paste0(out.dir,'chemicals.csv'),quote=TRUE,row.names=F)
-                                        #sample file - double check columns
-    samps<-sampChem%>%
-      select(samp_columns)%>%
-      distinct()
-
-    write.csv(samps,file=paste0(out.dir,'samples.csv'),quote=T,row.names=FALSE)
-
-      ##chemical to sample sample
-    chemSamp<-sampChem%>%
-        dplyr::select(sample_chem_columns)%>%
-        distinct()
-    write.csv(chemSamp,file=paste0(out.dir,'sampleToChemicals.csv'),row.names=FALSE, quote = TRUE)
-
 
 
     ##now, depending on what combination of data type and statistic, we can map the files
 
-    #message('Processing chemical response data')
-    allfiles=unlist(strsplit(args$dose_res_stat,split=','))
-    bf = allfiles[grep("bmd",allfiles)]
-    df = allfiles[grep('dose',allfiles)]
-    cf = allfiles[grep('fit',allfiles)]
+                                        #message('Processing chemical response data')
+    if(args$is_samp || args$is_chem){
+        allfiles=unlist(strsplit(args$dose_res_stat,split=','))
+        bf = allfiles[grep("bmd",allfiles)]
+        df = allfiles[grep('dose',allfiles)]
+        cf = allfiles[grep('fit',allfiles)]
 
-    metafile<-chemMeta
-    if(args$is_sample){
-        metafile<-sampChem
-    }
-
-#    print(head(endpointDetails))
-   # print(head(metafile))
-
-    bmds<-combineV2ChemicalEndpointData(bf,is_extract=args$is_sample,metafile,endpointDetails)%>%
-        unique()
-    curves <-combineChemicalFitData(cf, is_extract=args$is_sample, metafile,endpointDetails)%>%
-        unique()
-    doseReps <-combineChemicalDoseData(df, is_extract=args$is_sample, metafile,endpointDetails)%>%
-        unique()
- #   print(head(doseReps))
+        metafile<-chemMeta
+        if(args$is_sample){
+            metafile<-sampChem
+        }
 
 
+        bmds<-combineV2ChemicalEndpointData(bf,is_extract=args$is_sample,metafile,endpointDetails)%>%
+            unique()
+        curves <-combineChemicalFitData(cf, is_extract=args$is_sample, metafile,endpointDetails)%>%
+            unique()
+        doseReps <-combineChemicalDoseData(df, is_extract=args$is_sample, metafile,endpointDetails)%>%
+            unique()
+                                        #   print(head(doseReps))
 
-    ##now write files
-    if(args$is_samp){
-        write.csv(bmds,file=paste0(out.dir,'zebrafishSampBMDs.csv'),row.names=FALSE, quote = TRUE)
-        write.csv(curves,file=paste0(out.dir,'zebrafishSampXYCoords.csv'),row.names = FALSE, quote = TRUE)
-        write.csv(doseReps,file=paste0(out.dir,'zebrafishSampDoseResponse.csv'),row.names = FALSE, quote = TRUE)
 
-     }
-    if(args$is_chem){
-        nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
-        print(length(nas))
 
-        to.remove<-setdiff(nas,sampChem$Chemical_ID)
-        print(length(to.remove))
-        bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
-        curves<-curves%>%subset(!Chemical_ID%in%to.remove)
-        doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
+        ##now write files
+        if(args$is_samp){
+            write.csv(bmds,file=paste0(out.dir,'zebrafishSampBMDs.csv'),row.names=FALSE, quote = TRUE)
+            write.csv(curves,file=paste0(out.dir,'zebrafishSampXYCoords.csv'),row.names = FALSE, quote = TRUE)
+            write.csv(doseReps,file=paste0(out.dir,'zebrafishSampDoseResponse.csv'),row.names = FALSE, quote = TRUE)
 
-        write.csv(bmds,file=paste0(out.dir,'zebrafishChemBMDs.csv'),quote=T,row.names = FALSE)
-        write.csv(curves,file=paste0(out.dir,'zebrafishChemXYCoords.csv'),row.names = FALSE, quote = TRUE)
-        write.csv(doseReps,file=paste0(out.dir,'zebrafishChemDoseResponse.csv'),row.names = FALSE, quote = TRUE)
+        }
+        if(args$is_chem){
+            nas<-bmds$Chemical_ID[which(is.na(bmds$AUC_Norm))]
+                                        #    print(length(nas))
+
+            to.remove<-setdiff(nas,sampChem$Chemical_ID)
+                                        #    print(length(to.remove))
+            bmds<-bmds%>%subset(!Chemical_ID%in%to.remove)
+            curves<-curves%>%subset(!Chemical_ID%in%to.remove)
+            doseReps<-doseReps%>%subset(!Chemical_ID%in%to.remove)
+
+            write.csv(bmds,file=paste0(out.dir,'zebrafishChemBMDs.csv'),quote=T,row.names = FALSE)
+            write.csv(curves,file=paste0(out.dir,'zebrafishChemXYCoords.csv'),row.names = FALSE, quote = TRUE)
+            write.csv(doseReps,file=paste0(out.dir,'zebrafishChemDoseResponse.csv'),row.names = FALSE, quote = TRUE)
+
+        }
+    }else{
+        print('No bmds to proces, just printing other metadata files')
+            ### we can now write out the base line tables
+        ##chemical file - double check columns
+        chems <- chemMeta%>%dplyr::select(all_of(required_chem_columns))
+        write.csv(chems,file=paste0(out.dir,'chemicals.csv'),quote=TRUE,row.names=F)
+                                        #sample file - double check columns
+        samps<-sampChem%>%
+            select(samp_columns)%>%
+            distinct()
+
+        write.csv(samps,file=paste0(out.dir,'samples.csv'),quote=T,row.names=FALSE)
+
+        ##chemical to sample sample
+        chemSamp<-sampChem%>%
+            dplyr::select(sample_chem_columns)%>%
+            distinct()
+        write.csv(chemSamp,file=paste0(out.dir,'sampleToChemicals.csv'),row.names=FALSE, quote = TRUE)
 
     }
 

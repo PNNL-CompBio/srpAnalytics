@@ -30,7 +30,8 @@ dose8,dose,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/m
 fit6,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/extracts/fit_vals_2021_04_09.csv,1
 fit7,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/extracts/fit_vals_2021_08_18.csv,1
 fit8,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/extracts/fit_vals_all_qc.csv,1
-gene1,expression,zebrafish,,3
+gene1,expression,zebrafish,,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp/ZF_gex.xlsx,3
+geneInfo,mapping,zebrafish,,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp/allianceGenomeInfo.csv,3
 chemMap,mapping,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/chemicalIdMapping.csv,1
 sampMap,mapping,sample,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/sampleIdMapping.csv,1
 class1,classification,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/MASV%20Classifications%202021.xlsx,1
