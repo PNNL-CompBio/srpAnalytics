@@ -7,5 +7,5 @@ RUN R -e "install.packages(c('argparse','tidyverse'), dependencies=TRUE,repos='h
 COPY . bmd2Samps
 WORKDIR bmd2Samps
 
-ENTRYPOINT ["Rscript","buildv3database.R"]
+#ENTRYPOINT ["Rscript","buildv3database.R"]
 VOLUME ["/tmp"]
