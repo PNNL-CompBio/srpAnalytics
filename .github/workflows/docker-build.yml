@@ -5,7 +5,11 @@ defaults:
 on:
   push:
     branches:
-      - "*"
+      - "zfBmd"
+      - "zfExp"
+      - "sampleChemMapping"
+      - "dbSchema"
+      - "exposome"
 
 jobs:
   build-and-push:
