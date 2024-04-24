@@ -1,4 +1,4 @@
-FROM rocker/tidyverse
+FROM rocker/tidyverse:latest
 # To setup other dependencies
 
 #COPY setup.sh /setup.sh
