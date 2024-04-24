@@ -4,12 +4,12 @@ defaults:
     working-directory: ./
 on:
   push:
-    branches:
-      - "zfBmd"
-      - "zfExp"
-      - "sampleChemMapping"
-      - "dbSchema"
-      - "exposome"
+    paths: 
+      - zfBmd/
+      - zfExp/
+      - sampleChemMapping/
+      - dbSchema/
+      - exposome/
 
 jobs:
   build-and-push:
