@@ -3,7 +3,7 @@ FROM r-base:4.2.1
 
 
 RUN apt-get update --allow-insecure-repositories
-RUN apt-get install -y --allow-unauthenticated --fix-missing gcc-12 build-essential libpq-dev python3-venv
+RUN apt-get install -y --allow-unauthenticated --fix-missing gcc-12 build-essential libpq-dev python3-venv libcurl4-openssl-dev libxml2-dev libudunits2-dev
 
 RUN python3 -m venv /opt/venv
 

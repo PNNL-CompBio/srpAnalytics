@@ -20,6 +20,8 @@ COPY requirements.txt ./
 RUN Rscript -e "install.packages('readxl',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('dplyr',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('tidyr',dependencies=TRUE, repos='http://cran.rstudio.com')"
+RUN Rscript -e "install.packages('rio',dependencies=TRUE, repos='http://cran.rstudio.com')"
+
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 

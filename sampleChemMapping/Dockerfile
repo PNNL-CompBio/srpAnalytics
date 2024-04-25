@@ -1,4 +1,4 @@
-FROM rocker/tidyverse
+FROM r-base:4.2.1
 # To setup other dependencies
 
 

@@ -52,27 +52,20 @@ def runSampMap(is_sample=False,drcfiles=[],smap='',cid='',\
     run sample mapping
     '''
     if is_sample:
-        cmd = 'docker run sgosline/bmd2samps Rscript mapSamplesToChems.R --sample --drcFiles='+','.join(drcfiles)+\
+        cmd = "Rscript sampleChemMapping/mapSamplesToChems.R --sample --drcFiles="+','.join(drcfiles)+\
             ' --sampId='+smap+' --chemId='+cid+' --epMap='+emap+' --chemClass='+cclass+\
             ' --compToxFile='+ctfile+' --sampleFiles='+fses+' --chemDesc='+desfile+\
             ' --sampMap='+smap
-            #"Rscript sampleChemMapping/mapSamplesToChems.R --sample --drcFiles="+','.join(drcfiles)+\
-
     elif len(drcfiles)>0:
-        cmd = 'docker run sgosline/bmd2samps Rscript mapSamplesToChems.R --chemical --drcFiles='+','.join(drcfiles)+\
+        cmd = "Rscript sampleChemMapping/mapSamplesToChems.R --chemical --drcFiles="+','.join(drcfiles)+\
             ' --sampId='+smap+' --chemId='+cid+' --epMap='+emap+' --chemClass='+cclass+\
             ' --compToxFile='+ctfile+' --sampleFiles='+fses+' --chemDesc='+desfile+\
             ' --sampMap='+smap
-        #"Rscript sampleChemMapping/mapSamplesToChems.R --chemical --drcFiles="+','.join(drcfiles)+\
-
     else:
-        cmd = 'docker run sgosline/bmd2samps Rscript mapSamplesToChems.R --sampId='+smap+' --chemId='+cid+\
+        cmd = "Rscript sampleChemMapping/mapSamplesToChems.R --sampId="+smap+' --chemId='+cid+\
             ' --epMap='+emap+' --chemClass='+cclass+\
             ' --compToxFile='+ctfile+' --sampleFiles='+fses+' --chemDesc='+desfile+\
             ' --sampMap='+smap
-                #"Rscript sampleChemMapping/mapSamplesToChems.R --sampId="+smap+' --chemId='+cid+\
-
-    dmd = 'docker pull sgosline/bmd2samps'
     
     print(cmd)
     os.system(cmd)
