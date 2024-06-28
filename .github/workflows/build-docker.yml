@@ -1,0 +1,90 @@
+name: Build-upload-docker
+#defaults:
+#  run:
+#    working-directory: ./
+on:
+  push:
+    branches:
+      - "*"
+    paths:
+      - "*"
+      
+#      - .github/
+#      - zfBmd/
+#      - zfExp/
+#      - sampleChemMapping/
+#      - dbSchema/
+#      - exposome/
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Build and push sampleChem
+        uses: docker/build-push-action@v6
+        with:
+          file: ./sampleChemMapping/Dockerfile
+          tags: sgosline/srp-samplechem:latest
+          push: true
+          platforms:
+            - linux/amd64
+            - linux/arm64
+      - name: Build and push exposome
+        uses: docker/build-push-action@v6
+        with:
+          file: ./exposome/Dockerfile
+          push: true
+          tags: sgosline/srp-exposome:latest     
+          platforms:
+            - linux/amd64
+            - linux/arm64
+      - name: Build and push dbSchema
+        uses: docker/build-push-action@v6
+        with:
+          file: ./dbSchema/Dockerfile
+          push: true
+          tags: sgosline/srp-dbschema
+          platforms:
+            - linux/amd64
+            - linux/arm64
+      - name: Build and push expression
+        uses: docker/build-push-action@v6
+        with:
+          file: ./zfExp/Dockerfile
+          push: true
+          tags: sgosline/srp-zfexp
+          platforms:
+            - linux/amd64
+            - linux/arm64
+#      - name: Build and push bmd
+#        uses: docker/build-push-action@v6
+#        with:
+#          context: zfBmd
+#          push: true
+#          tags: sgosline/srp-zfbmd:latest
+#          platforms: linux/amd64,linux/arm64       
+#      - name: Build and push bmd2Samps
+#        uses: docker/build-push-action@v6
+#        with:
+#          context: old/bmd2Samps
+#          push: true
+#          tags: sgosline/srp-bmd2samps:v1
+#          platforms: linux/amd64,linux/arm64       
+#      - name: Build and push version 2 bmd2Samps
+#        uses: docker/build-push-action@v6
+#        with:
+#          context: old/bmd2Samps_v2
+#          push: true
+#          tags: sgosline/srp-bmd2samps:latest
+#          platforms: linux/amd64,linux/arm64
