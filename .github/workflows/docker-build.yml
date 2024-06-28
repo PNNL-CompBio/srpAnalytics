@@ -4,7 +4,8 @@ defaults:
     working-directory: ./
 on:
   push:
-    paths: 
+    paths:
+      - .github/
       - zfBmd/
       - zfExp/
       - sampleChemMapping/
