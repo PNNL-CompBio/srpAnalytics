@@ -1,12 +1,10 @@
-##V2 database will be comprised of more files to distinctly track
+##V3 database will be comprised of more files to distinctly track
 ## gene, chemical, and sample metadata
-
 require(dplyr)
 require(rio)
 require(argparse)
 require(xml2)
 library(tidyr)
-
 ##The data release will be comprised of 9 files (note change from v1!)
 #' 1- list of environmental samples and the chemical composition (curated sample data)
 #' 2- ZF summary statistics for chemicals (and no chemical metadata)

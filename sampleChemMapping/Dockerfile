@@ -1,7 +1,6 @@
 FROM r-base:4.2.1
 # To setup other dependencies
 
-
 RUN apt-get update --allow-insecure-repositories
 RUN apt-get install -y --allow-unauthenticated --fix-missing gcc-12 build-essential libpq-dev python3-venv
 
