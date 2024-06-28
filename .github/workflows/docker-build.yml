@@ -58,7 +58,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-	  file: exposome/Dockerfile
+          file: exposome/Dockerfile
           push: true
           tags: sgosline/srp-exposome:latest     
           platforms: linux/amd64,linux/arm64  
@@ -66,7 +66,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-	  file: dbSchema/Dockerfile
+          file: dbSchema/Dockerfile
           push: true
           tags: sgosline/srp-dbschema
           platforms: linux/amd64,linux/arm64
@@ -74,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-	  file: zfExp/Dockerfile
+          file: zfExp/Dockerfile
           push: true
           tags: sgosline/srp-zfexp
           platforms: linux/amd64,linux/arm64       
