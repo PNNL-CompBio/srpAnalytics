@@ -53,25 +53,34 @@ jobs:
 	  push: true
           file: ./sampleChemMapping/Dockerfile
           tags: sgosline/srp-samplechem:latest
-          platforms: linux/amd64,linux/arm64
+          platforms:
+            - linux/amd64
+            - linux/arm64
       - name: Build and push exposome
         uses: docker/build-push-action@v6
         with:
           file: ./exposome/Dockerfile
           push: true
           tags: sgosline/srp-exposome:latest     
-          platforms: linux/amd64,linux/arm64  
+          platforms:
+            - linux/amd64
+            - linux/arm64
       - name: Build and push dbSchema
         uses: docker/build-push-action@v6
         with:
           file: ./dbSchema/Dockerfile
           push: true
           tags: sgosline/srp-dbschema
-          platforms: linux/amd64,linux/arm64
+          platforms:
+            - linux/amd64
+            - linux/arm64
       - name: Build and push expression
         uses: docker/build-push-action@v6
         with:
           file: ./zfExp/Dockerfile
           push: true
           tags: sgosline/srp-zfexp
-          platforms: linux/amd64,linux/arm64       
+          platforms:
+            - linux/amd64
+            - linux/arm64
+
