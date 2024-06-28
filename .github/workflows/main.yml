@@ -18,13 +18,10 @@ permissions:
 
 jobs:
 # Placeholder
-
-
    build-samples:
-     if: github.actor != 'github-actions[bot]'
+     #if: github.actor != 'github-actions[bot]'
      runs-on: ubuntu-20.04
      environment: build
-#     needs: [build-drugs-beataml,depmap-docker-build]
      steps:
        - name: Checkout Repo
          uses: actions/checkout@v2
@@ -33,7 +30,7 @@ jobs:
        - name: Pull sample image
          run: docker pull sgosline/srp-samplechem
        - name: Run sample-chem python command
-        run: |
+         run: |
            docker run -v $PWD:/tmp sgosline/samplechem python build_script.py --samps
        - name: List files cwd
          run: ls -lah 
