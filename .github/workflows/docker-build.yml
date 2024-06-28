@@ -50,7 +50,7 @@ jobs:
       - name: Build and push sampleChem
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./
 	  push: true
           file: ./sampleChemMapping/Dockerfile
           tags: sgosline/srp-samplechem:latest
@@ -58,7 +58,7 @@ jobs:
       - name: Build and push exposome
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./
           file: ./exposome/Dockerfile
           push: true
           tags: sgosline/srp-exposome:latest     
@@ -66,7 +66,7 @@ jobs:
       - name: Build and push dbSchema
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./
           file: ./dbSchema/Dockerfile
           push: true
           tags: sgosline/srp-dbschema
@@ -74,7 +74,7 @@ jobs:
       - name: Build and push expression
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./
           file: ./zfExp/Dockerfile
           push: true
           tags: sgosline/srp-zfexp
