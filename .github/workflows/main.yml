@@ -24,9 +24,9 @@ jobs:
      environment: build
      steps:
        - name: Checkout Repo
-         uses: actions/checkout@v2
+         uses: actions/checkout@v3
        - name: Download artifacts from previous drug gen
-         uses: actions/download-artifact@v2
+         uses: actions/download-artifact@v3
        - name: Pull sample image
          run: docker pull sgosline/srp-samplechem
        - name: Run sample-chem python command
@@ -39,7 +39,7 @@ jobs:
 #           mkdir additive-drugs-file-2
 #           mv drugs.tsv ignore_chems.txt additive-drugs-file-2
 #       - name: Upload artifacts for genes
-#         uses: actions/upload-artifact@v2
+#         uses: actions/upload-artifact@v3
 #         with:
 #           name: additive-drugs-file-2
 #           path: additive-drugs-file-2
@@ -51,9 +51,9 @@ jobs:
 #     needs: [build-drugs-depmap-CTRPv2-GDSC-gCSI-PRISM-CCLE-FIMM]
 #     steps:
 #       - name: Checkout Repo
-#         uses: actions/checkout@v2
+#         uses: actions/checkout@v3
 #       - name: Download artifacts from previous drug gen
-#         uses: actions/download-artifact@v2
+#         uses: actions/download-artifact@v3
 #         with:
 #           name: additive-drugs-file-2
 #       - name: List files cwd
