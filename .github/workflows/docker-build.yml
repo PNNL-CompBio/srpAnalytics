@@ -26,33 +26,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-#      - name: Build and push bmd
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: zfBmd
-#          push: true
-#          tags: sgosline/srp-zfbmd:latest
-#          platforms: linux/amd64,linux/arm64       
-#      - name: Build and push bmd2Samps
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: old/bmd2Samps
-#          push: true
-#          tags: sgosline/srp-bmd2samps:v1
-#          platforms: linux/amd64,linux/arm64       
-#      - name: Build and push version 2 bmd2Samps
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: old/bmd2Samps_v2
-#          push: true
-#          tags: sgosline/srp-bmd2samps:latest
-#          platforms: linux/amd64,linux/arm64
       - name: Build and push sampleChem
         uses: docker/build-push-action@v6
         with:
-	  push: true
           file: ./sampleChemMapping/Dockerfile
           tags: sgosline/srp-samplechem:latest
+	  push: true
           platforms:
             - linux/amd64
             - linux/arm64
@@ -83,4 +62,24 @@ jobs:
           platforms:
             - linux/amd64
             - linux/arm64
-
+#      - name: Build and push bmd
+#        uses: docker/build-push-action@v6
+#        with:
+#          context: zfBmd
+#          push: true
+#          tags: sgosline/srp-zfbmd:latest
+#          platforms: linux/amd64,linux/arm64       
+#      - name: Build and push bmd2Samps
+#        uses: docker/build-push-action@v6
+#        with:
+#          context: old/bmd2Samps
+#          push: true
+#          tags: sgosline/srp-bmd2samps:v1
+#          platforms: linux/amd64,linux/arm64       
+#      - name: Build and push version 2 bmd2Samps
+#        uses: docker/build-push-action@v6
+#        with:
+#          context: old/bmd2Samps_v2
+#          push: true
+#          tags: sgosline/srp-bmd2samps:latest
+#          platforms: linux/amd64,linux/arm64
