@@ -4,6 +4,8 @@ defaults:
     working-directory: ./
 on:
   push:
+    branches:
+      - "*"
     paths:
       - .github/
       - zfBmd/
