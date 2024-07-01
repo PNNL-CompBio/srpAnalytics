@@ -13,7 +13,7 @@ ENV PYTHONPATH "${PYTHONPATH}:/tmp"
 ENV PYTHONPATH "${PYTHONPATH}:/app"
 WORKDIR /app
 
-RUN mkdir -p sapleChemMapping
+RUN mkdir -p sampleChemMapping
 COPY sampleChemMapping/* sampleChemMapping
 COPY build_script.py .
 COPY requirements.txt .
