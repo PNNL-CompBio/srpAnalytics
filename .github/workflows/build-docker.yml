@@ -1,14 +1,13 @@
 name: Build-upload-docker
-#defaults:
-#  run:
-#    working-directory: ./
+defaults:
+  run:
+    working-directory: ./
 on:
   push:
     branches:
       - "*"
     paths:
-      - "*"
-      
+      - "*"      
 #      - .github/
 #      - zfBmd/
 #      - zfExp/
