@@ -30,28 +30,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push sampleChem
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v3
         with:
           file: ./sampleChemMapping/Dockerfile
           tags: sgosline/srp-samplechem:latest
           push: true
           platforms: linux/amd64,linux/arm64
       - name: Build and push exposome
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v3
         with:
           file: ./exposome/Dockerfile
           push: true
           tags: sgosline/srp-exposome:latest     
           platforms: linux/amd64,linux/arm64
       - name: Build and push dbSchema
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v3
         with:
           file: ./dbSchema/Dockerfile
           push: true
           tags: sgosline/srp-dbschema
           platforms: linux/amd64,linux/arm64
       - name: Build and push expression
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v3
         with:
           file: ./zfExp/Dockerfile
           push: true
