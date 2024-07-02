@@ -5,7 +5,7 @@ on:
     branches:
       - '**'
     paths:
-      - '**'
+      - ./data/
       
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,6 +18,22 @@ permissions:
 
 jobs:
 # Placeholder
+#   build-bmd:
+#     #if: github.actor != 'github-actions[bot]'
+#     runs-on: ubuntu-20.04
+#     environment: build
+#     steps:
+#       - name: Checkout Repo
+#         uses: actions/checkout@v3
+#       - name: Download artifacts from previous drug gen
+#         uses: actions/download-artifact@v3
+#       - name: Pull sample image
+#         run: docker pull sgosline/srp-bmd
+#       - name: Run bmd python command
+#         run: |
+#           docker run -v $PWD:/tmp sgosline/srp-bmd
+#       - name: List files cwd
+#         run: ls -la
    build-samples:
      #if: github.actor != 'github-actions[bot]'
      runs-on: ubuntu-20.04
@@ -33,8 +49,39 @@ jobs:
          run: |
            docker run -v $PWD:/tmp sgosline/srp-samplechem 
        - name: List files cwd
-         run: ls -lah 
-
+         run: ls -la
+   build-expo:
+     #if: github.actor != 'github-actions[bot]'
+     runs-on: ubuntu-20.04
+     environment: build
+     steps:
+       - name: Checkout Repo
+         uses: actions/checkout@v3
+       - name: Download artifacts from previous drug gen
+         uses: actions/download-artifact@v3
+       - name: Pull sample image
+         run: docker pull sgosline/srp-exposome
+       - name: Run sample-chem python command
+         run: |
+           docker run -v $PWD:/tmp sgosline/srp-exposome
+       - name: List files cwd
+         run: ls -la
+   build-expr:
+     #if: github.actor != 'github-actions[bot]'
+     runs-on: ubuntu-20.04
+     environment: build
+     steps:
+       - name: Checkout Repo
+         uses: actions/checkout@v3
+       - name: Download artifacts from previous drug gen
+         uses: actions/download-artifact@v3
+       - name: Pull sample image
+         run: docker pull sgosline/srp-zfexp
+       - name: Run zfexp python command
+         run: |
+           docker run -v $PWD:/tmp sgosline/srp-zfexp
+       - name: List files cwd
+         run: ls -la
 #   build-drugs-depmap-NCI60-pt2:
 #     if: github.actor != 'github-actions[bot]'
 #     runs-on: ubuntu-20.04
