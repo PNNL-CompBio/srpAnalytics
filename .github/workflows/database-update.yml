@@ -31,56 +31,9 @@ jobs:
          run: docker pull sgosline/srp-samplechem
        - name: Run sample-chem python command
          run: |
-           docker run -v $PWD:/tmp sgosline/samplechem python build_script.py --samps
+           docker run -v $PWD:/tmp sgosline/srp-samplechem 
        - name: List files cwd
          run: ls -lah 
-#       - name: Copy drugs file to artifact 
-#         run: |
-#           mkdir additive-drugs-file-2
-#           mv drugs.tsv ignore_chems.txt additive-drugs-file-2
-#       - name: Upload artifacts for genes
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: additive-drugs-file-2
-#           path: additive-drugs-file-2
-
-#   build-drugs-depmap-NCI60-pt1:
-#     if: github.actor != 'github-actions[bot]'
-#     runs-on: ubuntu-20.04
-#     environment: build
-#     needs: [build-drugs-depmap-CTRPv2-GDSC-gCSI-PRISM-CCLE-FIMM]
-#     steps:
-#       - name: Checkout Repo
-#         uses: actions/checkout@v3
-#       - name: Download artifacts from previous drug gen
-#         uses: actions/download-artifact@v3
-#         with:
-#           name: additive-drugs-file-2
-#       - name: List files cwd
-#         run: ls -lah 
-#       # - name: Install R
-#       #   uses: r-lib/actions/setup-r@v2
-#       # - name: Install R and Python Packages
-#       #   run: |
-#       #     Rscript build/depmap/requirements.r
-#       #     pip install -r build/depmap/requirements.txt
-#       - name: Pull depmap image
-#         run: docker pull jjacobson95/depmap
-#       - name: Run depmap NCI60 Drug retrieval
-#         run: |
-#           docker run -v $PWD:/tmp jjacobson95/depmap Rscript /app/CreateDrugFileCL.R NCI60
-#       # - name: Run depmap NCI60 Drug retrieval
-#       #   run:  Rscript build/depmap/CreateDrugFileCL.R NCI60
-#       - name: Copy drugs file to artifact 
-#         run: |
-#           mkdir additive-drugs-file-3
-#           mv drugs.tsv ignore_chems.txt additive-drugs-file-3
-#       - name: Upload artifacts for genes
-#         uses: actions/upload-artifact@v2
-#         with:
-#           name: additive-drugs-file-3
-#           path: additive-drugs-file-3
-
 
 #   build-drugs-depmap-NCI60-pt2:
 #     if: github.actor != 'github-actions[bot]'
