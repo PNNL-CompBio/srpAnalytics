@@ -13,6 +13,8 @@ on:
       - sampleChemMapping/
       - dbSchema/
       - exposome/
+  workflow_dispatch:
+
 
 jobs:
   build-and-push:
