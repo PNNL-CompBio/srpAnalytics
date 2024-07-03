@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push sampleChem
-        run:
+        run: |
           docker build -t sgosline/srp-samplechem:latest -f ./sampleChemMapping/Dockerfile .
 	  docker push sgosline/srp-samplechem:latest
          # platforms: linux/amd64,linux/arm64
@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push expo
-        run:
+        run: |
           docker build -t sgosline/srp-exposome:latest -f ./exposome/Dockerfile .
 	  docker push sgosline/srp-exposome:latest
   build-push-db:
@@ -61,7 +61,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push expo
-        run:
+        run: |
           docker build -t sgosline/srp-dbschema:latest -f ./exposome/dbSchema .
 	  docker push sgosline/srp-dbschema:latest
   build-push-exp:
@@ -75,7 +75,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push expo
-        run:
+        run: |
           docker build -t sgosline/srp-zfexp:latest -f ./zfExp/Dockerfile .
 	  docker push sgosline/srp-zfexp:latest
 #      - name: Build and push bmd
