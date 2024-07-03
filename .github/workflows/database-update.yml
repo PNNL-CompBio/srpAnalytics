@@ -92,18 +92,18 @@ jobs:
            name: expr-files
            path: expr-files
 
-  artifact-test:
-    needs: [build-samples,build-expo,build-expr]
-    runs-on: ubuntu-20.04
-      steps:
-        - name: Checkout Repo
-          uses: actions/checkout@v2
-        - name: Download artifacts from expression
-          uses: actions/download-artifact@v2
-          with:
-            name: expr-files
-            name: expo-files
-        - name: List files cwd
-          run: ls -lah 
+   artifact-test:
+     needs: [build-samples,build-expo,build-expr]
+     runs-on: ubuntu-20.04
+     steps:
+       - name: Checkout Repo
+         uses: actions/checkout@v2
+       - name: Download artifacts from expression
+         uses: actions/download-artifact@v2
+         with:
+           name: expr-files
+           name: expo-files
+       - name: List files cwd
+         run: ls -lah 
 #zipfiles push to figshare
 
