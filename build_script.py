@@ -134,6 +134,7 @@ def main():
     parser.add_argument('--geneEx', dest='geneEx', action='store_true', default=False, help='Re run gene expression generation')
 
 
+
     args = parser.parse_args()
 
     ##call bmdrc on all morphology/behavior pairs for sample sources
