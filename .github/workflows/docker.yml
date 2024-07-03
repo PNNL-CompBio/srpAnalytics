@@ -22,10 +22,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v3
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -35,6 +31,7 @@ jobs:
         run: |
           docker build -t sgosline/srp-samplechem:latest -f ./sampleChemMapping/Dockerfile .
 	  docker push sgosline/srp-samplechem:latest
+
   build-push-expo:
     runs-on: ubuntu-latest
     steps:
@@ -49,6 +46,7 @@ jobs:
         run: |
           docker build -t sgosline/srp-exposome:latest -f ./exposome/Dockerfile .
 	  docker push sgosline/srp-exposome:latest
+   
   build-push-db:
     runs-on: ubuntu-latest
     steps:
@@ -63,6 +61,7 @@ jobs:
         run: |
           docker build -t sgosline/srp-dbschema:latest -f ./exposome/dbSchema .
 	  docker push sgosline/srp-dbschema:latest
+   
   build-push-exp:
     runs-on: ubuntu-latest
     steps:
