@@ -149,7 +149,7 @@ def main():
         for st in ['chemical','extract']:
             for dt in ['bmd','fit','dose']:
                 fdf = combineFiles(df.loc[df.sample_type==st].loc[df.data_type==dt],dt)
-                fname = 'tmp_'+st+'_'+dt+'.csv'
+                fname = '/tmp/tmp_'+st+'_'+dt+'.csv'
                 fdf.to_csv(fname,index=False)
                 if st=='chemical':
                     chemfiles.append(fname)
@@ -165,10 +165,10 @@ def main():
         runExposome(cid)
         runSchemaCheck()
     if args.geneEx:
-        if not os.path.exists("chemicals.csv"):
+        if not os.path.exists("/tmp/chemicals.csv"):
             runSampMap(False,[],smap,cid,emap,cclass,ctfile,fses,desfile)
         
-        runExpression(gex1,'chemicals.csv',ginfo)
+        runExpression(gex1,'/tmp/chemicals.csv',ginfo)
         runSchemaCheck()
     
     
