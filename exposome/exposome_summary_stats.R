@@ -13,7 +13,7 @@ if(length(args)<1){
 }
 
 
-
+out.dir='/tmp/'
 
                                         #library(cowplot)
 url <- "https://montilab.bu.edu/Xposome-API/projects?all=Yes"
@@ -31,7 +31,7 @@ print(paste('We now have data from',length(projects),'projects'))
 #portal_name=  'https://montilab.bu.edu/Xposome-API/portals'
 
 ##read in all chemicals
-all.chems <- read.table(args[1]',sep=',',header=T,fileEncoding = "UTF-8-BOM")
+all.chems <- read.table(args[1],sep=',',header=T,fileEncoding = "UTF-8-BOM")
 
 
 #' get GO terms for each chemical id
@@ -156,6 +156,6 @@ sg.stats <- sig.genes%>%
   dplyr::rename(Project=friendlyName)|>
   dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)
 
-write.table(sg.stats,file='sigGeneStats.csv',sep=',',row.names=F)
+write.table(sg.stats,file=paste0(out.dir,'sigGeneStats.csv'),sep=',',row.names=F)
 ##not using this for now:
 #write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)

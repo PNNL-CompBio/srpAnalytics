@@ -950,7 +950,7 @@ main<-function(){
 
     endpointDetails<-getEndpointMetadata(args$endpoint_mapping_file)%>%unique()
 
-    out.dir='./'
+    out.dir='/tmp/'
 
 
 
