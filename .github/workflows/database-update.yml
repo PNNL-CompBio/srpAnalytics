@@ -58,11 +58,11 @@ jobs:
          run: |
            docker run -v $PWD:/tmp sgosline/srp-exposome
        - name: List files cwd
-         run: ls -la /tmp/
+         run: ls -la 
        - name: Copy files to artifact
          run: |
            mkdir expo-files
-           mv /tmp/*.csv expo-files
+           mv *.csv expo-files
        - name: upload artifact
          uses: actions/upload-artifact@v2
          with:
@@ -83,11 +83,11 @@ jobs:
          run: |
            docker run -v $PWD:/tmp sgosline/srp-zfexp
        - name: List files cwd
-         run: ls -lah /tmp/
+         run: ls -lah
        - name: Copy files to artifact
          run: |
-           mkdir exp-files
-           mv /tmp/*csv expr-files
+           mkdir expr--files
+           mv *csv expr-files
        - name: upload artifact
          uses: actions/upload-artifact@v2
          with:
@@ -109,6 +109,6 @@ jobs:
          with:
            name: expo-files
        - name: List files cwd
-         run: ls -lah /tmp/
+         run: ls -lah 
 #zipfiles push to figshare
 
