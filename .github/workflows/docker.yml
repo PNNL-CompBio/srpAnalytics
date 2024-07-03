@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push sampleChem
         uses: docker/build-buildx-action@v3
-	with:
+        with:
 	  file: sampleChemMapping/Dockerfile
 	  tags: sgosline/srp-samplechem:latest
 	  push: true
