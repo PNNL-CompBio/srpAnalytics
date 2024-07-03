@@ -101,7 +101,11 @@ jobs:
        - name: Download artifacts from expression
          uses: actions/download-artifact@v2
          with:
-           name: [expr-files,expo-files]
+           name: expr-files
+       - name: Downlod artifacts from exposome
+         users: actions/download-artifacts@v2
+         with:
+           name: expo-files
        - name: List files cwd
          run: ls -lah 
 #zipfiles push to figshare
