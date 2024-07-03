@@ -42,7 +42,7 @@ jobs:
          run: |
            docker run -v $PWD:/tmp sgosline/srp-samplechem 
        - name: List files cwd
-         run: ls -la
+         run: ls -la /tmp/
 
    build-expo:
      #if: github.actor != 'github-actions[bot]'
