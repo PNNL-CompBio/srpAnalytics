@@ -10,12 +10,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
 jobs:
 # Placeholder
 #   build-bmd:
@@ -67,13 +61,13 @@ jobs:
          run: ls -la
        - name: Copy files to artifact
          run: |
-	   mkdir expo-files
-	   mv /tmp/sigGeneStats.csv expo-files
+           mkdir expo-files
+           mv /tmp/sigGeneStats.csv expo-files
        - name: upload artifact
          uses: actions/upload-artifact@v2
-	 with:
-	   name: expo-files
-	   path: expo-files	 
+         with:
+           name: expo-files
+           path: expo-files         
 
    build-expr:
      #if: github.actor != 'github-actions[bot]'
@@ -90,13 +84,13 @@ jobs:
            docker run -v $PWD:/tmp sgosline/srp-zfexp
        - name: Copy files to artifact
          run: |
-	   mkdir exp-files
-	   mv /tmp/*csv expr-files
+           mkdir exp-files
+           mv /tmp/*csv expr-files
        - name: upload artifact
          uses: actions/upload-artifact@v2
-	 with:
-	   name: expr-files
-	   path: expr-files
+         with:
+           name: expr-files
+           path: expr-files
 
   artifact-test:
     needs: [build-samples,build-expo,build-expr]
@@ -108,7 +102,7 @@ jobs:
           uses: actions/download-artifact@v2
           with:
             name: expr-files
-	    name: expo-files
+            name: expo-files
         - name: List files cwd
           run: ls -lah 
 #zipfiles push to figshare
