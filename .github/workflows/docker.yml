@@ -22,60 +22,76 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push sampleChem
-        run: |
-          docker build -t sgosline/srp-samplechem:latest -f ./sampleChemMapping/Dockerfile .
-	  docker push sgosline/srp-samplechem:latest
-
+        uses: docker/build-push-action@v3
+	with:
+	  file: sampleChemMapping/Dockerfile
+	  tags: sgosline/srp-samplechem:latest
+	  push: true
+	  
   build-push-expo:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up Docker Buildx	
+        uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build and push expo
-        run: |
-          docker build -t sgosline/srp-exposome:latest -f ./exposome/Dockerfile .
-	  docker push sgosline/srp-exposome:latest
-   
+        uses: docker/build-push-action@v3
+	with:
+	  file: exposome/Dockerfile
+	  tags: sgosline/srp-exposome:latest
+	  push: true
+
   build-push-db:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3	
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      - name: Build and push expo
-        run: |
-          docker build -t sgosline/srp-dbschema:latest -f ./exposome/dbSchema .
-	  docker push sgosline/srp-dbschema:latest
+      - name: Build and push dbschema
+        uses: docker/build-push-action@v3
+	with:
+	  file: dbSchema/Dockerfile
+	  tags: sgosline/srp-dbschema:latest
+	  push: true      
    
   build-push-exp:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3	
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      - name: Build and push expo
-        run: |
-          docker build -t sgosline/srp-zfexp:latest -f ./zfExp/Dockerfile .
-	  docker push sgosline/srp-zfexp:latest
+      - name: Build and push expr
+        uses: docker/build-push-action@v3
+	with:
+          file: zfExp/Dockerfile
+	  push: true
+	  tags: sgosline/srp-zfexp
 #      - name: Build and push bmd
 #        uses: docker/build-push-action@v6
 #        with:
