@@ -103,7 +103,7 @@ jobs:
          with:
            name: expr-files
        - name: Downlod artifacts from exposome
-         users: actions/download-artifacts@v2
+         uses: actions/download-artifacts@v2
          with:
            name: expo-files
        - name: List files cwd
