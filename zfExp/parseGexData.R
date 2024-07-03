@@ -15,6 +15,7 @@ schema<-data.frame(Project=c(),
 
 
 data.dir<-'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp'
+out.dir='/tmp/'
 
 generateGeneExamples<-function(genelist,chems){
   library(ggplot2)
@@ -230,6 +231,6 @@ main<-function(args=c()){
 }
 
 
-out.dir='/tmp/'
-ret = main(args<-c('../data/zfExp/ZF_gex.xlsx','../data/chemicalIdMapping.csv','../data/zfExp/allianceGenomeInfo.csv'))
+
+main()#args<-c('../data/zfExp/ZF_gex.xlsx','../data/chemicalIdMapping.csv','../data/zfExp/allianceGenomeInfo.csv'))
 
