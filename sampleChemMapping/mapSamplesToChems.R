@@ -72,8 +72,8 @@ required_bmd_columns<-list(bmd=c('Chemical_ID','End_Point','Model','BMD10','BMD5
 
 #data.dir='./data/'
 ##output directory is fixed
-#out.dir<-'/tmp/'
-out.dir<-'./'
+out.dir<-'/tmp/'
+#out.dir<-'./'
 
 
 
