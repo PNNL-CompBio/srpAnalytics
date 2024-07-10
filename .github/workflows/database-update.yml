@@ -118,7 +118,18 @@ jobs:
            name: expo-files
        - name: List files cwd
          run: ls -la *
-       - name: list files tmp
-         run: ls -la /tmp
+       - name: Moves files to single directory
+         run: |
+           mkdir srpAnalytics
+           mv *files/* srpAnalytics
+           gzip -cvf files srpAnalytics.gz
+#       - name: Pushes to figshare
+#         uses: figshare/github-upload-action@v1.1
+#         with:
+#           FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
+#           FIGSHARE_ENDPOINT: 'https://api.figshare.com/v2'
+#           FIGSHARE_ARTICLE_ID: 
+#           DATA_DIR: 'srpAnalytics'
+
 #zipfiles push to figshare
 
