@@ -69,6 +69,7 @@ def runSampMap(is_sample=False,drcfiles=[],smap='',cid='',\
     
     print(cmd)
     os.system(cmd)
+    print('ls -la .')
     
 def runExposome(chem_id_file):
     '''

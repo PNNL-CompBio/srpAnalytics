@@ -18,10 +18,15 @@ COPY zfExp/* zfExp/
 COPY build_script.py ./
 COPY requirements.txt ./
 
+RUN mkdir -p sampleChemMapping
+COPY sampleChemMapping/* sampleChemMapping/
+
 RUN Rscript -e "install.packages('readxl',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('dplyr',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('tidyr',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('rio',dependencies=TRUE, repos='http://cran.rstudio.com')"
+RUN Rscript -e "install.packages('enrichR', dependencies=TRUE, repos='http://cran.rstudio.com')"
+RUN Rscript -e "install.packages('argparse',dependencies=TRUE,repos='http://cran.rstudio.com')"
 
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
