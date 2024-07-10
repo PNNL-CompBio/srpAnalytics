@@ -167,10 +167,10 @@ def main():
         runExposome(cid)
         runSchemaCheck()
     if args.geneEx:
-        if not os.path.exists("chemicals.csv"):
+        if not os.path.exists("/tmp/chemicals.csv"):
             runSampMap(False,[],smap,cid,emap,cclass,ctfile,fses,desfile)
         
-        runExpression(gex1,'chemicals.csv',ginfo)
+        runExpression(gex1,'/tmp/chemicals.csv',ginfo)
         runSchemaCheck()
     
     

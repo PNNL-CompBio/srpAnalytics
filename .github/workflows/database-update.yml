@@ -80,13 +80,18 @@ jobs:
    build-expr:
      #if: github.actor != 'github-actions[bot]'
      runs-on: ubuntu-20.04
+     needs: build-samples
      steps:
        - name: Checkout Repo
          uses: actions/checkout@v3
-       - name: Download artifacts from previous drug gen
+       - name: Download artifacts from sample generation
          uses: actions/download-artifact@v3
+           with:
+           name: samp-files
        - name: Pull sample image
          run: docker pull sgosline/srp-zfexp
+       - name: move chemical list to tmp
+         run: mv samp-files/chemicals.csv .
        - name: Run zfexp python command
          run: |
            docker run -v $PWD:/tmp sgosline/srp-zfexp
