@@ -122,13 +122,17 @@ jobs:
          uses: actions/download-artifact@v2
          with:
            name: expo-files
+       - name: Downlod artifacts from samples
+         uses: actions/download-artifact@v2
+         with:
+           name: samp-files
        - name: List files cwd
          run: ls -la *
        - name: Moves files to single directory
          run: |
            mkdir srpAnalytics
-           mv *files/* srpAnalytics
-#           gzip -cvf files srpAnalytics.gz
+           mv *csv srpAnalytics
+           gzip -cvf files srpAnalytics.gz
        - name: Pushes to figshare
          uses: figshare/github-upload-action@v1.1
          with:
