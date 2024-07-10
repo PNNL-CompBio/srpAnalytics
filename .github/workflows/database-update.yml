@@ -43,8 +43,6 @@ jobs:
            docker run -v $PWD:/tmp sgosline/srp-samplechem 
        - name: List files cwd
          run: ls -la 
-       - name: List files app
-         run: ls -la  /app
        - name: list files tmp
          run: ls -la /tmp
    build-expo:
@@ -62,8 +60,6 @@ jobs:
            docker run -v $PWD:/tmp sgosline/srp-exposome
        - name: List files cwd
          run: ls -la 
-       - name: List files app
-         run: ls -la  /app
        - name: list files tmp
          run: ls -la /tmp
        - name: Copy files to artifact
@@ -91,8 +87,6 @@ jobs:
            docker run -v $PWD:/tmp sgosline/srp-zfexp
        - name: List files cwd
          run: ls -la 
-       - name: List files app
-         run: ls -la  /app
        - name: list files tmp
          run: ls -la /tmp
        - name: Copy files to artifact
@@ -121,8 +115,6 @@ jobs:
            name: expo-files
        - name: List files cwd
          run: ls -la 
-       - name: List files app
-         run: ls -la  /app
        - name: list files tmp
          run: ls -la /tmp
 #zipfiles push to figshare
