@@ -43,7 +43,10 @@ jobs:
            docker run -v $PWD:/tmp sgosline/srp-samplechem 
        - name: List files cwd
          run: ls -la 
-
+       - name: List files app
+         run: ls -la  /app
+       - name: list files tmp
+         run: ls -la /tmp
    build-expo:
      #if: github.actor != 'github-actions[bot]'
      runs-on: ubuntu-20.04
@@ -59,6 +62,10 @@ jobs:
            docker run -v $PWD:/tmp sgosline/srp-exposome
        - name: List files cwd
          run: ls -la 
+       - name: List files app
+         run: ls -la  /app
+       - name: list files tmp
+         run: ls -la /tmp
        - name: Copy files to artifact
          run: |
            mkdir expo-files
@@ -83,7 +90,11 @@ jobs:
          run: |
            docker run -v $PWD:/tmp sgosline/srp-zfexp
        - name: List files cwd
-         run: ls -lah
+         run: ls -la 
+       - name: List files app
+         run: ls -la  /app
+       - name: list files tmp
+         run: ls -la /tmp
        - name: Copy files to artifact
          run: |
            mkdir expr--files
@@ -109,6 +120,10 @@ jobs:
          with:
            name: expo-files
        - name: List files cwd
-         run: ls -lah 
+         run: ls -la 
+       - name: List files app
+         run: ls -la  /app
+       - name: list files tmp
+         run: ls -la /tmp
 #zipfiles push to figshare
 
