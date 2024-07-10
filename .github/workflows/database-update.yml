@@ -45,13 +45,13 @@ jobs:
          run: ls -la
        - name: move files
          run: |
-	   mkdir samp-files
-	   mv *csv samp-files
+           mkdir samp-files
+           mv *csv samp-files
        - name: upload artifacts
          uses: actions/upload-artifact@v2
-	 with:
-	   name: samp-files
-	   path: samp-files
+         with:
+           name: samp-files
+           path: samp-files
    build-expo:
      #if: github.actor != 'github-actions[bot]'
      runs-on: ubuntu-20.04
