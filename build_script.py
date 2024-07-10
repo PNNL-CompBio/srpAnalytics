@@ -160,7 +160,8 @@ def main():
         runSampMap(True,sampfiles,smap,cid,emap,cclass,ctfile,fses,desfile)
         runSampMap(False,chemfiles,smap,cid,emap,cclass,ctfile,fses,desfile)
         runSampMap(False,[],smap,cid,emap,cclass,ctfile,fses,desfile)
-
+        for f in sampfiles+chemfiles:
+            os.system('rm '+f)
         ##now we run validation
         runSchemaCheck()
     if args.expo:
