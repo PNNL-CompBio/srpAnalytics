@@ -119,7 +119,7 @@ jobs:
          with:
            name: expr-files
        - name: Downlod artifacts from exposome
-         uses: actions/download-artifacts@v2
+         uses: actions/download-artifact@v2
          with:
            name: expo-files
        - name: List files cwd
@@ -128,14 +128,15 @@ jobs:
          run: |
            mkdir srpAnalytics
            mv *files/* srpAnalytics
-           gzip -cvf files srpAnalytics.gz
-#       - name: Pushes to figshare
-#         uses: figshare/github-upload-action@v1.1
-#         with:
-#           FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
-#           FIGSHARE_ENDPOINT: 'https://api.figshare.com/v2'
-#           FIGSHARE_ARTICLE_ID: 
-#           DATA_DIR: 'srpAnalytics'
+#           gzip -cvf files srpAnalytics.gz
+       - name: Pushes to figshare
+         uses: figshare/github-upload-action@v1.1
+         with:
+           FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
+           FIGSHARE_ENDPOINT: 'https://api.figshare.com/v2'
+#           FIGSHARE_ARTICLE_ID:
+            FIGSHARE_PROJECT_ID: 177459
+           DATA_DIR: 'srpAnalytics'
 
 #zipfiles push to figshare
 
