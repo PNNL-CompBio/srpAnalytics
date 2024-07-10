@@ -138,8 +138,8 @@ jobs:
          with:
            FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
            FIGSHARE_ENDPOINT: 'https://api.figshare.com/v2'
-#           FIGSHARE_ARTICLE_ID:
-           FIGSHARE_PROJECT_ID: 177459
+           FIGSHARE_ARTICLE_ID: 26240471
+#           FIGSHARE_PROJECT_ID: 177459
            DATA_DIR: 'srpAnalytics'
 
 #zipfiles push to figshare
