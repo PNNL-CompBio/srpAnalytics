@@ -132,7 +132,7 @@ jobs:
          run: |
            mkdir srpAnalytics
            mv *csv srpAnalytics
-           gzip -cvf srpAnalytics/* srpAnalytics.gz
+           #gzip -cvf srpAnalytics/* srpAnalytics.gz
        - name: Pushes to figshare
          uses: figshare/github-upload-action@v1.1
          with:
