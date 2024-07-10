@@ -88,7 +88,7 @@ jobs:
          uses: actions/download-artifact@v3
          with:
            name: samp-files
-	   path: samp-files
+           path: samp-files
        - name: Pull sample image
          run: docker pull sgosline/srp-zfexp
        - name: move chemical list to tmp
