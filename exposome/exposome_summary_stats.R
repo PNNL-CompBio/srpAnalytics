@@ -13,7 +13,7 @@ if(length(args)<1){
 }
 
 
-out.dir='.'#/tmp/'
+out.dir='/tmp/'
 
                                         #library(cowplot)
 url <- "https://montilab.bu.edu/Xposome-API/projects?all=Yes"
