@@ -1,0 +1,58 @@
+id: http://w3id.org/linkml/examples/srpanalyics
+name: srpanalytics
+prefixes:
+   linkml: https://w3id.org/linkml
+   coderdata: https://w3id.org/linkml/examples/srpanalytics
+   schema: http://schema.org/
+imports:
+   - linkml:types
+default_range: string
+default_prefix: srpanalytics
+
+slot:
+  chemical_ID:
+    description: Unique identifier for every chemical in the databaes
+    range: integer
+    identifier: true
+    slot_uri: schema:identifier
+  sample_ID:
+    description: Unique identifier for every sample in the database
+    range: integer
+    identifer: true
+    slot_uri: schema:identifier
+  cas_number:
+    description: CAS identifier for a specific chemical
+
+
+classes:
+  samples:
+    description: List of samples collected in the Superfund study
+    slots:
+      - chemical_ID
+      - cas_number
+    attributes:
+      
+  chemicals:
+    description: List of chemicals measured in the Superfund study
+  samplesToChemicals:
+    description: Measurements of chemicals in samples
+  zebrafishSampBMDs:
+    description: Benchmark dose measurements of sample extracts in zebrafish
+  zebrafishSampDoseResponse:
+    description: Dose response datapoints of sample extracts in zebrafish
+  zebrafishSampXYCoords:
+    description: XY Coordinates of curve fit data for sample extracts in zebrafish
+  zebrafishChemBMDs:
+    description: Benchmark dose measurements of chemicals in zebrafish
+  zebrafishChemDoseResponse:
+    description: Dose response datapoints of chemicals in zebrafish
+  zebrafishChemXYCoords:
+    description: XY Coordinates of curve fit data for chemicals in zebrafish
+  allGeneEx:
+    description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
+  srpDEGStats:
+    description: Summary statistcs 
+  srpDEGPathways:
+    description: Pathways that are enriched in zebrafish genes that are differentially expressed upon treatment with a chemical
+  exposomeGeneStats:
+    description: Summary and link to exposome measurements of human genes that are differentailly expressed upon chemical treatmetn
