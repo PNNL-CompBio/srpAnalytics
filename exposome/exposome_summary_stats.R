@@ -154,8 +154,11 @@ sg.stats <- sig.genes%>%
   ungroup()|>
   dplyr::select(-Project)|>
   dplyr::rename(Project=friendlyName)|>
-  dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)
+    dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)|>
+        mutate(concentration=as.numeric(stringr::str_replace(Conc,'uM','')))|>
+    dplyr::select(-Conc)
 
-write.table(sg.stats,file=paste0(out.dir,'sigGeneStats.csv'),sep=',',row.names=F)
+
+write.table(sg.stats,file=paste0(out.dir,'exposomeGeneStats.csv'),sep=',',row.names=F)
 ##not using this for now:
 #write.table(sig.genes,file='data/sigGeneExp.csv',sep=',',row.names=F)

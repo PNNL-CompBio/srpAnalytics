@@ -70,6 +70,13 @@ def runSampMap(is_sample=False,drcfiles=[],smap='',cid='',\
     print(cmd)
     os.system(cmd)
     print('ls -la .')
+    ##now we validate the files that came out.
+    dblist=['/tmp/samples.csv','/tmp/chemicals.csv','/tmp/samplesToChemicals.csv']
+    for ftype in ['ChemXYCoords.csv','DoseResponse.csv','BMDs.csv']:
+        dblist.append('/tmp/zebrafishChem'+ftype)
+        dblist.append('/tmp/zebrafishSamp'+ftype)
+    runSchemaCheck(dblist)
+
     
 def runExposome(chem_id_file):
     '''
@@ -78,6 +85,7 @@ def runExposome(chem_id_file):
     cmd = 'Rscript exposome/exposome_summary_stats.R '+chem_id_file
     print(cmd)
     os.system(cmd)
+    runSchemaCheck(['/tmp/exposomeGeneStats.csv'])
 
 def runExpression(gex,chem,ginfo):
     '''
@@ -86,13 +94,18 @@ def runExpression(gex,chem,ginfo):
     cmd = 'Rscript zfExp/parseGexData.R '+gex+' '+chem+' '+ginfo
     print(cmd)
     os.system(cmd)
+    runSchemaCheck(['/tmp/srpDEGPathways.csv','/tmp/srpDEGStats.csv','/tmp/allGeneEx.csv'])
 
 def runSchemaCheck(dbfiles=[]):
     '''
     run schema checking
     '''
-    ##TODO: make this work with files as arguments
-    cmd = 'python dbSchema/main.py'
+    ##TODO: make this work with internal calls
+    for filename in dbfiles:
+        classname = os.path.basename(filename).split('.')[0]
+        cmd = 'linkml-validate --schema srpAnalytics.yaml '+filename+' --target-class '+classname
+        print(cmd)
+        os.system(cmd)
 
 def main():
     '''
@@ -106,7 +119,7 @@ def main():
     # file parsing - collects all files we might need for the tool below
     ####
     ##first find the morphology and behavior pairs for chemical sources
-    chemdf = df.loc[df.sample_type=='chemical']
+    chemdf = df.loc[df.sample_type=='chemical'] 
     morph = chemdf.loc[chemdf.data_type=='morphology']
     beh = chemdf.loc[chemdf.data_type=='behavior']
     tupes =[]

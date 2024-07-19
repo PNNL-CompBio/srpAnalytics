@@ -222,7 +222,7 @@ main<-function(args=c()){
 
   enrich<-doEnrich(allgenes)
 
-  res<-res|>left_join(enrich)
+  res#<-res|>left_join(enrich)
   ##need to get mapping to drug name
   readr::write_csv(enrich,file =paste0(out.dir,'srpDEGPathways.csv'))
   readr::write_csv(res,file =paste0(out.dir,'srpDEGstats.csv'))
