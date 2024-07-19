@@ -155,7 +155,7 @@ sg.stats <- sig.genes%>%
   dplyr::select(-Project)|>
   dplyr::rename(Project=friendlyName)|>
     dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)|>
-        mutate(concentration=as.numeric(stringr::str_replace(conc,'uM','')))|>
+        mutate(concentration=as.numeric(stringr::str_replace(Conc,'uM','')))|>
     dplyr::select(-Conc)
 
 
