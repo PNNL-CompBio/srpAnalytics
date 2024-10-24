@@ -9,7 +9,15 @@
 import pandas as pd
 import sys
 import argparse
-from bmdrc import BinaryClass, LPRClass 
+from bmdrc.BinaryClass import BinaryClass
+from bmdrc.LPRClass import LPRClass
+
+# Import specific commands 
+from support_functions import combine_datasets, preprocess_morpho, preprocess_lpr, run_filters, write_outputs 
+
+
+# Example commands
+# 
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
@@ -24,7 +32,8 @@ parser.add_argument('--morpho', dest = 'morpho', nargs = "+", \
                     default = None)
 parser.add_argument('--LPR', dest = 'lpr', nargs = "+", \
                     help = 'Pathway to the light photometer response (LPR) file to be processed containing the same \
-                          samples as morpho. Optional. Unless both is True, only LPR data will be returned.',\
+                            samples as morpho. Optional. Unless both is True, only LPR data will be returned. \
+                            Assumed format is long. Required columns are: chemical.id, conc, plate.id, well, variable, value.',\
                     default = None)
 parser.add_argument('--both', dest = 'both', \
                     help = 'Return both morpho and LPR endpoints. Optional. Default is False.',\
@@ -79,20 +88,6 @@ def main():
 
     print("...concatenating datasets")
 
-    # Combine datasets
-    def combine_datasets(thePaths):
-
-        # Create a vector to hold data
-        theData = []
-
-        # Read all files 
-        for thePath in thePaths:
-            theData.append(pd.read_csv(thePath))
-
-        # Combine dataframes 
-        theData = pd.concat(theData)
-        return(theData)
-
     # Morpho data always needs to be provided. Concatenate datasets together. 
     morpho_data = combine_datasets(morpho_paths)
 
@@ -101,37 +96,50 @@ def main():
         print("...LPR data detected")
         lpr_data = combine_datasets(lpr_paths)
 
-    ### 1. Format data--------------------------------------------------------------------------
+    ### 1. Input Data Modules--------------------------------------------------------------------
     
     print("...Formatting morphology data")
-    BC = BinaryClass(df = morpho_data, chemical = "chemical.id", concentration = "conc", plate = "plate.id" \
-                     well = "well", endpoint = "variable", value = "value", format = "long")
+    BC = BinaryClass(df = morpho_data, chemical = "chemical.id", concentration = "conc", 
+                     plate = "plate.id", well = "well", endpoint = "variable", value = "value", 
+                     format = "long")
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Formatting LPR data")
-        LPR = LPRClass()
+        LPR = LPRClass(df = lpr_data, chemical = "chemical.id", concentration = "conc", 
+                       plate = "plate.id", well = "well", time = "variable", value = "value", 
+                       cycle_length = 20.0, cycle_cooldown = 10.0, starting_cycle = "light")
 
-    ### 2. Calculate dose response--------------------------------------------------------------
+    ### 2. Pre-Processing modules-----------------------------------------------------------------
 
     if (args.lpr is None or args.both):
-        print("...Generating morphology flags")
-        BMD_Flags = generate_BMD_flags(dose_response)
+        print("...Pre-Processing morphology data")
+        BC = preprocess_morpho(BC)
 
     if (args.lpr is not None or (args.test and args.both)):
-        print("...Generating LPR flags")
-        lpr_BMD_Flags = generate_BMD_flags(lpr_dose_response)
+        print("...Pre-Processing LPR data")
+        LPR = preprocess_lpr(LPR, BC)
 
-    ### 3. Select and run models----------------------------------------------------------------
+    ### 3. Filtering Modules----------------------------------------------------------------------
 
     if (args.lpr is None or args.both):
-        print("...Fitting models for morphology data")
-        model_selection, lowqual_model, BMD_Flags, model_results = model_fitting(dose_response, BMD_Flags)
-    
-    if args.lpr is not None or (args.test and args.both):
-        print("...Fitting models for LPR data")
-        lpr_model_selection, lpr_lowqual_model, lpr_BMD_Flags, lpr_model_results = model_fitting(lpr_dose_response, lpr_BMD_Flags)
+        print("...Filtering morphology data")
+        BC = run_filters(BC)
 
-    ### 4. Format and export outputs------------------------------------------------------------
+    if (args.lpr is not None or (args.test and args.both)):
+        print("...Filtering LPR data")
+        LPR = run_filters(LPR)
+
+    ### 4. Model Fitting Modules------------------------------------------------------------------
+
+    if (args.lpr is None or args.both):
+        print("...Fitting models to morphology data")
+        BC.fit_models()
+
+    if (args.lpr is not None or (args.test and args.both)):
+        print("...Fitting models to LPR data")
+        LPR.fit_models()
+
+    ### 5. Format and export outputs------------------------------------------------------------
 
     print("...Exporting Results")
 

@@ -1,0 +1,153 @@
+import pandas as pd
+from bmdrc.BinaryClass import BinaryClass
+from bmdrc.LPRClass import LPRClass
+
+#########################
+## COMBINE DATA.FRAMES ##
+#########################
+
+# A support function to concatenate datasets together 
+def combine_datasets(thePaths):
+
+    # Create a vector to hold data
+    theData = []
+
+    # Read all files 
+    for thePath in thePaths:
+        theData.append(pd.read_csv(thePath))
+
+    # Combine dataframes 
+    theData = pd.concat(theData)
+    return(theData)
+
+######################################
+## PRE-PROCESSING SUPPORT FUNCTIONS ##
+######################################
+
+# All pre-processing required for morphology data
+def preprocess_morpho(BC):
+
+    ## Endpoint Check--------------------------------------------------------------------------------------
+
+    # Extract out the endpoints
+    theEndpoints = BC.df[BC.endpoint].unique().tolist()
+
+    # List the relevant endpoints, which is different for BRAIN samples  
+    if "BRAI" in theEndpoints:
+        relevant_endpoints = ['AXIS', 'BRAI', 'BRN_', 'CRAN', 'DNC_', 'CFIN', 'CIRC', 'DNC_', 
+                              'DP24', 'EYE_', 'EDEM', 'JAW_', 'LTRK', 'MO24', 'MORT', 'MUSC', 
+                              'NC24', 'NC__', 'OTIC', 'PE__', 'PFIN', 'PIG_', 'SKIN', 
+                              'SM24', 'SNOU', 'SOMI', 'SWIM', 'TCHR', 'TRUN', 'TR__', 'YSE_']
+    else:
+        relevant_endpoints = ['AXIS', 'BRN_', 'CRAN', 'DNC_', 'DP24', 'EDEM', 'LTRK', 'MO24', 'MORT', 
+                            'MUSC', 'NC__', 'SKIN','SM24', 'TCHR']
+
+    # Get endpoints that are not expected 
+    unexpected = [end for end in theEndpoints if end not in relevant_endpoints]
+
+    # Print a message for missing endpoints 
+    if (len(unexpected) != 0):
+        print("Pre-Processing: The following endpoints were discovered and are unexpected:", unexpected)
+
+    # Subset down to the relevant endpoints 
+    BC.df = BC.df[BC.df[BC.endpoint].isin(relevant_endpoints)]
+
+    ## Convert do not counts to NA-------------------------------------------------------------------------
+
+    # If there's a do not count category, remove data 
+    if ("DNC_" in theEndpoints):
+
+        # Let the user know that data have been removed
+        print("PreProcessing: A do not count category was detected and those wells were changed to NA.")
+
+        # Set wells with a "do not count" to NA
+        BC.well_to_na(endpoint_name = "DNC", endpoint_value = 1)
+
+        # Remove the DNC category
+        BC.remove_endpoints("DNC")
+
+    ## Convert Mortality to NA------------------------------------------------------------------------------
+
+    # Convert wells affected by mortality at 5 days to NA
+    if "MORT" in theEndpoints:
+
+        # Let users know that the affected organisms were changed to NA
+        print("PreProcessing: Mortality data at 5 days was detected, and affected endpoints in wells were changed to NA.")
+
+        # Set wells with mortality at 5 days to NA, with the exception of the 24 hour timepoints
+        BC.well_to_na(endpoint_name = "MORT", endpoint_value = 1, except_endpoint = ["DP24", "MO24", "SM24", "MORT"])
+
+    # Convert wells affected by mortality at 24 hours to NA
+    if "MO24" in theEndpoints:
+
+        # Let users know that the affected organisms were changed to NA
+        print("PreProcessing: Mortality data at 24 hours was detected and affected endpoints in wells were changed to NA.")
+
+        # Set wells at mortality at 24 hours to NA
+        BC.well_to_na(endpoint_name = "MO24", endpoint_value = 1, except_endpoint = "MO24")
+
+    ## Make new endpoints------------------------------------------------------------------------------------
+
+    # Let users know that endpoints are being added
+    print("PreProcessing: Adding endpoints")
+
+    if "BRAI" in theEndpoints:
+
+        # Define new endpoints in a dictionary
+        EndpointDictionary = {
+            'ANY24':['MO24', 'DP24', 'SM24', 'NC24'],
+            'ANY120':['MORT', 'YSE_', 'AXIS', 'EYE_', 'SNOU', 'JAW_', 'OTIC', 'PE__', 'BRAI', 
+                      'SOMI', 'PFIN', 'CFIN', 'PIG_', 'CIRC', 'TRUN', 'SWIM', 'NC__', 'TR__', 
+                      'ANY24'],
+            'TOT_MORT':["MO24", "MORT"],
+            'ALL_BUT_MORT':['DP24','SM24','NC24', 'YSE_', 'AXIS', 'EYE_', 'SNOU', 'JAW_', 'OTIC', 'PE__', 
+                            'BRAI', 'SOMI', 'PFIN', 'CFIN', 'PIG_', 'CIRC','TRUN', 'SWIM', 'NC__', 'TR__'],
+            'BRN_':['BRAI','OTIC','PFIN'],
+            'CRAN':['EYE_', 'SNOU', 'JAW_'],
+            'EDEM':['YSE_', 'PE__'],
+            'LTRK':['TRUN', 'CFIN'],
+            'MUSC':['CIRC','SWIM','SOMI'],
+            'SKIN':['PIG_'],
+            'TCHR':['TR__']
+        }
+
+        # Add new endpoints
+        BC.combine_and_create_new_endpoints(EndpointDictionary)
+
+        # Remove renamed endpoints
+        BC.remove_endpoints(["PIG_", "TR__"])
+
+    else: 
+
+        # Define new endpoints in a dictionary
+        EndpointDictionary = {
+            'ANY24':['MO24','DP24','SM24'],
+            'ANY120':['AXIS', 'BRN_', 'CRAN', 'EDEM', 'LTRK', 'MORT', 'MUSC', 'NC__', 'SKIN', 'TCHR', 'ANY24'],
+            'TOT_MORT':['MO24','MORT'],
+            'ALL_BUT_MORT':['AXIS', 'BRN_', 'CRAN', 'DP24', 'EDEM', 'LTRK', 'MUSC', 'NC__', 'SKIN', 'SM24', 'TCHR']
+        }
+
+        # Add new endpoints
+        BC.combine_and_create_new_endpoints(EndpointDictionary)
+
+    return(BC)
+
+# All pre-processing required for LPR data 
+def preprocess_lpr(LPR, BC):
+
+    # Remove invalid wells--------------------------------------------------------------------------------
+
+    # Extract out the endpoints
+    theEndpoints = BC.df[BC.endpoint].unique().tolist()
+
+    # Remove wells where fish died
+    if "MORT" in theEndpoints:
+        print("PreProcessing: Mortality at 5 days detected. Setting those wells to NA in the LPR data.")
+        # ToDo
+    if "MO24" in theEndpoints:
+        print("PreProcessing: Mortality at 24 hours detected. Setting those wells to NA in the LPR data.")
+        # ToDo
+
+    # Return LPR
+    return(LPR)
+
