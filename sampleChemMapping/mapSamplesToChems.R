@@ -26,12 +26,14 @@ required_sample_columns<-c("ClientName","SampleNumber","date_sampled","sample_ma
                            "LocationLon","LocationName","LocationAlternateDescription",
                            "AlternateName","cas_number","date_sample_start",
                            "measurement_value","measurement_value_qualifier","measurement_value_unit",
-                           "measurement_value_molar","measurement_value_molar_unit")
+                           "measurement_value_molar","measurement_value_molar_unit",
+                           'environment_concentration','environment_concentration_qualifier','environment_concentration_unit',
+                           'environment_concentration_molar,'environment_concentration_molar_unit')
 
 #we need to rename the water columns
-new_sample_columns=c(environment_concentration="water_concentration",environment_concentration_qualifier='water_concentration_qualifier',
-                        environment_concentration_unit='water_concentration_unit',environment_concentration_molar='water_concentration_molar',
-                        environment_concentration_molar_unit='water_concentration_molar_unit')
+#new_sample_columns=c(environment_concentration="water_concentration",environment_concentration_qualifier='water_concentration_qualifier',
+#                        environment_concentration_unit='water_concentration_unit',environment_concentration_molar='water_concentration_molar',
+#                        environment_concentration_molar_unit='water_concentration_molar_unit')
 
 ##required for comptox-derived mapping files
 required_comptox_columns <- c("INPUT","DTXSID","PREFERRED_NAME","INCHIKEY","SMILES","MOLECULAR_FORMULA",
@@ -319,7 +321,7 @@ buildSampleData<-function(fses_files, #files from barton that contain sample inf
 #    fses1<-subset(sampTab,name=='fses1')[['location']]
         sc <- rio::import(fs)|>#paste0(data.dir,'/fses/fses_data_for_pnnl_4-27-2021.csv'))%>%
                                         #  sampChem<-read.csv(paste0(data.dir,'/pnnl_bioassay_sample_query_1-14-2021.csv'))%>%
-            dplyr::select(all_of(c(required_sample_columns,unlist(new_sample_columns))))%>% #TODO: change original file to use new names
+            dplyr::select(all_of(required_sample_columns))%>% #TODO: change original file to use new names
 #            dplyr::rename(new_sample_columns)|>  ##REMOVE this once we have new names
             subset(SampleNumber!='None')%>%
             subset(cas_number!='NULL')%>%

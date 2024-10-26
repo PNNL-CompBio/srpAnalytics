@@ -20,7 +20,7 @@ fit3,fit,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/ma
 fit4,fit,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/phase_I_II_III/fit_vals_2021_05_10_all_phase_III_morpho.csv,1
 fit5,fit,chemical,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/phase_I_II_III/fit_vals_all_qc.csv,1
 samp1,sample,water,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/fses/fses_data_for_pnnl_4-27-2021.csv,1
-samp2,sample,water,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/fses/FSES_indoor_outdoor_study.xlsx,1
+samp2,sample,water,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/fses/FSES_indoor_outdoor_study.csv,1
 bmd6,bmd,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/extracts/bmd_vals_2021_04_09.csv,1
 bmd7,bmd,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/extracts/bmd_vals_2021_08_18.csv,1
 bmd8,bmd,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/extracts/bmd_vals_all_qc.csv,1
