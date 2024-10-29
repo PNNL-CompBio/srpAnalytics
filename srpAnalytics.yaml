@@ -258,7 +258,7 @@ classes:
     attributes:
       Gene:
         description:
-        range: integer
+        range: linkml:Any
       GeneID:
         description:
       adj_p_value:
@@ -283,7 +283,7 @@ classes:
       DownRegulatedGenes:
         description: number of genes down-regulated upon chemical treatement
         range: integer
-      UprRegulatedGenes:
+      UpRegulatedGenes:
         description: number of genes up-regulated upon chemical treatement
         range: integer
   srpDEGPathways:
