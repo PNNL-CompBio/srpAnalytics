@@ -162,7 +162,7 @@ def main():
         #add chemical BMDS, fits, curves to existing data
         chemfiles=[]
         sampfiles=[]
-        print(fses)
+        #print(fses)
         for st in ['chemical','extract']:
             for dt in ['bmd','fit','dose']:
                 fdf = combineFiles(df.loc[df.sample_type==st].loc[df.data_type==dt],dt)

@@ -332,7 +332,7 @@ buildSampleData<-function(fses_files, #files from barton that contain sample inf
             subset(!measurement_value_molar%in%c('0'))%>%
             subset(!measurement_value%in%c("0","NULL",""))#%>%
 #        select(-c(Sample_ID))#,Chemical_ID)) ##These two are added in the 4/27 version of the file
-
+       # print(head(sc))
     ##data added 1/19/2022
         #fses2<-subset(sampTab,name=='fses2')[['location']]
         #newSamp <- rio::import(fses2)|>#paste0(data.dir,'/fses/FSES_indoor_outdoor_study.xlsx'))%>%
@@ -424,7 +424,7 @@ buildSampleData<-function(fses_files, #files from barton that contain sample inf
 
     ##now we have one more rename of samples and metadata
     sampleNameRemap<-rio::import(sampMapping,which=1)|>#paste0(data.dir,'/envSampCleanMapping.xlsx'),which=1)%>%
-      dplyr::select(Sample_ID,date_sampled,sample_matrix,technology,#projectName='ProjectName',SampleName='NewSampleName',
+      dplyr::select(Sample_ID,#sample_matrix,technology,#date_sampled,projectName='ProjectName',SampleName='NewSampleName',
                     #LocationName='NewLocationName')%>%
                     ProjectName,NewSampleName,NewLocationName)%>%
       distinct()
@@ -440,12 +440,12 @@ buildSampleData<-function(fses_files, #files from barton that contain sample inf
     finalSampChem$projectName[nas]<-finalSampChem$ProjectName[nas]
     finalSampChem$LocationName[nas]<-finalSampChem$NewLocationName[nas]
     finalSampChem$SampleName[nas]<-finalSampChem$NewSampleName[nas]
-    finalSampChem$date_sampled.x[nas]<-finalSampChem$date_sampled.y[nas]
-    finalSampChem$sample_matrix.x[nas]<-finalSampChem$sample_matrix.y[nas]
-    finalSampChem$technology.x[nas]<-finalSampChem$technology.y[nas]
+    #finalSampChem$date_sampled.x[nas]<-finalSampChem$date_sampled.y[nas]
+    #finalSampChem$sample_matrix.x[nas]<-finalSampChem$sample_matrix.y[nas]
+    #finalSampChem$technology.x[nas]<-finalSampChem$technology.y[nas]
 
-    finalSampChem<-dplyr::select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled.y,sample_matrix.y,technology.y))%>%
-      dplyr::rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
+    finalSampChem<-finalSampChem|>#dplyr::select(finalSampChem,-c(ProjectName,NewSampleName,NewLocationName,date_sampled,sample_matrix,technology))%>%
+    #  dplyr::rename(sample_matrix='sample_matrix.x',date_sampled='date_sampled.x',technology='technology.x')%>%
       distinct()%>%
       subset(cas_number!='N/A')
 
@@ -857,7 +857,7 @@ buildDB<-function(chem.files=c(),extract.files=c()){
   samps<-sampChem%>%
     select(samp_columns)%>%
     distinct()
-
+#  print(head(samps))
   write.csv(samps,file=paste0(out.dir,'samples.csv'),quote=T,row.names=FALSE)
 
   ##bmds

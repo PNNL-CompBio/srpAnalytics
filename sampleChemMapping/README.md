@@ -10,6 +10,13 @@ Rscript sampleChemMapping/mapSamplesToChems.R --sampId="+smap+' --chemId='+cid+\
             ' --sampMap='+smap
 ```
 
+To run/test docker image (from root of repo):
+
+```
+docker build . -t srp-samplechem -f sampleChemMapping/Dockerfile
+docker run -v $PWD:/tmp srp-samplechem
+```
+
 ### Chemical identifiers
 
 All chemicals must have a `cas_number` that has data download from the [EPA Comptox website](https://comptox.epa.gov/dashboard/batch-search). 
@@ -18,6 +25,11 @@ All cas numbers must have a `Chemical_ID` - these either come from the Tanguay l
 
 ### Sample measurements
 
-All sample measurements must comply with our pre-determined sample schema.
+All sample measurements must comply with our pre-determined sample
+schema. There must be a `Sample_ID` mapping to `SampleNumber` in the
+sample mapping file.
 
 ### Benchmark dose values
+
+These are processed from the stored BMD files and the recalculated
+ones passed into the argument. 

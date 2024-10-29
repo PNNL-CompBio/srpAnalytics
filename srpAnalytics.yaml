@@ -250,17 +250,36 @@ classes:
       - endPointLink
   allGeneEx:
     description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
+    slots:
+      - Project
+      - cas_number
+      - Chemical_ID
+      - concentration
+    attributes:
+      Gene:
+        description:
+        range: integer
+      GeneID:
+        description:
+      adj_p_value:
+        description:
+        range: float
+      indication:
+        description:
+        range: integer
+      Log2FoldChange:
+        description: fold change
+        range: float
   srpDEGStats:
     description: Summary statistics
     slots:
       - Project
       - cas_number
       - Chemical_ID
+      - concentration
     attributes:
       link:
         description: Link to experiment?
-      concentration:
-        description: concentration at which drug was administered. includes number and unit
       DownRegulatedGenes:
         description: number of genes down-regulated upon chemical treatement
         range: integer
@@ -269,6 +288,29 @@ classes:
         range: integer
   srpDEGPathways:
     description: Pathways that are enriched in zebrafish genes that are differentially expressed upon treatment with a chemical
+    slots:
+      - Chemical_ID
+      - concentration
+    attributes:
+      term:
+        description:
+      adj_p_value:
+        description:
+        range: float
+      p_value:
+        description:
+        range: float
+      Genes:
+        description:      
+      enrichment_score:
+        description:
+        range: float
+      z_score:
+        description:
+        range: float
+      overlap:
+        description:
+    
   exposomeGeneStats:
     description: Summary and link to exposome measurements of human genes that are differentailly expressed upon chemical treatment
   

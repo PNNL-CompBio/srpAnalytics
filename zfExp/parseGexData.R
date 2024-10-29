@@ -62,19 +62,19 @@ generateChemicalExamples<-function(genelist,deglist){
 
   for(chem in testchems){
     genes<-subset(genelist,Chemical_ID==chem)|>
-      mutate(Pvalue=-1*log10(adj_p_value),Significant=ifelse(indication==1,TRUE,FALSE),Concentration=as.factor(Concentration))|>
-      ggplot(aes(x=Log2FoldChange,y=Pvalue,col=Significant,alpha=0.5,shape=Concentration))+geom_point()
+      mutate(Pvalue=-1*log10(adj_p_value),Significant=ifelse(indication==1,TRUE,FALSE),concentration=as.factor(concentration))|>
+      ggplot(aes(x=Log2FoldChange,y=Pvalue,col=Significant,alpha=0.5,shape=concentration))+geom_point()
 
     genecount<-subset(deglist,Chemical_ID==chem)|>
-      mutate(Direction=ifelse(Log2FoldChange>0,"Up","Down"),Significant=ifelse(indication==1,TRUE,FALSE),Concentration=as.factor(Concentration))|>
+      mutate(Direction=ifelse(Log2FoldChange>0,"Up","Down"),Significant=ifelse(indication==1,TRUE,FALSE),concentration=as.factor(concentration))|>
       subset(Significant)|>
       subset(!is.na(Direction))|>
-      ggplot(aes(x=Direction,fill=Concentration))+geom_bar(position='dodge')
+      ggplot(aes(x=Direction,fill=concentration))+geom_bar(position='dodge')
 
     paths<-subset(deglist,Chemical_ID==chem)|>
       subset(toPlot==1)|>
       tidyr::separate(Overlap,into=c('top','bottom'),sep='/')|>
-      mutate(geneCount=as.numeric(top)/as.numeric(bottom),Concentration=as.factor(Concentration))|>
+      mutate(geneCount=as.numeric(top)/as.numeric(bottom),concentration=as.factor(concentration))|>
       ggplot(aes(x=reorder(Term,geneCount),y=geneCount,fill=-1*log10(Adjusted.P.value)))+geom_bar(stat='identity',position='dodge')+coord_flip()
     ##volcano plot for genes
     ##barplot for pathways
@@ -105,7 +105,7 @@ enrichSelectTop<-function(genelist,path,pvalue=0.05,top=20){
 }
 ##call functional enrichment and store results
 doEnrich<-function(genelist){
-    condition<-genelist|>dplyr::select(Chemical_ID,Concentration)|>
+    condition<-genelist|>dplyr::select(Chemical_ID,concentration)|>
       distinct()
     setEnrichrSite("FishEnrichr")
 #    dbs<-listEnrichrDbs()$libraryName
@@ -114,12 +114,14 @@ doEnrich<-function(genelist){
     allpaths<-genelist|>
       subset(indication==1)|>
     #  subset(Chemical_ID%in%c(3138,3130,3148))|>
-      group_by(Chemical_ID,Concentration)|>
+      group_by(Chemical_ID,concentration)|>
       summarize(enrich=enrichSelectTop(Gene,path,0.05,20))
 
     ##now unnest and filter
     sigpaths<-allpaths|>
-      unnest(cols=c(enrich))
+        unnest(cols=c(enrich))|>
+        dplyr::rename(adj_p_value='Adjusted.P.Value',p_value='P.Value',enrichment_score='Combined.Score',z_score='Z.Score')|>
+        dplyr::select(Chemical_ID,Term,concentration,z_score,enrichment_score,overlap,p_value,adj_p_value,Genes,toPlot)
 
     ##filter for signifiance, then move to long form table
     return(sigpaths)
@@ -200,8 +202,10 @@ main<-function(args=c()){
     dplyr::select(-c(control,treatment))|>
     mutate(Project='Zebrafish',Link='')|>
     left_join(chem)|>
-    mutate(Concentration=as.numeric(stringr::str_replace(Conc,'uM','')))|>
-    select(-Conc)
+    mutate(concentration=as.numeric(stringr::str_replace(Conc,'uM','')))|>
+      select(-Conc)|>
+      subset(!is.na(Log2FoldChange))|>
+      subset(!is.na(concentration))
 
 
   diffex <- allgenes|>
@@ -210,7 +214,7 @@ main<-function(args=c()){
   res<-allgenes|>
     subset(indication!=0)|>
     mutate(up=Log2FoldChange>0)|>
-    group_by(Project,cas_number,Concentration,Link,Chemical_ID,up)|>
+    group_by(Project,cas_number,concentration,Link,Chemical_ID,up)|>
     summarize(nGenes=n())|>subset(!is.na(up))
 
 
