@@ -17,6 +17,7 @@ WORKDIR /app
 RUN mkdir -p sampleChemMapping
 COPY sampleChemMapping/* sampleChemMapping
 COPY build_script.py .
+COPY srpAnalytics.yaml .
 COPY requirements.txt .
 
 RUN pip3 install --upgrade pip

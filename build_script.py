@@ -71,8 +71,8 @@ def runSampMap(is_sample=False,drcfiles=[],smap='',cid='',\
     os.system(cmd)
     print('ls -la .')
     ##now we validate the files that came out.
-    dblist=['/tmp/samples.csv','/tmp/chemicals.csv','/tmp/samplesToChemicals.csv']
-    for ftype in ['ChemXYCoords.csv','DoseResponse.csv','BMDs.csv']:
+    dblist=['/tmp/samples.csv','/tmp/chemicals.csv','/tmp/sampleToChemicals.csv']
+    for ftype in ['XYCoords.csv','DoseResponse.csv','BMDs.csv']:
         dblist.append('/tmp/zebrafishChem'+ftype)
         dblist.append('/tmp/zebrafishSamp'+ftype)
     runSchemaCheck(dblist)
@@ -161,6 +161,7 @@ def main():
         #add chemical BMDS, fits, curves to existing data
         chemfiles=[]
         sampfiles=[]
+        print(fses)
         for st in ['chemical','extract']:
             for dt in ['bmd','fit','dose']:
                 fdf = combineFiles(df.loc[df.sample_type==st].loc[df.data_type==dt],dt)

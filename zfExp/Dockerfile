@@ -16,6 +16,7 @@ WORKDIR /app
 RUN mkdir -p zfExp
 COPY zfExp/* zfExp/
 COPY build_script.py ./
+COPY srpAnalytics.yaml ./
 COPY requirements.txt ./
 
 RUN mkdir -p sampleChemMapping

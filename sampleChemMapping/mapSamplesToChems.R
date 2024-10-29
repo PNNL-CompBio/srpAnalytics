@@ -28,7 +28,7 @@ required_sample_columns<-c("ClientName","SampleNumber","date_sampled","sample_ma
                            "measurement_value","measurement_value_qualifier","measurement_value_unit",
                            "measurement_value_molar","measurement_value_molar_unit",
                            'environment_concentration','environment_concentration_qualifier','environment_concentration_unit',
-                           'environment_concentration_molar,'environment_concentration_molar_unit')
+                           'environment_concentration_molar','environment_concentration_molar_unit')
 
 #we need to rename the water columns
 #new_sample_columns=c(environment_concentration="water_concentration",environment_concentration_qualifier='water_concentration_qualifier',
@@ -977,11 +977,14 @@ main<-function(){
 
 
         bmds<-combineV2ChemicalEndpointData(bf,is_extract=args$is_sample,metafile,endpointDetails)%>%
-            unique()
+            unique()|>
+            subset(!is.na(BMD_Analysis_Flag))|>
+            subset(BMD_Analysis_Flag!="NA")
         curves <-combineChemicalFitData(cf, is_extract=args$is_sample, metafile,endpointDetails)%>%
             unique()
         doseReps <-combineChemicalDoseData(df, is_extract=args$is_sample, metafile,endpointDetails)%>%
-            unique()
+            unique()|>
+            subset(!is.na(Dose))
                                         #   print(head(doseReps))
 
 

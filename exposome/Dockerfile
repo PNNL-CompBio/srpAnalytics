@@ -16,6 +16,7 @@ WORKDIR /app
 RUN mkdir -p exposome
 COPY exposome/* exposome/
 COPY build_script.py ./
+COPY srpAnalytics.yaml ./
 COPY requirements.txt .
 
 RUN pip3 install --upgrade pip
