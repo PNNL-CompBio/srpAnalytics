@@ -75,7 +75,7 @@ generateChemicalExamples<-function(genelist,deglist){
       subset(toPlot==1)|>
       tidyr::separate(Overlap,into=c('top','bottom'),sep='/')|>
       mutate(geneCount=as.numeric(top)/as.numeric(bottom),concentration=as.factor(concentration))|>
-      ggplot(aes(x=reorder(Term,geneCount),y=geneCount,fill=-1*log10(Adjusted.P.value)))+geom_bar(stat='identity',position='dodge')+coord_flip()
+      ggplot(aes(x=reorder(Term,geneCount),y=geneCount,fill=-1*log10(adj_p_value)))+geom_bar(stat='identity',position='dodge')+coord_flip()
     ##volcano plot for genes
     ##barplot for pathways
 
@@ -91,7 +91,7 @@ enrichSelectTop<-function(genelist,path,pvalue=0.05,top=20){
 
   res<-enrichr(genelist,path)
   res<-res[[path]]
-
+#  print(head(res))
   res<-res|>
     subset(Adjusted.P.value<pvalue)|>
     arrange(Adjusted.P.value)
@@ -120,7 +120,8 @@ doEnrich<-function(genelist){
     ##now unnest and filter
     sigpaths<-allpaths|>
         unnest(cols=c(enrich))|>
-        dplyr::rename(adj_p_value='Adjusted.P.Value',p_value='P.Value',enrichment_score='Combined.Score',z_score='Z.Score')|>
+        dplyr::rename(adj_p_value='Adjusted.P.value',p_value='P.value',enrichment_score='Combined.Score',z_score='Z.score',overlap='Overlap')|>
+#        dplyr::rename(Adjusted.P.value='adj_p_value',P.Value='p_value',Combined.Score='enrichment_score',Z.Score='z_score')|>
         dplyr::select(Chemical_ID,Term,concentration,z_score,enrichment_score,overlap,p_value,adj_p_value,Genes,toPlot)
 
     ##filter for signifiance, then move to long form table
