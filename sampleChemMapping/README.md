@@ -2,6 +2,14 @@
 
 This module consumes bench mark dose measurements from the pipeline and maps them to specific chemical metadata and concentrations in sample extracts. 
 
+To run/test in this repo:
+```
+Rscript sampleChemMapping/mapSamplesToChems.R --sampId="+smap+' --chemId='+cid+\
+            ' --epMap='+emap+' --chemClass='+cclass+\
+            ' --compToxFile='+ctfile+' --sampleFiles='+fses+' --chemDesc='+desfile+\
+            ' --sampMap='+smap
+```
+
 ### Chemical identifiers
 
 All chemicals must have a `cas_number` that has data download from the [EPA Comptox website](https://comptox.epa.gov/dashboard/batch-search). 

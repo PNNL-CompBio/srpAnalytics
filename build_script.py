@@ -75,7 +75,8 @@ def runSampMap(is_sample=False,drcfiles=[],smap='',cid='',\
     for ftype in ['XYCoords.csv','DoseResponse.csv','BMDs.csv']:
         dblist.append('/tmp/zebrafishChem'+ftype)
         dblist.append('/tmp/zebrafishSamp'+ftype)
-    runSchemaCheck(dblist)
+    return(dblist)
+    #runSchemaCheck(dblist)
 
     
 def runExposome(chem_id_file):
@@ -85,7 +86,7 @@ def runExposome(chem_id_file):
     cmd = 'Rscript exposome/exposome_summary_stats.R '+chem_id_file
     print(cmd)
     os.system(cmd)
-    runSchemaCheck(['/tmp/exposomeGeneStats.csv'])
+    return(['/tmp/exposomeGeneStats.csv'])
 
 def runExpression(gex,chem,ginfo):
     '''
@@ -94,7 +95,7 @@ def runExpression(gex,chem,ginfo):
     cmd = 'Rscript zfExp/parseGexData.R '+gex+' '+chem+' '+ginfo
     print(cmd)
     os.system(cmd)
-    runSchemaCheck(['/tmp/srpDEGPathways.csv','/tmp/srpDEGStats.csv','/tmp/allGeneEx.csv'])
+    return(['/tmp/srpDEGPathways.csv','/tmp/srpDEGStats.csv','/tmp/allGeneEx.csv'])
 
 def runSchemaCheck(dbfiles=[]):
     '''
@@ -171,22 +172,24 @@ def main():
                     chemfiles.append(fname)
                 else:
                     sampfiles.append(fname)
-        runSampMap(True,sampfiles,smap,cid,emap,cclass,ctfile,fses,desfile)
-        runSampMap(False,chemfiles,smap,cid,emap,cclass,ctfile,fses,desfile)
-        runSampMap(False,[],smap,cid,emap,cclass,ctfile,fses,desfile)
+        res1=runSampMap(True,sampfiles,smap,cid,emap,cclass,ctfile,fses,desfile)
+        res2=runSampMap(False,chemfiles,smap,cid,emap,cclass,ctfile,fses,desfile)
+        res3=runSampMap(False,[],smap,cid,emap,cclass,ctfile,fses,desfile)
+        res = res1+res2+res3
+        res = list(set(res))
         for f in sampfiles+chemfiles:
             os.system('rm '+f)
         ##now we run validation
-        runSchemaCheck()
+        runSchemaCheck(res)
     if args.expo:
-        runExposome(cid)
-        runSchemaCheck()
+        res=runExposome(cid)
+        runSchemaCheck(res)
     if args.geneEx:
         if not os.path.exists("/tmp/chemicals.csv"):
             runSampMap(False,[],smap,cid,emap,cclass,ctfile,fses,desfile)
         
-        runExpression(gex1,'/tmp/chemicals.csv',ginfo)
-        runSchemaCheck()
+        res=runExpression(gex1,'/tmp/chemicals.csv',ginfo)
+        runSchemaCheck(res)
     
     
 main()
