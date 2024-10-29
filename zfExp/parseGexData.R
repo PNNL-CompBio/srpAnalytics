@@ -120,9 +120,9 @@ doEnrich<-function(genelist){
     ##now unnest and filter
     sigpaths<-allpaths|>
         unnest(cols=c(enrich))|>
-        dplyr::rename(adj_p_value='Adjusted.P.value',p_value='P.value',enrichment_score='Combined.Score',z_score='Z.score',overlap='Overlap')|>
+        dplyr::rename(adj_p_value='Adjusted.P.value',p_value='P.value',enrichment_score='Combined.Score',z_score='Z.score',term='Term',overlap='Overlap')|>
 #        dplyr::rename(Adjusted.P.value='adj_p_value',P.Value='p_value',Combined.Score='enrichment_score',Z.Score='z_score')|>
-        dplyr::select(Chemical_ID,Term,concentration,z_score,enrichment_score,overlap,p_value,adj_p_value,Genes,toPlot)
+        dplyr::select(Chemical_ID,term,concentration,z_score,enrichment_score,overlap,p_value,adj_p_value,Genes,toPlot)
 
     ##filter for signifiance, then move to long form table
     return(sigpaths)
@@ -221,8 +221,8 @@ main<-function(args=c()){
 
   res<-res|>
     tidyr::pivot_wider(names_from='up',
-                       values_from='nGenes')|>
-    rename(UpRegulatedGenes='TRUE',DownRegulatedGenes='FALSE')
+                       values_from='nGenes',values_fill=0.0)|>
+      rename(UpRegulatedGenes='TRUE',DownRegulatedGenes='FALSE')
 
 
   enrich<-doEnrich(allgenes)
@@ -237,5 +237,5 @@ main<-function(args=c()){
 
 
 
-main()#args<-c('../data/zfExp/ZF_gex.xlsx','../data/chemicalIdMapping.csv','../data/zfExp/allianceGenomeInfo.csv'))
+res=main()#args<-c('../data/zfExp/ZF_gex.xlsx','../data/chemicalIdMapping.csv','../data/zfExp/allianceGenomeInfo.csv'))
 
