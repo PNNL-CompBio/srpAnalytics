@@ -323,5 +323,6 @@ classes:
     attributes:
       nGenes:
         description:
+        range: integer
       Link:
         description:

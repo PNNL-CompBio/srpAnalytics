@@ -17,4 +17,4 @@ docker build . -t srp-exposome -f exposome/Dockerfile
 docker run -v $PWD:/tmp srp-exposome
 ```
 
-
+    
