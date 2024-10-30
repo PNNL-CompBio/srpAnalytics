@@ -312,8 +312,16 @@ classes:
         description:
       toPlot:
         description:
-        range: integer
-    
+        range: integer    
   exposomeGeneStats:
     description: Summary and link to exposome measurements of human genes that are differentailly expressed upon chemical treatment
-  
+    slots:
+      - Chemical_ID
+      - Project
+      - concentration
+      - cas_number
+    attributes:
+      nGenes:
+        description:
+      Link:
+        description:

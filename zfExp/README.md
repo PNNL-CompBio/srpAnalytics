@@ -15,6 +15,6 @@ However the build script is also copied into the Dockerfile and run as below:
 
 ```
 docker build . -t srp-zfexp -f zfExp/Dockerfile
-docker run zfexp
+docker run -v $PWD:/tmp srp-zfexp
 
 ```
