@@ -23,8 +23,8 @@ stop_for_status(res)
 projects <- fromJSON(fromJSON(rawToChar(res$content)))
 
 ##create a mapping to friendly names for projects
-project_map<-data.frame(Project=c('ADIPO','HEPG2','MCF10A','TF-GATEs'),
-			friendlyName=c('Human adipocyte cell lines','Human Hepg2 cell lines','Human MCF10A cell lines','Human TF-GATEs'))
+project_map<-data.frame(Project=c('ADIPO','HEPG2','MCF10A','TG-GATEs'),
+			friendlyName=c('Human adipocyte cell lines','Human Hepg2 cell lines','Human MCF10A cell lines','Human TG-GATEs'))
 
 print(paste('We now have data from',length(projects),'projects'))
 
@@ -57,8 +57,26 @@ getGoTerms<-function(chemical_id,proj){
     gs_enrichment_stat <- gs_enrichment_stat%>%
       pivot_longer(cols=grep('GS Score',colnames(gs_enrichment_stat)),names_to='Conc',values_to='GSScore')%>%
       mutate(Conc=stringr::str_replace_all(Conc,'GS Score ',''))
-
+    if(length(grep('_',gene_expression_stat$Conc[1]))>1){
+        gene_expression_stat<-gene_expression_stat|>
+            tidyr::separate(Conc,into=c('Condition','High','Conc'),sep='_')|>
+            dplyr::select(-High)
+    }else if(length(grep('_',gene_expression_stat$Conc)[1])>0){
+        gene_expression_stat<-gene_expression_stat|>
+            tidyr::separate(Conc,into=c('Condition','Conc'),sep='_')
+    }else{
+        gene_expression_stat$Condition<-rep('WT',nrow(gene_expression_stat))
     }
+    if(length(grep('uM',gene_expression_stat$Conc))>0){
+        gene_expression_stat$concentration_unit='uM'
+        gene_expression_stat =gene_expression_stat|>mutate(Conc=stringr::str_replace_all(Conc,'uM',''))
+    }else if(length(grep('mg/kg',gene_expression_stat$Conc))>0){
+        gene_expression_stat$concentration_unit='mg/kg'
+        gene_expression_stat =gene_expression_stat|>mutate(Conc=stringr::str_replace_all(Conc,'mg/kg',''))
+    }
+
+
+  }
   print(head(gs_enrichment_stat))
   data.frame(Project=proj,cas_number=chemical_id,gs_enrichment_stat)
 }
@@ -78,22 +96,55 @@ getGenes<-function(chemical_id,proj){
   chem_gene_link=paste0("https://montilab.bu.edu/Xposome/?page=",proj,
                    "&tab=chemical_explorer&chemical_id=",chemical_id,"&stat=gene_expression")
 
+ #  print(chemical_id)
   if(res$status_code!=200)
-    gene_expression_stat=data.frame(Gene=NULL,GeneName=NULL,Direction=NULL,`Summary Score`=NULL,`Zscore`=NULL,`Conc`=NULL,Link=NULL)
+    return(data.frame())#Project=proj,cas_number=chemical_id,Link=chem_gene_link,Gene=NULL,GeneName=NULL,Direction=NULL,`Summary Score`=NULL,`Zscore`=NULL,`Conc`=NULL,Link=NULL,Condition=NULL))
   else{
     gene_expression_stat <- fromJSON(fromJSON(rawToChar(res$content)))
     gene_expression_stat <- gene_expression_stat%>%
       tibble::rownames_to_column('GeneName')
     gene_expression_stat <-gene_expression_stat%>%
       pivot_longer(cols=grep('ModZScore',colnames(gene_expression_stat)),names_to='Conc',values_to='ModZScore')%>%
-      mutate(Conc=stringr::str_replace_all(Conc,'ModZScore ',''))
-    if('Landmark_Gene'%in%colnames(gene_expression_stat))
+        mutate(Conc=stringr::str_replace_all(Conc,'ModZScore ',''))
+
+    if(proj=='TG-GATEs'){
+        gene_expression_stat<-gene_expression_stat|>
+            tidyr::separate(Conc,into=c('Condition','High','Conc'),sep='_')|>
+            dplyr::select(-High)
+    }else if(proj=='MCF10A'){
+        gene_expression_stat<-gene_expression_stat|>
+            tidyr::separate(Conc,into=c('Condition','Conc'),sep='_')
+    }else{
+        gene_expression_stat$Condition<-rep('WT',nrow(gene_expression_stat))
+    }
+
+    if(length(grep('uM',gene_expression_stat$Conc))>0){
+        gene_expression_stat$concentration_unit='uM'
+        gene_expression_stat =gene_expression_stat|>mutate(Conc=stringr::str_replace_all(Conc,'uM',''))
+    }else if(length(grep('mg/kg',gene_expression_stat$Conc))>0){
+        gene_expression_stat$concentration_unit='mg/kg'
+        gene_expression_stat =gene_expression_stat|>mutate(Conc=stringr::str_replace_all(Conc,'mg/kg',''))
+    }
+
+    if('Landmark_Gene'%in%colnames(gene_expression_stat)){
       gene_expression_stat <- select(gene_expression_stat,-Landmark_Gene)
+    }
+    #if(nrow(gene_expression_stat)==0){
+    #    gene_expression_stat=data.frame(Gene=NULL,GeneName=NULL,Direction=NULL,`Summary Score`=NULL,`Zscore`=NULL,`Conc`=NULL,Link=NULL,Condition=NULL)
+    #    }
   }
- # print(head(gene_expression_stat))
-    data.frame(Project=proj,cas_number=chemical_id,gene_expression_stat,Link=chem_gene_link)
+
+
+  #print(head(gene_expression_stat))
+  data.frame(Project=proj,cas_number=chemical_id,gene_expression_stat,Link=chem_gene_link)
 
 }
+
+
+
+
+
+
 
 full.list <- list()
 for(proj in projects){
@@ -147,14 +198,14 @@ map <-all.chems%>%
 
 
 sg.stats <- sig.genes%>%
-  group_by(Project,cas_number,Conc,Link)%>%
+  group_by(Project,cas_number,Conc,Link,Condition)%>%
   summarize(nGenes=n_distinct(Gene))%>%
   left_join(map)|>
   left_join(project_map)|>
   ungroup()|>
   dplyr::select(-Project)|>
   dplyr::rename(Project=friendlyName)|>
-    dplyr::select(Project,cas_number,Conc,Link,nGenes,Chemical_ID)|>
+    dplyr::select(Project,cas_number,Condition,Conc,Link,nGenes,Chemical_ID)|>
         mutate(concentration=as.numeric(stringr::str_replace(Conc,'uM','')))|>
     dplyr::select(-Conc)
 

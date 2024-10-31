@@ -25,6 +25,8 @@ slots:
   concentration:
     description: Concentration at which chemical was administered in uM
     range: float
+  concentration_unit:
+    description: Unit of concentration
   Project:
     description: name of project contributing the dataset
   Model:
@@ -59,7 +61,7 @@ slots:
     description: Quality of Data
   Dose:
     description: Dose of chemical
-    range: flot
+    range: float
   Response:
     description: Response in terms of percentage of fish alive
     range: float
@@ -320,9 +322,12 @@ classes:
       - Project
       - concentration
       - cas_number
+      - concentration_unit
     attributes:
       nGenes:
         description:
         range: integer
       Link:
         description:
+      Condition:
+        description: 

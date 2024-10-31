@@ -8,7 +8,7 @@ This module also runs the `build_all.py` script to build the zf
 expression data. 
 
 ```
-python build_script.py --zfExp
+python build_script.py --geneEx
 ```
 
 However the build script is also copied into the Dockerfile and run as below:
