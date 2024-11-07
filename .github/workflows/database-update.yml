@@ -20,7 +20,7 @@ jobs:
 #       - name: Checkout Repo
 #         uses: actions/checkout@v3
 #       - name: Download artifacts from previous drug gen
-#         uses: actions/download-artifact@v3
+#         uses: actions/download-artifact@v4
 #       - name: Pull sample image
 #         run: docker pull sgosline/srp-bmd
 #       - name: Run bmd python command
@@ -35,7 +35,7 @@ jobs:
        - name: Checkout Repo
          uses: actions/checkout@v3
        - name: Download artifacts from previous drug gen
-         uses: actions/download-artifact@v3
+         uses: actions/download-artifact@v4
        - name: Pull sample image
          run: docker pull sgosline/srp-samplechem
        - name: Run sample-chem python command
@@ -48,7 +48,7 @@ jobs:
            mkdir samp-files
            mv *csv samp-files
        - name: upload artifacts
-         uses: actions/upload-artifact@v2
+         uses: actions/upload-artifact@v4
          with:
            name: samp-files
            path: samp-files
@@ -59,7 +59,7 @@ jobs:
        - name: Checkout Repo
          uses: actions/checkout@v3
        - name: Download artifacts from previous drug gen
-         uses: actions/download-artifact@v3
+         uses: actions/download-artifact@v4
        - name: Pull sample image
          run: docker pull sgosline/srp-exposome
        - name: Run sample-chem python command
@@ -72,7 +72,7 @@ jobs:
            mkdir expo-files
            mv *.csv expo-files
        - name: upload artifact
-         uses: actions/upload-artifact@v2
+         uses: actions/upload-artifact@v4
          with:
            name: expo-files
            path: expo-files         
@@ -85,7 +85,7 @@ jobs:
        - name: Checkout Repo
          uses: actions/checkout@v3
        - name: Download artifacts from sample generation
-         uses: actions/download-artifact@v3
+         uses: actions/download-artifact@v4
          with:
            name: samp-files
            path: samp-files
@@ -103,7 +103,7 @@ jobs:
            mkdir expr-files
            mv *csv expr-files
        - name: upload artifact
-         uses: actions/upload-artifact@v2
+         uses: actions/upload-artifact@v4
          with:
            name: expr-files
            path: expr-files
@@ -115,15 +115,15 @@ jobs:
        - name: Checkout Repo
          uses: actions/checkout@v2
        - name: Download artifacts from expression
-         uses: actions/download-artifact@v2
+         uses: actions/download-artifact@v4
          with:
            name: expr-files
        - name: Downlod artifacts from exposome
-         uses: actions/download-artifact@v2
+         uses: actions/download-artifact@v4
          with:
            name: expo-files
        - name: Downlod artifacts from samples
-         uses: actions/download-artifact@v2
+         uses: actions/download-artifact@v4
          with:
            name: samp-files
        - name: List files cwd
