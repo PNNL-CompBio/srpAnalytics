@@ -4,7 +4,7 @@ FROM r-base:4.4.1
 
 RUN apt-get update --allow-insecure-repositories
 RUN apt-get install -y --allow-unauthenticated --fix-missing  python3-pip python3-setuptools python3-dev python3-venv libcurl4-openssl-dev libglpk-dev libxml2-dev libpq-dev
-
+RUN apt-get install -y libmariadb-dev-compat libmariadb-dev
 
 RUN python3 -m venv /opt/venv
 
@@ -26,7 +26,9 @@ RUN Rscript -e "install.packages('readxl',dependencies=TRUE, repos='http://cran.
 RUN Rscript -e "install.packages('dplyr',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('tidyr',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('rio',dependencies=TRUE, repos='http://cran.rstudio.com')"
-RUN Rscript -e "install.packages('enrichR', dependencies=TRUE, repos='http://cran.rstudio.com')"
+RUN Rscript -e "install.packages('rjson',dependencies=TRUE, repos='http://cran.rstudio.com')"
+RUN Rscript -e "install.packages('WriteXLS',dependencies=TRUE, repos='http://cran.rstudio.com')"
+RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/Archive/enrichR/enrichR_3.2.tar.gz', dependencies=TRUE, source=TRUE)"
 RUN Rscript -e "install.packages('argparse',dependencies=TRUE,repos='http://cran.rstudio.com')"
 
 RUN pip3 install --upgrade pip
