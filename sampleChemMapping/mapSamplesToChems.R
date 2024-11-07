@@ -5,7 +5,7 @@ require(rio)
 require(argparse)
 require(xml2)
 library(tidyr)
-##The data release will be comprised of 9 files (note change from v1!)
+##The data release will be comprised of 9 files (note change fro v1!)
 #' 1- list of environmental samples and the chemical composition (curated sample data)
 #' 2- ZF summary statistics for chemicals (and no chemical metadata)
 #' 3- ZF points to plot for chemicals
@@ -27,13 +27,13 @@ required_sample_columns<-c("ClientName","SampleNumber","date_sampled","sample_ma
                            "AlternateName","cas_number","date_sample_start",
                            "measurement_value","measurement_value_qualifier","measurement_value_unit",
                            "measurement_value_molar","measurement_value_molar_unit",
-                           'environment_concentration','environment_concentration_qualifier','environment_concentration_unit',
-                           'environment_concentration_molar','environment_concentration_molar_unit')
+                           'environmental_concentration','environmental_concentration_qualifier','environmental_concentration_unit',
+                           'environmental_concentration_molar','environmental_concentration_molar_unit')
 
 #we need to rename the water columns
-#new_sample_columns=c(environment_concentration="water_concentration",environment_concentration_qualifier='water_concentration_qualifier',
-#                        environment_concentration_unit='water_concentration_unit',environment_concentration_molar='water_concentration_molar',
-#                        environment_concentration_molar_unit='water_concentration_molar_unit')
+#new_sample_columns=c(environmental_concentration="water_concentration",environmental_concentration_qualifier='water_concentration_qualifier',
+#                        environmental_concentration_unit='water_concentration_unit',environmental_concentration_molar='water_concentration_molar',
+#                        environmental_concentration_molar_unit='water_concentration_molar_unit')
 
 ##required for comptox-derived mapping files
 required_comptox_columns <- c("INPUT","DTXSID","PREFERRED_NAME","INCHIKEY","SMILES","MOLECULAR_FORMULA",
@@ -43,8 +43,8 @@ required_comptox_columns <- c("INPUT","DTXSID","PREFERRED_NAME","INCHIKEY","SMIL
 ##output tables
 sample_chem_columns <-c('Sample_ID','Chemical_ID',"measurement_value","measurement_value_qualifier","measurement_value_unit",
                            "measurement_value_molar","measurement_value_molar_unit",
-                           "environment_concentration","environment_concentration_qualifier","environment_concentration_unit",
-                           "environment_concentration_molar","environment_concentration_molar_unit")
+                           "environmental_concentration","environmental_concentration_qualifier","environmental_concentration_unit",
+                           "environmental_concentration_molar","environmental_concentration_molar_unit")
 
 samp_columns <-c("Sample_ID","ClientName","SampleNumber","date_sampled","sample_matrix","technology",
                 "projectName","SampleName","LocationLat","projectLink",
@@ -325,10 +325,10 @@ buildSampleData<-function(fses_files, #files from barton that contain sample inf
 #            dplyr::rename(new_sample_columns)|>  ##REMOVE this once we have new names
             subset(SampleNumber!='None')%>%
             subset(cas_number!='NULL')%>%
-            mutate(environment_concentration_molar=stringr::str_replace_all(environment_concentration_molar,'BLOD|NULL|nc:BDL',"0"))%>%
+            mutate(environmental_concentration_molar=stringr::str_replace_all(environmental_concentration_molar,'BLOD|NULL|nc:BDL',"0"))%>%
             mutate(measurement_value_molar=stringr::str_replace_all(measurement_value_molar,'BLOD|NULL|BDL',"0"))%>%
-            mutate(environment_concentration=stringr::str_replace_all(environment_concentration,'BLOD|NULL|BDL',"0"))%>%
-                                        # subset(environment_concentration_molar!='0.0')%>%
+            mutate(environmental_concentration=stringr::str_replace_all(environmental_concentration,'BLOD|NULL|BDL',"0"))%>%
+                                        # subset(environmental_concentration_molar!='0.0')%>%
             subset(!measurement_value_molar%in%c('0'))%>%
             subset(!measurement_value%in%c("0","NULL",""))#%>%
 #        select(-c(Sample_ID))#,Chemical_ID)) ##These two are added in the 4/27 version of the file
