@@ -3,35 +3,59 @@ Build script moved to python for better extendability and interoperability.
 
 """
 
-import os
-import pandas as pd
 import argparse
+import os
+from typing import Optional
+import pandas as pd
+from tqdm import tqdm
 
 
 def collectFiles(
-    data_dir="https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data",
-    filename="srp_build_files.csv",
-):
+    data_dir: str = "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data",
+    filename: str = "srp_build_files.csv",
+) -> pd.DataFrame:
+    """Collect files to be fed into each module upon build file update.
+
+    Parameters
+    ----------
+    data_dir : str, optional
+        _description_, by default "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data"
+    filename : str, optional
+        _description_, by default "srp_build_files.csv"
+
+    Returns
+    -------
+    pandas.DataFrame
+        _description_
     """
-    every time the build file is updated, this script will collect the files and return
-    a dictionary of files to be fed into each module
-    """
-    df = pd.read_csv(data_dir + "/" + filename)
+    df = pd.read_csv(os.path.join(data_dir, filename))
     return df
 
 
+# TODO: Write this function
 def fitCurveFiles(morpho_behavior_tuples):
     """
     get new curve fits, list of tuples of morpho/behavior pairs
     """
 
 
-def combineFiles(location_list, ftype):
-    """
-    helper function to combine duplicates
+def combineFiles(location_list: pd.DataFrame, ftype: str) -> pd.DataFrame:
+    """Combine files and account for duplicates and desired schema.
+
+    Parameters
+    ----------
+    location_list : pd.DataFrame
+        _description_
+    ftype : str
+        File type, one of ["bmd", "fit", "dose"]
+
+    Returns
+    -------
+    pd.DataFrame
+        Table of concatenated files with duplicates removed
     """
     dflist = []
-    required_columns = {
+    required_cols = {
         "bmd": [
             "Chemical_ID",
             "End_Point",
@@ -48,100 +72,56 @@ def combineFiles(location_list, ftype):
         "fit": ["Chemical_ID", "End_Point", "X_vals", "Y_vals"],
     }
 
-    print("concatenating " + ftype)
+    tqdm.write(f"Concatenating {ftype}...")
     for loc in location_list.location:
-        f = pd.read_csv(loc)[required_columns[ftype]]
+        f = pd.read_csv(loc)[required_cols[ftype]]
         dflist.append(f)
     fulldf = pd.concat(dflist)
     fulldf = fulldf.drop_duplicates()
-
-    return fulldf.drop_duplicates()
+    return fulldf
 
 
 def runSampMap(
-    is_sample=False,
-    drcfiles=[],
-    smap="",
-    cid="",
-    emap="",
-    cclass="",
-    ctfile="",
-    fses="",
-    desfile="",
-):
+    is_sample: bool = False,
+    drcfiles: list = [],
+    smap: str = "",
+    cid: str = "",
+    emap: str = "",
+    cclass: str = "",
+    ctfile: str = "",
+    fses: str = "",
+    descfile: str = "",
+) -> list[str]:
     """
     run sample mapping
     """
+    drc = ",".join(drcfiles)
+    args = (
+        f" --sampId={smap}"
+        f" --chemid={cid}"
+        f" --epMap={emap}"
+        f" --chemClass={cclass}"
+        f" --compToxFile={ctfile}"
+        f" --sampleFiles={fses}"
+        f" --chemDesc={descfile}"
+        f" --sampMap={smap}"
+    )
     if is_sample:
-        cmd = (
-            "Rscript sampleChemMapping/mapSamplesToChems.R --sample --drcFiles="
-            + ",".join(drcfiles)
-            + " --sampId="
-            + smap
-            + " --chemId="
-            + cid
-            + " --epMap="
-            + emap
-            + " --chemClass="
-            + cclass
-            + " --compToxFile="
-            + ctfile
-            + " --sampleFiles="
-            + fses
-            + " --chemDesc="
-            + desfile
-            + " --sampMap="
-            + smap
-        )
+        cmd = f"Rscript sampleChemMapping/mapSamplesToChems.R --sample --drcFiles={drc} {args}"
     elif len(drcfiles) > 0:
-        cmd = (
-            "Rscript sampleChemMapping/mapSamplesToChems.R --chemical --drcFiles="
-            + ",".join(drcfiles)
-            + " --sampId="
-            + smap
-            + " --chemId="
-            + cid
-            + " --epMap="
-            + emap
-            + " --chemClass="
-            + cclass
-            + " --compToxFile="
-            + ctfile
-            + " --sampleFiles="
-            + fses
-            + " --chemDesc="
-            + desfile
-            + " --sampMap="
-            + smap
-        )
+        cmd = f"Rscript sampleChemMapping/mapSamplesToChems.R --chemical --drcFiles={drc} {args}"
     else:
-        cmd = (
-            "Rscript sampleChemMapping/mapSamplesToChems.R --sampId="
-            + smap
-            + " --chemId="
-            + cid
-            + " --epMap="
-            + emap
-            + " --chemClass="
-            + cclass
-            + " --compToxFile="
-            + ctfile
-            + " --sampleFiles="
-            + fses
-            + " --chemDesc="
-            + desfile
-            + " --sampMap="
-            + smap
-        )
+        cmd = f"Rscript sampleChemMapping/mapSamplesToChems.R {args}"
 
-    print(cmd)
-    os.system(cmd)
-    print("ls -la .")
+    tqdm.write("\nRunning sample mapping with the following parameters:\n")
+    tqdm.write(f"{cmd}\n")
+    # os.system(cmd)
+    tqdm.write("ls -la . \n")
     ##now we validate the files that came out.
     dblist = ["/tmp/samples.csv", "/tmp/chemicals.csv", "/tmp/sampleToChemicals.csv"]
     for ftype in ["XYCoords.csv", "DoseResponse.csv", "BMDs.csv"]:
-        dblist.append("/tmp/zebrafishChem" + ftype)
-        dblist.append("/tmp/zebrafishSamp" + ftype)
+        dblist.append(f"/tmp/zebrafishChem{ftype}")
+        dblist.append(f"/tmp/zebrafishSamp{ftype}")
     return dblist
     # runSchemaCheck(dblist)
 
@@ -150,8 +130,8 @@ def runExposome(chem_id_file):
     """
     run exposome data pull
     """
-    cmd = "Rscript exposome/exposome_summary_stats.R " + chem_id_file
-    print(cmd)
+    cmd = f"Rscript exposome/exposome_summary_stats.R {chem_id_file}"
+    tqdm.write(cmd)
     os.system(cmd)
     return ["/tmp/exposomeGeneStats.csv"]
 
@@ -160,26 +140,21 @@ def runExpression(gex, chem, ginfo):
     """
     run expression parsing
     """
-    cmd = "Rscript zfExp/parseGexData.R " + gex + " " + chem + " " + ginfo
-    print(cmd)
+    cmd = f"Rscript zfExp/parseGexData.R {gex} {chem} {ginfo}"
+    tqdm.write(cmd)
     os.system(cmd)
     return ["/tmp/srpDEGPathways.csv", "/tmp/srpDEGStats.csv", "/tmp/allGeneEx.csv"]
 
 
-def runSchemaCheck(dbfiles=[]):
+def runSchemaCheck(dbfiles: list[Optional[str]] = []):
     """
     run schema checking
     """
     ##TODO: make this work with internal calls
     for filename in dbfiles:
         classname = os.path.basename(filename).split(".")[0]
-        cmd = (
-            "linkml-validate --schema srpAnalytics.yaml "
-            + filename
-            + " --target-class "
-            + classname
-        )
-        print(cmd)
+        cmd = f"linkml-validate --schema srpAnalytics.yaml {filename} --target-class {classname}"
+        tqdm.write(cmd)
         os.system(cmd)
 
 
@@ -210,7 +185,7 @@ def main():
     emap = list(df.loc[df.name == "endpointMap"].location)[0]
     fses = ",".join(list(df.loc[df.data_type == "sample"].location))
     ctfile = list(df.loc[df.name == "compTox"].location)[0]
-    desfile = list(df.loc[df.name == "chemdesc"].location)[0]
+    descfile = list(df.loc[df.name == "chemdesc"].location)[0]
     smap = list(df.loc[df.name == "sampMap"].location)[0]
     gex1 = ",".join(list(df.loc[df.data_type == "expression"].location))
     ginfo = list(df.loc[df.name == "geneInfo"].location)[0]
@@ -252,45 +227,98 @@ def main():
 
     ##call bmdrc on all morphology/behavior pairs for sample sources
     if args.bmd:
-        print("Re-running benchmark dose collection")
+        tqdm.write("Re-running benchmark dose collection...")
         newbmds, newfits, newdoses = [], [], []
         fitCurveFiles()
 
+    # ------------------------------------------------------------------------
+    # Benchmark Dose (BMD) Calculation / Sample-Chem Mapping (SAMPS) Workflows
+    # ------------------------------------------------------------------------
     if args.bmd or args.samps:  ### need to rerun samples if we have created new bmds
         # add chemical BMDS, fits, curves to existing data
         chemfiles = []
         sampfiles = []
-        # print(fses)
-        for st in ["chemical", "extract"]:
-            for dt in ["bmd", "fit", "dose"]:
+
+        # Define files and set progress bar incrementes for concatenating each
+        sample_type = ["chemical", "extract"]
+        data_type = ["bmd", "fit", "dose"]
+        total_iterations = len(sample_type) * len(data_type)
+        progress_bar = tqdm(total=total_iterations, desc="Combining files")
+
+        for st in sample_type:
+            tqdm.write(f"Processing {st} samples...")
+
+            for dt in data_type:
                 fdf = combineFiles(
                     df.loc[df.sample_type == st].loc[df.data_type == dt], dt
                 )
-                fname = "/tmp/tmp_" + st + "_" + dt + ".csv"
+                fname = f"/tmp/tmp_{st}_{dt}.csv"
                 fdf.to_csv(fname, index=False)
                 if st == "chemical":
                     chemfiles.append(fname)
                 else:
                     sampfiles.append(fname)
-        res1 = runSampMap(
-            True, sampfiles, smap, cid, emap, cclass, ctfile, fses, desfile
+                progress_bar.update(1)
+
+        # Update progress bar after completion
+        progress_bar.set_description("Combining files... Done!")
+        progress_bar.close()
+
+        # Define fixed params for sample mapping
+        all_res = list()
+        sampmap_args = {
+            "smap": smap,
+            "cid": cid,
+            "emap": emap,
+            "cclass": cclass,
+            "ctfile": ctfile,
+            "fses": fses,
+            "descfile": descfile,
+        }
+
+        # Iterate through sampMap params
+        sampmap_params = [
+            {"is_sample": True, "drcfiles": sampfiles},
+            {"is_sample": False, "drcfiles": chemfiles},
+            {"is_sample": False, "drcfiles": []},
+        ]
+        progress_bar = tqdm(
+            range(len(sampmap_params)),
+            desc="Running sample mapping",
         )
-        res2 = runSampMap(
-            False, chemfiles, smap, cid, emap, cclass, ctfile, fses, desfile
-        )
-        res3 = runSampMap(False, [], smap, cid, emap, cclass, ctfile, fses, desfile)
-        res = res1 + res2 + res3
-        res = list(set(res))
+
+        # Perform sample mapping
+        for smp in sampmap_params:
+            sampmap_args = {**smp, **sampmap_args}
+            res = runSampMap(**sampmap_args)
+            all_res.extend(res)
+            progress_bar.update(1)
+
+        # Update progress bar after completion
+        progress_bar.set_description("Running sample mapping... Done!")
+        progress_bar.close()
+
+        # Collect all unique files
+        all_res = list(set(all_res))
         for f in sampfiles + chemfiles:
-            os.system("rm " + f)
-        ##now we run validation
+            os.system(f"rm {f}")
+
+        # Validate schema
         runSchemaCheck(res)
+
+    # -----------------
+    # Exposome Workflow
+    # -----------------
     if args.expo:
         res = runExposome(cid)
         runSchemaCheck(res)
+
+    # ------------------------
+    # Gene Expression Workflow
+    # ------------------------
     if args.geneEx:
         if not os.path.exists("/tmp/chemicals.csv"):
-            runSampMap(False, [], smap, cid, emap, cclass, ctfile, fses, desfile)
+            runSampMap(False, [], smap, cid, emap, cclass, ctfile, fses, descfile)
 
         res = runExpression(gex1, "/tmp/chemicals.csv", ginfo)
         runSchemaCheck(res)
