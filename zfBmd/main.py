@@ -12,9 +12,8 @@ import argparse
 from bmdrc.BinaryClass import BinaryClass
 from bmdrc.LPRClass import LPRClass
 
-# Import specific commands 
+# Import specific support_functions for this main pipeline function
 from support_functions import combine_datasets, preprocess_morpho, preprocess_lpr, run_filters, write_outputs 
-
 
 # Example commands
 # 

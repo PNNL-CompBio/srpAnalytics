@@ -40,7 +40,7 @@ def preprocess_morpho(BC):
                               'SM24', 'SNOU', 'SOMI', 'SWIM', 'TCHR', 'TRUN', 'TR__', 'YSE_']
     else:
         relevant_endpoints = ['AXIS', 'BRN_', 'CRAN', 'DNC_', 'DP24', 'EDEM', 'LTRK', 'MO24', 'MORT', 
-                            'MUSC', 'NC__', 'SKIN','SM24', 'TCHR']
+                              'MUSC', 'NC__', 'SKIN','SM24', 'TCHR']
 
     # Get endpoints that are not expected 
     unexpected = [end for end in theEndpoints if end not in relevant_endpoints]
@@ -151,3 +151,6 @@ def preprocess_lpr(LPR, BC):
     # Return LPR
     return(LPR)
 
+#################################
+## FILTERING SUPPORT FUNCTIONS ##
+#################################
