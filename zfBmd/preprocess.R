@@ -206,7 +206,7 @@ unique(all_data$value) # Only 0, 1, and NA allowed
 all_data <- all_data %>%
   filter(!is.na(conc))
 
-fwrite("~/Downloads/Zfish_Morphology_Legacy_2011-2018.csv", quote = F, row.names = F)
+fwrite(all_data, "~/Downloads/Zfish_Morphology_Legacy_2011-2018.csv", quote = F, row.names = F)
 
 ################
 ## MAPPING ID ##
@@ -220,19 +220,76 @@ zfish <- fread("~/Downloads/Zfish_Morphology_Legacy_2011-2018.csv") %>%
 # Read and concatenate mapping files
 mapfiles <- list.files("~/Downloads/mappings/", full.names = T)
 
-rbind( 
+all_maps <- rbind( 
   fread(mapfiles[1]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = `Chemical ID`, casrn = CASRN) %>%
     select(-`Project Name`) %>% mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
   fread(mapfiles[2]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = `Chemical ID`, casrn = CASRN) %>%
     select(-`Project Name`) %>% mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
   fread(mapfiles[3]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = `Chemical ID`, casrn = CASRN) %>%
     mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
-  fread(mapfiles[4]) %>% rename(chemical.name = TestSubstance.ChemicalName, chemical.id = Chemical.ID, casrn = CASRN) %>%
+  fread(mapfiles[4]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = `Chemical ID`, casrn = CASRN) %>%
+    mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
+  fread(mapfiles[5]) %>% rename(chemical.name = TestSubstance.ChemicalName, chemical.id = Chemical.ID, casrn = CASRN) %>%
+    mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
+  fread(mapfiles[6]),
+  fread(mapfiles[7]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = `Chemical ID`, casrn = CASRN) %>%
+    mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
+  fread(mapfiles[8]) %>% select(-project_name),
+  fread(mapfiles[9]),
+  fread(mapfiles[10]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = Chemical.ID, casrn = TestSubstance_CASRN) %>%
+    mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
+  fread(mapfiles[11]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = Chemical.ID, casrn = CASRN) %>%
+    mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
+  fread(mapfiles[12]),
+  fread(mapfiles[13]),
+  fread(mapfiles[14]),
+  fread(mapfiles[15]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = `Chemical ID`, casrn = CASRN) %>%
+    mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn),
+  fread(mapfiles[16]) %>% rename(chemical.name = TestSubstance_ChemicalName, chemical.id = `Chemical ID`, casrn = CASRN) %>%
+    mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn), 
+  fread(mapfiles[17]) %>% rename(chemical.name = ChemicalName, casrn = CAS, chemical.id = `Zebrafish ID`) %>%
     mutate(bottle.id = NA) %>% select(bottle.id, chemical.id, chemical.name, casrn)
+) %>%
+  filter(chemical.id %in% zfish$chemical.id) %>%
+  mutate(chemical.name = gsub(",", "_", chemical.name),
+         chemical.name = gsub("?", "", chemical.name, fixed = T),
+         casrn = trimws(casrn),
+         casrn = gsub("/", "-", casrn)) %>%
+  unique() 
+
+# Remove naming inconsistencies
+all_maps <- all_maps %>%
+  filter(chemical.name %in% c("9-aminophenanthrene", "PAH Mix", "Naphtho[12-b]fluoranthene",
+                              "Supermix 10 [50x]", "_A130485___") == FALSE)
+
+# Find and select first duplicate
+dupes <- table(all_maps$chemical.id, dnn = "chemical.id") %>% data.frame() %>% filter(Freq > 1)
+
+cleaned_maps <- rbind(
+  all_maps %>%
+    filter(chemical.id %in% dupes$chemical.id) %>%
+    arrange(chemical.id, casrn) %>%
+    group_by(chemical.id) %>%
+    slice_head(n = 1),
+  all_maps %>%
+    filter(chemical.id %in% dupes$chemical.id == FALSE) 
 )
 
+# Make sure there is none missing! 
+zfish$chemical.id[zfish$chemical.id %in% cleaned_maps$chemical.id == FALSE]
 
+# Last checks
+cleaned_maps <- cleaned_maps %>%
+  mutate(casrn = ifelse(casrn == "", NA, casrn))
 
+cleaned_maps$bottle.id %>% unique()
+cleaned_maps$chemical.id %>% unique()
+cleaned_maps$chemical.name %>% unique()
+cleaned_maps$casrn %>% unique()
+
+sum(is.na(cleaned_maps$casrn))
+
+fwrite(cleaned_maps, "~/Downloads/Zfish_Chemical_Mappings_Legacy_2011-2018.csv", quote = F, row.names = F)
 
 
 
