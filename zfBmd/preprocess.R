@@ -291,6 +291,39 @@ sum(is.na(cleaned_maps$casrn))
 
 fwrite(cleaned_maps, "~/Downloads/Zfish_Chemical_Mappings_Legacy_2011-2018.csv", quote = F, row.names = F)
 
+#####################
+## CHECK 2023 DATA ##
+#####################
+
+morpho <- fread("~/Downloads/Tanguay Phase 4 zf 104alkyl PAH morphology data PNNL 2023OCT05.csv")
+lpr <- fread("~/Downloads/Tanguay Phase 4 zf 104alkyl PAH LPR data PNNL 2023OCT05.csv")
+maps <- fread("~/Downloads/Tanguay Phase 4 zf 104alkyl PAH Table IDs PNNL 2023OCT05.csv")
+
+# chemical.id, bottle.id, conc, plate.id, well, date, endpoint, value
+colnames(morpho)
+
+# chemical.id, bottle.id, conc, plate.id, well, variable, value
+colnames(lpr)
+
+# Should be bottle.id, chemical.name, chemical.id, casrn
+colnames(maps)
+maps <- maps %>%
+  rename(bottle.id = bottle_id, chemical.id = chemical_id, chemical.name = chemical_name) %>%
+  select(bottle.id, chemical.id, chemical.name, casrn) %>%
+  mutate(chemical.name = gsub(",", "_", chemical.name))
+
+all_morpho_ids <- morpho$chemical.id %>% unique()
+all_lpr_ids <- lpr$chemical.id %>% unique()
+all_maps_ids <- maps$chemical.id
+
+# Check ids match
+all(all_morpho_ids %in% all_maps_ids)
+all(all_lpr_ids %in% all_maps_ids)
+fwrite(maps, "~/Downloads/Tanguay Phase 4 zf 104alkyl PAH Table IDs PNNL 2023OCT05_reformat.csv", quote = F, row.names = F)
+
+
+
+
 
 
 
