@@ -144,47 +144,25 @@ def main():
 
     if args.lpr is None and args.both == False:
 
-        # Benchmark Dose #
-        BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
-        BMDS_Final_Clean = BMDS_Final.drop("ids", axis = 1)
-        BMDS_Final_Clean.to_csv(args.output + "/new_bmds.csv", index = False)
-
-        # Fits #
-        export_fits(model_results, dose_response, BMDS_Final).to_csv(args.output + "/new_fits.csv", index = False)
-
-        # Doses # 
-        export_doses(dose_response).to_csv(args.output + "/new_dose.csv", index = False)
+        # Output files
+        write_outputs(BC, "BC")
 
     elif args.lpr is not None and args.both == False:
 
-        # Benchmark Dose #
-        lpr_BMDS_Final = export_BMDs(lpr_dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
-        lpr_BMDS_Final.to_csv(args.output + "/new_bmds.csv", index = False)
+        # Output files
+        write_outputs(LPR, "LPR")
 
-        # Fits #
-        export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final).to_csv(args.output + "/new_fits.csv", index = False)
-        
-        # Doses #
-        export_doses(lpr_dose_response).to_csv(args.output + "/new_dose.csv", index = False)
+        # lpr_clean (AUC2 and MOV2 become AUC and MOV, the rest is removed)
 
     elif args.both:
 
-        # Benchmark Dose #
-        BMDS_Final = export_BMDs(dose_response, BMD_Flags, model_selection, lowqual_model)
-        lpr_BMDS_Final = export_BMDs(lpr_dose_response, lpr_BMD_Flags, lpr_model_selection, lpr_lowqual_model)
-        pd.concat([BMDS_Final, lpr_BMDS_Final]).to_csv(args.output + "/new_bmds.csv", index = False)
+        # Output both files
+        write_outputs(BC, "BC")
+        write_outputs(LPR, "LPR")
+        # lpr_clean (AUC2 and MOV2 become AUC and MOV, the rest is removed)
 
-        # Fits #
-        pd.concat(
-            [export_fits(model_results, dose_response, BMDS_Final),
-             export_fits(lpr_model_results, lpr_dose_response, lpr_BMDS_Final)]
-        ).to_csv(args.output + "/new_fits.csv", index = False)
-        
-        # Doses # 
-        pd.concat(
-            [export_doses(dose_response),
-             export_doses(lpr_dose_response)]
-        ).to_csv(args.output + "/new_dose.csv", index = False)
+        # Combine both file types
+        # combine_outputs() combine output files and delete the originals 
 
 if __name__ == "__main__":
     main()

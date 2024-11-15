@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from bmdrc.BinaryClass import BinaryClass
 from bmdrc.LPRClass import LPRClass
 
@@ -154,3 +155,36 @@ def preprocess_lpr(LPR, BC):
 #################################
 ## FILTERING SUPPORT FUNCTIONS ##
 #################################
+
+# Run filters on either the BC or LPR object
+def run_filters(obj):
+
+    # Negative control filter, default 50%
+    obj.filter_negative_control(apply = True, diagnostic_plot = False)
+
+    # Minimum concentration filter, default is 3
+    obj.filter_min_concentration(apply = True, diagnostic_plot = False)
+
+    # Correlation score filter
+    obj.filter_correlation_score(apply = True, diagnostic_plot = False)
+
+###################
+## WRITE OUTPUTS ##
+###################
+
+# Write all output files: BMDs, Dose, Fits, and Report markdown
+def write_outputs(obj, tag):
+
+    # Output bmds: Chemical_ID, End_Point, Model, BMD10, BMDL, BMD50, AUC, Min_Dose, Max_Dose, AUC_Norm,
+    # DataQC_Flag, BMD_Analysis_Flag, BMD10_Flag, BMD50_Flag, ids
+    obj.output_benchmark_dose("./new_BMDS" + "_" + tag + ".csv")
+
+    # Output dose: Chemical_ID, End_Point, Dose, num.affected, num.nonna, ids, CI_Lo, CI_Hi
+    obj.output_dose_table("./new_Dose" + "_" + tag + ".csv")
+
+    # Output fits: Chemical_ID, End_Point, X_vals, Y_vals
+    obj.output_fits_table("./new_Fits" + "_" + tag + ".csv")
+
+    # Output reports
+    obj.report("./new_report" + "_" + tag + "/")
+    
