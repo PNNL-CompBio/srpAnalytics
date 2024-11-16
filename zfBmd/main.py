@@ -16,7 +16,8 @@ from bmdrc.LPRClass import LPRClass
 from support_functions import combine_datasets, preprocess_morpho, preprocess_lpr, run_filters, write_outputs 
 
 # Example commands
-# 
+
+## morphology only: python3 main.py --morpho test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
@@ -99,7 +100,7 @@ def main():
     
     print("...Formatting morphology data")
     BC = BinaryClass(df = morpho_data, chemical = "chemical.id", concentration = "conc", 
-                     plate = "plate.id", well = "well", endpoint = "variable", value = "value", 
+                     plate = "plate.id", well = "well", endpoint = "endpoint", value = "value", 
                      format = "long")
 
     if (args.lpr is not None or (args.test and args.both)):
