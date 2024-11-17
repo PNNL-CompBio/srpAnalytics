@@ -86,7 +86,7 @@ def main():
 
     ### 0. Pre-launch combination-------------------------------------------------------------
 
-    print("...concatenating datasets")
+    print("...Concatenating datasets")
 
     # Morpho data always needs to be provided. Concatenate datasets together. 
     morpho_data = combine_datasets(morpho_paths)
@@ -99,8 +99,8 @@ def main():
     ### 1. Input Data Modules--------------------------------------------------------------------
     
     print("...Formatting morphology data")
-    BC = BinaryClass(df = morpho_data, chemical = "chemical.id", concentration = "conc", 
-                     plate = "plate.id", well = "well", endpoint = "endpoint", value = "value", 
+    BC = BinaryClass(df = morpho_data, chemical = "chemical.id", concentration = "conc", \
+                     plate = "plate.id", well = "well", endpoint = "endpoint", value = "value", \
                      format = "long")
 
     if (args.lpr is not None or (args.test and args.both)):
@@ -113,31 +113,31 @@ def main():
 
     if (args.lpr is None or args.both):
         print("...Pre-Processing morphology data")
-        BC = preprocess_morpho(BC)
+        preprocess_morpho(BC)
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Pre-Processing LPR data")
-        LPR = preprocess_lpr(LPR, BC)
+        preprocess_lpr(LPR, BC)
 
     ### 3. Filtering Modules----------------------------------------------------------------------
 
     if (args.lpr is None or args.both):
         print("...Filtering morphology data")
-        BC = run_filters(BC)
+        run_filters(BC)
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Filtering LPR data")
-        LPR = run_filters(LPR)
+        run_filters(LPR)
 
     ### 4. Model Fitting Modules------------------------------------------------------------------
 
     if (args.lpr is None or args.both):
         print("...Fitting models to morphology data")
-        BC.fit_models()
+        BC.fit_models(diagnostic_mode = True)
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Fitting models to LPR data")
-        LPR.fit_models()
+        LPR.fit_models(diagnostic_mode = True)
 
     ### 5. Format and export outputs------------------------------------------------------------
 

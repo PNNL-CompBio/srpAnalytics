@@ -48,7 +48,7 @@ def preprocess_morpho(BC):
 
     # Print a message for missing endpoints 
     if (len(unexpected) != 0):
-        print("Pre-Processing: The following endpoints were discovered and are unexpected:", unexpected)
+        print("......Pre-Processing: The following endpoints were discovered and are unexpected:", unexpected)
 
     # Subset down to the relevant endpoints 
     BC.df = BC.df[BC.df[BC.endpoint].isin(relevant_endpoints)]
@@ -59,13 +59,13 @@ def preprocess_morpho(BC):
     if ("DNC_" in theEndpoints):
 
         # Let the user know that data have been removed
-        print("PreProcessing: A do not count category was detected and those wells were changed to NA.")
+        print("......Pre-Processing: A do not count category was detected and those wells were changed to NA.")
 
         # Set wells with a "do not count" to NA
-        BC.well_to_na(endpoint_name = "DNC", endpoint_value = 1)
+        BC.set_well_to_na(endpoint_name = "DNC_", endpoint_value = 1)
 
         # Remove the DNC category
-        BC.remove_endpoints("DNC")
+        BC.remove_endpoints("DNC_")
 
     ## Convert Mortality to NA------------------------------------------------------------------------------
 
@@ -73,24 +73,24 @@ def preprocess_morpho(BC):
     if "MORT" in theEndpoints:
 
         # Let users know that the affected organisms were changed to NA
-        print("PreProcessing: Mortality data at 5 days was detected, and affected endpoints in wells were changed to NA.")
+        print("......Pre-Processing: Mortality data at 5 days was detected, and affected endpoints in wells were changed to NA.")
 
         # Set wells with mortality at 5 days to NA, with the exception of the 24 hour timepoints
-        BC.well_to_na(endpoint_name = "MORT", endpoint_value = 1, except_endpoint = ["DP24", "MO24", "SM24", "MORT"])
+        BC.set_well_to_na(endpoint_name = "MORT", endpoint_value = 1, except_endpoint = ["DP24", "MO24", "SM24", "MORT"])
 
     # Convert wells affected by mortality at 24 hours to NA
     if "MO24" in theEndpoints:
 
         # Let users know that the affected organisms were changed to NA
-        print("PreProcessing: Mortality data at 24 hours was detected and affected endpoints in wells were changed to NA.")
+        print("......Pre-Processing: Mortality data at 24 hours was detected and affected endpoints in wells were changed to NA.")
 
         # Set wells at mortality at 24 hours to NA
-        BC.well_to_na(endpoint_name = "MO24", endpoint_value = 1, except_endpoint = "MO24")
+        BC.set_well_to_na(endpoint_name = "MO24", endpoint_value = 1, except_endpoint = "MO24")
 
     ## Make new endpoints------------------------------------------------------------------------------------
 
     # Let users know that endpoints are being added
-    print("PreProcessing: Adding endpoints")
+    print("......Pre-Processing: Adding additional endpoints")
 
     if "BRAI" in theEndpoints:
 
@@ -131,8 +131,6 @@ def preprocess_morpho(BC):
         # Add new endpoints
         BC.combine_and_create_new_endpoints(EndpointDictionary)
 
-    return(BC)
-
 # All pre-processing required for LPR data 
 def preprocess_lpr(LPR, BC):
 
@@ -143,14 +141,11 @@ def preprocess_lpr(LPR, BC):
 
     # Remove wells where fish died
     if "MORT" in theEndpoints:
-        print("PreProcessing: Mortality at 5 days detected. Setting those wells to NA in the LPR data.")
+        print("......Pre-Processing: Mortality at 5 days detected. Setting those wells to NA in the LPR data.")
         # ToDo
     if "MO24" in theEndpoints:
-        print("PreProcessing: Mortality at 24 hours detected. Setting those wells to NA in the LPR data.")
+        print("......Pre-Processing: Mortality at 24 hours detected. Setting those wells to NA in the LPR data.")
         # ToDo
-
-    # Return LPR
-    return(LPR)
 
 #################################
 ## FILTERING SUPPORT FUNCTIONS ##
