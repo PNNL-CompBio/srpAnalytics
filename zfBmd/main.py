@@ -17,7 +17,7 @@ from support_functions import combine_datasets, preprocess_morpho, preprocess_lp
 
 # Example commands
 
-## morphology only: python3 main.py --morpho test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv
+## morphology only: python3 main.py --morpho test_files/test_morphology.csv
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##

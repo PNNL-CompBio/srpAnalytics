@@ -7,6 +7,8 @@ from bmdrc.LPRClass import LPRClass
 ## COMBINE DATA.FRAMES ##
 #########################
 
+## TO FIX: log probit erroring out on some curves (how to fix infinity estimate)
+
 # A support function to concatenate datasets together 
 def combine_datasets(thePaths):
 
