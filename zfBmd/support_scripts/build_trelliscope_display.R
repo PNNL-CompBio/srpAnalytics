@@ -35,5 +35,5 @@ curve_plot <- function(ids) {
 bmds %>%
   mutate(plot = panel_lazy(curve_plot)) %>%
   as_trelliscope_df(name = "Fit Dichotomous Curves", description = "Visualizing Dichotomous Curve Fits", 
-                    path = "~/Downloads/bmd_trelli") %>%
+                    path = "~/Downloads/bmd_trelli", force_plot = T) %>%
   view_trelliscope()
