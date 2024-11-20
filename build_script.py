@@ -97,21 +97,21 @@ def runSampMap(
     """
     drc = ",".join(drcfiles)
     args = (
-        f" --sampId={smap}"
-        f" --chemid={cid}"
-        f" --epMap={emap}"
-        f" --chemClass={cclass}"
-        f" --compToxFile={ctfile}"
-        f" --sampleFiles={fses}"
-        f" --chemDesc={descfile}"
-        f" --sampMap={smap}"
+        f" --sample_id={smap}"
+        f" --chem_id={cid}"
+        f" --ep_map={emap}"
+        f" --chem_class={cclass}"
+        f" --comptox_file={ctfile}"
+        f" --sample_files={fses}"
+        f" --chem_desc={descfile}"
+        f" --sample_map={smap}"
     )
     if is_sample:
-        cmd = f"Rscript sampleChemMapping/mapSamplesToChems.R --sample --drcFiles={drc} {args}"
+        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --sample --drc_files={drc} {args}"
     elif len(drcfiles) > 0:
-        cmd = f"Rscript sampleChemMapping/mapSamplesToChems.R --chemical --drcFiles={drc} {args}"
+        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --chemical --drc_files={drc} {args}"
     else:
-        cmd = f"Rscript sampleChemMapping/mapSamplesToChems.R {args}"
+        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py {args}"
 
     tqdm.write("\nRunning sample mapping with the following parameters:\n")
     tqdm.write(f"{cmd}\n")
