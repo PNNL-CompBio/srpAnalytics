@@ -1,0 +1,121 @@
+id: http://w3id.org/linkml/examples/srpanalyics
+name: srpanalytics
+prefixes:
+   linkml: https://w3id.org/linkml
+   coderdata: https://w3id.org/linkml/examples/srpanalytics
+   schema: http://schema.org/
+imports:
+   - linkml:types
+default_range: string
+default_prefix: srpanalytics
+
+slots:
+  chemical.id:
+    description: Chemical identifier as prescribed by the Tanguay lab, maps to value in mapping file. 
+    identifier: true
+    slot_uri: schema:identifier
+  bottle.id:
+    description: Identifier for bottle.
+    identifier: true
+    slot_uri: schema:identifier
+  conc:
+    description: concentration of the measurement. units are always in uM
+    range: numeric
+  plate.id: Identifier for zebrafish plate
+  well: Idnetifier for well on plate. Are we sure this is a string?
+  date: Date collected written as YYYYMMDD.
+    range: numeric
+classes:
+  morphology:
+    slots:
+      - chemical.id
+      - bottle.id
+      - conc
+      - well
+      - date
+      - endpoint
+      - value
+    attributes:
+     endpoint:
+       description: Name of specific endpoint
+       range: zebrafish_morphology
+     value:
+       description: Numeric representing whether or not a zebrafish was observed in this well with the endpoint.
+        range: numeric
+  behavior:
+      - chemical.id
+      - bottle.id
+      - conc
+      - well
+      - date
+    attributes:
+     endpoint:
+       description: Name of time point from t0 to t67, each representing 6 second time points
+     value:
+       description: Numeric or NA vaule representing the behavior measurement at this time point
+        range: linkml:Any
+  zebrafishMapping:
+    slots:
+      - bottle.id
+      - chemical.id
+      - casrn
+    attributes:
+      chemical.name:
+        description:
+      
+  fses:
+enums:
+  zebrafish_morphology:
+    permissable_values:
+      MO24:
+        description:
+      DP24:
+        description:
+      SM24:
+        description:
+      NC24:
+        description:
+      MORT:
+        description:
+      YSE_:
+        description:
+      AXIS:
+        description:
+      EYE_:
+        description:
+      SNOU:
+        description:
+      JAW_:
+        description:
+      OTIC:
+        description:
+      PE__:
+        description:
+      BRAI:
+        description:
+      SOMI:
+        description:
+      PFIN:
+        description:
+      CFIN:
+        description:
+      PIG_:
+        description:
+      CIRC:
+        description:
+      TRUN:
+        description:
+      SWIM:
+        description:
+      NC__:
+        description:
+      TR__:
+        description:
+      DNC_:
+        description:
+
+chemical mapping: 
+bottle.id: (String) An identifier for the bottle. Name of column must include a period. If missing, use NA,
+chemical.id: (String) An identifier for the chemical. Name of column must include a period. These identifiers must be the same as in the morpohology/behavioral files.
+chemical.name: (String) The chemical name, written with underscores for chemicals instead of commas. 1,2-dibromoethane should be 1_2-dibromoethane. If missing, use NA. 
+casrn: (String) The CAS number if applicable. If missing, use NA.
