@@ -27,6 +27,7 @@ slots:
     range: numeric
 classes:
   morphology:
+    description: Morphology data from the Tanguay LIMS
     slots:
       - chemical.id
       - bottle.id
@@ -55,6 +56,7 @@ classes:
        description: Numeric or NA vaule representing the behavior measurement at this time point
         range: linkml:Any
   zebrafishMapping:
+    description: Mapping file for the zebrafish data
     slots:
       - bottle.id
       - chemical.id
@@ -62,8 +64,42 @@ classes:
     attributes:
       chemical.name:
         description:
-      
+      casrn:
+        description: CAS Number
   fses:
+    description: FSES data exported from the Anderson lab
+    attributes:
+       SampleNumber:
+       date_sampled:
+       sample_matrix:
+       technology:
+       Sample_ID:
+       zf_lims_id:
+       cas_number:
+       ClientName:
+       SampleName:
+       LocationLat:
+       LocationLon:
+       LocationName:
+       LocationAlternateDescription:
+       AlternateName:
+       Chemical_ID:
+       measurement_value:
+       measurement_value_qualifier:
+       measurement_value_unit:
+       measurement_value_molar:
+       measurement_value_molar_unit:
+       environmental_concentration:
+       environmental_concentration_qualifier:
+       environmental_concentration_unit:
+       environmental_concentration_molar:
+       environmental_concentration_molar_unit:
+       parentSampleNumber:
+       childSampleNumber:
+       projectName:
+       date_sample_start:
+       projectLink:
+  
 enums:
   zebrafish_morphology:
     permissable_values:
