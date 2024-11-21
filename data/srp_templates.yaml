@@ -21,9 +21,12 @@ slots:
   conc:
     description: concentration of the measurement. units are always in uM
     range: numeric
-  plate.id: Identifier for zebrafish plate
-  well: Idnetifier for well on plate. Are we sure this is a string?
-  date: Date collected written as YYYYMMDD.
+  plate.id:
+    description: Identifier for zebrafish plate
+  well:
+    description: Idnetifier for well on plate. Are we sure this is a string?
+  date:
+    description: Date collected written as YYYYMMDD.
     range: numeric
 classes:
   morphology:
@@ -44,6 +47,7 @@ classes:
        description: Numeric representing whether or not a zebrafish was observed in this well with the endpoint.
         range: numeric
   behavior:
+    slots:
       - chemical.id
       - bottle.id
       - conc
@@ -70,22 +74,45 @@ classes:
     description: FSES data exported from the Anderson lab
     attributes:
        SampleNumber:
+         description:
        date_sampled:
+         description:
        sample_matrix:
+         description:
        technology:
+         description:
        Sample_ID:
+         description:
        zf_lims_id:
+         description: Should match to bottle.id slot above
        cas_number:
+         description: Important: this is the CAS identifier of the chemical measured
+         range: string
        ClientName:
+         description: Name of client supplying sample 
        SampleName:
+         description: Name of sample
        LocationLat:
+         description: Latitude of sample collection site. Can be numeric or missing
+         range: linkml:Any
        LocationLon:
+         description: Logitude of sample collection sate. Can be numeric or missing
+         range: linkml:Any
        LocationName:
-       LocationAlternateDescription:
+         description: Name of location
        AlternateName:
+         description: Alternate name of location
+       LocationAlternateDescription:
+         description: Alternate location description
        Chemical_ID:
+         description: Chemical identifier if present
        measurement_value:
+         description: concentration of chemical in passive sampling device. Numeric or 'BDL' if below detected level.
+         range: numeric
        measurement_value_qualifier:
+         description: flag required to determine if value is valid: J, Null, Or NA
+         range:
+            measurementQualifier
        measurement_value_unit:
        measurement_value_molar:
        measurement_value_molar_unit:
@@ -101,6 +128,16 @@ classes:
        projectLink:
   
 enums:
+  measurementQualifer:
+    permissable_values:
+      J:
+        description:
+      U:
+        description:
+      NULL:
+        description:
+      JB:
+        description:
   zebrafish_morphology:
     permissable_values:
       MO24:
@@ -150,8 +187,3 @@ enums:
       DNC_:
         description:
 
-chemical mapping: 
-bottle.id: (String) An identifier for the bottle. Name of column must include a period. If missing, use NA,
-chemical.id: (String) An identifier for the chemical. Name of column must include a period. These identifiers must be the same as in the morpohology/behavioral files.
-chemical.name: (String) The chemical name, written with underscores for chemicals instead of commas. 1,2-dibromoethane should be 1_2-dibromoethane. If missing, use NA. 
-casrn: (String) The CAS number if applicable. If missing, use NA.
