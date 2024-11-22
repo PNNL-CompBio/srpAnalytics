@@ -45,7 +45,7 @@ classes:
        range: zebrafish_morphology
      value:
        description: Numeric representing whether or not a zebrafish was observed in this well with the endpoint.
-        range: numeric
+       range: numeric
   behavior:
     slots:
       - chemical.id
@@ -58,7 +58,7 @@ classes:
        description: Name of time point from t0 to t67, each representing 6 second time points
      value:
        description: Numeric or NA vaule representing the behavior measurement at this time point
-        range: linkml:Any
+       range: linkml:Any
   zebrafishMapping:
     description: Mapping file for the zebrafish data
     slots:
@@ -83,10 +83,11 @@ classes:
          description:
        Sample_ID:
          description:
+         range: numeric
        zf_lims_id:
          description: Should match to bottle.id slot above
        cas_number:
-         description: Important: this is the CAS identifier of the chemical measured
+         description: Important- this is the CAS identifier of the chemical measured
          range: string
        ClientName:
          description: Name of client supplying sample 
@@ -106,30 +107,47 @@ classes:
          description: Alternate location description
        Chemical_ID:
          description: Chemical identifier if present
+         range: numeric
        measurement_value:
          description: concentration of chemical in passive sampling device. Numeric or 'BDL' if below detected level.
          range: numeric
        measurement_value_qualifier:
-         description: flag required to determine if value is valid: J, Null, Or NA
+         description: flag required to determine if value is valid- J, Null, Or NA
          range:
             measurementQualifier
        measurement_value_unit:
+         description: unit of measurement value
        measurement_value_molar:
+         description: measurement value in moles
+         range: numeric
        measurement_value_molar_unit:
+         description: unit of molar measurement value
        environmental_concentration:
+         description: concentration of chemical in environemnet
+         range: numeric
        environmental_concentration_qualifier:
+         description: qualifier determining if the concentration is good
        environmental_concentration_unit:
+          description: unit of concentration value  
        environmental_concentration_molar:
+         description: measurement value in moles
+         range: numeric
        environmental_concentration_molar_unit:
+         description: unit of molar measurement value       
        parentSampleNumber:
+         description: ??
        childSampleNumber:
+         description: ??
        projectName:
+         description: Name of project to be displayed on portal
        date_sample_start:
+         description: Date that sample was collected
        projectLink:
+         description: URL to projet information for portal
   
 enums:
   measurementQualifer:
-    permissable_values:
+    permissible_values:
       J:
         description:
       U:
@@ -139,7 +157,7 @@ enums:
       JB:
         description:
   zebrafish_morphology:
-    permissable_values:
+    permissible_values:
       MO24:
         description:
       DP24:
