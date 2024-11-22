@@ -1,0 +1,207 @@
+id: http://w3id.org/linkml/examples/srpanalyics
+name: srpanalytics
+prefixes:
+   linkml: https://w3id.org/linkml
+   coderdata: https://w3id.org/linkml/examples/srpanalytics
+   schema: http://schema.org/
+imports:
+   - linkml:types
+default_range: string
+default_prefix: srpanalytics
+
+slots:
+  chemical.id:
+    description: Chemical identifier as prescribed by the Tanguay lab, maps to value in mapping file. 
+    identifier: true
+    slot_uri: schema:identifier
+  bottle.id:
+    description: Identifier for bottle.
+    identifier: true
+    slot_uri: schema:identifier
+  conc:
+    description: concentration of the measurement. units are always in uM
+    range: numeric
+  plate.id:
+    description: Identifier for zebrafish plate
+  well:
+    description: Idnetifier for well on plate. Are we sure this is a string?
+  date:
+    description: Date collected written as YYYYMMDD.
+    range: numeric
+classes:
+  morphology:
+    description: Morphology data from the Tanguay LIMS
+    slots:
+      - chemical.id
+      - bottle.id
+      - conc
+      - well
+      - date
+      - endpoint
+      - value
+    attributes:
+     endpoint:
+       description: Name of specific endpoint
+       range: zebrafish_morphology
+     value:
+       description: Numeric representing whether or not a zebrafish was observed in this well with the endpoint.
+       range: numeric
+  behavior:
+    slots:
+      - chemical.id
+      - bottle.id
+      - conc
+      - well
+      - date
+    attributes:
+     endpoint:
+       description: Name of time point from t0 to t67, each representing 6 second time points
+     value:
+       description: Numeric or NA vaule representing the behavior measurement at this time point
+       range: linkml:Any
+  zebrafishMapping:
+    description: Mapping file for the zebrafish data
+    slots:
+      - bottle.id
+      - chemical.id
+      - casrn
+    attributes:
+      chemical.name:
+        description:
+      casrn:
+        description: CAS Number
+  fses:
+    description: FSES data exported from the Anderson lab
+    attributes:
+       SampleNumber:
+         description:
+       date_sampled:
+         description:
+       sample_matrix:
+         description:
+       technology:
+         description:
+       Sample_ID:
+         description:
+         range: numeric
+       zf_lims_id:
+         description: Should match to bottle.id slot above
+       cas_number:
+         description: Important- this is the CAS identifier of the chemical measured
+         range: string
+       ClientName:
+         description: Name of client supplying sample 
+       SampleName:
+         description: Name of sample
+       LocationLat:
+         description: Latitude of sample collection site. Can be numeric or missing
+         range: linkml:Any
+       LocationLon:
+         description: Logitude of sample collection sate. Can be numeric or missing
+         range: linkml:Any
+       LocationName:
+         description: Name of location
+       AlternateName:
+         description: Alternate name of location
+       LocationAlternateDescription:
+         description: Alternate location description
+       Chemical_ID:
+         description: Chemical identifier if present
+         range: numeric
+       measurement_value:
+         description: concentration of chemical in passive sampling device. Numeric or 'BDL' if below detected level.
+         range: numeric
+       measurement_value_qualifier:
+         description: flag required to determine if value is valid- J, Null, Or NA
+         range:
+            measurementQualifier
+       measurement_value_unit:
+         description: unit of measurement value
+       measurement_value_molar:
+         description: measurement value in moles
+         range: numeric
+       measurement_value_molar_unit:
+         description: unit of molar measurement value
+       environmental_concentration:
+         description: concentration of chemical in environemnet
+         range: numeric
+       environmental_concentration_qualifier:
+         description: qualifier determining if the concentration is good
+       environmental_concentration_unit:
+          description: unit of concentration value  
+       environmental_concentration_molar:
+         description: measurement value in moles
+         range: numeric
+       environmental_concentration_molar_unit:
+         description: unit of molar measurement value       
+       parentSampleNumber:
+         description: ??
+       childSampleNumber:
+         description: ??
+       projectName:
+         description: Name of project to be displayed on portal
+       date_sample_start:
+         description: Date that sample was collected
+       projectLink:
+         description: URL to projet information for portal
+  
+enums:
+  measurementQualifer:
+    permissible_values:
+      J:
+        description:
+      U:
+        description:
+      NULL:
+        description:
+      JB:
+        description:
+  zebrafish_morphology:
+    permissible_values:
+      MO24:
+        description:
+      DP24:
+        description:
+      SM24:
+        description:
+      NC24:
+        description:
+      MORT:
+        description:
+      YSE_:
+        description:
+      AXIS:
+        description:
+      EYE_:
+        description:
+      SNOU:
+        description:
+      JAW_:
+        description:
+      OTIC:
+        description:
+      PE__:
+        description:
+      BRAI:
+        description:
+      SOMI:
+        description:
+      PFIN:
+        description:
+      CFIN:
+        description:
+      PIG_:
+        description:
+      CIRC:
+        description:
+      TRUN:
+        description:
+      SWIM:
+        description:
+      NC__:
+        description:
+      TR__:
+        description:
+      DNC_:
+        description:
+
