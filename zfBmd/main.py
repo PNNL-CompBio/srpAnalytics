@@ -18,6 +18,7 @@ from support_functions import combine_datasets, preprocess_morpho, preprocess_lp
 # Example commands
 
 ## morphology only: python3 main.py --morpho test_files/test_morphology.csv
+## morphology & lpr: python3 main.py --morpho test_files/test_morphology.csv --LPR test_files/test_behavioral.csv --both True
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
@@ -36,8 +37,8 @@ parser.add_argument('--LPR', dest = 'lpr', nargs = "+", \
                             Assumed format is long. Required columns are: chemical.id, conc, plate.id, well, variable, value.',\
                     default = None)
 parser.add_argument('--both', dest = 'both', \
-                    help = 'Return both morpho and LPR endpoints. Optional. Default is False.',\
-                    default = False)
+                    help = 'Return both morpho and LPR endpoints. Optional. Default is True.',\
+                    default = True)
 parser.add_argument('--output', dest = 'output', \
                     help = 'The output folder for files. Default is current directory.',\
                     default = '.')
@@ -81,8 +82,8 @@ def main():
 
     # Load test data if test is true 
     if args.test == True:
-        morpho_paths = './test_files/7_PAH_zf_morphology_data_2020NOV11_tall_3756.csv'
-        lpr_paths = './test_files/7_PAH_zf_LPR_data_2021JAN11_3756.csv'
+        morpho_paths = './test_files/test_morphology.csv'
+        lpr_paths = './test_files/test_behavioral.csv'
 
     ### 0. Pre-launch combination-------------------------------------------------------------
 
@@ -153,17 +154,11 @@ def main():
         # Output files
         write_outputs(LPR, "LPR")
 
-        # lpr_clean (AUC2 and MOV2 become AUC and MOV, the rest is removed)
-
     elif args.both:
 
         # Output both files
         write_outputs(BC, "BC")
         write_outputs(LPR, "LPR")
-        # lpr_clean (AUC2 and MOV2 become AUC and MOV, the rest is removed)
-
-        # Combine both file types
-        # combine_outputs() combine output files and delete the originals 
 
 if __name__ == "__main__":
     main()
