@@ -97,6 +97,10 @@ def preprocess_morpho(BC):
 
     if "BRAI" in theEndpoints:
 
+        # Remove any endpoints taht are calculated by us
+        BC.df = BC.df[np.logical_not(BC.df[BC.endpoint].isin(["ANY24", "ANY120", "TOT_MORT", "ALL_BUT_MORT", "BRN_", \
+                                                            "CRAN", "EDEM", "LTRK", "MUSC", "SKIN", "TCHR"]))]
+
         # Define new endpoints in a dictionary
         EndpointDictionary = {
             'ANY24':['MO24', 'DP24', 'SM24', 'NC24'],
@@ -133,52 +137,6 @@ def preprocess_morpho(BC):
 
         # Add new endpoints
         BC.combine_and_create_new_endpoints(EndpointDictionary)
-
-# All pre-processing required for LPR data 
-def preprocess_lpr(LPR, BC):
-
-    # Remove invalid wells--------------------------------------------------------------------------------
-
-    # Extract out the endpoints
-    theEndpoints = BC.df[BC.endpoint].unique().tolist()
-
-    # Make a list to hold MORT and MO24 well ids
-    well_ids = []
-
-    # Remove wells where fish died
-    if "MORT" in theEndpoints:
-        print("......Pre-Processing: Mortality at 5 days detected. Setting those wells to NA in the LPR data.")
-        MORT_Endpoints = BC.df[(BC.df[BC.endpoint] == "MORT") & (BC.df[BC.value] == 1)]
-        MORT_Wells = MORT_Endpoints[BC.chemical].astype(str) + " "  + \
-                     MORT_Endpoints[BC.concentration].astype(str) + " " + \
-                     MORT_Endpoints[BC.plate].astype(str) + "  " + \
-                     MORT_Endpoints[BC.well].astype(str) 
-        well_ids.append(MORT_Wells)
-    if "MO24" in theEndpoints:
-        print("......Pre-Processing: Mortality at 24 hours detected. Setting those wells to NA in the LPR data.")
-        MO24_Endpoints = BC.df[(BC.df[BC.endpoint] == "MO24") & (BC.df[BC.value] == 1)]
-        MO24_Wells = MO24_Endpoints[BC.chemical].astype(str) + " "  + \
-                     MO24_Endpoints[BC.concentration].astype(str) + " " + \
-                     MO24_Endpoints[BC.plate].astype(str) + "  " + \
-                     MO24_Endpoints[BC.well].astype(str) 
-        well_ids.append(MO24_Wells)
-
-    # If nothing to remove, don't do anything
-    if len(well_ids) == 0:
-        print("......Pre-Processing: No mortality was detected, so no wells were set to NA in the LPR data.")
-    else:
-
-        # Create well IDs in the LPR data
-        LPR.df["bmdrc.well.id"] = LPR.df[LPR.chemical].astype(str) + " "  + \
-                                  LPR.df[LPR.concentration].astype(str) + " " + \
-                                  LPR.df[LPR.plate].astype(str) + "  " + \
-                                  LPR.df[LPR.well].astype(str) 
-        
-        # Set measurements to NA
-        LPR.df[LPR.df["bmdrc.well.id"].isin(well_ids)]["value"] = np.nan
-
-        # Remove well id 
-        LPR.df = LPR.df.drop("bmdrc.well.id", axis = 1)
 
 #################################
 ## FILTERING SUPPORT FUNCTIONS ##

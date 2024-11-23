@@ -13,12 +13,14 @@ from bmdrc.BinaryClass import BinaryClass
 from bmdrc.LPRClass import LPRClass
 
 # Import specific support_functions for this main pipeline function
-from support_functions import combine_datasets, preprocess_morpho, preprocess_lpr, run_filters, write_outputs 
+from support_functions import combine_datasets, preprocess_morpho, run_filters, write_outputs 
 
 # Example commands
 
 ## morphology only: python3 main.py --morpho test_files/test_morphology.csv
 ## morphology & lpr: python3 main.py --morpho test_files/test_morphology.csv --LPR test_files/test_behavioral.csv --both True
+
+## python3 main.py --morpho files/Tanguay_Phase_4_zf_104alkyl_PAH_morphology_data_PNNL_2023OCT05.csv files/Zfish_Morphology_Legacy_2011-2018.csv --LPR files/Tanguay_Phase_4_zf_104alkyl_PAH_LPR_data_PNNL_2023OCT05.csv --both True
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
@@ -37,8 +39,8 @@ parser.add_argument('--LPR', dest = 'lpr', nargs = "+", \
                             Assumed format is long. Required columns are: chemical.id, conc, plate.id, well, variable, value.',\
                     default = None)
 parser.add_argument('--both', dest = 'both', \
-                    help = 'Return both morpho and LPR endpoints. Optional. Default is True.',\
-                    default = True)
+                    help = 'Return both morpho and LPR endpoints. Optional. Default is False.',\
+                    default = False)
 parser.add_argument('--output', dest = 'output', \
                     help = 'The output folder for files. Default is current directory.',\
                     default = '.')
@@ -116,9 +118,7 @@ def main():
         print("...Pre-Processing morphology data")
         preprocess_morpho(BC)
 
-    if (args.lpr is not None or (args.test and args.both)):
-        print("...Pre-Processing LPR data")
-        preprocess_lpr(LPR, BC)
+    # LPR data has MORT and MO24 fish set to NA
 
     ### 3. Filtering Modules----------------------------------------------------------------------
 
