@@ -138,6 +138,11 @@ def main():
 
     if (args.lpr is not None or (args.test and args.both)):
         print("...Fitting models to LPR data")
+
+        # Subset down to AUC2 and MOV2 and rename them "AUC" and "MOV"
+        LPR.plate_groups = LPR.plate_groups[LPR.plate_groups[LPR.endpoint].isin(["AUC2", "MOV2"])]
+        LPR.plate_groups[LPR.endpoint] = LPR.plate_groups[LPR.endpoint].str.replace('\d+', '', regex = True)
+        LPR.plate_groups["bmdrc.Endpoint.ID"] = LPR.plate_groups[LPR.chemical].astype(str) + " " + LPR.plate_groups[LPR.endpoint].astype(str)
         LPR.fit_models(diagnostic_mode = True)
 
     ### 5. Format and export outputs------------------------------------------------------------
