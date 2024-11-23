@@ -18,9 +18,12 @@ from support_functions import combine_datasets, preprocess_morpho, run_filters, 
 # Example commands
 
 ## morphology only: python3 main.py --morpho test_files/test_morphology.csv
-## morphology & lpr: python3 main.py --morpho test_files/test_morphology.csv --LPR test_files/test_behavioral.csv --both True
+## lpr only: python3 main.py --lpr test_files/test_behavioral.csv
+## morphology & lpr: python3 main.py --morpho test_files/test_morphology.csv --lpr test_files/test_behavioral.csv --both True
 
-## python3 main.py --morpho files/Tanguay_Phase_4_zf_104alkyl_PAH_morphology_data_PNNL_2023OCT05.csv files/Zfish_Morphology_Legacy_2011-2018.csv --LPR files/Tanguay_Phase_4_zf_104alkyl_PAH_LPR_data_PNNL_2023OCT05.csv --both True
+## python3 main.py --morpho files/Tanguay_Phase_4_zf_104alkyl_PAH_morphology_data_PNNL_2023OCT05.csv files/Zfish_Morphology_Legacy_2011-2018.csv --lpr files/Tanguay_Phase_4_zf_104alkyl_PAH_LPR_data_PNNL_2023OCT05.csv 
+
+## python3 main.py --lpr files/Tanguay_Phase_4_zf_104alkyl_PAH_LPR_data_PNNL_2023OCT05.csv 
 
 ###########################
 ## COLLECT CLI ARGUMENTS ##
@@ -29,18 +32,13 @@ from support_functions import combine_datasets, preprocess_morpho, run_filters, 
 parser = argparse.ArgumentParser('Run the QC and BMD analysis for the SRP analytics compendium')
 
 parser.add_argument('--morpho', dest = 'morpho', nargs = "+", \
-                    help = 'Pathway to the morphological file to be processed. Required. \
-                            Assumed and needed column names are: chemical.id, conc, plate.id, well, variable, value. \
-                            Data assumed to be in long format.',\
+                    help = 'Pathway to the morphological file to be processed. \
+                            Assumed format is long and required column names are: chemical.id, conc, plate.id, well, variable, value.',\
                     default = None)
-parser.add_argument('--LPR', dest = 'lpr', nargs = "+", \
-                    help = 'Pathway to the light photometer response (LPR) file to be processed containing the same \
-                            samples as morpho. Optional. Unless both is True, only LPR data will be returned. \
+parser.add_argument('--lpr', dest = 'lpr', nargs = "+", \
+                    help = 'Pathway to the light photometer response (LPR) file to be processed. \
                             Assumed format is long. Required columns are: chemical.id, conc, plate.id, well, variable, value.',\
                     default = None)
-parser.add_argument('--both', dest = 'both', \
-                    help = 'Return both morpho and LPR endpoints. Optional. Default is False.',\
-                    default = False)
 parser.add_argument('--output', dest = 'output', \
                     help = 'The output folder for files. Default is current directory.',\
                     default = '.')
@@ -74,14 +72,6 @@ def main():
     morpho_paths = args.morpho
     lpr_paths = args.lpr
 
-    # If there is no morphological data and this is not the test mode, stop. 
-    if args.morpho is None and args.test == False:
-        sys.exit("--morpho cannot be blank, since morphological data is required to run zfBMD.")
-    
-    # Users must supply both morpho and lpr data if both is selected
-    if args.both and args.lpr is None and args.test == False:
-        sys.exit("--lpr cannot be blank if args.both is True.")
-
     # Load test data if test is true 
     if args.test == True:
         morpho_paths = './test_files/test_morphology.csv'
@@ -89,24 +79,23 @@ def main():
 
     ### 0. Pre-launch combination-------------------------------------------------------------
 
-    print("...Concatenating datasets")
+    if args.morpho is not None:
+        print("...Concatenating morpho datasets") 
+        morpho_data = combine_datasets(morpho_paths)
 
-    # Morpho data always needs to be provided. Concatenate datasets together. 
-    morpho_data = combine_datasets(morpho_paths)
-
-    # LPR data is optional. Concatenate datasets together. 
-    if (args.lpr is not None or (args.test and args.both)):
-        print("...LPR data detected")
+    if args.lpr is not None:
+        print("...Concatenating LPR datasets")
         lpr_data = combine_datasets(lpr_paths)
 
     ### 1. Input Data Modules--------------------------------------------------------------------
     
-    print("...Formatting morphology data")
-    BC = BinaryClass(df = morpho_data, chemical = "chemical.id", concentration = "conc", \
-                     plate = "plate.id", well = "well", endpoint = "endpoint", value = "value", \
-                     format = "long")
+    if args.morpho is not None:
+        print("...Formatting morphology data")
+        BC = BinaryClass(df = morpho_data, chemical = "chemical.id", concentration = "conc", \
+                        plate = "plate.id", well = "well", endpoint = "endpoint", value = "value", \
+                        format = "long")
 
-    if (args.lpr is not None or (args.test and args.both)):
+    if args.lpr is not None:
         print("...Formatting LPR data")
         LPR = LPRClass(df = lpr_data, chemical = "chemical.id", concentration = "conc", 
                        plate = "plate.id", well = "well", time = "variable", value = "value", 
@@ -114,7 +103,7 @@ def main():
 
     ### 2. Pre-Processing modules-----------------------------------------------------------------
 
-    if (args.lpr is None or args.both):
+    if args.morpho is not None:
         print("...Pre-Processing morphology data")
         preprocess_morpho(BC)
 
@@ -122,21 +111,21 @@ def main():
 
     ### 3. Filtering Modules----------------------------------------------------------------------
 
-    if (args.lpr is None or args.both):
+    if args.morpho is not None:
         print("...Filtering morphology data")
         run_filters(BC)
 
-    if (args.lpr is not None or (args.test and args.both)):
+    if args.lpr is not None:
         print("...Filtering LPR data")
         run_filters(LPR)
 
     ### 4. Model Fitting Modules------------------------------------------------------------------
 
-    if (args.lpr is None or args.both):
+    if args.morpho is not None:
         print("...Fitting models to morphology data")
         BC.fit_models(diagnostic_mode = True)
 
-    if (args.lpr is not None or (args.test and args.both)):
+    if args.lpr is not None:
         print("...Fitting models to LPR data")
 
         # Subset down to AUC2 and MOV2 and rename them "AUC" and "MOV"
@@ -149,20 +138,14 @@ def main():
 
     print("...Exporting Results")
 
-    if args.lpr is None and args.both == False:
+    if args.morpho is not None:
 
         # Output files
         write_outputs(BC, "BC")
 
-    elif args.lpr is not None and args.both == False:
+    if args.lpr is not None:
 
         # Output files
-        write_outputs(LPR, "LPR")
-
-    elif args.both:
-
-        # Output both files
-        write_outputs(BC, "BC")
         write_outputs(LPR, "LPR")
 
 if __name__ == "__main__":
