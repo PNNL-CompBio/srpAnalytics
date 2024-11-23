@@ -169,7 +169,7 @@ def write_outputs(obj, tag):
     obj.output_dose_table("./new_Dose" + "_" + tag + ".csv")
 
     # Output fits: Chemical_ID, End_Point, X_vals, Y_vals
-    obj.output_fits_table("./new_Fits" + "_" + tag + ".csv")
+    #obj.output_fits_table("./new_Fits" + "_" + tag + ".csv")
 
     # Output reports
     obj.report("./new_report" + "_" + tag + "/")
