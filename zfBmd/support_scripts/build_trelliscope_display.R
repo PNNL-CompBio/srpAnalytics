@@ -2,12 +2,18 @@ library(trelliscope)
 library(tidyverse)
 library(data.table)
 
-setwd("~/Git_Repos/srpAnalytics/zfBmd/")
+setwd("~/Git_Repos/srpAnalytics/zfBmd/outputs/")
 
 # Load datasets
-bmds <- fread("new_BMDS_BC.csv") %>% rename(ids = bmdrc.Endpoint.ID)
-dose <- fread("new_Dose_BC.csv") %>% mutate(Response = num.affected/num.nonna)
-fits <- fread("new_Fits_BC.csv")
+bmds <- rbind(fread("20241122_BMDS_BC.csv"),
+              fread("20241122_BMDS_LPR.csv")) %>% 
+  rename(ids = bmdrc.Endpoint.ID)
+dose <- rbind(fread("20241122_Dose_BC.csv"),
+              fread("20241122_Dose_LPR.csv")) %>% 
+  mutate(Response = num.affected/num.nonna)
+fits <- rbind(fread("20241122_Fits_BC_1.csv"),
+              fread("20241122_Fits_BC_2.csv"),
+              fread("20241122_Fits_LPR.csv"))
 
 # Add an ids column to fits
 fits$ids <- paste(fits$Chemical_ID, fits$End_Point)

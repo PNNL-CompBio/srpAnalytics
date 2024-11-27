@@ -10,7 +10,8 @@ RUN /usr/local/bin/python -m pip install --upgrade pip
 RUN pip3 install -r /requirements.txt
 
 COPY ./main.py zfBmd/main.py
-COPY ./support_functions.py zfBMD/support_functions.py
+COPY ./support_functions.py zfBmd/support_functions.py
+COPY ./test_files/* zfBmd/test_files/
 WORKDIR zfBmd
 
 ENTRYPOINT ["python3", "main.py"]

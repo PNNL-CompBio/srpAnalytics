@@ -1,4 +1,2 @@
 bmdrc
 argparse
-pandas
-os
