@@ -8,6 +8,7 @@ import os
 from typing import Optional
 import pandas as pd
 from tqdm import tqdm
+from sampleChemMapping.mapping import get_mapping_file
 
 
 def collectFiles(
@@ -91,6 +92,7 @@ def runSampMap(
     ctfile: str = "",
     fses: str = "",
     descfile: str = "",
+    output_dir: str = "/tmp/",
 ) -> list[str]:
     """
     run sample mapping
@@ -105,6 +107,7 @@ def runSampMap(
         f" --sample_files={fses}"
         f" --chem_desc={descfile}"
         f" --sample_map={smap}"
+        f" --output_dir={output_dir}"
     )
     if is_sample:
         cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --sample --drc_files={drc} {args}"
@@ -117,11 +120,16 @@ def runSampMap(
     tqdm.write(f"{cmd}\n")
     # os.system(cmd)
     tqdm.write("ls -la . \n")
+    os.system(f"ls -la {output_dir}")
     ##now we validate the files that came out.
-    dblist = ["/tmp/samples.csv", "/tmp/chemicals.csv", "/tmp/sampleToChemicals.csv"]
+    dblist = [
+        os.path.join(output_dir, "samples.csv"),
+        os.path.join(output_dir, "chemicals.csv"),
+        os.path.join(output_dir, "sampleToChemicals.csv"),
+    ]
     for ftype in ["XYCoords.csv", "DoseResponse.csv", "BMDs.csv"]:
-        dblist.append(f"/tmp/zebrafishChem{ftype}")
-        dblist.append(f"/tmp/zebrafishSamp{ftype}")
+        dblist.append(os.path.join(output_dir, f"zebrafishChem{ftype}"))
+        dblist.append(os.path.join(output_dir, f"zebrafishSamp{ftype}"))
     return dblist
     # runSchemaCheck(dblist)
 
@@ -179,16 +187,16 @@ def main():
         )
 
     ##now map sample information
-    sid = list(df.loc[df.name == "sampId"].location)[0]
-    cid = list(df.loc[df.name == "chemId"].location)[0]
-    cclass = list(df.loc[df.name == "class1"].location)[0]
-    emap = list(df.loc[df.name == "endpointMap"].location)[0]
-    fses = ",".join(list(df.loc[df.data_type == "sample"].location))
-    ctfile = list(df.loc[df.name == "compTox"].location)[0]
-    descfile = list(df.loc[df.name == "chemdesc"].location)[0]
-    smap = list(df.loc[df.name == "sampMap"].location)[0]
-    gex1 = ",".join(list(df.loc[df.data_type == "expression"].location))
-    ginfo = list(df.loc[df.name == "geneInfo"].location)[0]
+    sid = get_mapping_file(df, "sampId")
+    cid = get_mapping_file(df, "chemId")
+    cclass = get_mapping_file(df, "class1")
+    emap = get_mapping_file(df, "endpointMap")
+    fses = get_mapping_file(df, "sample", return_first=False)
+    ctfile = get_mapping_file(df, "compTox")  # FIXME: now irrelevant?
+    descfile = get_mapping_file(df, "chemdesc")
+    smap = get_mapping_file(df, "sampMap")
+    gex1 = get_mapping_file(df, "expression", return_first=False)
+    ginfo = get_mapping_file(df, "geneInfo")
 
     ###now we can call individiual commands
     parser = argparse.ArgumentParser(
