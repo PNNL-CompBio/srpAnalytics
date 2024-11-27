@@ -8,21 +8,23 @@ Original rewrite using generative AI; modified by @christinehc
 # =========================================================
 import os
 from argparse import ArgumentParser
-from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 from numpy.typing import ArrayLike
+from .format import snakeify
+from .mapping import rename_chemical_class
+from .metadata import get_chem_metadata, get_endpoint_metadata
 from .params import (
     MASV_CC,
     MASV_SOURCE,
     REQUIRED_BMD_COLUMNS,
-    REQUIRED_COMPTOX_COLUMNS,
     REQUIRED_SAMPLE_COLUMNS,
     SAMPLE_CHEM_COLUMNS,
     SAMPLE_COLUMNS,
 )
+from .tables import sample_id_master_table
 
 # These pathways refer to absolute pathways in the docker image
 # setting these three parameters, can be appended
@@ -30,200 +32,12 @@ from .params import (
 out_dir = "/tmp/"
 # out_dir = "./"
 
+# Set CompTox API key
+CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
+
 # =========================================================
 # Functions
 # =========================================================
-
-
-# @FIXME: Possibly delete? Seems unused
-def get_data_files(
-    data_dir: str = "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data",
-    filename: str = "srp_build_files.csv",
-) -> pd.DataFrame:
-    """Get online data files
-    Note: most data files are stored on github and can be edited there, then this will be rerun
-
-    Parameters
-    ----------
-    data_dir : _type_, optional
-        _description_, by default "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data"
-    filename : str, optional
-        _description_, by default "srp_build_files.csv"
-
-    Returns
-    -------
-    pd.DataFrame
-        _description_
-    """
-    dflist = pd.read_csv(os.path.join(data_dir, filename))
-    return dflist
-
-
-def get_mapping_file(filename: str, map_type: str) -> str:
-    """Get mapping filename from master list.
-
-    Parameters
-    ----------
-    filename : str
-        Master list file
-    map_type : str
-        Type of mapping file
-
-    Returns
-    -------
-    pd.DataFrame
-        /path/to/map_type/file
-    """
-    data = pd.read_csv(filename)
-    map_file = list(data.loc[data.name == map_type].location)[0]
-    return map_file
-
-
-# #################################
-# Master ID tables
-#
-# Note: The database requires Sample_ID and Chemical_ID be unique.
-# They are in some files but not others, so tables are
-# automatically updated below.
-# #################################
-
-
-def chem_id_master_table(cas_ids: ArrayLike, cmap: str) -> pd.DataFrame:
-    """Generate master table for chemical ID
-
-    Note: database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
-    Thus, the tables below are automatically updated
-
-    Parameters
-    ----------
-    cas_ids : ArrayLike
-        CAS IDs
-    cmap : str
-        /path/to/chemical_mapping_file.csv
-
-    Returns
-    -------
-    pd.DataFrame
-        Chemical ID master table
-    """
-    cols = ["cas_number", "zf.cid", "Chemical_ID", "chemical_class"]
-    map_df = (
-        pd.read_csv(cmap).loc[:, cols].drop_duplicates().dropna(subset=["cas_number"])
-    )
-
-    missing = set(cas_ids) - set(map_df["cas_number"])
-    if missing:
-        print(f"Missing {len(missing)} chemical IDs; adding them now...")
-        max_id = map_df["Chemical_ID"].max() + 1
-
-        # create table rows for missing chemical IDs
-        missing_df = pd.DataFrame(
-            {
-                "cas_number": list(missing),
-                "zf.cid": [""] * len(missing),
-                "Chemical_ID": range(max_id, max_id + len(missing)),
-                "chemical_class": [""] * len(missing),
-            }
-        )
-
-        # add missing rows
-        map_df = pd.concat([map_df, missing_df])
-
-        # TODO: how do we update with new ids?
-        # write.csv(newMap,paste0(data.dir,'chemicalIdMapping.csv'),row.names = F)
-    return map_df
-
-
-def sample_id_master_table(
-    existing_sample_numbers: ArrayLike, smap: str
-) -> pd.DataFrame:
-    """Generate master table for sample ID
-
-    Note: database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
-    Thus, the tables below are automatically updated
-
-    Parameters
-    ----------
-    existing_sample_numbers : ArrayLike
-        _description_
-    smap : str
-        _description_
-
-    Returns
-    -------
-    pd.DataFrame
-        Sample ID master table
-    """
-    map_df = pd.read_csv(smap).loc[:, ["Sample_ID", "SampleNumber"]].drop_duplicates()
-
-    missing = set(existing_sample_numbers) - set(map_df["SampleNumber"])
-    if missing:
-        print(f"Missing {len(missing)} sample IDs; adding them now...")
-        max_id = map_df["Sample_ID"].astype(float).max(skipna=True) + 1
-        missing_df = pd.DataFrame(
-            {
-                "Sample_ID": range(int(max_id), int(max_id) + len(missing)),
-                "SampleNumber": list(missing),
-            }
-        )
-        map_df = pd.concat([map_df, missing_df])
-
-    return map_df
-
-
-# ##################################
-# Duplicate Removal
-#
-# There are two causes of duplicates in the data
-# 1) Samples that are evaluated from multiple files:
-#    Duplicated samples need to be removed.
-# 2) Multiple chemical ids mapping to a single CAS ID:
-#    A single chemical ID must be selected.
-# ##################################
-
-
-def remove_chem_id_duplicates(
-    df: pd.DataFrame,
-    chem_ids: pd.DataFrame,
-    cols: ArrayLike = ["AUC_Norm", "End_Point_Name", "Model"],
-) -> pd.DataFrame:
-    """Remove duplicates from anything with Chemical_ID in the field
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Table to be de-duplicated
-    chem_ids : pd.DataFrame
-        Mapping of chemical_IDs to CAS ids
-    cols : ArrayLike, optional
-        List of columns that make the data distinct,
-            by default ["AUC_Norm", "End_Point_Name", "Model"]
-
-    Returns
-    -------
-    pd.DataFrame
-        De-duplicated table
-    """
-    group_by_cas = chem_ids.groupby("cas_number")["Chemical_ID"].nunique()
-    dupes = group_by_cas[group_by_cas > 1].index
-
-    chem_ids = (
-        chem_ids[chem_ids["cas_number"].isin(dupes)]
-        .loc[:, ["cas_number", "Chemical_ID"]]
-        .assign(in_dataset=lambda df: df["Chemical_ID"].isin(df["Chemical_ID"]))
-    )
-
-    dist_tab = df.merge(chem_ids, on="Chemical_ID", how="left").drop_duplicates(
-        subset=["cas_number"] + cols
-    )
-    dupe_counts = (
-        dist_tab.groupby(["cas_number", "End_Point_Name", "Model"])
-        .size()
-        .reset_index(name="n_ids")
-    )
-
-    dupe_cas = dupe_counts[dupe_counts["n_ids"] > 1]["cas_number"].unique()
-    return dupe_cas
 
 
 ###################################
@@ -231,160 +45,29 @@ def remove_chem_id_duplicates(
 ###################################
 
 
-def get_chem_metadata(
-    desc_file: str = "ChemicalDescriptions.xlsx",
-    chemical_classes: Optional[pd.DataFrame] = None,
-    comptox_file: str = "",
-    chem_id_file: str = "",
-) -> pd.DataFrame:
-    """Get chemical metadata, which is stored in `data.dir`
-
-    Parameters
-    ----------
-    desc_file : str, optional
-        Path to standardized data that enables matching across datasets,
-            by default "ChemicalDescriptions.xlsx"
-    chemical_classes : Optional[pd.DataFrame], optional
-        _description_, by default None
-    comptox_file : str, optional
-        Files downloaded from the EPA website, by default ""
-    chem_id_file : str, optional
-        _description_, by default ""
-
-    Returns
-    -------
-    pd.DataFrame
-        _description_
-    """
-    # Read curated descriptions for each chemical
-    curated_desc = pd.read_excel(desc_file, sheet_name=0)
-    curated_desc = curated_desc[["CASRN", "USE CATEGORY/DESCRIPTION"]]
-    curated_desc = curated_desc.rename(
-        columns={
-            "CASRN": "cas_number",
-            "USE CATEGORY/DESCRIPTION": "chemDescription",
-        }
-    )
-
-    # Get chemical metadata from CompTox dashboard
-    chem_meta = pd.read_csv(comptox_file)
-    chem_meta = chem_meta[REQUIRED_COMPTOX_COLUMNS]
-    chem_meta = chem_meta.rename(columns={"INPUT": "cas_number"})
-    chem_meta = chem_meta.merge(chemical_classes, on="cas_number", how="left")
-    chem_meta = chem_meta.merge(curated_desc, on="cas_number", how="left")
-    chem_meta = chem_meta.dropna(subset=["cas_number"])
-    chem_meta = chem_meta.replace(["NA", "N/A"], np.nan)
-
-    chem_ids = chem_id_master_table(chem_meta["cas_number"], chem_id_file)
-    chem_ids = chem_ids.loc[:, ["cas_number", "Chemical_ID"]].drop_duplicates()
-    chem_meta = chem_meta.merge(chem_ids, on="cas_number", how="left")
-    chem_meta["PREFERRED_NAME"] = chem_meta["PREFERRED_NAME"].str.replace(
-        r"^-$", "Chemical name unknown", regex=True
-    )
-    chem_meta = chem_meta.fillna(
-        {"newClass": "Unclassified", "PREFERRED_NAME": "Chemical name unknown"}
-    ).drop(columns=["ParameterName"])
-
-    nocas = chem_meta["cas_number"].str.contains("NOCAS", na=False)
-    if nocas.any():
-        print(f"removing {nocas.sum()} chems with no cas")
-        chem_meta = chem_meta[~nocas]
-    return chem_meta
-
-
-def get_endpoint_metadata(filename: str) -> pd.DataFrame:
-    """_summary_
-
-    Parameters
-    ----------
-    filename : str
-        Path to endpoint file
-
-    Returns
-    -------
-    pd.DataFrame
-        _description_
-    """
-    endpoint_details = (
-        pd.read_excel(filename, sheet_name=3)
-        .rename(
-            columns={
-                "Abbreviation": "End_Point",
-                "Simple name (<20char)": "End_Point_Name",
-                "Ontology Link": "endPointLink",
-            }
-        )
-        .assign(
-            IncludeInPortal="No",
-            End_Point="NoData",
-            End_Point_Name=None,
-            Description="No data",
-            endPointLink="",
-        )
-        .pipe(
-            lambda df: df.append(
-                {
-                    "IncludeInPortal": "No",
-                    "End_Point": "NoData",
-                    "End_Point_Name": None,
-                    "Description": "No data",
-                    "endPointLink": "",
-                },
-                ignore_index=True,
-            )
-        )
-    )
-    return endpoint_details
-
-
+# FIXME: Seems unused?
 #'getNewChemicalClass
 #'This file reads in the files and processes the chemical class names
 #'to be friendly for the website
 #' @depracated As we move to the new MASV classes
 #'@param data.dir
 #'@return data.frame
-# Map the newClass values based on conditions provided
-def _map_classification(x):
-    if x in [
-        "industrial",
-        "industrial; aniline",
-        "Industrial",
-        "industrial; consumerProduct; phenol",
-        "industrial; consumerProduct; aniline",
-        "industrial; phenol",
-    ]:
-        return "Industrial"
-    elif x in ["PAH; industrial", "PAH"]:
-        return "PAH"
-    elif x in [
-        "personalCare; personalCare; natural; natural; consumerProduct; consumerProduct",
-        "personalCare; natural; consumerProduct",
-        "personalCare; natural",
-        "pharmacological; personalCare; industrial; natural; consumerProduct",
-    ]:
-        return "Natural"
-    elif x == "pestFungicide":
-        return "Fungicide"
-    elif pd.isna(x) or x == "NA":
-        return "Unclassified"
-    else:
-        return x
-
-
 def get_new_chemical_class(data_dir):
     # Read in the Excel sheet for PAHs
     pahs = (
-        pd.read_excel(f"{data_dir}/PAH_and_1530_SRP_Summary.xlsx", sheet_name=3)
+        pd.read_excel(
+            os.path.join(data_dir, "PAH_and_1530_SRP_Summary.xlsx"), sheet_name=3
+        )
         .loc[:, ["casrn"]]
         .rename(columns={"casrn": "cas_number"})
-        .assign(Classification="PAH")
+        .assign(classification="PAH")
     )
 
     # Extras data for particular CAS numbers
     extras = pd.DataFrame(
         {
             "cas_number": ["3074-03-01", "7496-02-08", "6373-11-01"],
-            "Classification": "PAH",
+            "classification": "PAH",
         }
     )
 
@@ -392,12 +75,12 @@ def get_new_chemical_class(data_dir):
     non_pahs = (
         pd.read_excel(f"{data_dir}/PAH_and_1530_SRP_Summary.xlsx", sheet_name=4)
         .loc[:, ["casrn", "classification"]]
-        .rename(columns={"casrn": "cas_number", "classification": "Classification"})
+        .rename(columns={"casrn": "cas_number"})
     )
 
     # Combine all the dataframes
     full_class = pd.concat([pahs, extras, non_pahs], ignore_index=True)
-    full_class["newClass"] = full_class["Classification"].apply(_map_classification)
+    full_class["newClass"] = full_class["classification"].apply(rename_chemical_class)
 
     return full_class
 
@@ -730,7 +413,7 @@ def masv_chem_class(
     # Combine source and class information
     combined = sources.merge(classes, on=id_cols, how="outer")
     combined = combined.fillna({"chemical_class": "Unclassified"})
-    combined = combined.rename(columns={"CASNumber": "cas_number"})
+    combined = combined.rename(columns={c: snakeify(c) for c in id_cols})
 
     combined.to_csv(save_to, index=False)
     return combined
@@ -851,13 +534,6 @@ def main():
         help="Chemical class file location",
     )
     parser.add_argument(
-        "-x",
-        "--comptox_file",
-        dest="comptox_mapping",
-        default="",
-        help="CompTox data file location",
-    )
-    parser.add_argument(
         "-f",
         "--sample_files",
         dest="sample_files",
@@ -878,13 +554,24 @@ def main():
         default="",
         help="File that maps sample locations",
     )
+    parser.add_argument(
+        "--metadata",
+        dest="metadata",
+        default="https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/srp_build_files.csv",
+        help="Metadata file location (i.e. srp_build_files.csv)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        dest="output_dir",
+        default="/tmp/",
+        help="File that maps sample locations",
+    )
 
     args = parser.parse_args()
 
     chem_class = masv_chem_class(args.chem_class_file)
-    chem_meta = get_chem_metadata(
-        args.chem_desc, chem_class, args.comptox_mapping, args.chem_id_file
-    )
+    chem_meta = get_chem_metadata(args.metadata)
 
     sample_files_list = args.sample_files.split(",")
     samp_chem = build_sample_data(
@@ -926,17 +613,15 @@ def main():
             endpoint_details=endpoint_details,
         ).dropna(subset=["Dose"])
 
-        output_dir = "/tmp/"
-
         if args.is_sample:
             bmds.to_csv(
-                f"{output_dir}zebrafishSampBMDs.csv", index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishSampBMDs.csv"), index=False, quotechar='"'
             )
             curves.to_csv(
-                f"{output_dir}zebrafishSampXYCoords.csv", index=False, quotechar='"'
+                os.path.join(args.output_dir "zebrafishSampXYCoords.csv"), index=False, quotechar='"'
             )
             dose_reps.to_csv(
-                f"{output_dir}zebrafishSampDoseResponse.csv", index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishSampDoseResponse.csv"), index=False, quotechar='"'
             )
 
         if args.is_chem:
@@ -947,22 +632,22 @@ def main():
             dose_reps = dose_reps[~dose_reps["Chemical_ID"].isin(to_remove)]
 
             bmds.to_csv(
-                f"{output_dir}zebrafishChemBMDs.csv", index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishChemBMDs.csv"), index=False, quotechar='"'
             )
             curves.to_csv(
-                f"{output_dir}zebrafishChemXYCoords.csv", index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishChemXYCoords.csv"), index=False, quotechar='"'
             )
             dose_reps.to_csv(
-                f"{output_dir}zebrafishChemDoseResponse.csv", index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishChemDoseResponse.csv"), index=False, quotechar='"'
             )
 
     else:
-        chem_meta.to_csv(f"{output_dir}chemicals.csv", index=False, quotechar='"')
+        chem_meta.to_csv(os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"')
         samp_chem[SAMPLE_COLUMNS].drop_duplicates().to_csv(
-            f"{output_dir}samples.csv", index=False, quotechar='"'
+            os.path.join(args.output_dir, "samples.csv"), index=False, quotechar='"'
         )
         samp_chem[SAMPLE_CHEM_COLUMNS].drop_duplicates().to_csv(
-            f"{output_dir}sampleToChemicals.csv", index=False, quotechar='"'
+            os.path.join(args.output_dir, "sampleToChemicals.csv"), index=False, quotechar='"'
         )
 
 

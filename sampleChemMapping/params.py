@@ -155,3 +155,31 @@ MASV_CC = [
     "aniline",
     "uncategorized",
 ]
+
+
+# Map the newClass values based on conditions provided
+def map_classification(x):
+    if x in [
+        "industrial",
+        "industrial; aniline",
+        "Industrial",
+        "industrial; consumerProduct; phenol",
+        "industrial; consumerProduct; aniline",
+        "industrial; phenol",
+    ]:
+        return "Industrial"
+    elif x in ["PAH; industrial", "PAH"]:
+        return "PAH"
+    elif x in [
+        "personalCare; personalCare; natural; natural; consumerProduct; consumerProduct",
+        "personalCare; natural; consumerProduct",
+        "personalCare; natural",
+        "pharmacological; personalCare; industrial; natural; consumerProduct",
+    ]:
+        return "Natural"
+    elif x == "pestFungicide":
+        return "Fungicide"
+    elif pd.isna(x) or x == "NA":
+        return "Unclassified"
+    else:
+        return x
