@@ -5,14 +5,11 @@ library(data.table)
 setwd("~/Git_Repos/srpAnalytics/zfBmd/")
 
 # Load datasets
-bmds <- rbind(fread("new_BMDS_BC.csv"),
-              fread("new_BMDS_LPR.csv")) %>% 
+bmds <- rbind(fread("new_BMDS_LPR.csv")) %>% 
   rename(ids = bmdrc.Endpoint.ID)
-dose <- rbind(fread("new_Dose_BC.csv"),
-              fread("new_Dose_LPR.csv")) %>% 
+dose <- rbind(fread("new_Dose_LPR.csv")) %>% 
   mutate(Response = num.affected/num.nonna)
-fits <- rbind(fread("new_Fits_BC.csv"),
-              fread("new_Fits_LPR.csv"))
+fits <- rbind(fread("new_Fits_LPR.csv"))
 
 # Add an ids column to fits
 fits$ids <- paste(fits$Chemical_ID, fits$End_Point)

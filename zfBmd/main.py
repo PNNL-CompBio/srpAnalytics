@@ -42,9 +42,6 @@ parser.add_argument('--lpr', dest = 'lpr', nargs = "+", \
 parser.add_argument('--output', dest = 'output', \
                     help = 'The output folder for files. Default is current directory.',\
                     default = '.')
-parser.add_argument('--test', dest = 'test',\
-                    help = 'Set this flag to test code with internal files. Default is False.',\
-                    action = 'store_true', default=False)
 parser.add_argument('--report', dest ='rep', \
                     help = 'Generate a report in the output folder. Default is True',
                     action = 'store_true', default = True)
@@ -71,11 +68,6 @@ def main():
     # Pull arguments
     morpho_paths = args.morpho
     lpr_paths = args.lpr
-
-    # Load test data if test is true 
-    if args.test == True:
-        morpho_paths = './test_files/test_morphology.csv'
-        lpr_paths = './test_files/test_behavioral.csv'
 
     ### 0. Pre-launch combination-------------------------------------------------------------
 
