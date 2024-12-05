@@ -74,12 +74,10 @@ def main():
     if args.morpho is not None:
         print("...Concatenating morpho datasets") 
         morpho_data = combine_datasets(morpho_paths)
-        morpho_data["chemical.id"] = morpho_data["chemical.id"].astype("str")
 
     if args.lpr is not None:
         print("...Concatenating LPR datasets")
         lpr_data = combine_datasets(lpr_paths)
-        lpr_data["chemical.id"] = lpr_data["chemical.id"].astype("str")
 
     ### 1. Input Data Modules--------------------------------------------------------------------
     

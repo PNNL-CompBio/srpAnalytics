@@ -22,6 +22,10 @@ def combine_datasets(thePaths):
 
     # Combine dataframes 
     theData = pd.concat(theData)
+
+    # Replace spaces 
+    theData["chemical.id"] = theData["chemical.id"].str.replace(" ", "_")
+
     return(theData)
 
 ######################################
@@ -105,11 +109,13 @@ def preprocess_morpho(BC):
         EndpointDictionary = {
             'ANY24':['MO24', 'DP24', 'SM24', 'NC24'],
             'ANY120':['MORT', 'YSE_', 'AXIS', 'EYE_', 'SNOU', 'JAW_', 'OTIC', 'PE__', 'BRAI', 
-                      'SOMI', 'PFIN', 'CFIN', 'PIG_', 'CIRC', 'TRUN', 'SWIM', 'NC__', 'TR__', 
+                      'SOMI', 'PFIN', 'CFIN', 'PIG_', 
+                      'CIRC', 'TRUN', 'SWIM', 'NC__', 'TR__', 
                       'ANY24'],
             'TOT_MORT':["MO24", "MORT"],
             'ALL_BUT_MORT':['DP24','SM24','NC24', 'YSE_', 'AXIS', 'EYE_', 'SNOU', 'JAW_', 'OTIC', 'PE__', 
-                            'BRAI', 'SOMI', 'PFIN', 'CFIN', 'PIG_', 'CIRC','TRUN', 'SWIM', 'NC__', 'TR__'],
+                            'BRAI', 'SOMI', 'PFIN', 'CFIN', 'PIG_', 
+                            'CIRC','TRUN', 'SWIM', 'NC__', 'TR__'],
             'BRN_':['BRAI','OTIC','PFIN'],
             'CRAN':['EYE_', 'SNOU', 'JAW_'],
             'EDEM':['YSE_', 'PE__'],
@@ -123,7 +129,7 @@ def preprocess_morpho(BC):
         BC.combine_and_create_new_endpoints(EndpointDictionary)
 
         # Remove renamed endpoints
-        BC.remove_endpoints(["PIG_", "TR__"])
+        #BC.remove_endpoints(["PIG_", "TR__"])
 
     else: 
 

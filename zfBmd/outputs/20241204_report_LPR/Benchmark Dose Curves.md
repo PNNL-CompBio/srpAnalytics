@@ -90,7 +90,7 @@ And here is the plot:
 
 #### **Filter Summary**
 
-Overall, 208 endpoint and chemical combinations were considered. 35 were deemed eligible for modeling, and 173 were not based on filtering selections explained in the previous section.
+Overall, 208 endpoint and chemical combinations were considered. 35 were deemed eligible for modeling, and 173 were not based on filtering selections explained in the previous section.  Of the 35 deened eligible for modeling, 0 did not pass modeling checks.
 
 #### **Model Fitting Selections**
 
