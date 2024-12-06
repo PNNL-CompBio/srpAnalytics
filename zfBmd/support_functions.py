@@ -24,6 +24,7 @@ def combine_datasets(thePaths):
     theData = pd.concat(theData)
 
     # Replace spaces 
+    theData["chemical.id"] = theData["chemical.id"].astype(str)
     theData["chemical.id"] = theData["chemical.id"].str.replace(" ", "_")
 
     return(theData)

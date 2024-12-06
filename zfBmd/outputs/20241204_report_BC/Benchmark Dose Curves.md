@@ -1,4 +1,4 @@
-# Benchmark Dose Curves
+# Benchmark Dose Response Curves
 
 ## Input Data
 
@@ -127,7 +127,6 @@ Endpoints with too few concentration measurements (non-NA) to model are removed.
 
 |Number of Concentrations|Number of Endpoints|Filter|
 |---|---|---|
-|272|10|Keep|
 |18|23|Keep|
 |11|33|Keep|
 |9|297|Keep|
