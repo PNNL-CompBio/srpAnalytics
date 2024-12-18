@@ -5,10 +5,12 @@ RENAME = {"casrn": "cas_number"}
 
 
 def format_cas(cas: str) -> str:
-    if "/" not in cas:
-        return cas
-    cas = cas.split("/")
-    return f"{cas[2]}-{int(cas[0]):02d}-{cas[1]}"
+    if isinstance(cas, str):
+        if "/" not in cas:
+            return cas
+        cas = cas.split("/")
+        return f"{cas[2]}-{int(cas[0]):02d}-{cas[1]}"
+    return cas
 
 
 def snakeify(name: str) -> str:
@@ -49,3 +51,23 @@ def snakeify_all_columns(df: DataFrame, rename: dict[str, str] = RENAME) -> Data
     df = df.rename(columns=RENAME)
     df.columns = [snakeify(c) for c in df.columns]
     return df
+
+
+def chunker(seq: DataFrame, size: int) -> DataFrame:
+    """Splits input data into chunks of specified size.
+
+    Borrowed from https://stackoverflow.com/a/25701576
+
+    Parameters
+    ----------
+    seq : DataFrame
+        _description_
+    size : int
+        _description_
+
+    Returns
+    -------
+    DataFrame
+        _description_
+    """
+    return (seq.iloc[pos : pos + size] for pos in range(0, len(seq), size))

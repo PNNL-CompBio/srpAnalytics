@@ -7,7 +7,7 @@ import pandas as pd
 
 
 # @FIXME: Possibly delete? Seems unused
-def get_mapping_reference(
+def load_mapping_reference(
     data_dir: str = "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data",
     filename: str = "srp_build_files.csv",
 ) -> pd.DataFrame:
@@ -26,8 +26,7 @@ def get_mapping_reference(
     pd.DataFrame
         _description_
     """
-    dflist = pd.read_csv(os.path.join(data_dir, filename))
-    return dflist
+    return pd.read_csv(os.path.join(data_dir, filename))
 
 
 # @FIXME: Possibly delete? Seems unused

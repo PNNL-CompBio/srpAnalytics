@@ -13,10 +13,10 @@ import numpy as np
 import pandas as pd
 
 from numpy.typing import ArrayLike
-from .format import snakeify
-from .mapping import rename_chemical_class
-from .metadata import get_chem_metadata, get_endpoint_metadata
-from .params import (
+from src.format import snakeify, snakeify_all_columns
+from src.mapping import rename_chemical_class
+from src.metadata import build_chem_metadata, get_endpoint_metadata
+from src.params import (
     MASV_CC,
     MASV_SOURCE,
     REQUIRED_BMD_COLUMNS,
@@ -24,7 +24,7 @@ from .params import (
     SAMPLE_CHEM_COLUMNS,
     SAMPLE_COLUMNS,
 )
-from .tables import sample_id_master_table
+from src.tables import sample_id_master_table
 
 # These pathways refer to absolute pathways in the docker image
 # setting these three parameters, can be appended
@@ -52,7 +52,7 @@ CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
 #' @depracated As we move to the new MASV classes
 #'@param data.dir
 #'@return data.frame
-def get_new_chemical_class(data_dir):
+def get_new_chemical_class(data_dir: str) -> pd.DataFrame:
     # Read in the Excel sheet for PAHs
     pahs = (
         pd.read_excel(
@@ -63,7 +63,7 @@ def get_new_chemical_class(data_dir):
         .assign(classification="PAH")
     )
 
-    # Extras data for particular CAS numbers
+    # Add extra data for particular CAS numbers
     extras = pd.DataFrame(
         {
             "cas_number": ["3074-03-01", "7496-02-08", "6373-11-01"],
@@ -73,7 +73,9 @@ def get_new_chemical_class(data_dir):
 
     # Read in the Excel sheet for non-PAHs
     non_pahs = (
-        pd.read_excel(f"{data_dir}/PAH_and_1530_SRP_Summary.xlsx", sheet_name=4)
+        pd.read_excel(
+            os.path.join(data_dir, "PAH_and_1530_SRP_Summary.xlsx"), sheet_name=4
+        )
         .loc[:, ["casrn", "classification"]]
         .rename(columns={"casrn": "cas_number"})
     )
@@ -92,55 +94,74 @@ def get_new_chemical_class(data_dir):
 # chemMeta, #metadata for chemicals including identifier mapping
 # sampIds, #new ids for samples
 # sampMapping  ##mapping for sample names to clean up
-def build_sample_data(fses_files, chem_meta, sample_ids, samp_mapping=None):
+def build_sample_data(
+    fses_files: ArrayLike, chem_metadata: pd.DataFrame, sample_ids, samp_mapping=None
+) -> pd.DataFrame:
     sample_data = []
-    for fs in fses_files:
-        sc = (
-            pd.read_csv(fs)
-            .loc[:, REQUIRED_SAMPLE_COLUMNS]
-            .replace({"BLOD": "0", "NULL": "0", "nc:BDL": "0"})
-            .query(
-                "SampleNumber != 'None' and cas_number != 'NULL' and measurement_value != '0' and measurement_value_molar != '0'"
-            )
-            .copy()
-        )
-        sc["LocationLon"] = pd.to_numeric(sc["LocationLon"], errors="coerce")
-        sc["LocationLon"] = np.where(
-            sc["LocationLon"].gt(0), -sc["LocationLon"], sc["LocationLon"]
-        )
-        sample_data.append(sc)
 
-    final_samp_chem = pd.concat(sample_data).merge(
-        chem_meta[["Chemical_ID", "cas_number", "AVERAGE_MASS"]],
+    # Read and process each FSES file
+    for f in fses_files:
+        # Replace invalid values with nulls for filtering
+        tmp = pd.read_csv(f)[REQUIRED_SAMPLE_COLUMNS].replace(
+            {"BLOD": "0", "NULL": "0", "nc:BDL": "0"}
+        )
+        tmp = snakeify_all_columns(tmp)
+
+        # Remove null and invalid entries
+        tmp = tmp[
+            (tmp["sample_number"].notna())
+            & (tmp["cas_number"].notna())
+            & (~tmp["measurement_value"].isin(["0", np.nan]))
+            & (~tmp["measurement_value_molar"].isin(["0", np.nan]))
+        ]
+
+        # Format FSES location data
+        tmp["location_lon"] = pd.to_numeric(tmp["location_lon"], errors="coerce")
+
+        # Only allow negative longitudes
+        # Note: Our data is already all negative, so unnecessary?
+        # tmp["location_lon"] = np.where(
+        #     tmp["location_lon"].gt(0), -tmp["location_lon"], tmp["location_lon"]
+        # )
+        sample_data.append(tmp)
+
+    # Add metadata to sample chemical table
+    sample_data = pd.concat(sample_data).merge(
+        chem_metadata[["chemical_id", "cas_number", "average_mass"]],
         on="cas_number",
         how="left",
     )
+    # Enforce snake_case for all col names
+    sample_data = snakeify_all_columns(sample_data)
 
-    ids = sample_id_master_table(final_samp_chem["SampleNumber"], sample_ids)
-    final_samp_chem = final_samp_chem.merge(
-        ids, on="SampleNumber", how="left"
+    # Add sample ID information to sample data table
+    sample_data = sample_data.merge(
+        sample_id_master_table(sample_data["sample_number"], sample_ids),
+        on="sample_number",
+        how="left",
     ).drop_duplicates()
 
+    # Find all duplicate sample names
     all_samp_names = (
-        final_samp_chem[["Sample_ID", "SampleName"]]
+        sample_data[["sample_id", "sample_name"]]
         .drop_duplicates()
-        .assign(is_dupe=lambda df: df.duplicated("SampleName"))
+        .assign(is_dupe=lambda df: df.duplicated("sample_name"))
     )
-    dupe_samp_names = all_samp_names.query("is_dupe").sort_values("SampleName")
+    dupe_samp_names = all_samp_names.query("is_dupe").sort_values("sample_name")
     num_dupes = (
-        dupe_samp_names.groupby("SampleName")
+        dupe_samp_names.groupby("sample_name")
         .size()
         .reset_index(name="nid")
         .merge(dupe_samp_names)
     )
 
     new_names = (
-        num_dupes[["SampleName", "nid"]]
+        num_dupes[["sample_name", "nid"]]
         .drop_duplicates()
         .assign(
             new_name=lambda df: df.apply(
                 lambda row: ":".join(
-                    [f"{row['SampleName']}:{i+1}" for i in range(int(row["nid"]))]
+                    [f"{row['sample_name']}:{i+1}" for i in range(int(row["nid"]))]
                 ),
                 axis=1,
             )
@@ -158,8 +179,8 @@ def build_sample_data(fses_files, chem_meta, sample_ids, samp_mapping=None):
             full_rep.rename(columns={"new_name": "SampleName"}),
         ]
     )
-    final_samp_chem = (
-        final_samp_chem.drop("SampleName", axis=1)
+    sample_data = (
+        sample_data.drop("SampleName", axis=1)
         .merge(new_samp_names, on="Sample_ID", how="left")
         .copy()
     )
@@ -170,22 +191,20 @@ def build_sample_data(fses_files, chem_meta, sample_ids, samp_mapping=None):
         .drop_duplicates()
     )
 
-    final_samp_chem = final_samp_chem.merge(
+    sample_data = sample_data.merge(
         sample_name_remap, on="Sample_ID", how="left"
     ).drop_duplicates()
 
-    nas = final_samp_chem["projectName"].isna()
-    final_samp_chem.loc[nas, "projectName"] = final_samp_chem.loc[nas, "ProjectName"]
-    final_samp_chem.loc[nas, "LocationName"] = final_samp_chem.loc[
-        nas, "NewLocationName"
-    ]
-    final_samp_chem.loc[nas, "SampleName"] = final_samp_chem.loc[nas, "NewSampleName"]
+    nas = sample_data["projectName"].isna()
+    sample_data.loc[nas, "projectName"] = sample_data.loc[nas, "ProjectName"]
+    sample_data.loc[nas, "LocationName"] = sample_data.loc[nas, "NewLocationName"]
+    sample_data.loc[nas, "SampleName"] = sample_data.loc[nas, "NewSampleName"]
 
-    final_samp_chem = final_samp_chem.drop(
+    sample_data = sample_data.drop(
         columns=["ProjectName", "NewSampleName", "NewLocationName", "AVERAGE_MASS"]
     ).dropna(subset=["cas_number"])
 
-    return final_samp_chem
+    return sample_data
 
 
 def combine_v2_chemical_endpoint_data(
@@ -345,8 +364,7 @@ def _flatten_class_df(
     pd.DataFrame
         Formatted dataframe
     """
-
-    df = df.drop(drop_cols)  # drop non-source cols
+    df = df.drop(columns=drop_cols)  # drop non-source cols
     df = df.melt(  # reorg by cas, param name, source/class, and pos/neg
         id_vars=id_cols,
         value_vars=keep_cols,
@@ -571,7 +589,7 @@ def main():
     args = parser.parse_args()
 
     chem_class = masv_chem_class(args.chem_class_file)
-    chem_meta = get_chem_metadata(args.metadata)
+    chem_meta = build_chem_metadata(args.metadata)
 
     sample_files_list = args.sample_files.split(",")
     samp_chem = build_sample_data(
@@ -615,13 +633,19 @@ def main():
 
         if args.is_sample:
             bmds.to_csv(
-                os.path.join(args.output_dir, "zebrafishSampBMDs.csv"), index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishSampBMDs.csv"),
+                index=False,
+                quotechar='"',
             )
             curves.to_csv(
-                os.path.join(args.output_dir "zebrafishSampXYCoords.csv"), index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishSampXYCoords.csv"),
+                index=False,
+                quotechar='"',
             )
             dose_reps.to_csv(
-                os.path.join(args.output_dir, "zebrafishSampDoseResponse.csv"), index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishSampDoseResponse.csv"),
+                index=False,
+                quotechar='"',
             )
 
         if args.is_chem:
@@ -632,22 +656,32 @@ def main():
             dose_reps = dose_reps[~dose_reps["Chemical_ID"].isin(to_remove)]
 
             bmds.to_csv(
-                os.path.join(args.output_dir, "zebrafishChemBMDs.csv"), index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishChemBMDs.csv"),
+                index=False,
+                quotechar='"',
             )
             curves.to_csv(
-                os.path.join(args.output_dir, "zebrafishChemXYCoords.csv"), index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishChemXYCoords.csv"),
+                index=False,
+                quotechar='"',
             )
             dose_reps.to_csv(
-                os.path.join(args.output_dir, "zebrafishChemDoseResponse.csv"), index=False, quotechar='"'
+                os.path.join(args.output_dir, "zebrafishChemDoseResponse.csv"),
+                index=False,
+                quotechar='"',
             )
 
     else:
-        chem_meta.to_csv(os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"')
+        chem_meta.to_csv(
+            os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"'
+        )
         samp_chem[SAMPLE_COLUMNS].drop_duplicates().to_csv(
             os.path.join(args.output_dir, "samples.csv"), index=False, quotechar='"'
         )
         samp_chem[SAMPLE_CHEM_COLUMNS].drop_duplicates().to_csv(
-            os.path.join(args.output_dir, "sampleToChemicals.csv"), index=False, quotechar='"'
+            os.path.join(args.output_dir, "sampleToChemicals.csv"),
+            index=False,
+            quotechar='"',
         )
 
 

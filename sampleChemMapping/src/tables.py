@@ -4,7 +4,7 @@
 
 import pandas as pd
 
-from .format import snakeify
+from .format import snakeify, snakeify_all_columns
 from numpy.typing import ArrayLike
 
 # #################################
@@ -16,7 +16,9 @@ from numpy.typing import ArrayLike
 # #################################
 
 
-def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
+def chem_id_master_table(
+    df: pd.DataFrame, cas_ids: ArrayLike, snake_case: bool = True
+) -> pd.DataFrame:
     """Generate master table for chemical ID
 
     Note: database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
@@ -28,6 +30,8 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
         DataFrame of chemical ID information (map_type="chemID")
     cas_ids : ArrayLike
         CAS IDs
+    snake_case : bool, optional
+        If True, enforces snake_case in columns, by default True
 
     Returns
     -------
@@ -36,6 +40,13 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
     """
     # Clean up input data and reduce # columns
     cols = ["cas_number", "zf.cid", "Chemical_ID", "chemical_class"]
+
+    # Standardize col names to snake_case
+    if snake_case:
+        cols = [snakeify(c) for c in cols]
+        df = snakeify_all_columns(df)
+
+    # Remove duplicates
     df = df[cols].drop_duplicates().dropna(subset=["cas_number"])
 
     # For compounds missing chemical IDs, assign new chem ID
@@ -49,14 +60,14 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
             {
                 "cas_number": list(missing),
                 "zf.cid": [""] * len(missing),
-                "Chemical_ID": range(max_id, max_id + len(missing)),
+                "Chemical_ID": range(max_id, max_id + len(missing)),  # new chem IDs
                 "chemical_class": [""] * len(missing),
             }
         )
 
         # Append missing rows and format output col names
         df = pd.concat([df, missing_df])
-        df.columns = [snakeify(c) for c in df.columns]
+        df = snakeify_all_columns(df)
 
         # TODO: how do we update with new ids?
         # write.csv(newMap,paste0(data.dir,'chemicalIdMapping.csv'),row.names = F)
@@ -66,7 +77,7 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
 def sample_id_master_table(
     existing_sample_numbers: ArrayLike, smap: str
 ) -> pd.DataFrame:
-    """Generate master table for sample ID
+    """Generate master table for sample ID.
 
     Note: database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
     Thus, the tables below are automatically updated
@@ -83,20 +94,22 @@ def sample_id_master_table(
     pd.DataFrame
         Sample ID master table
     """
-    map_df = pd.read_csv(smap).loc[:, ["Sample_ID", "SampleNumber"]].drop_duplicates()
+    map_df = pd.read_csv(smap)[["Sample_ID", "SampleNumber"]].drop_duplicates()
 
     missing = set(existing_sample_numbers) - set(map_df["SampleNumber"])
     if missing:
         print(f"Missing {len(missing)} sample IDs; adding them now...")
-        max_id = map_df["Sample_ID"].astype(float).max(skipna=True) + 1
+        max_id = int(map_df["Sample_ID"].astype(float).max(skipna=True) + 1)
         missing_df = pd.DataFrame(
             {
-                "Sample_ID": range(int(max_id), int(max_id) + len(missing)),
+                "Sample_ID": range(max_id, max_id + len(missing)),  # new sample IDs
                 "SampleNumber": list(missing),
             }
         )
         map_df = pd.concat([map_df, missing_df])
 
+    # Enforce snake_case for all col names
+    map_df = snakeify_all_columns(map_df)
     return map_df
 
 
@@ -104,9 +117,9 @@ def sample_id_master_table(
 # Duplicate Removal
 #
 # There are two causes of duplicates in the data
-# 1) Samples that are evaluated from multiple files:
+# 1. Samples that are evaluated from multiple files:
 #    Duplicated samples need to be removed.
-# 2) Multiple chemical ids mapping to a single CAS ID:
+# 2. Multiple chemical ids mapping to a single CAS ID:
 #    A single chemical ID must be selected.
 # ##################################
 
@@ -153,3 +166,38 @@ def remove_chem_id_duplicates(
 
     dupe_cas = dupe_counts[dupe_counts["n_ids"] > 1]["cas_number"].unique()
     return dupe_cas
+
+
+def remove_sample_duplicates(data: pd.DataFrame):
+    # Find all duplicate sample names
+    data = data[["sample_id", "sample_name"]].drop_duplicates()
+    data = data.assign(is_dupe=lambda df: df.duplicated("sample_name"))
+
+    duplicates = data.query("is_dupe").sort_values("sample_name")
+    duplicate_counts = (
+        duplicates.groupby("sample_name")
+        .size()
+        .reset_index(name="nid")
+        .merge(duplicates)
+    )
+
+    # Rename
+    new_names = (
+        duplicate_counts[["sample_name", "nid"]]
+        .drop_duplicates()
+        .rename(columns={"sample_name": "old_sample_name"})
+        .assign(
+            sample_name=lambda df: df.apply(
+                lambda row: ":".join(
+                    [f"{row['old_sample_name']}:{i+1}" for i in range(int(row["nid"]))]
+                ),
+                axis=1,
+            )
+        )
+        .drop(columns="nid")
+    )
+
+    full_rep = pd.concat([duplicates, new_names], axis=1)[["sample_id", "sample_name"]]
+    new_samp_names = pd.concat(
+        [data.query("~is_dupe").drop("is_dupe", axis=1), full_rep]
+    )

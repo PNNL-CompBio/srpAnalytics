@@ -1,14 +1,15 @@
 # =========================================================
 # Imports
 # =========================================================
-
+from json import JSONDecodeError
+from time import sleep
 
 import ctxpy as ctx
 import numpy as np
 import pandas as pd
 
 from .mapping import get_mapping_file
-from .format import format_cas, snakeify
+from .format import chunker, format_cas, snakeify, snakeify_all_columns
 from .tables import chem_id_master_table
 
 # These pathways refer to absolute pathways in the docker image
@@ -16,6 +17,9 @@ from .tables import chem_id_master_table
 # data_dir = 'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
 out_dir = "/tmp/"
 # out_dir = "./"
+
+# Set random wait factor for CompTox queries
+WAIT = 2.5
 
 # Set CompTox API key
 CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
@@ -29,6 +33,8 @@ def query_comptox_by_cas(
     df: pd.DataFrame,
     keep_cols: list[str] = ["cas_number", "chemical_id", "chemical_class"],
     data_cols: list[str] = ["preferredName", "smiles", "dtxsid", "dtxcid"],
+    wait: float = WAIT,
+    tries: int = 5,
 ) -> pd.DataFrame:
     """Perform CompTox API search function by CAS.
 
@@ -51,34 +57,42 @@ def query_comptox_by_cas(
     # Initialize CompTox API
     chem = ctx.Chemical(x_api_key=CTX_API_KEY)
 
-    data = {c.lower(): [] for c in keep_cols}
+    data = {snakeify(c): [] for c in keep_cols}
     comptox_fields = {snakeify(c): [] for c in data_cols}
     data = {**data, **comptox_fields}
 
-    for i, cas in enumerate(df["cas_number"].values):
-        # Fix CAS erroneously converted to Excel dates
-        cas = format_cas(cas)
+    # Split data into batches
+    for chunk in chunker(df, 10):
+        cas_list = [format_cas(cas) for cas in chunk["cas_number"]]
+        data["cas_number"] += cas_list
 
-        data["cas_number"] += [cas]
-        for col in keep_cols:
-            data[col.lower()] += [df[col].values[i]]
+        # Preserve data from original dataframe
+        for col in [c for c in keep_cols if c != "cas_number"]:
+            data[col.lower()] += list(chunk[col])
 
         try:
-            details = chem.search(by="equals", word=cas)[0]
+            sleep(wait * np.random.random())
+            details = chem.search(by="batch", word=cas_list)
 
-            for c in data_cols:
-                data[snakeify(c)] += [details[c]]
+            for d in details:
+                for c in data_cols:
+                    data[snakeify(c)] += [d[c]]
 
         except (KeyError, TypeError):
             for c in data_cols:
-                data[snakeify(c)] += [np.nan]
+                data[snakeify(c)] += [np.nan] * len(cas_list)
+        except (JSONDecodeError, SystemError) as e:
+            raise (e)
 
     data = pd.DataFrame(data)
     return data
 
 
 def query_comptox_by_dtxsid(
-    df: pd.DataFrame, data_cols: list[str] = ["averageMass", "inchikey", "molFormula"]
+    df: pd.DataFrame,
+    data_cols: list[str] = ["averageMass", "inchikey", "molFormula"],
+    wait: float = WAIT,
+    tries: int = 5,
 ) -> pd.DataFrame:
     """Perform CompTox API detail query by DTXSID.
 
@@ -105,18 +119,28 @@ def query_comptox_by_dtxsid(
 
     result = {snakeify(c): [] for c in data_cols}
 
-    for sid in df["dtxsid"]:
-        if isinstance(sid, str):
-            try:
-                details = chem.details(by="dtxsid", word=sid)
-                for c in data_cols:
-                    result[snakeify(c)] += [details[c]]
-            except:
-                raise ValueError(f"Encountered CTX error with DTXSID {sid}.")
+    # Split data into batches
+    for chunk in chunker(df, 10):
+        sid_list = [str(sid) for sid in chunk["dtxsid"]]
+        # result["dtxsid"] += sid_list
 
-        else:
-            for c in data_cols:
-                result[snakeify(c)] += [np.nan]
+        try:
+            sleep(wait * np.random.random())
+            details = chem.details(by="batch", word=sid_list)
+
+            for d in details:
+                for c in data_cols:
+                    if c in d:
+                        result[snakeify(c)] += [d[c]]
+                    else:
+                        result[snakeify(c)] += [np.nan]
+
+        # except (KeyError, TypeError):
+        #     for c in data_cols:
+        #         result[snakeify(c)] += [np.nan] * len(sid_list)
+
+        except (JSONDecodeError, SystemError) as e:
+            raise Exception((f"Encountered CTX error with DTXSIDs {sid_list}.")) from e
 
     result = pd.DataFrame(result)
     return pd.concat([df, result], axis=1)
@@ -127,6 +151,7 @@ def query_comptox(
     keep_cols: list[str] = ["cas_number", "chemical_id", "chemical_class"],
     cas_data_cols: list[str] = ["preferredName", "smiles", "dtxsid", "dtxcid"],
     dtxsid_data_cols: list[str] = ["averageMass", "inchikey", "molFormula"],
+    wait: float = WAIT,
 ) -> pd.DataFrame:
     """Get CompTox API results from CAS + DTXSID queries.
 
@@ -150,12 +175,12 @@ def query_comptox(
         DataFrame with desired CompTox results
     """
     df = query_comptox_by_cas(df, keep_cols=keep_cols, data_cols=cas_data_cols)
-    df = query_comptox_by_dtxsid(df, data_cols=dtxsid_data_cols)
+    df = query_comptox_by_dtxsid(df, data_cols=dtxsid_data_cols, wait=wait)
 
     return df
 
 
-def get_chem_metadata(
+def build_chem_metadata(
     filename: str,
     keep_cols: list[str] = ["cas_number", "chemical_id", "chemical_class"],
     cas_data_cols: list[str] = ["preferredName", "smiles", "dtxsid", "dtxcid"],
@@ -185,9 +210,13 @@ def get_chem_metadata(
     """
     # Get chem ID file
     mappings = pd.read_csv(filename)
-    chem_ids = get_mapping_file(mappings, "chemID")
+    chem_ids = pd.read_csv(get_mapping_file(mappings, "chemId"))
+
+    # Enforce snake_case column names
+    chem_ids = snakeify_all_columns(chem_ids)
 
     # Get chemical metadata from CompTox dashboard
+    # These will have snake_case enforced for all col names
     metadata = (
         query_comptox(
             chem_ids,
@@ -204,21 +233,24 @@ def get_chem_metadata(
     chem_ids = chem_ids[["cas_number", "chemical_id"]].drop_duplicates()
 
     # Add chem metadata information to Chem ID table
-    metadata = metadata.merge(chem_ids, on="cas_number", how="left")
+    metadata = metadata.merge(chem_ids, on=["cas_number", "chemical_id"], how="left")
 
     # Clean up metadata table
-    metadata["PREFERRED_NAME"] = metadata["PREFERRED_NAME"].str.replace(
+    metadata["preferred_name"] = metadata["preferred_name"].str.replace(
         r"^-$", "Chemical name unknown", regex=True
     )  # replace "-" entries with more informative blurb
     metadata = metadata.fillna(
-        {"newClass": "Unclassified", "PREFERRED_NAME": "Chemical name unknown"}
-    ).drop(columns=["ParameterName"])  # fill unknowns with NaN
+        {"new_class": "Unclassified", "preferred_name": "Chemical name unknown"}
+    )  # fill unknowns with NaN
 
     # If no CAS, remove chemicals from final table
     nocas = metadata["cas_number"].str.contains("NOCAS", na=False)
     if nocas.any():
-        print(f"removing {nocas.sum()} chems with no cas")
+        print(f"Removing {nocas.sum()} chemicals with no CAS.")
         metadata = metadata[~nocas]
+
+    # apply snake_case to all col names
+    # metadata = snakeify_all_columns(metadata)
     return metadata
 
 
