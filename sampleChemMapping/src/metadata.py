@@ -92,7 +92,6 @@ def query_comptox_by_dtxsid(
     df: pd.DataFrame,
     data_cols: list[str] = ["averageMass", "inchikey", "molFormula"],
     wait: float = WAIT,
-    tries: int = 5,
 ) -> pd.DataFrame:
     """Perform CompTox API detail query by DTXSID.
 
