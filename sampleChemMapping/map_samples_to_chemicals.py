@@ -8,19 +8,19 @@ Original rewrite using generative AI; modified by @christinehc
 # =========================================================
 import os
 from argparse import ArgumentParser
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 from numpy.typing import ArrayLike
-from src.format import snakeify, snakeify_all_columns
+from src.format import process_fses, rename_duplicates, snakeify, snakeify_all_columns
 from src.mapping import rename_chemical_class
 from src.metadata import build_chem_metadata, get_endpoint_metadata
 from src.params import (
     MASV_CC,
     MASV_SOURCE,
     REQUIRED_BMD_COLUMNS,
-    REQUIRED_SAMPLE_COLUMNS,
     SAMPLE_CHEM_COLUMNS,
     SAMPLE_COLUMNS,
 )
@@ -95,116 +95,68 @@ def get_new_chemical_class(data_dir: str) -> pd.DataFrame:
 # sampIds, #new ids for samples
 # sampMapping  ##mapping for sample names to clean up
 def build_sample_data(
-    fses_files: ArrayLike, chem_metadata: pd.DataFrame, sample_ids, samp_mapping=None
-) -> pd.DataFrame:
-    sample_data = []
-
-    # Read and process each FSES file
+    fses_files: list[str],
+    chem_meta: pd.DataFrame,
+    sample_ids: str,
+    samp_mapping: Optional[str] = None,
+):
+    data = []
+    # Read and preprocess each file in fses_files
     for f in fses_files:
         # Replace invalid values with nulls for filtering
-        tmp = pd.read_csv(f)[REQUIRED_SAMPLE_COLUMNS].replace(
-            {"BLOD": "0", "NULL": "0", "nc:BDL": "0"}
-        )
-        tmp = snakeify_all_columns(tmp)
+        sample = process_fses(f)
+        data.append(sample)
 
-        # Remove null and invalid entries
-        tmp = tmp[
-            (tmp["sample_number"].notna())
-            & (tmp["cas_number"].notna())
-            & (~tmp["measurement_value"].isin(["0", np.nan]))
-            & (~tmp["measurement_value_molar"].isin(["0", np.nan]))
-        ]
-
-        # Format FSES location data
-        tmp["location_lon"] = pd.to_numeric(tmp["location_lon"], errors="coerce")
-
-        # Only allow negative longitudes
-        # Note: Our data is already all negative, so unnecessary?
-        # tmp["location_lon"] = np.where(
-        #     tmp["location_lon"].gt(0), -tmp["location_lon"], tmp["location_lon"]
-        # )
-        sample_data.append(tmp)
-
-    # Add metadata to sample chemical table
-    sample_data = pd.concat(sample_data).merge(
-        chem_metadata[["chemical_id", "cas_number", "average_mass"]],
+    # Concatenate samples and merge with chemical metadata
+    data = pd.concat(data).merge(
+        chem_meta[["chemical_id", "cas_number", "average_mass"]],
         on="cas_number",
         how="left",
     )
-    # Enforce snake_case for all col names
-    sample_data = snakeify_all_columns(sample_data)
 
-    # Add sample ID information to sample data table
-    sample_data = sample_data.merge(
-        sample_id_master_table(sample_data["sample_number"], sample_ids),
-        on="sample_number",
-        how="left",
-    ).drop_duplicates()
+    # Merge with sample IDs
+    ids = sample_id_master_table(data["sample_number"], sample_ids)
+    data = data.merge(ids, on="sample_number", how="left").drop_duplicates()
 
-    # Find all duplicate sample names
-    all_samp_names = (
-        sample_data[["sample_id", "sample_name"]]
-        .drop_duplicates()
-        .assign(is_dupe=lambda df: df.duplicated("sample_name"))
-    )
-    dupe_samp_names = all_samp_names.query("is_dupe").sort_values("sample_name")
-    num_dupes = (
-        dupe_samp_names.groupby("sample_name")
-        .size()
-        .reset_index(name="nid")
-        .merge(dupe_samp_names)
-    )
+    # Rename duplicate sample names as sample:01, :02, etc.
+    data["sample_name"] = rename_duplicates(data)
 
-    new_names = (
-        num_dupes[["sample_name", "nid"]]
-        .drop_duplicates()
-        .assign(
-            new_name=lambda df: df.apply(
-                lambda row: ":".join(
-                    [f"{row['sample_name']}:{i+1}" for i in range(int(row["nid"]))]
-                ),
-                axis=1,
-            )
-        )
-        .drop(columns="nid")
-        .rename(columns={"SampleName": "old_sn"})
-    )
-
-    full_rep = pd.concat([dupe_samp_names, new_names], axis=1)[
-        ["Sample_ID", "new_name"]
-    ]
-    new_samp_names = pd.concat(
-        [
-            all_samp_names.query("~is_dupe").drop("is_dupe", axis=1),
-            full_rep.rename(columns={"new_name": "SampleName"}),
+    # Merge with sample name remappings if provided
+    if samp_mapping is not None:
+        sample_remap_cols = [
+            "sample_id",
+            "new_project_name",
+            "new_sample_name",
+            "new_location_name",
         ]
-    )
-    sample_data = (
-        sample_data.drop("SampleName", axis=1)
-        .merge(new_samp_names, on="Sample_ID", how="left")
-        .copy()
-    )
+        sample_name_remap = (
+            snakeify_all_columns(pd.read_excel(samp_mapping, sheet_name=0))
+            .rename(columns={"project_name": "new_project_name"})
+            .loc[:, sample_remap_cols]
+            .drop_duplicates()
+        )
 
-    sample_name_remap = (
-        pd.read_excel(samp_mapping, sheet_name=0)
-        .loc[:, ["Sample_ID", "ProjectName", "NewSampleName", "NewLocationName"]]
-        .drop_duplicates()
-    )
+        data = data.merge(
+            sample_name_remap, on="sample_id", how="left"
+        ).drop_duplicates()
 
-    sample_data = sample_data.merge(
-        sample_name_remap, on="Sample_ID", how="left"
-    ).drop_duplicates()
+        # Fill in NAs with values from remapping table
+        nas = data["project_name"].isna()
+        data.loc[nas, "project_name"] = data.loc[nas, "new_project_name"]
+        data.loc[nas, "location_name"] = data.loc[nas, "new_location_name"]
+        data.loc[nas, "sample_name"] = data.loc[nas, "new_sample_name"]
 
-    nas = sample_data["projectName"].isna()
-    sample_data.loc[nas, "projectName"] = sample_data.loc[nas, "ProjectName"]
-    sample_data.loc[nas, "LocationName"] = sample_data.loc[nas, "NewLocationName"]
-    sample_data.loc[nas, "SampleName"] = sample_data.loc[nas, "NewSampleName"]
-
-    sample_data = sample_data.drop(
-        columns=["ProjectName", "NewSampleName", "NewLocationName", "AVERAGE_MASS"]
+    # Drop unnecessary columns and rows with missing cas_number
+    data = data.drop(
+        columns=[
+            "new_project_name",
+            "new_sample_name",
+            "new_location_name",
+            "average_mass",
+        ]
     ).dropna(subset=["cas_number"])
 
-    return sample_data
+    return data
 
 
 def combine_v2_chemical_endpoint_data(
@@ -519,7 +471,7 @@ def main():
     parser.add_argument(
         "-d",
         "--drc_files",
-        dest="dose_res_stat",
+        dest="dose_response",
         default="",
         help="Dose response curve file",
     )
@@ -592,7 +544,7 @@ def main():
     chem_meta = build_chem_metadata(args.metadata)
 
     sample_files_list = args.sample_files.split(",")
-    samp_chem = build_sample_data(
+    chem_sample = build_sample_data(
         sample_files_list, chem_meta, args.sample_id_file, args.samp_map
     )
 
@@ -601,12 +553,12 @@ def main():
     ).drop_duplicates()
 
     if args.is_sample or args.is_chem:
-        all_files = args.dose_res_stat.split(",")
+        all_files = args.dose_response.split(",")
         bmd_files = [file for file in all_files if "bmd" in file]
         dose_files = [file for file in all_files if "dose" in file]
         fit_files = [file for file in all_files if "fit" in file]
 
-        meta_file = samp_chem if args.is_sample else chem_meta
+        meta_file = chem_sample if args.is_sample else chem_meta
 
         bmds = (
             combine_v2_chemical_endpoint_data(
@@ -650,7 +602,7 @@ def main():
 
         if args.is_chem:
             nas = bmds["Chemical_ID"].isna()
-            to_remove = set(nas) - set(samp_chem["Chemical_ID"])
+            to_remove = set(nas) - set(chem_sample["chemical_id"])
             bmds = bmds[~bmds["Chemical_ID"].isin(to_remove)]
             curves = curves[~curves["Chemical_ID"].isin(to_remove)]
             dose_reps = dose_reps[~dose_reps["Chemical_ID"].isin(to_remove)]
@@ -675,10 +627,10 @@ def main():
         chem_meta.to_csv(
             os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"'
         )
-        samp_chem[SAMPLE_COLUMNS].drop_duplicates().to_csv(
+        chem_sample[SAMPLE_COLUMNS].drop_duplicates().to_csv(
             os.path.join(args.output_dir, "samples.csv"), index=False, quotechar='"'
         )
-        samp_chem[SAMPLE_CHEM_COLUMNS].drop_duplicates().to_csv(
+        chem_sample[SAMPLE_CHEM_COLUMNS].drop_duplicates().to_csv(
             os.path.join(args.output_dir, "sampleToChemicals.csv"),
             index=False,
             quotechar='"',
