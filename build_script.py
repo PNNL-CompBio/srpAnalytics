@@ -8,32 +8,10 @@ import os
 from typing import Optional
 import pandas as pd
 from tqdm import tqdm
-from sampleChemMapping.mapping import get_mapping_file
+from sampleChemMapping.src.mapping import load_mapping_reference, get_mapping_file
 
 
-def collectFiles(
-    data_dir: str = "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data",
-    filename: str = "srp_build_files.csv",
-) -> pd.DataFrame:
-    """Collect files to be fed into each module upon build file update.
-
-    Parameters
-    ----------
-    data_dir : str, optional
-        _description_, by default "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data"
-    filename : str, optional
-        _description_, by default "srp_build_files.csv"
-
-    Returns
-    -------
-    pandas.DataFrame
-        _description_
-    """
-    df = pd.read_csv(os.path.join(data_dir, filename))
-    return df
-
-
-# TODO: Write this function
+# TODO: Write this functions
 def fitCurveFiles(morpho_behavior_tuples):
     """
     get new curve fits, list of tuples of morpho/behavior pairs
@@ -77,9 +55,8 @@ def combineFiles(location_list: pd.DataFrame, ftype: str) -> pd.DataFrame:
     for loc in location_list.location:
         f = pd.read_csv(loc)[required_cols[ftype]]
         dflist.append(f)
-    fulldf = pd.concat(dflist)
-    fulldf = fulldf.drop_duplicates()
-    return fulldf
+    df = pd.concat(dflist).drop_duplicates()
+    return df
 
 
 def runSampMap(
@@ -103,7 +80,6 @@ def runSampMap(
         f" --chem_id={cid}"
         f" --ep_map={emap}"
         f" --chem_class={cclass}"
-        f" --comptox_file={ctfile}"
         f" --sample_files={fses}"
         f" --chem_desc={descfile}"
         f" --sample_map={smap}"
@@ -118,7 +94,7 @@ def runSampMap(
 
     tqdm.write("\nRunning sample mapping with the following parameters:\n")
     tqdm.write(f"{cmd}\n")
-    # os.system(cmd)
+    os.system(cmd)
     tqdm.write("ls -la . \n")
     os.system(f"ls -la {output_dir}")
     ##now we validate the files that came out.
@@ -171,7 +147,7 @@ def main():
     this wrapping script is placed into every docker image to pull the files
     from the repo and initiate the appropriate call to the underlying code.
     """
-    df = collectFiles()
+    df = load_mapping_reference()
 
     ####
     # file parsing - collects all files we might need for the tool below
