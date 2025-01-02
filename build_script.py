@@ -62,11 +62,11 @@ def combineFiles(location_list: pd.DataFrame, ftype: str) -> pd.DataFrame:
 def runSampMap(
     is_sample: bool = False,
     drcfiles: list = [],
+    sid: str = "",
     smap: str = "",
     cid: str = "",
     emap: str = "",
     cclass: str = "",
-    ctfile: str = "",
     fses: str = "",
     descfile: str = "",
     output_dir: str = "/tmp/",
@@ -76,7 +76,8 @@ def runSampMap(
     """
     drc = ",".join(drcfiles)
     args = (
-        f" --sample_id={smap}"
+        f" --sample_id={sid}"
+        f" --sample_map={smap}"
         f" --chem_id={cid}"
         f" --ep_map={emap}"
         f" --chem_class={cclass}"
@@ -168,7 +169,6 @@ def main():
     cclass = get_mapping_file(df, "class1")
     emap = get_mapping_file(df, "endpointMap")
     fses = get_mapping_file(df, "sample", return_first=False)
-    ctfile = get_mapping_file(df, "compTox")  # FIXME: now irrelevant?
     descfile = get_mapping_file(df, "chemdesc")
     smap = get_mapping_file(df, "sampMap")
     gex1 = get_mapping_file(df, "expression", return_first=False)
@@ -220,8 +220,7 @@ def main():
     # ------------------------------------------------------------------------
     if args.bmd or args.samps:  ### need to rerun samples if we have created new bmds
         # add chemical BMDS, fits, curves to existing data
-        chemfiles = []
-        sampfiles = []
+        chem_files, sample_files = [], []
 
         # Define files and set progress bar incrementes for concatenating each
         sample_type = ["chemical", "extract"]
@@ -239,9 +238,9 @@ def main():
                 fname = f"/tmp/tmp_{st}_{dt}.csv"
                 fdf.to_csv(fname, index=False)
                 if st == "chemical":
-                    chemfiles.append(fname)
+                    chem_files.append(fname)
                 else:
-                    sampfiles.append(fname)
+                    sample_files.append(fname)
                 progress_bar.update(1)
 
         # Update progress bar after completion
@@ -251,19 +250,19 @@ def main():
         # Define fixed params for sample mapping
         all_res = list()
         sampmap_args = {
+            "sid": sid,
             "smap": smap,
             "cid": cid,
             "emap": emap,
             "cclass": cclass,
-            "ctfile": ctfile,
             "fses": fses,
             "descfile": descfile,
         }
 
         # Iterate through sampMap params
         sampmap_params = [
-            {"is_sample": True, "drcfiles": sampfiles},
-            {"is_sample": False, "drcfiles": chemfiles},
+            {"is_sample": True, "drcfiles": sample_files},
+            {"is_sample": False, "drcfiles": chem_files},
             {"is_sample": False, "drcfiles": []},
         ]
         progress_bar = tqdm(
@@ -284,7 +283,7 @@ def main():
 
         # Collect all unique files
         all_res = list(set(all_res))
-        for f in sampfiles + chemfiles:
+        for f in sample_files + chem_files:
             os.system(f"rm {f}")
 
         # Validate schema
@@ -302,7 +301,7 @@ def main():
     # ------------------------
     if args.geneEx:
         if not os.path.exists("/tmp/chemicals.csv"):
-            runSampMap(False, [], smap, cid, emap, cclass, ctfile, fses, descfile)
+            runSampMap(False, [], sid, cid, emap, cclass, fses, descfile)
 
         res = runExpression(gex1, "/tmp/chemicals.csv", ginfo)
         runSchemaCheck(res)
