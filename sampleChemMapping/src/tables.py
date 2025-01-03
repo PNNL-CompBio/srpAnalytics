@@ -75,7 +75,7 @@ def chem_id_master_table(
 
 
 def sample_id_master_table(
-    existing_sample_numbers: ArrayLike, smap: str
+    existing_sample_numbers: ArrayLike, sample_id_file: str
 ) -> pd.DataFrame:
     """Generate master table for sample ID.
 
@@ -86,15 +86,17 @@ def sample_id_master_table(
     ----------
     existing_sample_numbers : ArrayLike
         _description_
-    smap : str
-        _description_
+    sample_id_file : str
+        /path/to/sample_id_file (CSV file)
 
     Returns
     -------
     pd.DataFrame
         Sample ID master table
     """
-    map_df = pd.read_csv(smap)[["Sample_ID", "SampleNumber"]].drop_duplicates()
+    map_df = pd.read_csv(sample_id_file)[
+        ["Sample_ID", "SampleNumber"]
+    ].drop_duplicates()
 
     missing = set(existing_sample_numbers) - set(map_df["SampleNumber"])
     if missing:

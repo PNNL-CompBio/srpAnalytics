@@ -266,33 +266,30 @@ def get_endpoint_metadata(filename: str) -> pd.DataFrame:
     pd.DataFrame
         _description_
     """
-    endpoint_details = (
-        pd.read_excel(filename, sheet_name=3)
-        .rename(
-            columns={
-                "Abbreviation": "End_Point",
-                "Simple name (<20char)": "End_Point_Name",
-                "Ontology Link": "endPointLink",
-            }
-        )
-        .assign(
-            IncludeInPortal="No",
-            End_Point="NoData",
-            End_Point_Name=None,
-            Description="No data",
-            endPointLink="",
-        )
-        .pipe(
-            lambda df: df.append(
-                {
-                    "IncludeInPortal": "No",
-                    "End_Point": "NoData",
-                    "End_Point_Name": None,
-                    "Description": "No data",
-                    "endPointLink": "",
-                },
-                ignore_index=True,
-            )
-        )
+    # Read file and rename cols to expected format
+    df = pd.read_excel(filename, sheet_name=3).rename(
+        columns={
+            "Abbreviation": "End_Point",
+            "Simple name (<20char)": "End_Point_Name",
+            "Ontology Link": "endPointLink",
+        }
     )
-    return endpoint_details
+
+    # Trim whitespace from 'End_Point' column
+    df["End_Point"] = df["End_Point"].str.strip()
+
+    # Create a new row for 'No Data'
+    no_data_row = pd.DataFrame(
+        {
+            "IncludeInPortal": ["No"],
+            "End_Point": ["NoData"],
+            "End_Point_Name": [None],
+            "Description": ["No data"],
+            "endPointLink": [""],
+        }
+    )
+
+    # Append the new row to the dataframe
+    df = pd.concat([df, no_data_row], ignore_index=True)
+
+    return snakeify_all_columns(df)

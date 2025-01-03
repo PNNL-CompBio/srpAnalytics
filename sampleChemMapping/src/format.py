@@ -1,7 +1,5 @@
 import re
-from numpy import nan
-from pandas import DataFrame, read_csv, to_numeric
-from .params import REQUIRED_SAMPLE_COLUMNS
+from pandas import DataFrame
 
 RENAME = {"casrn": "cas_number"}
 
@@ -30,6 +28,7 @@ def snakeify(name: str) -> str:
     # Convert camelCase to snake_case using regular expressions
     snake_case_name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     snake_case_name = re.sub("([a-z0-9])([A-Z])", r"\1_\2", snake_case_name).lower()
+    snake_case_name = snake_case_name.replace("__", "_")
 
     return snake_case_name
 
@@ -73,33 +72,6 @@ def chunker(seq: DataFrame, size: int) -> DataFrame:
         _description_
     """
     return (seq.iloc[pos : pos + size] for pos in range(0, len(seq), size))
-
-
-def process_fses(filename: str, snake_case: bool = True) -> DataFrame:
-    # Replace invalid values with nulls for filtering
-    df = read_csv(filename)[REQUIRED_SAMPLE_COLUMNS].replace(
-        {"BLOD": "0", "NULL": "0", "nc:BDL": "0"}
-    )
-    if snake_case:
-        df = snakeify_all_columns(df)
-
-    # Remove null and invalid entries
-    df = df[
-        (df["sample_number"].notna())
-        & (df["cas_number"].notna())
-        & (~df["measurement_value"].isin(["0", nan]))
-        & (~df["measurement_value_molar"].isin(["0", nan]))
-    ]
-
-    # Format FSES location data
-    df["location_lon"] = to_numeric(df["location_lon"], errors="coerce")
-
-    # Only allow negative longitudes
-    # Note: Our data is already all negative, so unnecessary?
-    # df["location_lon"] = np.where(
-    #     df["location_lon"].gt(0), -df["location_lon"], df["location_lon"]
-    # )
-    return df
 
 
 def rename_duplicates(data: DataFrame, col: str = "sample_name") -> list[str]:

@@ -14,13 +14,15 @@ import numpy as np
 import pandas as pd
 
 from numpy.typing import ArrayLike
-from src.format import process_fses, rename_duplicates, snakeify, snakeify_all_columns
+from src.format import rename_duplicates, snakeify, snakeify_all_columns
 from src.mapping import rename_chemical_class
 from src.metadata import build_chem_metadata, get_endpoint_metadata
 from src.params import (
     MASV_CC,
     MASV_SOURCE,
+    QC_FLAGS,
     REQUIRED_BMD_COLUMNS,
+    REQUIRED_SAMPLE_COLUMNS,
     SAMPLE_CHEM_COLUMNS,
     SAMPLE_COLUMNS,
 )
@@ -87,19 +89,57 @@ def get_new_chemical_class(data_dir: str) -> pd.DataFrame:
     return full_class
 
 
-#' buildSampleData - takes the curated information and selects the data we need
-#' @param data.dir
-#' @return data.frame
-# fses_files, #files from barton that contain sample info
-# chemMeta, #metadata for chemicals including identifier mapping
-# sampIds, #new ids for samples
-# sampMapping  ##mapping for sample names to clean up
+def process_fses(filename: str, snake_case: bool = True) -> pd.DataFrame:
+    # Replace invalid values with nulls for filtering
+    df = pd.read_csv(filename)[REQUIRED_SAMPLE_COLUMNS].replace(
+        {"BLOD": "0", "NULL": "0", "nc:BDL": "0"}
+    )
+    if snake_case:
+        df = snakeify_all_columns(df)
+
+    # Remove null and invalid entries
+    df = df[
+        (df["sample_number"].notna())
+        & (df["cas_number"].notna())
+        & (~df["measurement_value"].isin(["0", np.nan]))
+        & (~df["measurement_value_molar"].isin(["0", np.nan]))
+    ]
+
+    # Format FSES location data
+    df["location_lon"] = pd.to_numeric(df["location_lon"], errors="coerce")
+
+    # Only allow negative longitudes
+    # Note: Our data is already all negative, so unnecessary?
+    # df["location_lon"] = np.where(
+    #     df["location_lon"].gt(0), -df["location_lon"], df["location_lon"]
+    # )
+    return df
+
+
 def build_sample_data(
     fses_files: list[str],
-    chem_meta: pd.DataFrame,
-    sample_ids: str,
-    samp_mapping: Optional[str] = None,
-):
+    chem_metadata: pd.DataFrame,
+    sample_id_file: str,
+    sample_mapping: Optional[str] = None,
+) -> pd.DataFrame:
+    """Select relevant data from curated tables.
+
+    Parameters
+    ----------
+    fses_files : list[str]
+        List of FSES files from the Barton lab with sample info
+    chem_metadata : pd.DataFrame
+        Chemical metadata table containing identifier mapping
+    sample_id_file : str
+        /path/to/sample_id_file (CSV file)
+    sample_mapping : Optional[str], optional
+        Mapping file containing new data, by default None
+
+    Returns
+    -------
+    pd.DataFrame
+        _description_
+    """
     data = []
     # Read and preprocess each file in fses_files
     for f in fses_files:
@@ -109,20 +149,20 @@ def build_sample_data(
 
     # Concatenate samples and merge with chemical metadata
     data = pd.concat(data).merge(
-        chem_meta[["chemical_id", "cas_number", "average_mass"]],
+        chem_metadata[["chemical_id", "cas_number", "average_mass"]],
         on="cas_number",
         how="left",
     )
 
     # Merge with sample IDs
-    ids = sample_id_master_table(data["sample_number"], sample_ids)
+    ids = sample_id_master_table(data["sample_number"], sample_id_file)
     data = data.merge(ids, on="sample_number", how="left").drop_duplicates()
 
     # Rename duplicate sample names as sample:01, :02, etc.
     data["sample_name"] = rename_duplicates(data)
 
     # Merge with sample name remappings if provided
-    if samp_mapping is not None:
+    if sample_mapping is not None:
         sample_remap_cols = [
             "sample_id",
             "new_project_name",
@@ -130,7 +170,7 @@ def build_sample_data(
             "new_location_name",
         ]
         sample_name_remap = (
-            snakeify_all_columns(pd.read_excel(samp_mapping, sheet_name=0))
+            snakeify_all_columns(pd.read_excel(sample_mapping, sheet_name=0))
             .rename(columns={"project_name": "new_project_name"})
             .loc[:, sample_remap_cols]
             .drop_duplicates()
@@ -140,11 +180,10 @@ def build_sample_data(
             sample_name_remap, on="sample_id", how="left"
         ).drop_duplicates()
 
-        # Fill in NAs with values from remapping table
+        # Fill in NAs with new values from remapping table
         nas = data["project_name"].isna()
-        data.loc[nas, "project_name"] = data.loc[nas, "new_project_name"]
-        data.loc[nas, "location_name"] = data.loc[nas, "new_location_name"]
-        data.loc[nas, "sample_name"] = data.loc[nas, "new_sample_name"]
+        for col in ["project_name", "location_name", "sample_name"]:
+            data.loc[nas, col] = data.loc[nas, f"new_{col}"]
 
     # Drop unnecessary columns and rows with missing cas_number
     data = data.drop(
@@ -160,133 +199,147 @@ def build_sample_data(
 
 
 def combine_v2_chemical_endpoint_data(
-    bmd_files, is_extract=False, samp_chem=None, endpoint_details=None
+    bmd_files: list[str],
+    is_extract: bool = False,
+    chem_data: Optional[pd.DataFrame] = None,
+    endpoint_details: Optional[pd.DataFrame] = None,
 ):
+    """Combine chemical endpoint data
+
+    Parameters
+    ----------
+    bmd_files : list[str]
+        List of BMD files
+    is_extract : bool, optional
+        True if data is for extracts, by default False
+    chem_data : Optional[pd.DataFrame], optional
+        Tabulated chemical data, by default None
+    endpoint_details : Optional[pd.DataFrame], optional
+        Tabulated endpoint data, by default None
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     print(f"Combining bmd files: {', '.join(bmd_files)}")
+
+    # Read and concatenate the specified columns from all provided BMD files into one df
     cols = REQUIRED_BMD_COLUMNS["bmd"]
-    mid_bmd = pd.concat([pd.read_csv(bmd_file).loc[:, cols] for bmd_file in bmd_files])
+    df = pd.concat([pd.read_csv(bmd_file).loc[:, cols] for bmd_file in bmd_files])
+    df = snakeify_all_columns(df)  # .rename(columns={"chemical_id": "tmp_id"})
 
-    dupes = mid_bmd[["Chemical_ID", "End_Point"]].duplicated().values
-    if dupes.any():
-        mid_bmd = mid_bmd[~dupes]
+    # Remove duplicate entries (based on 'chemical_id' and 'end_point')
+    print(df.columns)
+    df = df.drop_duplicates(subset=["chemical_id", "end_point"])
 
+    # Process extracts
     if is_extract:
-        sd_samp = (
-            samp_chem["Sample_ID"]
-            .str.split("-", expand=True)
-            .iloc[:, 0:2]
-            .rename(columns={0: "tmp_id", 1: "sub"})
-            .merge(samp_chem[["Sample_ID"]].drop_duplicates(), on="sub", how="left")
+        chem_data = snakeify_all_columns(chem_data)
+        print(chem_data.columns)
+
+        # Split `sample_id` column on '-', take first two parts, and rename split cols
+        chem_data[["tmp_id", "sub"]] = chem_data["sample_id"].str.split(
+            "-", expand=True, n=1
+        )
+        print(chem_data.columns)
+        # df["chemical_id"] = df["chemical_id"].astype(str)
+        df = df.merge(
+            chem_data[["chemical_id", "sample_id"]], on="chemical_id", how="outer"
         )
 
-        full_bmd = (
-            mid_bmd.assign(tmp_id=mid_bmd["Chemical_ID"].astype(str))
-            .drop("Chemical_ID", axis=1)
-            .merge(sd_samp, on="tmp_id", how="left")
+        # Fill NAs and format sample names
+        df["sample_id"] = df["sample_id"].fillna(df["chemical_id"])
+        df["sample_name"] = df["sample_id"].apply(
+            lambda x: f"Sample {x}"
+            if pd.isnull(df.get("sample_name"))
+            else df["sample_name"]
         )
 
-        nas = full_bmd["Sample_ID"].isna()
-        full_bmd.loc[nas, "Sample_ID"] = full_bmd.loc[nas, "tmp_id"]
-
-        new_nas = full_bmd["SampleName"].isna()
-        if new_nas.any():
-            full_bmd.loc[new_nas, "SampleName"] = (
-                "Sample " + full_bmd.loc[new_nas, "Sample_ID"]
-            )
-
-        full_bmd = (
-            full_bmd.fillna({"End_Point": "NoData"})
-            .merge(endpoint_details, on="End_Point", how="right")
-            .drop(columns=["End_Point", "tmp_id"])
-            .dropna(subset=["Sample_ID"])
+        # Fill missing 'end_point' values with "NoData", merge with `endpoint_details` on 'end_point',
+        # drop unused columns, remove rows with missing 'sample_id', drop duplicates,
+        # and fill remaining missing 'location_name' values with "None"
+        print(endpoint_details.columns)
+        # print(endpoint_details.head(2))
+        df = (
+            df.fillna({"end_point": "NoData"})
+            .merge(endpoint_details, on="end_point", how="right")
+            .drop(columns=["end_point", "chemical_id"])
+            .dropna(subset=["sample_id"])
             .drop_duplicates()
-            .fillna({"LocationName": "None"})
+            .fillna({"location_name": "None"})
         )
+
+    # Similar operations for non-extract case:
+    # Fill missing 'end_point' values with "NoData", merge with `endpoint_details` on 'end_point'
+    # drop unused column, remove rows with missing 'cas_number', drop duplicates,
+    # and fill remaining missing 'chemical_class' values with "Unclassified"
     else:
-        full_bmd = (
-            mid_bmd.fillna({"End_Point": "NoData"})
-            .merge(endpoint_details, on="End_Point", how="right")
-            .drop(columns="End_Point")
+        df = (
+            df.fillna({"end_point": "NoData"})
+            .merge(endpoint_details, on="end_point", how="right")
+            .drop(columns="end_point")
             .dropna(subset=["cas_number"])
             .drop_duplicates()
             .fillna({"chemical_class": "Unclassified"})
         )
 
-    full_bmd = (
-        full_bmd.rename(columns={"DataQC_Flag": "qc_num"})
-        .assign(
-            DataQC_Flag=full_bmd["qc_num"].replace(
-                {0: "Poor", 1: "Poor", 4: "Moderate", 5: "Moderate"}, regex=True
-            )
-        )
-        .assign(Model=lambda df: df["Model"].str.replace("NULL", "None"))
-        .drop(columns="qc_num")
-    )
+    # Grade data QC on scale and replace NULL values in model col
+    df["data_qc_flag"] = df["data_qc_flag"].map(QC_FLAGS).fillna("Good")
+    df["model"] = df["model"].str.replace("NULL", "None")
 
-    return full_bmd
+    return df
 
 
-def combine_chemical_fit_data(
-    bmd_files, is_extract=False, samp_chem=None, endpoint_details=None
+def combine_chemical_data(
+    bmd_files: list[str],
+    data_type: str = "fit",
+    is_extract: bool = False,
+    chem_data: Optional[pd.DataFrame] = None,
+    endpoint_details: Optional[pd.DataFrame] = None,
 ):
-    print(f"Combining fit files: {', '.join(bmd_files)}")
-    cols = REQUIRED_BMD_COLUMNS["fitVals"]
-    files = [pd.read_csv(bmd_file).loc[:, cols] for bmd_file in bmd_files]
+    print(f'Combining {data_type} files: {", ".join(bmd_files)}')
 
-    chem_eps = [
-        set(
-            file.assign(combined=lambda df: df["Chemical_ID"] + df["End_Point"])[
-                "combined"
-            ]
-        )
-        for file in files
-    ]
-    new_chem_eps = chem_eps.copy()
-
-    if len(chem_eps) > 1:
-        for i in range(1, len(new_chem_eps)):
-            previous_eps = set.union(*chem_eps[:i])
-            new_chem_eps[i] -= previous_eps
-
-    fixed_files = []
-    for i, (file, new_eps) in enumerate(zip(files, new_chem_eps)):
-        fixed_files.append(
-            file.assign(combined=lambda df: df["Chemical_ID"] + df["End_Point"])
-            .query("combined in @new_eps")
-            .replace({"X_vals": "NULL"}, np.nan)
-            .assign(
-                X_vals=lambda df: df["X_vals"].astype(float),
-                Y_vals=lambda df: df["Y_vals"].astype(float),
-            )
-        )
-
-    mid_bmd = pd.concat(fixed_files)
-    full_bmd = (
-        mid_bmd.merge(endpoint_details, on="End_Point", how="right")
-        .drop_duplicates()
-        .drop(columns=["End_Point", "Description"])
+    col_type = (
+        "fitVals"
+        if data_type == "fit"
+        else "doseRep"
+        if data_type == "dose"
+        else ValueError("Invalid data_type. Must be 'fit' or 'dose'.")
     )
+    cols = REQUIRED_BMD_COLUMNS[col_type]
+
+    df = pd.concat([pd.read_csv(file)[cols] for file in bmd_files])
+    df = snakeify_all_columns(df)
+
+    df["combined"] = df[["chemical_id", "end_point"]].astype(str).agg(" ".join, axis=1)
+    df = df.drop_duplicates(subset=["combined"], keep="last")
+
+    if data_type == "fit":
+        df = df[df["x_vals"] != "NULL"]
+        df["x_vals"] = pd.to_numeric(df["x_vals"])
+        df["y_vals"] = pd.to_numeric(df["y_vals"])
+
+    df = df.merge(
+        snakeify_all_columns(endpoint_details),
+        on="end_point",
+        how="right",
+    )
+    df = df.drop(columns=["end_point", "description"]).drop_duplicates()
 
     if is_extract:
-        sd_samp = (
-            samp_chem["Sample_ID"]
-            .str.split("-", expand=True)
-            .iloc[:, 0:2]
-            .rename(columns={0: "tmp_id", 1: "sub"})
-            .merge(samp_chem[["Sample_ID"]].drop_duplicates(), on="sub", how="left")
+        chem_data[["tmp_id", "sub"]] = chem_data["sample_id"].str.split(
+            "-", expand=True
         )
+        chem_data = chem_data[["sample_id", "tmp_id"]].drop_duplicates()
 
-        full_bmd = (
-            full_bmd.assign(tmp_id=full_bmd["Chemical_ID"].astype(str))
-            .drop("Chemical_ID", axis=1)
-            .merge(sd_samp, on="tmp_id", how="left")
-        )
+        df["tmp_id"] = df["chemical_id"].astype(str)
+        df = df.drop(columns="chemical_id").merge(chem_data, on="tmp_id", how="left")
 
-        nas = full_bmd["Sample_ID"].isna()
-        full_bmd.loc[nas, "Sample_ID"] = full_bmd.loc[nas, "tmp_id"]
-        full_bmd = full_bmd.drop(columns=["tmp_id"])
+        df["sample_id"] = df["sample_id"].fillna(df["tmp_id"])
+        df = df.drop(columns="tmp_id")
 
-    return full_bmd
+    return df.drop_duplicates()
 
 
 def _flatten_class_df(
@@ -338,25 +391,25 @@ def _flatten_class_df(
 
 
 def masv_chem_class(
-    class_file,
+    class_file: str,
     save_to: str = "MASV_classAndSource.csv",
     id_cols: ArrayLike = ["CASNumber", "ParameterName"],
-):
+) -> pd.DataFrame:
     """Reads full MASV class annotations and assigns values to chemicals.
 
     Parameters
     ----------
-    class_file : _type_
-        _description_
+    class_file : str
+        Filename of class annotation data.
     save_to : str, optional
-        _description_, by default "MASV_classAndSource.csv"
+        Desired output filename, by default "MASV_classAndSource.csv"
     id_cols : ArrayLike, optional
-        _description_, by default ["CASNumber", "ParameterName"]
+        List of chemical ID cols, by default ["CASNumber", "ParameterName"]
 
     Returns
     -------
-    _type_
-        _description_
+    pd.DataFrame
+        Combined chemical class information
     """
     data = pd.read_excel(class_file, sheet_name=0)
 
@@ -387,62 +440,6 @@ def masv_chem_class(
 
     combined.to_csv(save_to, index=False)
     return combined
-
-
-def combine_chemical_dose_data(
-    bmd_files, is_extract=False, samp_chem=None, endpoint_details=None
-):
-    print(f'Combining dose response files: {", ".join(bmd_files)}')
-    cols = REQUIRED_BMD_COLUMNS["doseRep"]
-    files = [pd.read_csv(bmd_file).loc[:, cols] for bmd_file in bmd_files]
-
-    chem_eps = [
-        set(
-            file.assign(combined=lambda df: df["Chemical_ID"] + df["End_Point"])[
-                "combined"
-            ]
-        )
-        for file in files
-    ]
-    new_chem_eps = chem_eps.copy()
-
-    if len(chem_eps) > 1:
-        for i in range(1, len(new_chem_eps)):
-            previous_eps = set.union(*chem_eps[:i])
-            new_chem_eps[i] -= previous_eps
-
-    fixed_files = []
-    for i, (file, new_eps) in enumerate(zip(files, new_chem_eps)):
-        fixed_files.append(
-            file.assign(combined=lambda df: df["Chemical_ID"] + df["End_Point"])
-            .query("combined in @new_eps")
-            .loc[:, cols]
-        )
-
-    mid_bmd = pd.concat(fixed_files)
-    full_bmd = (
-        mid_bmd.merge(endpoint_details, on="End_Point", how="right")
-        .drop_duplicates()
-        .drop(columns=["End_Point", "Description"])
-    )
-
-    if is_extract:
-        sd_samp = (
-            samp_chem["Sample_ID"]
-            .str.split("-", expand=True)
-            .iloc[:, 0:2]
-            .rename(columns={0: "tmp_id", 1: "sub"})
-            .merge(samp_chem[["Sample_ID"]].drop_duplicates(), on="sub", how="left")
-        )
-
-        full_bmd = (
-            full_bmd.assign(tmp_id=full_bmd["Chemical_ID"].astype(str))
-            .drop("Chemical_ID", axis=1)
-            .merge(sd_samp, on="tmp_id", how="left")
-            .assign(Sample_ID=lambda df: df["Sample_ID"].fillna(df["tmp_id"]))
-        )
-
-    return full_bmd
 
 
 # =========================================================
@@ -520,7 +517,7 @@ def main():
     parser.add_argument(
         "-m",
         "--sample_map",
-        dest="samp_map",
+        dest="sample_map",
         default="",
         help="File that maps sample locations",
     )
@@ -539,13 +536,14 @@ def main():
     )
 
     args = parser.parse_args()
+    print(args)
 
     chem_class = masv_chem_class(args.chem_class_file)
-    chem_meta = build_chem_metadata(args.metadata)
+    chem_metadata = build_chem_metadata(args.metadata)
 
     sample_files_list = args.sample_files.split(",")
     chem_sample = build_sample_data(
-        sample_files_list, chem_meta, args.sample_id_file, args.samp_map
+        sample_files_list, chem_metadata, args.sample_id_file, args.sample_map
     )
 
     endpoint_details = get_endpoint_metadata(
@@ -558,30 +556,32 @@ def main():
         dose_files = [file for file in all_files if "dose" in file]
         fit_files = [file for file in all_files if "fit" in file]
 
-        meta_file = chem_sample if args.is_sample else chem_meta
+        chem_data = chem_sample if args.is_sample else chem_metadata
 
         bmds = (
             combine_v2_chemical_endpoint_data(
                 bmd_files,
                 is_extract=args.is_sample,
-                samp_chem=meta_file,
+                chem_data=chem_data,
                 endpoint_details=endpoint_details,
             )
-            .dropna(subset=["BMD_Analysis_Flag"])
-            .query("BMD_Analysis_Flag != 'NA'")
+            .dropna(subset=["bmd_analysis_flag"])
+            .query("bmd_analysis_flag != 'NA'")
         )
-        curves = combine_chemical_fit_data(
+        curves = combine_chemical_data(
             fit_files,
+            data_type="fit",
             is_extract=args.is_sample,
-            samp_chem=meta_file,
+            chem_data=chem_data,
             endpoint_details=endpoint_details,
         )
-        dose_reps = combine_chemical_dose_data(
+        dose_reps = combine_chemical_data(
             dose_files,
+            data_type="dose",
             is_extract=args.is_sample,
-            samp_chem=meta_file,
+            chem_data=chem_data,
             endpoint_details=endpoint_details,
-        ).dropna(subset=["Dose"])
+        ).dropna(subset=["dose"])
 
         if args.is_sample:
             bmds.to_csv(
@@ -624,7 +624,7 @@ def main():
             )
 
     else:
-        chem_meta.to_csv(
+        chem_metadata.to_csv(
             os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"'
         )
         chem_sample[SAMPLE_COLUMNS].drop_duplicates().to_csv(

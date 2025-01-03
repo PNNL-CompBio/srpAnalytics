@@ -1,3 +1,4 @@
+from pandas import isna
 # =========================================================
 # Define Columns / Table Schemas
 # =========================================================
@@ -156,6 +157,10 @@ MASV_CC = [
     "uncategorized",
 ]
 
+QC_FLAGS = {0: "Poor", 1: "Poor", 4: "Moderate", 5: "Moderate"}
+# BMD_FLAGS ?
+# QC_SCALE = {0: "Poor", 1: "Poor", 2: "Good", 3: "Good", 4: "Moderate", 5: "Poor"}
+
 
 # Map the newClass values based on conditions provided
 def map_classification(x):
@@ -179,7 +184,7 @@ def map_classification(x):
         return "Natural"
     elif x == "pestFungicide":
         return "Fungicide"
-    elif pd.isna(x) or x == "NA":
+    elif isna(x) or x == "NA":
         return "Unclassified"
     else:
         return x
