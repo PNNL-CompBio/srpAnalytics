@@ -1,0 +1,333 @@
+id: http://w3id.org/linkml/examples/srpanalyics
+name: srpanalytics
+prefixes:
+   linkml: https://w3id.org/linkml
+   coderdata: https://w3id.org/linkml/examples/srpanalytics
+   schema: http://schema.org/
+imports:
+   - linkml:types
+default_range: string
+default_prefix: srpanalytics
+
+slots:
+  Chemical_ID:
+    description: Unique identifier for every chemical in the database
+    range: linkml:Any
+    identifier: true #INTEGER
+    slot_uri: schema:identifier
+  Sample_ID:
+    description: Unique identifier for every sample in the database
+    range: linkml:Any
+    identifier: true
+    slot_uri: schema:identifier
+  cas_number:
+    description: CAS identifier for a specific chemical
+  concentration:
+    description: Concentration at which chemical was administered in uM
+    range: float
+  concentration_unit:
+    description: Unit of concentration
+  Project:
+    description: name of project contributing the dataset
+  Model:
+    description: Model with best fit to data
+  BMD10:
+    description: Dose at which 10% of fish are affected
+    range: linkml:Any
+  BMD50:
+    description: Dose at which 50% of fish are affected
+    range: linkml:Any
+  Min_Dose:
+    description: Minimum dose administered #Number(decimal)
+    range: linkml:Any
+  Max_Dose:
+    description: Maximum dose administered #Number(decimal)
+    range: linkml:Any    
+  AUC_Norm:
+    description: normalized area under the curve #Number(decimal)
+    range: linkml:Any
+  BMD_Analysis_Flag:
+    description: quality of curve fit #string
+    range: integer
+  IncludeInPortal:
+    description:
+  End_Point_Name:
+    description:
+  Description:
+    description: Name of endpoint
+  endPointLink:
+    description: Link to endpoint description
+  DataQC_Flag:
+    description: Quality of Data
+  Dose:
+    description: Dose of chemical #Number(decimal)
+    range: float
+  Response:
+    description: Response in terms of percentage of fish alive #Number(decimal)
+    range: float
+  CI_Lo:
+    description: Low range of confidence interval #Number(decimal)
+    range: float
+  CI_Hi:
+    description: High range of confidence interval #Number(decimal)
+    range: float
+  X_vals:
+    description: X coordinates of fitted curve #Number(decimal)
+    range: linkml:Any
+  Y_vals:
+    description: Y coordinates of fitted curve #Number(decimal)
+    range: linkml:Any
+
+classes:
+  samples:
+    description: List of samples collected in the Superfund study
+    slots:
+      - Sample_ID
+      - projectName
+    attributes:
+      ClientName:
+        description:
+      SampleNumber:
+        description:
+      date_sampled:
+        description:
+      date_sample_start:
+        description:
+        range: linkml:Any
+      sample_matrix:
+        description:
+      technology:
+        description:
+      projectName:
+        description:
+      sampleName:
+        description:
+      LocationLat:
+        description:
+        range: float
+      LocationLon:
+        description:
+        range: float
+      projectLink:
+        description:
+      LocationAlternateDescription:
+        description:
+      LocationName:
+        description:
+      SampleName:
+        description:
+      AlternateName:
+        description:
+  chemicals:
+    description: List of chemicals measured in the Superfund study
+    slots:
+      - Chemical_ID
+      - cas_number
+    attributes:
+      DTXSID:
+        description:
+      PREFERRED_NAME:
+        description:      
+      INCHIKEY:
+        description:
+      SMILES:
+        description: 
+      MOLECULAR_FORMULA:
+        description:
+      AVERAGE_MASS:   
+        description:
+        range: linkml:Any
+      PUBCHEM_DATA_SOURCES:
+        description: Number of data sources in pubchem citing this chemical
+        range: linkml:Any
+      chem_source:
+        description:
+      chemical_class:
+        description:
+      chemDescription:
+        description:
+  sampleToChemicals: 
+    description: Measurements of chemicals in samples
+    slots:
+      - Chemical_ID
+      - cas_number
+      - Sample_ID
+    attributes:
+      measurement_value: #Number (float)
+        description:
+        range: linkml:Any
+      measurement_value_qualifier:
+        description:
+      measurement_value_unit:
+        description:
+      measurement_value_molar: #Number (float)
+        description:
+        range: linkml:Any
+      measurement_value_molar_unit:
+        description:
+      environment_concentration: #Number (float)
+        description:
+        range: linkml:Any
+      environment_concentration_qualifier:
+        description:
+      environment_concentration_unit:
+        description:
+      environment_concentration_molar: #Number (float)
+        description:
+        range: linkml:Any
+      environment_concentration_molar_unit:
+        description:
+  zebrafishSampBMDs:
+    description: Benchmark dose measurements of sample extracts in zebrafish
+    slots:
+      - Sample_ID
+      - Model
+      - BMD10
+      - BMD50
+      - Min_Dose
+      - Max_Dose
+      - AUC_Norm
+      - BMD_Analysis_Flag
+      - IncludeInPortal
+      - End_Point_Name
+      - Description
+      - endPointLink
+      - DataQC_Flag
+  zebrafishSampDoseResponse:
+    description: Dose response datapoints of sample extracts in zebrafish
+    slots:
+      - Sample_ID
+      - Dose
+      - Response
+      - CI_Lo
+      - CI_Hi
+      - IncludeInPortal
+      - End_Point_Name
+      - endPointLink
+  zebrafishSampXYCoords:
+    description: XY Coordinates of curve fit data for sample extracts in zebrafish
+    slots:
+      - Sample_ID
+      - X_vals
+      - Y_vals
+      - IncludeInPortal
+      - End_Point_Name
+      - endPointLink
+  zebrafishChemBMDs:
+    description: Benchmark dose measurements of chemicals in zebrafish
+    slots:
+      - Chemical_ID
+      - Model
+      - BMD10
+      - BMD50
+      - Min_Dose
+      - Max_Dose
+      - AUC_Norm
+      - BMD_Analysis_Flag
+      - IncludeInPortal
+      - End_Point_Name
+      - Description
+      - endPointLink
+      - DataQC_Flag
+      
+  zebrafishChemDoseResponse:
+    description: Dose response datapoints of chemicals in zebrafish
+    slots:
+      - Chemical_ID
+      - Dose
+      - Response
+      - CI_Lo
+      - CI_Hi
+      - IncludeInPortal
+      - End_Point_Name
+      - endPointLink
+  zebrafishChemXYCoords:
+    description: XY Coordinates of curve fit data for chemicals in zebrafish
+    slots:
+      - Chemical_ID
+      - X_vals
+      - Y_vals
+      - IncludeInPortal
+      - End_Point_Name
+      - endPointLink
+  allGeneEx:
+    description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
+    slots:
+      - Project
+      - cas_number
+      - Chemical_ID
+      - concentration
+    attributes:
+      Gene:
+        description:
+        range: linkml:Any
+      GeneID:
+        description:
+      adj_p_value:
+        description:
+        range: float
+      indication:
+        description:
+        range: integer
+      Log2FoldChange:
+        description: fold change
+        range: float
+  srpDEGStats:
+    description: Summary statistics
+    slots:
+      - Project
+      - cas_number
+      - Chemical_ID
+      - concentration
+    attributes:
+      link:
+        description: Link to experiment?
+      DownRegulatedGenes:
+        description: number of genes down-regulated upon chemical treatement
+        range: integer
+      UpRegulatedGenes:
+        description: number of genes up-regulated upon chemical treatement
+        range: integer
+  srpDEGPathways:
+    description: Pathways that are enriched in zebrafish genes that are differentially expressed upon treatment with a chemical
+    slots:
+      - Chemical_ID
+      - concentration
+    attributes:
+      term:
+        description:
+      adj_p_value:
+        description:
+        range: float
+      p_value:
+        description:
+        range: float
+      Genes:
+        description:      
+      enrichment_score:
+        description:
+        range: float
+      z_score:
+        description:
+        range: float
+      overlap:
+        description:
+      toPlot:
+        description:
+        range: integer    
+  exposomeGeneStats:
+    description: Summary and link to exposome measurements of human genes that are differentailly expressed upon chemical treatment
+    slots:
+      - Chemical_ID
+      - Project
+      - concentration
+      - cas_number
+      - concentration_unit
+    attributes:
+      nGenes:
+        description:
+        range: integer
+      Link:
+        description:
+      Condition:
+        description: 
