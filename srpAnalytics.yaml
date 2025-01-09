@@ -180,39 +180,42 @@ classes:
   zebrafishSampBMDs:
     description: Benchmark dose measurements of sample extracts in zebrafish
     slots:
-      - Sample_ID
-      - Model
-      - BMD10
-      - BMD50
-      - Min_Dose
-      - Max_Dose
-      - AUC_Norm
-      - BMD_Analysis_Flag
-      - IncludeInPortal
-      - End_Point_Name
-      - Description
-      - endPointLink
-      - DataQC_Flag
+      - sample_id
+      - sample_name
+      - model
+      - bmd10
+      - bmd50
+      - min_dose
+      - max_dose
+      - auc_norm
+      - bmd_analysis_flag
+      - include_in_portal
+      - end_point_name
+      - description
+      - end_point_link
+      - data_qc_Flag
   zebrafishSampDoseResponse:
     description: Dose response datapoints of sample extracts in zebrafish
     slots:
-      - Sample_ID
-      - Dose
-      - Response
-      - CI_Lo
-      - CI_Hi
-      - IncludeInPortal
-      - End_Point_Name
-      - endPointLink
+      - sample_id
+      - dose
+      - response
+      - ci_lo
+      - ci_hi
+      - combined
+      - include_in_portal
+      - end_point_name
+      - end_point_link
   zebrafishSampXYCoords:
     description: XY Coordinates of curve fit data for sample extracts in zebrafish
     slots:
-      - Sample_ID
-      - X_vals
-      - Y_vals
-      - IncludeInPortal
-      - End_Point_Name
-      - endPointLink
+      - sample_id
+      - x_vals
+      - y_vals
+      - combined
+      - include_in_portal
+      - end_point_name
+      - end_point_link
   zebrafishChemBMDs:
     description: Benchmark dose measurements of chemicals in zebrafish
     slots:

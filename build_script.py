@@ -10,6 +10,9 @@ import pandas as pd
 from tqdm import tqdm
 from sampleChemMapping.src.mapping import load_mapping_reference, get_mapping_file
 
+# DEFINE OUTPUT DIRECTORY
+OUTPUT_DIR = "."  # "/tmp"
+
 
 # TODO: Write this functions
 def fitCurveFiles(morpho_behavior_tuples):
@@ -69,7 +72,7 @@ def runSampMap(
     cclass: str = "",
     fses: str = "",
     descfile: str = "",
-    output_dir: str = "/tmp/",
+    output_dir: str = OUTPUT_DIR,
 ) -> list[str]:
     """
     run sample mapping
@@ -118,7 +121,7 @@ def runExposome(chem_id_file):
     cmd = f"Rscript exposome/exposome_summary_stats.R {chem_id_file}"
     tqdm.write(cmd)
     os.system(cmd)
-    return ["/tmp/exposomeGeneStats.csv"]
+    return [os.path.join(OUTPUT_DIR, "exposomeGeneStats.csv")]
 
 
 def runExpression(gex, chem, ginfo):
@@ -128,7 +131,11 @@ def runExpression(gex, chem, ginfo):
     cmd = f"Rscript zfExp/parseGexData.R {gex} {chem} {ginfo}"
     tqdm.write(cmd)
     os.system(cmd)
-    return ["/tmp/srpDEGPathways.csv", "/tmp/srpDEGStats.csv", "/tmp/allGeneEx.csv"]
+    return [
+        os.path.join(OUTPUT_DIR, "srpDEGPathways.csv"),
+        os.path.join(OUTPUT_DIR, "srpDEGStats.csv"),
+        os.path.join(OUTPUT_DIR, "allGeneEx.csv"),
+    ]
 
 
 def runSchemaCheck(dbfiles: list[Optional[str]] = []):
@@ -235,7 +242,7 @@ def main():
                 fdf = combineFiles(
                     df.loc[df.sample_type == st].loc[df.data_type == dt], dt
                 )
-                fname = f"/tmp/tmp_{st}_{dt}.csv"
+                fname = os.path.join(OUTPUT_DIR, f"tmp_{st}_{dt}.csv")
                 fdf.to_csv(fname, index=False)
                 if st == "chemical":
                     chem_files.append(fname)
@@ -300,10 +307,10 @@ def main():
     # Gene Expression Workflow
     # ------------------------
     if args.geneEx:
-        if not os.path.exists("/tmp/chemicals.csv"):
+        if not os.path.exists(os.path.join(OUTPUT_DIR, "chemicals.csv")):
             runSampMap(False, [], sid, cid, emap, cclass, fses, descfile)
 
-        res = runExpression(gex1, "/tmp/chemicals.csv", ginfo)
+        res = runExpression(gex1, os.path.join(OUTPUT_DIR, "chemicals.csv"), ginfo)
         runSchemaCheck(res)
 
 
