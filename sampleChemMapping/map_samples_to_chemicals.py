@@ -7,6 +7,7 @@ Original rewrite using generative AI; modified by @christinehc
 # Imports
 # =========================================================
 import os
+import sys
 from argparse import ArgumentParser
 from typing import Optional
 
@@ -14,6 +15,8 @@ import numpy as np
 import pandas as pd
 
 from numpy.typing import ArrayLike
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.format import rename_duplicates, snakeify, snakeify_all_columns
 from src.mapping import rename_chemical_class
 from src.metadata import build_chem_metadata, get_endpoint_metadata
@@ -31,8 +34,8 @@ from src.tables import sample_id_master_table
 # These pathways refer to absolute pathways in the docker image
 # setting these three parameters, can be appended
 # data_dir = 'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
-out_dir = "/tmp/"
-# out_dir = "./"
+# OUT_DIR = "/tmp"
+OUT_DIR = "."
 
 # Set CompTox API key
 CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"

@@ -8,7 +8,7 @@ import os
 from typing import Optional
 import pandas as pd
 from tqdm import tqdm
-from sampleChemMapping.src.mapping import load_mapping_reference, get_mapping_file
+from src.mapping import load_mapping_reference, get_mapping_file
 
 # DEFINE OUTPUT DIRECTORY
 OUTPUT_DIR = "."  # "/tmp"
@@ -118,7 +118,8 @@ def runExposome(chem_id_file):
     """
     run exposome data pull
     """
-    cmd = f"Rscript exposome/exposome_summary_stats.R {chem_id_file}"
+    # cmd = f"Rscript exposome/exposome_summary_stats.R {chem_id_file}"
+    cmd = f"python exposome/exposome_summary_stats.py {chem_id_file}"
     tqdm.write(cmd)
     os.system(cmd)
     return [os.path.join(OUTPUT_DIR, "exposomeGeneStats.csv")]

@@ -321,16 +321,16 @@ classes:
   exposomeGeneStats:
     description: Summary and link to exposome measurements of human genes that are differentailly expressed upon chemical treatment
     slots:
-      - Chemical_ID
-      - Project
+      - chemical_id
+      - project
       - concentration
       - cas_number
       - concentration_unit
     attributes:
-      nGenes:
+      n_genes:
         description:
         range: integer
-      Link:
+      link:
         description:
-      Condition:
+      condition:
         description: 
