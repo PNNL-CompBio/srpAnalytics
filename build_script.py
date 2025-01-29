@@ -77,6 +77,7 @@ def runSampMap(
     """
     run sample mapping
     """
+    print("drcfiles:", drcfiles)
     drc = ",".join(drcfiles)
     args = (
         f" --sample_id={sid}"

@@ -604,7 +604,7 @@ def main():
             )
 
         if args.is_chem:
-            nas = bmds["Chemical_ID"].isna()
+            nas = bmds[bmds["Chemical_ID"].isna()]["Chemical_ID"]
             to_remove = set(nas) - set(chem_sample["chemical_id"])
             bmds = bmds[~bmds["Chemical_ID"].isin(to_remove)]
             curves = curves[~curves["Chemical_ID"].isin(to_remove)]

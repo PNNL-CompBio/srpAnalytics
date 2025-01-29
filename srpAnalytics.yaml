@@ -15,7 +15,17 @@ slots:
     range: linkml:Any
     identifier: true
     slot_uri: schema:identifier
+  chemical_id:
+    description: Unique identifier for every chemical in the database
+    range: linkml:Any
+    identifier: true
+    slot_uri: schema:identifier
   Sample_ID:
+    description: Unique identifier for every sample in the database
+    range: linkml:Any
+    identifier: true
+    slot_uri: schema:identifier
+  sample_id:
     description: Unique identifier for every sample in the database
     range: linkml:Any
     identifier: true
@@ -29,52 +39,52 @@ slots:
     description: Unit of concentration
   Project:
     description: name of project contributing the dataset
-  Model:
+  model:
     description: Model with best fit to data
-  BMD10:
+  bmd10:
     description: Dose at which 10% of fish are affected
     range: linkml:Any
-  BMD50:
+  bmd50:
     description: Dose at which 50% of fish are affected
     range: linkml:Any
-  Min_Dose:
+  min_dose:
     description: Minimum dose administered
     range: linkml:Any
-  Max_Dose:
+  max_dose:
     description: Maximum dose administered
     range: linkml:Any    
-  AUC_Norm:
+  auc_norm:
     description: normalized area under the curve
     range: linkml:Any
-  BMD_Analysis_Flag:
+  bmd_analysis_flag:
     description: quality of curve fit
     range: integer
-  IncludeInPortal:
+  include_in_portal:
     description:
-  End_Point_Name:
+  end_point_name:
     description:
-  Description:
+  description:
     description: Name of endpoint
-  endPointLink:
+  end_point_link:
     description: Link to endpoint description
-  DataQC_Flag:
+  data_qc_flag:
     description: Quality of Data
-  Dose:
+  dose:
     description: Dose of chemical
     range: float
-  Response:
+  response:
     description: Response in terms of percentage of fish alive
     range: float
-  CI_Lo:
+  ci_lo:
     description: Low range of confidence interval
     range: float
-  CI_Hi:
+  ci_hi:
     description: High range of confidence interval
     range: float
-  X_vals:
+  x_vals:
     description: X coordinates of fitted curve
     range: linkml:Any
-  Y_vals:
+  y_vals:
     description: Y coordinates of fitted curve
     range: linkml:Any
 
@@ -193,7 +203,7 @@ classes:
       - end_point_name
       - description
       - end_point_link
-      - data_qc_Flag
+      - data_qc_flag
   zebrafishSampDoseResponse:
     description: Dose response datapoints of sample extracts in zebrafish
     slots:
