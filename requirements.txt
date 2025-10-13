@@ -1,5 +1,6 @@
 pandas
 argparse
 linkml
+pydantic
 # ctx-python
 -e git+https://github.com/christinehc/ctx-python#egg=ctx-python
