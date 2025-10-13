@@ -6,15 +6,16 @@ Build script moved to python for better extendability and interoperability.
 import argparse
 import os
 from typing import Optional
+
 import pandas as pd
+from src.mapping import get_mapping_file, load_mapping_reference
 from tqdm import tqdm
-from src.mapping import load_mapping_reference, get_mapping_file
 
 # DEFINE OUTPUT DIRECTORY
-OUTPUT_DIR = "."  # "/tmp"
+OUTPUT_DIR = "/tmp"  # "/tmp"
 
 
-# TODO: Write this functions
+# TODO: Write this function
 def fitCurveFiles(morpho_behavior_tuples):
     """
     get new curve fits, list of tuples of morpho/behavior pairs
@@ -58,6 +59,12 @@ def combineFiles(location_list: pd.DataFrame, ftype: str) -> pd.DataFrame:
     for loc in location_list.location:
         f = pd.read_csv(loc)[required_cols[ftype]]
         dflist.append(f)
+
+    # Check for empty list
+    if not dflist:
+        tqdm.write("Warning: No valid files found for concatenation")
+        return pd.DataFrame(columns=required_cols[ftype])
+
     df = pd.concat(dflist).drop_duplicates()
     return df
 
@@ -87,7 +94,6 @@ def runSampMap(
         f" --chem_class={cclass}"
         f" --sample_files={fses}"
         f" --chem_desc={descfile}"
-        f" --sample_map={smap}"
         f" --output_dir={output_dir}"
     )
     if is_sample:
@@ -290,9 +296,11 @@ def main():
         progress_bar.set_description("Running sample mapping... Done!")
         progress_bar.close()
 
-        # Collect all unique files
+        # Collect all unique files and remove temp files
         all_res = list(set(all_res))
         for f in sample_files + chem_files:
+            # tqdm.write(f"Filename: {f}")
+            # os.system(f"head {f}")
             os.system(f"rm {f}")
 
         # Validate schema
@@ -303,6 +311,9 @@ def main():
     # -----------------
     if args.expo:
         res = runExposome(cid)
+        for f in res:
+            tqdm.write(f"Filename: {f}")
+            os.system(f"head {f}")
         runSchemaCheck(res)
 
     # ------------------------
@@ -310,10 +321,25 @@ def main():
     # ------------------------
     if args.geneEx:
         if not os.path.exists(os.path.join(OUTPUT_DIR, "chemicals.csv")):
-            runSampMap(False, [], sid, cid, emap, cclass, fses, descfile)
+            runSampMap(
+                is_sample=False,
+                drcfiles=[],
+                sid=sid,
+                smap=smap,
+                cid=cid,
+                emap=emap,
+                cclass=cclass,
+                fses=fses,
+                descfile=descfile,
+                output_dir=OUTPUT_DIR,
+            )
 
         res = runExpression(gex1, os.path.join(OUTPUT_DIR, "chemicals.csv"), ginfo)
+        for f in res:
+            tqdm.write(f"Filename: {f}")
+            os.system(f"head {f}")
         runSchemaCheck(res)
 
 
-main()
+if __name__ == "__main__":
+    main()
