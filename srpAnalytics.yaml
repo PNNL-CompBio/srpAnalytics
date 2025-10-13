@@ -2,7 +2,7 @@ id: http://w3id.org/linkml/examples/srpanalyics
 name: srpanalytics
 prefixes:
    linkml: https://w3id.org/linkml
-   coderdata: https://w3id.org/linkml/examples/srpanalytics
+   srpanalytics: https://w3id.org/linkml/examples/srpanalytics
    schema: http://schema.org/
 imports:
    - linkml:types
@@ -10,81 +10,75 @@ default_range: string
 default_prefix: srpanalytics
 
 slots:
+  AUC_Norm:
+    description: normalized area under the curve
+    range: linkml:Any
+  BMD_Analysis_Flag:
+    description: quality of curve fit
+    range: integer
+  BMD10:
+    description: Dose at which 10% of fish are affected
+    range: linkml:Any
+  BMD50:
+    description: Dose at which 50% of fish are affected
+    range: linkml:Any
   Chemical_ID:
     description: Unique identifier for every chemical in the database
     range: linkml:Any
     identifier: true
     slot_uri: schema:identifier
-  chemical_id:
-    description: Unique identifier for every chemical in the database
-    range: linkml:Any
-    identifier: true
-    slot_uri: schema:identifier
-  Sample_ID:
-    description: Unique identifier for every sample in the database
-    range: linkml:Any
-    identifier: true
-    slot_uri: schema:identifier
-  sample_id:
-    description: Unique identifier for every sample in the database
-    range: linkml:Any
-    identifier: true
-    slot_uri: schema:identifier
+  DataQC_Flag:
+    description: Quality of Data
+  Description:
+    description: Name of endpoint
+  End_Point_Name:
+    description:
+  endPointLink:
+    description: Link to endpoint description
   cas_number:
     description: CAS identifier for a specific chemical
+    range: linkml:Any  # need to enforce string
+  CI_Hi:
+    description: High range of confidence interval
+    range: float
+  CI_Lo:
+    description: Low range of confidence interval
+    range: float
+  combined:
+    description: (TODO) Combined significance score?
+    range: float
   concentration:
     description: Concentration at which chemical was administered in uM
     range: float
   concentration_unit:
     description: Unit of concentration
-  Project:
-    description: name of project contributing the dataset
-  model:
-    description: Model with best fit to data
-  bmd10:
-    description: Dose at which 10% of fish are affected
-    range: linkml:Any
-  bmd50:
-    description: Dose at which 50% of fish are affected
-    range: linkml:Any
-  min_dose:
-    description: Minimum dose administered
-    range: linkml:Any
-  max_dose:
-    description: Maximum dose administered
-    range: linkml:Any    
-  auc_norm:
-    description: normalized area under the curve
-    range: linkml:Any
-  bmd_analysis_flag:
-    description: quality of curve fit
-    range: integer
-  include_in_portal:
-    description:
-  end_point_name:
-    description:
-  description:
-    description: Name of endpoint
-  end_point_link:
-    description: Link to endpoint description
-  data_qc_flag:
-    description: Quality of Data
-  dose:
+  Dose:
     description: Dose of chemical
     range: float
-  response:
+  IncludeInPortal:
+    description:
+  Max_Dose:
+    description: Maximum dose administered
+    range: linkml:Any
+  Min_Dose:
+    description: Minimum dose administered
+    range: linkml:Any
+  Model:
+    description: Model with best fit to data
+  Project:
+    description: name of project contributing the dataset
+  Response:
     description: Response in terms of percentage of fish alive
     range: float
-  ci_lo:
-    description: Low range of confidence interval
-    range: float
-  ci_hi:
-    description: High range of confidence interval
-    range: float
-  x_vals:
+  Sample_ID:
+    description: Unique identifier for every sample in the database
+    range: linkml:Any
+    identifier: true
+    slot_uri: schema:identifier
+  X_vals:
     description: X coordinates of fitted curve
     range: linkml:Any
-  y_vals:
+  Y_vals:
     description: Y coordinates of fitted curve
     range: linkml:Any
 
@@ -131,25 +125,27 @@ classes:
   chemicals:
     description: List of chemicals measured in the Superfund study
     slots:
-      - Chemical_ID
       - cas_number
+      - Chemical_ID
     attributes:
-      DTXSID:
-        description:
-      PREFERRED_NAME:
-        description:      
-      INCHIKEY:
-        description:
-      SMILES:
-        description: 
-      MOLECULAR_FORMULA:
-        description:
-      AVERAGE_MASS:   
-        description:
+      preferredName:
+        description: Chemical name
+      smiles:
+        description: SMILES representation of a chemical compound
+      dtxsid:
+        description: DSSTox Substance Identifier used in the Environmental Protection Agency CompTox Dashboard
+      dtxcid:
+        description: DSSTox Compound Identifier used in the Environmental Protection Agency CompTox Dashboard
+      averageMass:   
+        description: Average molecular mass of a chemical compound
         range: linkml:Any
+      inchikey:
+        description: InChIKey identifier for a chemical compound
+      molFormula:
+        description: Molecular formula
       PUBCHEM_DATA_SOURCES:
         description: Number of data sources in pubchem citing this chemical
-        range: linkml:Any
+        range: float
       chem_source:
         description:
       chemical_class:
@@ -175,57 +171,56 @@ classes:
         range: linkml:Any
       measurement_value_molar_unit:
         description:
-      environment_concentration:
+      environmental_concentration:
         description:
         range: linkml:Any
-      environment_concentration_qualifier:
+      environmental_concentration_qualifier:
         description:
-      environment_concentration_unit:
+      environmental_concentration_unit:
         description:
-      environment_concentration_molar:
+      environmental_concentration_molar:
         description:
         range: linkml:Any
-      environment_concentration_molar_unit:
+      environmental_concentration_molar_unit:
         description:
   zebrafishSampBMDs:
     description: Benchmark dose measurements of sample extracts in zebrafish
     slots:
-      - sample_id
-      - sample_name
-      - model
-      - bmd10
-      - bmd50
-      - min_dose
-      - max_dose
-      - auc_norm
-      - bmd_analysis_flag
-      - include_in_portal
-      - end_point_name
-      - description
-      - end_point_link
-      - data_qc_flag
+      - Sample_ID
+      - Model
+      - BMD10
+      - BMD50
+      - Min_Dose
+      - Max_Dose
+      - AUC_Norm
+      - BMD_Analysis_Flag
+      - IncludeInPortal
+      - End_Point_Name
+      - Description
+      - endPointLink
+      - DataQC_Flag
   zebrafishSampDoseResponse:
     description: Dose response datapoints of sample extracts in zebrafish
     slots:
-      - sample_id
-      - dose
-      - response
-      - ci_lo
-      - ci_hi
+      - Sample_ID
+      - Dose
+      - Response
+      - CI_Lo
+      - CI_Hi
       - combined
-      - include_in_portal
-      - end_point_name
-      - end_point_link
+      - IncludeInPortal
+      - End_Point_Name
+      - endPointLink
   zebrafishSampXYCoords:
     description: XY Coordinates of curve fit data for sample extracts in zebrafish
     slots:
-      - sample_id
-      - x_vals
-      - y_vals
+      - Sample_ID
+      - X_vals
+      - Y_vals
       - combined
-      - include_in_portal
-      - end_point_name
-      - end_point_link
+      - IncludeInPortal
+      - End_Point_Name
+      - endPointLink
   zebrafishChemBMDs:
     description: Benchmark dose measurements of chemicals in zebrafish
     slots:
@@ -309,30 +304,33 @@ classes:
     attributes:
       term:
         description:
-      adj_p_value:
-        description:
-        range: float
-      p_value:
-        description:
-        range: float
-      Genes:
-        description:      
-      enrichment_score:
-        description:
-        range: float
+        range: string
       z_score:
+        description:
+        range: float
+      enrichment_score:
         description:
         range: float
       overlap:
         description:
+        range: string
+      p_value:
+        description:
+        range: float
+      adj_p_value:
+        description:
+        range: float
+      Genes:
+        description:
+        range: string
       toPlot:
         description:
         range: integer    
   exposomeGeneStats:
     description: Summary and link to exposome measurements of human genes that are differentailly expressed upon chemical treatment
     slots:
-      - chemical_id
-      - project
+      - Chemical_ID
+      - Project
       - concentration
       - cas_number
       - concentration_unit
