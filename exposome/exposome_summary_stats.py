@@ -1,4 +1,4 @@
-"""exposome_summary_stats: Converted from R to Python with AI Incubator."""
+"""exposome_summary_stats: Build exposome data and get summary statistics."""
 
 # ===============================================
 #  IMPORTS
@@ -6,18 +6,15 @@
 import json
 import re
 import sys
-from os.path import abspath, dirname, join
+from os.path import join
 
 import pandas as pd
 import requests
 
-sys.path.append(dirname(dirname(abspath(__file__))))
-from src.format import snakeify_all_columns
-
 # ===============================================
 #  CONFIG
 # ===============================================
-OUTPUT_DIR = "."
+OUTPUT_DIR = "/tmp/"
 
 PROJ2NAME = {
     "ADIPO": "Human adipocyte cell lines",
@@ -31,6 +28,7 @@ PROJ2NAME = {
 #  FUNCTIONS
 # ===============================================
 def check_args():  # Check for the path to the chemical mapping file
+    """Enforce that the minimum number of arguments is called."""
     if len(sys.argv) < 2:
         print("Need to call script with path to chemical mapping file.")
         sys.exit()
@@ -70,7 +68,7 @@ def _load_projects(
 
 
 def _load_chemicals(project: str) -> pd.DataFrame:
-    """Load chemicals associated with project
+    """Load chemicals associated with project.
 
     Parameters
     ----------
@@ -81,7 +79,7 @@ def _load_chemicals(project: str) -> pd.DataFrame:
     -------
     pd.DataFrame
         Tabulated chemical information with the following columns:
-            Chemical_Id: str
+            Chemical_ID: str
             Project: str
             Chemical_Name: str
             CAS: str
@@ -98,18 +96,22 @@ def _load_chemicals(project: str) -> pd.DataFrame:
 def format_concentration(
     df: pd.DataFrame, column_name: str = "Concentration"
 ) -> pd.DataFrame:
-    """
-    Splits a concentration column into separate numeric and unit columns,
+    """Split concentration column into separate numeric and unit columns,
     only recognizing units 'uM' or 'mg/kg' from a larger string.
 
-    Parameters:
-    - df: pandas DataFrame containing the concentration column.
-    - column_name: str, name of the column to be split (default is 'Concentration').
+    Written using AI incubator 01/2025
 
-    Returns:
-    - DataFrame with separate 'Concentration' and 'Unit' columns.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Data containing the concentration column.
+    column_name : str
+        Name of the column to be split (default is 'Concentration').
 
-    Written by AI incubator 01/2025
+    Returns
+    -------
+    pandas.DataFrame
+        Data with separate 'Concentration' and 'Unit' columns.
     """
 
     def extract_unit_and_numeric(c):
@@ -139,6 +141,48 @@ def summarize(
     prefix: str = "ModZScore ",
     value_name: str = "ModZScore",
 ) -> pd.DataFrame:
+    """Summarize/reshape dataframe by certain statistics.
+
+    e.g. the default parameters would take a dataframe of the form:
+
+    | Gene   | ModZScore 0.1 | ModZScore 1.0 | ModZScore 10.0 | OtherColumn |
+    |--------|---------------|---------------|----------------|-------------|
+    | GATA1  | 0.5           | 1.2           | 2.7            | value1      |
+    | SOX2   | -0.3          | 0.8           | 1.9            | value2      |
+    | PAX6   | 0.2           | 0.4           | 1.5            | value3      |
+
+    and reshape to
+
+    | Gene   | Concentration | ModZScore |
+    |--------|--------------|-----------|
+    | GATA1  | 0.1          | 0.5       |
+    | GATA1  | 1.0          | 1.2       |
+    | GATA1  | 10.0         | 2.7       |
+    | SOX2   | 0.1          | -0.3      |
+    | SOX2   | 1.0          | 0.8       |
+    | SOX2   | 10.0         | 1.9       |
+    | PAX6   | 0.1          | 0.2       |
+    | PAX6   | 1.0          | 0.4       |
+    | PAX6   | 10.0         | 1.5       |
+
+    Note the example above was generated using AI on 10/2025.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe
+    id_var : str, optional
+        Column name for summary statistic of interest, by default "Gene"
+    prefix : str, optional
+        Column prefix for summary statistics to group, by default "ModZScore "
+    value_name : str, optional
+        Name of grouped statistic, by default "ModZScore"
+
+    Returns
+    -------
+    pd.DataFrame
+        Reshaped dataframe.
+    """
     if " " not in prefix:
         prefix = f"{prefix} "
 
@@ -152,7 +196,21 @@ def summarize(
     return df
 
 
-def getGoTerms(chemical_id, project):
+def getGoTerms(chemical_id: str, project: str) -> pd.DataFrame:
+    """Retrieve Gene Ontology (GO) terms via the BU Xposome portal.
+
+    Parameters
+    ----------
+    chemical_id : str
+        Chemical identifier (e.g. CAS number)
+    project : str
+        Name of project by which to query API
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe containing GO summarized info
+    """
     url = f"https://montilab.bu.edu/Xposome-API/gs_enrichment?project={project}&chemical_id={chemical_id}"
     res = requests.get(url)
     if res.status_code != 200:
@@ -180,6 +238,29 @@ def getGoTerms(chemical_id, project):
 
 
 def getGenes(chemical_id, project):
+    """Retrieve and gene expression data from the BU Xposome portal.
+
+    Parameters
+    ----------
+    chemical_id : str
+        Chemical identifier (e.g. CAS number)
+    project : str
+        Name of project (e.g. "TG-GATEs", "MCF10A")
+
+    Returns
+    -------
+    pd.DataFrame
+        Processed dataframe containing summarized gene expression
+        data. Returns an empty DataFrame if no data is found or
+        if an error occurs.
+
+    Notes
+    -----
+    The function applies project-specific processing:
+    - For TG-GATEs: Parses "Condition_High_Concentration" format
+    - For MCF10A: Parses "Condition_Concentration" format
+    - For other projects: Assigns "WT" as default condition
+    """
     url = f"https://montilab.bu.edu/Xposome-API/gene_expression?project={project}&chemical_id={chemical_id}&landmark=FALSE&do.scorecutoff=FALSE"
 
     try:
