@@ -5,10 +5,11 @@
 # ===============================================
 import json
 import re
-import requests
 import sys
 from os.path import abspath, dirname, join
+
 import pandas as pd
+import requests
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 from src.format import snakeify_all_columns
@@ -88,7 +89,9 @@ def _load_chemicals(project: str) -> pd.DataFrame:
     url = f"https://montilab.bu.edu/Xposome-API/chemicals?projects={project}&chemical_ids=all"
     res = requests.get(url)
     if res.status_code == 200:
-        return pd.DataFrame(json.loads(res.json()[0]))
+        data = pd.DataFrame(json.loads(res.json()[0]))
+        data = data.rename(columns={"Chemical_Id": "Chemical_ID"})
+        return data.dropna(subset=["Chemical_ID"])
     return
 
 
@@ -170,31 +173,33 @@ def getGoTerms(chemical_id, project):
 
     display_link = f"https://montilab.bu.edu/Xposome/?page={project}&tab=chemical_explorer&chemical_id={chemical_id}&stat=gs_enrichment"
 
-    summary["project"] = project
+    summary["Project"] = project
     summary["cas_number"] = chemical_id
-    summary["link"] = display_link
-    return snakeify_all_columns(summary)
+    summary["Link"] = display_link
+    return summary
 
 
 def getGenes(chemical_id, project):
     url = f"https://montilab.bu.edu/Xposome-API/gene_expression?project={project}&chemical_id={chemical_id}&landmark=FALSE&do.scorecutoff=FALSE"
-    res = requests.get(url)
-    if res.status_code != 200:
-        return pd.DataFrame()
 
-    # Load gene expression summary statistics data
-    summary = pd.DataFrame(json.loads(res.json()[0]))
+    try:
+        res = requests.get(url)
 
-    if len(summary) > 0:
+        # Load gene expression summary statistics data
+        summary = pd.DataFrame(json.loads(res.json()[0]))
+
+        if summary.empty:
+            return pd.DataFrame()
+
         # Reshape into 3 cols: Gene, Concentration, and ModZScore
         summary = summarize(summary)
 
-        if proj == "TG-GATEs":
+        if project == "TG-GATEs":
             summary[["Condition", "High", "Concentration"]] = summary[
                 "Concentration"
             ].str.split("_", expand=True)
             summary.drop(columns=["High"], inplace=True)
-        elif proj == "MCF10A":
+        elif project == "MCF10A":
             summary[["Condition", "Concentration"]] = summary[
                 "Concentration"
             ].str.split("_", expand=True)
@@ -203,12 +208,16 @@ def getGenes(chemical_id, project):
 
         summary = format_concentration(summary)  # format conc + unit cols
 
-    display_link = f"https://montilab.bu.edu/Xposome/?page={project}&tab=chemical_explorer&chemical_id={chemical_id}&stat=gene_expression"
+        display_link = f"https://montilab.bu.edu/Xposome/?page={project}&tab=chemical_explorer&chemical_id={chemical_id}&stat=gene_expression"
 
-    summary["project"] = project
-    summary["cas_number"] = chemical_id
-    summary["link"] = display_link
-    return snakeify_all_columns(summary)
+        summary["Project"] = project
+        summary["cas_number"] = chemical_id
+        summary["Link"] = display_link
+        return summary
+
+    except (requests.RequestException, json.JSONDecodeError, KeyError) as e:
+        print(f"Error processing {chemical_id} in {project}: {e}")
+        return pd.DataFrame()
 
 
 # ===============================================
@@ -218,12 +227,19 @@ if __name__ == "__main__":
     check_args()
 
     # Load all chemicals and projects
-    chems = snakeify_all_columns(pd.read_csv(sys.argv[1], encoding="utf-8-sig"))
+    chems = pd.read_csv(sys.argv[1], encoding="utf-8-sig").dropna(
+        subset=["Chemical_ID"]
+    )
     projects = _load_projects()
 
     genes, gos = list(), list()
     for proj in projects:
         c = _load_chemicals(proj)
+
+        # Check for empty data
+        if c is None or c.empty:
+            print(f"No chemicals found for project {proj}")
+            continue
 
         overlap = set(chems["cas_number"]).intersection(set(c["CAS"]))
         print(f"Found {len(overlap)} CAS ids in common in project {proj}")
@@ -234,17 +250,17 @@ if __name__ == "__main__":
 
     # Combine all gene data and include friendly project names
     genes = pd.concat(genes, ignore_index=True)
-    genes["project_id"] = genes["project"]
-    genes["project"] = [PROJ2NAME[p] for p in genes["project_id"]]
+    genes["project_id"] = genes["Project"]
+    genes["Project"] = [PROJ2NAME[p] for p in genes["project_id"]]
     # gos = pd.concat(gos, ignore_index=True)
 
     # Get significant genes
-    genes = genes.loc[genes["mod_z_score"].abs() > 1.63].copy()
-    chems = chems[["cas_number", "chemical_id"]].drop_duplicates()
+    genes = genes.loc[genes["ModZScore"].abs() > 1.63].copy()
+    chems = chems[["cas_number", "Chemical_ID"]].drop_duplicates()
 
     genes = (
-        genes.groupby(["project", "cas_number", "concentration", "link", "condition"])
-        .agg(n_genes=("gene", "nunique"))
+        genes.groupby(["Project", "cas_number", "Concentration", "Link", "Condition"])
+        .agg(nGenes=("Gene", "nunique"))
         .reset_index()
         .merge(chems, on="cas_number")
     )
