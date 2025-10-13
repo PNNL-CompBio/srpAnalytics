@@ -1,10 +1,7 @@
 # =========================================================
 # Imports
 # =========================================================
-
 import pandas as pd
-
-from .format import snakeify, snakeify_all_columns
 from numpy.typing import ArrayLike
 
 # #################################
@@ -16,9 +13,7 @@ from numpy.typing import ArrayLike
 # #################################
 
 
-def chem_id_master_table(
-    df: pd.DataFrame, cas_ids: ArrayLike, snake_case: bool = True
-) -> pd.DataFrame:
+def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
     """Generate master table for chemical ID
 
     Note: database requires Sample_ID and  Chemical_ID be unique. They are in some files but not others
@@ -41,11 +36,6 @@ def chem_id_master_table(
     # Clean up input data and reduce # columns
     cols = ["cas_number", "zf.cid", "Chemical_ID", "chemical_class"]
 
-    # Standardize col names to snake_case
-    if snake_case:
-        cols = [snakeify(c) for c in cols]
-        df = snakeify_all_columns(df)
-
     # Remove duplicates
     df = df[cols].drop_duplicates().dropna(subset=["cas_number"])
 
@@ -67,7 +57,6 @@ def chem_id_master_table(
 
         # Append missing rows and format output col names
         df = pd.concat([df, missing_df])
-        df = snakeify_all_columns(df)
 
         # TODO: how do we update with new ids?
         # write.csv(newMap,paste0(data.dir,'chemicalIdMapping.csv'),row.names = F)
@@ -101,7 +90,12 @@ def sample_id_master_table(
     missing = set(existing_sample_numbers) - set(map_df["SampleNumber"])
     if missing:
         print(f"Missing {len(missing)} sample IDs; adding them now...")
-        max_id = int(map_df["Sample_ID"].astype(float).max(skipna=True) + 1)
+
+        # Get max ID, filtering for only numeric sample IDs
+        numeric_mask = map_df["Sample_ID"].str.match(r"^\d+$", na=False)
+        numeric_ids = map_df.loc[numeric_mask, "Sample_ID"].astype(float)
+        max_id = int(numeric_ids.max(skipna=True) + 1)
+
         missing_df = pd.DataFrame(
             {
                 "Sample_ID": range(max_id, max_id + len(missing)),  # new sample IDs
@@ -109,9 +103,6 @@ def sample_id_master_table(
             }
         )
         map_df = pd.concat([map_df, missing_df])
-
-    # Enforce snake_case for all col names
-    map_df = snakeify_all_columns(map_df)
     return map_df
 
 

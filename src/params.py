@@ -1,8 +1,8 @@
 from pandas import isna
+
 # =========================================================
 # Define Columns / Table Schemas
 # =========================================================
-
 REQUIRED_SAMPLE_COLUMNS = [
     "ClientName",
     "SampleNumber",
