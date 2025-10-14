@@ -14,6 +14,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike
+from tqdm import tqdm
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.format import rename_duplicates
@@ -180,7 +181,7 @@ def build_sample_data(
         # Fill in NAs with new values from remapping table
         missing = data["projectName"].isna()
         if missing.any():
-            print("Missing values found!")
+            # tqdm.write("Missing values found!")
             remap_col_names = {
                 "projectName": "ProjectName",
                 "LocationName": "NewLocationName",
@@ -189,7 +190,7 @@ def build_sample_data(
             for old_col, new_col in remap_col_names.items():
                 data.loc[missing, old_col] = data.loc[missing, new_col]
 
-            print("columns after missing filled in:", data.columns)
+            # tqdm.write"columns after missing filled in:", data.columns)
 
         # Drop unnecessary columns and rows with missing CAS
         data = data.drop(
@@ -231,7 +232,7 @@ def combine_v2_chemical_endpoint_data(
     pd.DataFrame
         _description_
     """
-    print(f"Combining bmd files: {', '.join(bmd_files)}")
+    # tqdm.writef"Combining bmd files: {', '.join(bmd_files)}")
 
     # Read and concatenate the specified columns from all BMD files
     cols = REQUIRED_BMD_COLUMNS["bmd"]
@@ -246,13 +247,18 @@ def combine_v2_chemical_endpoint_data(
         # Split `sample_id` column on '-', take first two parts, and rename split cols
         sd_samp = chem_data.copy()
         sd_samp[["tmp_id", "sub"]] = sd_samp["Sample_ID"].str.split("-", expand=True)
-        sd_samp = sd_samp[["tmp_id", "Sample_ID"]].drop_duplicates()
+        sd_samp = sd_samp.dropna(subset=["tmp_id"])
 
         # Prepare for join
         full_bmd = df.copy()
         full_bmd["tmp_id"] = full_bmd["Chemical_ID"].astype(str)
-        full_bmd = full_bmd.drop(columns=["Chemical_ID"])
-        full_bmd = full_bmd.merge(sd_samp, on="tmp_id", how="full")
+        full_bmd = full_bmd.drop(columns=["Chemical_ID"]).dropna(subset=["tmp_id"])
+        full_bmd = pd.merge(
+            full_bmd,
+            sd_samp[["Sample_ID", "tmp_id"]].drop_duplicates(),
+            on="tmp_id",
+            how="outer",
+        )
 
         # Fill missing sample IDs with tmp_id
         nas = full_bmd["Sample_ID"].isna()
@@ -295,7 +301,6 @@ def combine_v2_chemical_endpoint_data(
         full_bmd = full_bmd.fillna({"End_Point": "NoData"})
         full_bmd = full_bmd.merge(endpoint_details, on="End_Point", how="right")
         full_bmd = full_bmd.drop(columns=["End_Point"])
-        full_bmd = full_bmd[full_bmd["casrn"].notna()]
         full_bmd = full_bmd.drop_duplicates()
         full_bmd = full_bmd.fillna({"chemical_class": "Unclassified"})
 
@@ -342,8 +347,6 @@ def combine_chemical_data(
     ValueError
         _description_
     """
-    print(f'Combining {data_type} files: {", ".join(bmd_files)}')
-
     # Determine columns based on data type
     if data_type == "fit":
         col_type = "fitVals"
@@ -361,9 +364,9 @@ def combine_chemical_data(
             df = pd.read_csv(file)[cols]
             files.append(df)
         except Exception as e:
-            print(f"Error reading {file}: {e}")
+            tqdm.write(f"Error reading {file}: {e}")
     if not files:
-        print("No valid files found")
+        tqdm.write("No valid files found")
         return pd.DataFrame()
     df = pd.concat(files, ignore_index=True)
 
@@ -599,9 +602,8 @@ def main():
     )
 
     args = parser.parse_args()
-    print(args)
 
-    print("Getting chemical metadata...")
+    tqdm.write("Getting chemical metadata...")
     chem_class = masv_chem_class(args.chem_class_file)
     if not os.path.exists(os.path.join(OUT_DIR, "chem_metadata.tsv")):
         chem_metadata = build_chem_metadata(args.metadata)
@@ -609,20 +611,20 @@ def main():
         chem_metadata = pd.read_csv(
             os.path.join(OUT_DIR, "chem_metadata.tsv"), sep="\t"
         )
-    print("Done!")
+    tqdm.write("Done!")
 
-    print("Getting sample data...")
+    tqdm.write("Getting sample data...")
     sample_files_list = args.sample_files.split(",")
     chem_sample = build_sample_data(
         sample_files_list, chem_metadata, args.sample_id_file, args.sample_map
     )
-    print("Done!")
+    tqdm.write("Done!")
 
-    print("Getting endpoint details...")
+    tqdm.write("Getting endpoint details...")
     endpoint_details = get_endpoint_metadata(
         args.endpoint_mapping_file
     ).drop_duplicates()
-    print("Done!")
+    tqdm.write("Done!")
 
     if args.is_sample or args.is_chem:
         all_files = args.dose_response.split(",")
@@ -632,7 +634,7 @@ def main():
 
         chem_data = chem_sample if args.is_sample else chem_metadata
 
-        print("Combining chemical endpoint data...")
+        tqdm.write("Combining chemical endpoint data...")
         bmds = (
             combine_v2_chemical_endpoint_data(
                 bmd_files,
@@ -640,12 +642,12 @@ def main():
                 chem_data=chem_data,
                 endpoint_details=endpoint_details,
             )
-            .dropna(subset=["bmd_analysis_flag"])
-            .query("bmd_analysis_flag != 'NA'")
+            .dropna(subset=["BMD_Analysis_Flag"])
+            .query("BMD_Analysis_Flag != 'NA'")
         )
-        print("Done!")
+        tqdm.write("Done!")
 
-        print("Combining chemical fitness data...")
+        tqdm.write("Combining chemical fitness data...")
         curves = combine_chemical_data(
             fit_files,
             data_type="fit",
@@ -653,20 +655,20 @@ def main():
             chem_data=chem_data,
             endpoint_details=endpoint_details,
         )
-        print("Done!")
+        tqdm.write("Done!")
 
-        print("Combining chemical dose response data...")
+        tqdm.write("Combining chemical dose response data...")
         dose_reps = combine_chemical_data(
             dose_files,
             data_type="dose",
             is_extract=args.is_sample,
             chem_data=chem_data,
             endpoint_details=endpoint_details,
-        ).dropna(subset=["dose"])
-        print("Done!")
+        ).dropna(subset=["Dose"])
+        tqdm.write("Done!")
 
         if args.is_sample:
-            print("Saving sample data to CSV...")
+            tqdm.write("Saving sample data to CSV...")
             bmds.to_csv(
                 os.path.join(args.output_dir, "zebrafishSampBMDs.csv"),
                 index=False,
@@ -682,18 +684,18 @@ def main():
                 index=False,
                 quotechar='"',
             )
-            print("Done!")
+            tqdm.write("Done!")
 
         if args.is_chem:
-            print("Removing invalid chemical IDs...")
+            tqdm.write("Removing invalid chemical IDs...")
             nas = bmds[bmds["Chemical_ID"].isna()]["Chemical_ID"]
             to_remove = set(nas) - set(chem_sample["Chemical_ID"])
             bmds = bmds[~bmds["Chemical_ID"].isin(to_remove)]
             curves = curves[~curves["Chemical_ID"].isin(to_remove)]
             dose_reps = dose_reps[~dose_reps["Chemical_ID"].isin(to_remove)]
-            print("Done!")
+            tqdm.write("Done!")
 
-            print("Saving chemical data to CSV...")
+            tqdm.write("Saving chemical data to CSV...")
             bmds.to_csv(
                 os.path.join(args.output_dir, "zebrafishChemBMDs.csv"),
                 index=False,
@@ -709,10 +711,10 @@ def main():
                 index=False,
                 quotechar='"',
             )
-            print("Done!")
+            tqdm.write("Done!")
 
     else:
-        print("Saving data...")
+        tqdm.write("Saving data...")
         chem_metadata.to_csv(
             os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"'
         )
@@ -720,11 +722,11 @@ def main():
             os.path.join(args.output_dir, "samples.csv"), index=False, quotechar='"'
         )
         chem_sample[SAMPLE_CHEM_COLUMNS].drop_duplicates().to_csv(
-            os.path.join(args.output_dir, "sampleToChemicals.csv"),
+            os.path.join(args.output_dir, "samplesToChemicals.csv"),
             index=False,
             quotechar='"',
         )
-        print("Done!")
+        tqdm.write("Done!")
 
 
 if __name__ == "__main__":

@@ -339,11 +339,16 @@ if __name__ == "__main__":
     genes = genes.loc[genes["ModZScore"].abs() > 1.63].copy()
     chems = chems[["cas_number", "Chemical_ID"]].drop_duplicates()
 
+    print(genes.columns)
+
     genes = (
         genes.groupby(["Project", "cas_number", "Concentration", "Link", "Condition"])
         .agg(nGenes=("Gene", "nunique"))
         .reset_index()
         .merge(chems, on="cas_number")
     )
+
+    # Enforce schema
+    genes = genes.rename(columns={"Concentration": "concentration"})
 
     genes.to_csv(join(OUTPUT_DIR, "exposomeGeneStats.csv"), index=False)
