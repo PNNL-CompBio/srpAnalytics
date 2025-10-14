@@ -2,6 +2,5 @@ pandas
 argparse
 linkml
 pydantic
-python <= 3.12
 # ctx-python
 -e git+https://github.com/christinehc/ctx-python#egg=ctx-python
