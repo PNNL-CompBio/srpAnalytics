@@ -46,7 +46,7 @@ slots:
     range: float
   combined:
     description: (TODO) Combined significance score?
-    range: float
+    # range: linkml:Any  # float
   concentration:
     description: Concentration at which chemical was administered in uM
     range: float
@@ -152,12 +152,12 @@ classes:
         description:
       chemDescription:
         description:
-  sampleToChemicals: 
+  samplesToChemicals: 
     description: Measurements of chemicals in samples
     slots:
+      - Sample_ID
       - Chemical_ID
       - cas_number
-      - Sample_ID
     attributes:
       measurement_value:
         description:
@@ -199,6 +199,9 @@ classes:
       - Description
       - endPointLink
       - DataQC_Flag
+    attributes:
+      SampleName:
+        description:
   zebrafishSampDoseResponse:
     description: Dose response datapoints of sample extracts in zebrafish
     slots:
@@ -237,7 +240,6 @@ classes:
       - Description
       - endPointLink
       - DataQC_Flag
-      
   zebrafishChemDoseResponse:
     description: Dose response datapoints of chemicals in zebrafish
     slots:
@@ -246,6 +248,7 @@ classes:
       - Response
       - CI_Lo
       - CI_Hi
+      - combined
       - IncludeInPortal
       - End_Point_Name
       - endPointLink
@@ -255,6 +258,7 @@ classes:
       - Chemical_ID
       - X_vals
       - Y_vals
+      - combined
       - IncludeInPortal
       - End_Point_Name
       - endPointLink
@@ -335,10 +339,10 @@ classes:
       - cas_number
       - concentration_unit
     attributes:
-      n_genes:
+      Link:
+        description:
+      Condition:
+        description:
+      nGenes:
         description:
         range: integer
-      link:
-        description:
-      condition:
-        description: 
