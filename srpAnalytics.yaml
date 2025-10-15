@@ -24,7 +24,7 @@ slots:
     range: linkml:Any
   Chemical_ID:
     description: Unique identifier for every chemical in the database
-    range: linkml:Any
+    range: integer
     identifier: true
     slot_uri: schema:identifier
   DataQC_Flag:
@@ -76,10 +76,10 @@ slots:
     identifier: true
     slot_uri: schema:identifier
   X_vals:
-    description: X coordinates of fitted curve
+    description: X coordinates of fitted curve, if available
     range: linkml:Any
   Y_vals:
-    description: Y coordinates of fitted curve
+    description: Y coordinates of fitted curve, if available
     range: linkml:Any
 
 classes:
@@ -90,11 +90,11 @@ classes:
       - projectName
     attributes:
       ClientName:
-        description:
+        description: Name of client
       SampleNumber:
-        description:
+        description: SampleNumber value from LIMS
       date_sampled:
-        description:
+        description: Date sampled in [day]/[month]/[year] [hh:mm:ss] [AM|PM] format
       date_sample_start:
         description:
         range: linkml:Any
@@ -147,9 +147,9 @@ classes:
         description: Number of data sources in pubchem citing this chemical
         range: float
       chem_source:
-        description:
+        description: Source of chemical, from hand-curated list at OSU.
       chemical_class:
-        description:
+        description: Chemical class, from hand-curated list at OSU
       chemDescription:
         description:
   samplesToChemicals: 
@@ -160,15 +160,15 @@ classes:
       - cas_number
     attributes:
       measurement_value:
-        description:
-        range: linkml:Any
+        description: Value measured in sampler
+        range: float
       measurement_value_qualifier:
-        description:
+        description: Qualifier of sample measurement
       measurement_value_unit:
-        description:
+        description: Unit of sample measurement
       measurement_value_molar:
-        description:
-        range: linkml:Any
+        description: Value converted to molar. 
+        range: float
       measurement_value_molar_unit:
         description:
       environmental_concentration:
@@ -340,7 +340,7 @@ classes:
       - concentration_unit
     attributes:
       Link:
-        description:
+        description: Link to Exposome website at Boston University
       Condition:
         description:
       nGenes:
