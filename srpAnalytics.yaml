@@ -161,16 +161,17 @@ classes:
     attributes:
       measurement_value:
         description: Value measured in sampler
-        range: float
+        range: linkml:Any
       measurement_value_qualifier:
         description: Qualifier of sample measurement
       measurement_value_unit:
         description: Unit of sample measurement
       measurement_value_molar:
         description: Value converted to molar. 
-        range: float
+        range: linkml:Any
       measurement_value_molar_unit:
         description:
+        range: linkml:Any
       environmental_concentration:
         description:
         range: linkml:Any
