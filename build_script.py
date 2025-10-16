@@ -140,15 +140,26 @@ def runSampMap(
     else:
         cmd = f"python sampleChemMapping/map_samples_to_chemicals.py {args}"
 
-    process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
-    for line in process.stdout.splitlines():
-        if line.strip():
-            tqdm.write(line)
-    # tqdm.write("\nRunning sample mapping with the following parameters:\n")
-    # tqdm.write(f"{cmd}\n")
-    # os.system(cmd)
-    # tqdm.write(f"ls -la {output_dir} \n")
-    # os.system(f"ls -la {output_dir}")
+    try:
+        process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+
+        # Verify successful command execution
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(
+                returncode=process.returncode,
+                cmd=cmd,
+                output=process.stdout,
+                stderr=process.stderr,
+            )
+
+        # Show command line logging messages
+        for line in process.stdout.splitlines():
+            if line.strip():
+                tqdm.write(line)
+    except Exception as e:
+        tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
+        raise e
+
     ##now we validate the files that came out.
     dblist = [
         os.path.join(output_dir, "samples.csv"),
@@ -416,9 +427,9 @@ def main():
         # Perform sample mapping
         for smp in sampmap_params:
             smpargs = {**smp, **sampmap_args}
-            tqdm.write(
-                f"Performing sample mapping with the following parameters: {smpargs}"
-            )
+            # tqdm.write(
+            #     f"Performing sample mapping with the following parameters: {smpargs}"
+            # )
             res = runSampMap(**smpargs)
             all_res.extend(res)
             progress_bar.update(1)
