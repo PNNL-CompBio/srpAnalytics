@@ -3,3 +3,4 @@ argparse
 linkml
 pydantic
 ctx-python
+tqdm
