@@ -34,8 +34,8 @@ from src.tables import sample_id_master_table
 # These pathways refer to absolute pathways in the docker image
 # setting these three parameters, can be appended
 # data_dir = 'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
-# OUT_DIR = "/tmp"
-OUT_DIR = "."
+OUT_DIR = "/tmp"
+# OUT_DIR = "."
 
 # Set CompTox API key
 CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
@@ -606,8 +606,10 @@ def main():
     tqdm.write("Getting chemical metadata...")
     chem_class = masv_chem_class(args.chem_class_file)
     if not os.path.exists(os.path.join(OUT_DIR, "chem_metadata.tsv")):
+        tqdm.write("No metadata found. Building metadata...")
         chem_metadata = build_chem_metadata(args.metadata)
     else:
+        tqdm.write("Metadata found! Reading from previous file...")
         chem_metadata = pd.read_csv(
             os.path.join(OUT_DIR, "chem_metadata.tsv"), sep="\t"
         )
