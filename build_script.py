@@ -140,7 +140,7 @@ def runSampMap(
     else:
         cmd = f"python sampleChemMapping/map_samples_to_chemicals.py {args}"
 
-    process = subprocess.run(cmd.split(" "), capture_output=True, text=True)
+    process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
     for line in process.stdout.splitlines():
         if line.strip():
             tqdm.write(line)
