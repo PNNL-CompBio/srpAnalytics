@@ -173,7 +173,10 @@ def runSampMap(
     # runSchemaCheck(dblist)
 
 
-def runExposome(chem_id_file: str) -> list[str]:
+def runExposome(
+    chem_id_file: str,
+    output_dir: str = OUTPUT_DIR,
+) -> list[str]:
     """Pull exposome data.
 
     Parameters
@@ -190,10 +193,15 @@ def runExposome(chem_id_file: str) -> list[str]:
     cmd = f"python exposome/exposome_summary_stats.py {chem_id_file}"
     tqdm.write(cmd)
     os.system(cmd)
-    return [os.path.join(OUTPUT_DIR, "exposomeGeneStats.csv")]
+    return [os.path.join(output_dir, "exposomeGeneStats.csv")]
 
 
-def runExpression(gex: str, chem: str, ginfo: str) -> list[str]:
+def runExpression(
+    gex: str,
+    chem: str,
+    ginfo: str,
+    output_dir: str = OUTPUT_DIR,
+) -> list[str]:
     """Parse gene expression data using R.
 
     Parameters
@@ -220,9 +228,9 @@ def runExpression(gex: str, chem: str, ginfo: str) -> list[str]:
     tqdm.write(cmd)
     os.system(cmd)
     return [
-        os.path.join(OUTPUT_DIR, "srpDEGPathways.csv"),
-        os.path.join(OUTPUT_DIR, "srpDEGStats.csv"),
-        os.path.join(OUTPUT_DIR, "allGeneEx.csv"),
+        os.path.join(output_dir, "srpDEGPathways.csv"),
+        os.path.join(output_dir, "srpDEGStats.csv"),
+        os.path.join(output_dir, "allGeneEx.csv"),
     ]
 
 
@@ -360,6 +368,12 @@ def main():
         default=False,
         help="Re run gene expression generation",
     )
+    parser.add_argument(
+        "--output_dir",
+        dest="output_dir",
+        default=OUTPUT_DIR,
+        help="Directory to store output files (default: '/tmp')",
+    )
 
     args = parser.parse_args()
 
@@ -389,7 +403,7 @@ def main():
                 fdf = combineFiles(
                     df.loc[df.sample_type == st].loc[df.data_type == dt], dt
                 )
-                fname = os.path.join(OUTPUT_DIR, f"tmp_{st}_{dt}.csv")
+                fname = os.path.join(args.output_dir, f"tmp_{st}_{dt}.csv")
                 fdf.to_csv(fname, index=False)
                 if st == "chemical":
                     chem_files.append(fname)
@@ -411,6 +425,7 @@ def main():
             "cclass": cclass,
             "fses": fses,
             "descfile": descfile,
+            "output_dir": args.output_dir,
         }
 
         # Iterate through sampMap params
@@ -452,7 +467,7 @@ def main():
     # Exposome Workflow
     # -----------------
     if args.expo:
-        res = runExposome(cid)
+        res = runExposome(cid, output_dir=args.output_dir)
         # for f in res:
         #     tqdm.write(f"Filename: {f}")
         #     os.system(f"head {f}")
@@ -462,7 +477,7 @@ def main():
     # Gene Expression Workflow
     # ------------------------
     if args.geneEx:
-        if not os.path.exists(os.path.join(OUTPUT_DIR, "chemicals.csv")):
+        if not os.path.exists(os.path.join(args.output_dir, "chemicals.csv")):
             runSampMap(
                 is_sample=False,
                 drcfiles=[],
@@ -473,10 +488,15 @@ def main():
                 cclass=cclass,
                 fses=fses,
                 descfile=descfile,
-                output_dir=OUTPUT_DIR,
+                output_dir=args.output_dir,
             )
 
-        res = runExpression(gex1, os.path.join(OUTPUT_DIR, "chemicals.csv"), ginfo)
+        res = runExpression(
+            gex1,
+            os.path.join(args.output_dir, "chemicals.csv"),
+            ginfo,
+            output_dir=args.output_dir,
+        )
         # for f in res:
         #     tqdm.write(f"Filename: {f}")
         #     os.system(f"head {f}")

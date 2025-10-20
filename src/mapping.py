@@ -1,9 +1,6 @@
 # =========================================================
 # Imports
 # =========================================================
-import os
-from urllib.error import HTTPError
-
 import pandas as pd
 
 
