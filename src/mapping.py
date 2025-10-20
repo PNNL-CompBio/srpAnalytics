@@ -2,6 +2,7 @@
 # Imports
 # =========================================================
 import os
+from urllib.error import HTTPError
 
 import pandas as pd
 
@@ -26,7 +27,7 @@ def load_mapping_reference(
     pd.DataFrame
         _description_
     """
-    return pd.read_csv(os.path.join(data_dir, filename))
+    return pd.read_csv(f"{data_dir}/{filename}")
 
 
 # @FIXME: Possibly delete? Seems unused
