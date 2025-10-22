@@ -4,14 +4,14 @@ FROM python:3.12
 
 
 RUN apt-get update --allow-insecure-repositories
-RUN apt-get install -y --allow-unauthenticated --fix-missing  python3-pip python3-setuptools python3-dev python3-venv libcurl4-openssl-dev libglpk-dev libxml2-dev libpq-dev
+RUN apt-get install -y --allow-unauthenticated --fix-missing  python3-pip python3-setuptools python3-dev python3-venv libcurl4-openssl-dev libglpk-dev libxml2-dev libpq-dev r-base
 RUN apt-get install -y libmariadb-dev-compat libmariadb-dev
 
 RUN python3 -m venv /opt/venv
 
 ENV PATH="/opt/venv/bin:$PATH"
-ENV PYTHONPATH "${PYTHONPATH}:/tmp"
-ENV PYTHONPATH "${PYTHONPATH}:/app"
+ENV PYTHONPATH="${PYTHONPATH}:/tmp"
+ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 WORKDIR /app
 RUN mkdir -p zfExp
