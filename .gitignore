@@ -58,3 +58,8 @@ tmp/
 new_*
 Reformatted*
 .vscode
+zfBmd/files/
+new_BMDS_BC.csv
+new_Dose_BC.csv
+new_Fits_BC.csv
+new_report_BC/*

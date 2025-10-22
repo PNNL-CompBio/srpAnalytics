@@ -1,9 +1,2 @@
-pandas
+bmdrc
 argparse
-numpy
-scipy
-statsmodels
-astropy
-pyodbc
-jsonschema
-ipdb
