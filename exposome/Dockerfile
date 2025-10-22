@@ -11,12 +11,14 @@ RUN apt-get install -y --allow-unauthenticated --fix-missing  python3-pip python
 RUN python3 -m venv /opt/venv
 
 ENV PATH="/opt/venv/bin:$PATH"
-ENV PYTHONPATH="${PYTHONPATH}:/tmp"
-ENV PYTHONPATH="${PYTHONPATH}:/app"
+# ENV PYTHONPATH="${PYTHONPATH}:/tmp"
+# ENV PYTHONPATH="${PYTHONPATH}:/app"
 WORKDIR /app
 
 RUN mkdir -p exposome
 COPY exposome/* exposome/
+RUN mkdir src
+COPY src/* src
 COPY build_script.py ./
 COPY srpAnalytics.yaml ./
 COPY requirements.txt .
