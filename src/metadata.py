@@ -72,7 +72,7 @@ def query_comptox_by_cas(
 
         try:
             sleep(wait * np.random.random())
-            details = chem.search(by="batch", word=cas_list)
+            details = chem.search("batch", cas_list)
 
             for d in details:
                 for c in data_cols:
@@ -125,7 +125,7 @@ def query_comptox_by_dtxsid(
 
         try:
             sleep(wait * np.random.random())
-            details = chem.details(by="batch", word=sid_list)
+            details = chem.details("batch", sid_list)
 
             for d in details:
                 for c in data_cols:
