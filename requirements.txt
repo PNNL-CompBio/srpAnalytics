@@ -1,3 +1,6 @@
 pandas
 argparse
 linkml
+pydantic
+ctx-python
+tqdm
