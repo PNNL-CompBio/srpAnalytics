@@ -166,18 +166,23 @@ def run_filters(obj):
 ###################
 
 # Write all output files: BMDs, Dose, Fits, and Report markdown
-def write_outputs(obj, tag):
+def write_outputs(obj, tag, outname):
+
+    if outname is None:
+        out = "."
+    else:
+        out = str(outname)
 
     # Output bmds: Chemical_ID, End_Point, Model, BMD10, BMDL, BMD50, AUC, Min_Dose, Max_Dose, AUC_Norm,
     # DataQC_Flag, BMD_Analysis_Flag, BMD10_Flag, BMD50_Flag, ids
-    obj.output_benchmark_dose("./new_BMDS" + "_" + tag + ".csv")
+    obj.output_benchmark_dose(out + "/new_BMDS" + "_" + tag + ".csv")
 
     # Output dose: Chemical_ID, End_Point, Dose, num.affected, num.nonna, ids, CI_Lo, CI_Hi
-    obj.output_dose_table("./new_Dose" + "_" + tag + ".csv")
+    obj.output_dose_table(out + "/new_Dose" + "_" + tag + ".csv")
 
     # Output fits: Chemical_ID, End_Point, X_vals, Y_vals
-    obj.output_fits_table("./new_Fits" + "_" + tag + ".csv")
+    obj.output_fits_table(out + "/new_Fits" + "_" + tag + ".csv")
 
     # Output reports
-    obj.report("./new_report" + "_" + tag + "/")
+    obj.report(out + "/new_report" + "_" + tag + "/")
     
