@@ -133,12 +133,12 @@ def main():
     if args.morpho is not None:
 
         # Output files
-        write_outputs(BC, "BC")
+        write_outputs(BC, "BC", args.output)
 
     if args.lpr is not None:
 
         # Output files
-        write_outputs(LPR, "LPR")
+        write_outputs(LPR, "LPR", args.output)
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,13 @@
+# Build command: docker build -t zfbmd .
+#
+# Morphology example using a local folder called tmp and data in the container: 
+#       docker run -v ./tmp:/zfBmd/tmp zfbmd --morpho test_files/test_morphology.csv --output /zfBmd/tmp/
+#
+# Both morphology and LPR example using a local folder called tmp and data in the container:
+#       docker run -v ./tmp:/zfBmd/tmp zfbmd --morpho test_files/test_morphology.csv --lpr test_files/test_behavioral.csv --output /zfBmd/tmp/
+#
+# Both example using local data. It must be moved to the tmp folder to work
+#       docker run -v ./tmp:/zfBmd/tmp zfbmd --morpho /zfBmd/tmp/test_morphology.csv --lpr /zfBmd/tmp/test_behavioral.csv --output /zfBmd/tmp/
 FROM python:3.10
 
 RUN apt-get update && apt-get install -y net-tools \
@@ -14,6 +24,6 @@ COPY zfBmd/main.py zfBmd/main.py
 COPY zfBmd/support_functions.py zfBmd/support_functions.py
 COPY zfBmd/test_files/* zfBmd/test_files/
 WORKDIR zfBmd
+RUN mkdir ./tmp
 
-ENTRYPOINT ["python3", "main.py"]
-VOLUME ["/tmp"]
+ENTRYPOINT ["python3", "-u", "main.py"]
