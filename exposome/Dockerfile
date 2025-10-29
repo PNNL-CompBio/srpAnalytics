@@ -28,4 +28,4 @@ RUN pip3 install -r requirements.txt
 # RUN Rscript -e "install.packages(c('jsonlite','dplyr','httr','tidyr'), dependencies=TRUE,repos='http://cran.rstudio.com')"
 
 
-ENTRYPOINT ["python","/app/build_script.py","--expo"]
+ENTRYPOINT ["python", "/app/build_script.py", "--expo"]

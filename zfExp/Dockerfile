@@ -38,5 +38,5 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
 
-ENTRYPOINT ["python","/app/build_script.py","--geneEx"]
+ENTRYPOINT ["python", "/app/build_script.py", "--geneEx"]
 
