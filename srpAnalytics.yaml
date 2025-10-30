@@ -31,12 +31,13 @@ slots:
     slot_uri: schema:identifier
   DataQC_Flag:
     description: Quality of Data
+    range: integer
   Description:
     description: Name of endpoint
-  End_Point_Name:
-    description:
-  endPointLink:
-    description: Link to endpoint description
+  End_Point:
+    description: Name of endpoint
+  # endPointLink:
+  #   description: Link to endpoint description
   cas_number:
     description: CAS identifier for a specific chemical
     range: linkml:Any  # need to enforce string
@@ -46,8 +47,8 @@ slots:
   CI_Lo:
     description: Low range of confidence interval
     range: float
-  combined:
-    description: (TODO) Combined significance score?
+  # combined:
+  #   description: (TODO) Combined significance score?
     # range: linkml:Any  # float
   concentration:
     description: Concentration at which chemical was administered in uM
@@ -57,8 +58,8 @@ slots:
   Dose:
     description: Dose of chemical
     range: float
-  IncludeInPortal:
-    description:
+  # IncludeInPortal:
+  #   description:
   Max_Dose:
     description: Maximum dose administered
     range: linkml:Any
@@ -69,9 +70,9 @@ slots:
     description: Model with best fit to data
   Project:
     description: name of project contributing the dataset
-  Response:
-    description: Response in terms of percentage of fish alive
-    range: float
+  # Response:
+  #   description: Response in terms of percentage of fish alive
+    # range: float
   Sample_ID:
     description: Unique identifier for every sample in the database
     range: linkml:Any
