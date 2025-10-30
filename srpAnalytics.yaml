@@ -21,15 +21,9 @@ slots:
   BMD10:
     description: Dose at which 10% of fish are affected
     range: linkml:Any
-  BMD10_Flag:
-    description: Flag for BMD10
   BMD50:
     description: Dose at which 50% of fish are affected
     range: linkml:Any
-  BMD50_Flag:
-    description: Flag for BMD50
-  BMDL:
-    description: Lowest dose at which fish were affected
   Chemical_ID:
     description: Unique identifier for every chemical in the database
     range: integer
@@ -73,12 +67,6 @@ slots:
     range: linkml:Any
   Model:
     description: Model with best fit to data
-  num.affected:
-    description: Number of fish with the observed phenotype
-    range: integer
-  num.nonna:
-    description: Number of fish measured for the given endpoint
-    range: integer
   Project:
     description: name of project contributing the dataset
   Response:
@@ -198,43 +186,50 @@ classes:
         range: linkml:Any
       environmental_concentration_molar_unit:
         description:
-  zebrafishSampBMDs:  # new_BMDS_BC
+  zfBMDS:  # new_BMDS_BC/LPR -> seems to be same as the Chem ones? combine?
     description: Benchmark dose measurements of sample extracts in zebrafish
     slots:
       - Chemical_ID
       - End_Point
       - Model
       - BMD10
-      - BMDL
       - BMD50
       - Min_Dose
       - Max_Dose
       - AUC_Norm
       - DataQC_Flag
       - BMD_Analysis_Flag
-      - BMD10_Flag
-      - BMD50_Flag
       - bmdrc.Endpoint.ID
     attributes:
       AUC:
         description: Area under curve
         range: float
-  zebrafishSampDoseResponse:  # new_Dose_BC
+      BMD10_Flag:
+        description: Flag for BMD10
+        range: integer
+      BMD50_Flag:
+        description: Flag for BMD50
+        range: integer
+      BMDL:
+        description: Lowest dose at which fish were affected
+        range: float
+  zfDose:  # new_Dose_BC/LPR
     description: Dose response datapoints of sample extracts in zebrafish
     slots:
       - Chemical_ID
       - End_Point
       - Dose
       - bmdrc.Endpoint.ID
-      - num.affected
-      - num.nonna
       - CI_Lo
       - CI_Hi
-      # - Response
-      # - combined
-      # - IncludeInPortal
-      # - endPointLink
-  zebrafishSampXYCoords:  # new_Fits_BC
+    attributes:
+      num.affected:
+        description: Number of fish with the observed phenotype
+        range: integer
+      num.nonna:
+        description: Number of fish measured for the given endpoint
+        range: integer
+  zfFits:  # new_Fits_BC/LPR
     description: XY Coordinates of curve fit data for sample extracts in zebrafish
     slots:
       - Chemical_ID
@@ -242,59 +237,6 @@ classes:
       - X_vals
       - Y_vals
       - bmdrc.Endpoint.ID
-      # - combined
-      # - IncludeInPortal
-      # - End_Point_Name
-      # - endPointLink
-  zebrafishChemBMDs:  # new_BMDS_LPR
-    description: Benchmark dose measurements of chemicals in zebrafish
-    slots:
-      - Chemical_ID
-      - End_Point
-      - Model
-      - BMD10
-      - BMDL
-      - BMD50
-      - Min_Dose
-      - Max_Dose
-      - AUC_Norm
-      - DataQC_Flag
-      - BMD_Analysis_Flag
-      - BMD10_Flag
-      - BMD50_Flag
-      - bmdrc.Endpoint.ID
-      # - IncludeInPortal
-      # - End_Point_Name
-      # - Description
-      # - endPointLink
-  zebrafishChemDoseResponse:  # new_Dose_LPR
-    description: Dose response datapoints of chemicals in zebrafish
-    slots:
-      - Chemical_ID
-      - End_Point
-      - Dose
-      - bmdrc.Endpoint.ID
-      - num.affected
-      - num.nonna
-      - CI_Lo
-      - CI_Hi
-      # - Response
-      # - combined
-      # - IncludeInPortal
-      # - End_Point_Name
-      # - endPointLink
-  zebrafishChemXYCoords:
-    description: XY Coordinates of curve fit data for chemicals in zebrafish
-    slots:
-      - Chemical_ID
-      - End_Point
-      - X_vals
-      - Y_vals
-      - bmdrc.Endpoint.ID
-      # - combined
-      # - IncludeInPortal
-      # - End_Point_Name
-      # - endPointLink
   allGeneEx:
     description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
     slots:
