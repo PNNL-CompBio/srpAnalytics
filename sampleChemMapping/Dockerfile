@@ -6,8 +6,6 @@ RUN apt-get install -y --allow-unauthenticated --fix-missing  python3-pip python
 # r-base gcc-12 build-essential libpq-dev python3-venv libxml2-dev libcurl4-openssl-dev
 
 RUN python3 -m venv /opt/venv
-
-
 ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /app
 
