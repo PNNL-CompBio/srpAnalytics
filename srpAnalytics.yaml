@@ -13,6 +13,8 @@ slots:
   AUC_Norm:
     description: normalized area under the curve
     range: linkml:Any
+  bmdrc.Endpoint.ID:
+    description: bmdrc package identifier for endpoint, typically Chemical_ID + End_Point
   BMD_Analysis_Flag:
     description: quality of curve fit
     range: integer
@@ -29,12 +31,13 @@ slots:
     slot_uri: schema:identifier
   DataQC_Flag:
     description: Quality of Data
+    range: integer
   Description:
     description: Name of endpoint
-  End_Point_Name:
-    description:
-  endPointLink:
-    description: Link to endpoint description
+  End_Point:
+    description: Name of endpoint
+  # endPointLink:
+  #   description: Link to endpoint description
   cas_number:
     description: CAS identifier for a specific chemical
     range: linkml:Any  # need to enforce string
@@ -44,8 +47,8 @@ slots:
   CI_Lo:
     description: Low range of confidence interval
     range: float
-  combined:
-    description: (TODO) Combined significance score?
+  # combined:
+  #   description: (TODO) Combined significance score?
     # range: linkml:Any  # float
   concentration:
     description: Concentration at which chemical was administered in uM
@@ -55,8 +58,8 @@ slots:
   Dose:
     description: Dose of chemical
     range: float
-  IncludeInPortal:
-    description:
+  # IncludeInPortal:
+  #   description:
   Max_Dose:
     description: Maximum dose administered
     range: linkml:Any
@@ -67,9 +70,9 @@ slots:
     description: Model with best fit to data
   Project:
     description: name of project contributing the dataset
-  Response:
-    description: Response in terms of percentage of fish alive
-    range: float
+  # Response:
+  #   description: Response in terms of percentage of fish alive
+    # range: float
   Sample_ID:
     description: Unique identifier for every sample in the database
     range: linkml:Any
@@ -184,85 +187,57 @@ classes:
         range: linkml:Any
       environmental_concentration_molar_unit:
         description:
-  zebrafishSampBMDs:
+  zfBMDS:  # new_BMDS_BC/LPR -> seems to be same as the Chem ones? combine?
     description: Benchmark dose measurements of sample extracts in zebrafish
     slots:
-      - Sample_ID
+      - Chemical_ID
+      - End_Point
       - Model
       - BMD10
       - BMD50
       - Min_Dose
       - Max_Dose
       - AUC_Norm
-      - BMD_Analysis_Flag
-      - IncludeInPortal
-      - End_Point_Name
-      - Description
-      - endPointLink
       - DataQC_Flag
+      - BMD_Analysis_Flag
+      - bmdrc.Endpoint.ID
     attributes:
-      SampleName:
-        description:
-  zebrafishSampDoseResponse:
+      AUC:
+        description: Area under curve
+        range: float
+      BMD10_Flag:
+        description: Flag for BMD10
+        range: integer
+      BMD50_Flag:
+        description: Flag for BMD50
+        range: integer
+      BMDL:
+        description: Lowest dose at which fish were affected
+        range: float
+  zfDose:  # new_Dose_BC/LPR
     description: Dose response datapoints of sample extracts in zebrafish
     slots:
-      - Sample_ID
+      - Chemical_ID
+      - End_Point
       - Dose
-      - Response
+      - bmdrc.Endpoint.ID
       - CI_Lo
       - CI_Hi
-      - combined
-      - IncludeInPortal
-      - End_Point_Name
-      - endPointLink
-  zebrafishSampXYCoords:
+    attributes:
+      num.affected:
+        description: Number of fish with the observed phenotype
+        range: integer
+      num.nonna:
+        description: Number of fish measured for the given endpoint
+        range: integer
+  zfFits:  # new_Fits_BC/LPR
     description: XY Coordinates of curve fit data for sample extracts in zebrafish
     slots:
-      - Sample_ID
+      - Chemical_ID
+      - End_Point
       - X_vals
       - Y_vals
-      - combined
-      - IncludeInPortal
-      - End_Point_Name
-      - endPointLink
-  zebrafishChemBMDs:
-    description: Benchmark dose measurements of chemicals in zebrafish
-    slots:
-      - Chemical_ID
-      - Model
-      - BMD10
-      - BMD50
-      - Min_Dose
-      - Max_Dose
-      - AUC_Norm
-      - BMD_Analysis_Flag
-      - IncludeInPortal
-      - End_Point_Name
-      - Description
-      - endPointLink
-      - DataQC_Flag
-  zebrafishChemDoseResponse:
-    description: Dose response datapoints of chemicals in zebrafish
-    slots:
-      - Chemical_ID
-      - Dose
-      - Response
-      - CI_Lo
-      - CI_Hi
-      - combined
-      - IncludeInPortal
-      - End_Point_Name
-      - endPointLink
-  zebrafishChemXYCoords:
-    description: XY Coordinates of curve fit data for chemicals in zebrafish
-    slots:
-      - Chemical_ID
-      - X_vals
-      - Y_vals
-      - combined
-      - IncludeInPortal
-      - End_Point_Name
-      - endPointLink
+      - bmdrc.Endpoint.ID
   allGeneEx:
     description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
     slots:

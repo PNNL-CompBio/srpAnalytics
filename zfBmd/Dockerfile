@@ -1,16 +1,21 @@
-FROM python:3.9
+FROM python:3.10
 
 RUN apt-get update && apt-get install -y net-tools \
         curl \
         unixodbc \
         unixodbc-dev
 
-COPY requirements.txt /requirements.txt
-RUN /usr/local/bin/python -m pip install --upgrade pip
-RUN pip3 install -r /requirements.txt
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+WORKDIR /app
 
-COPY . zfBmd
-WORKDIR zfBmd
+RUN mkdir ./zfBmd
+COPY zfBmd ./zfBmd
+COPY srpAnalytics.yaml .
+COPY zfBmd/requirements.txt .
+RUN mkdir ./tmp
 
-ENTRYPOINT ["python3", "main.py"]
-VOLUME ["/tmp"]
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+
+ENTRYPOINT ["python3", "-u", "/app/zfBmd/main.py"]
