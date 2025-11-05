@@ -3,144 +3,211 @@ name: Build-database
 on:
   push:
     branches:
-      - '**'
+      - "**"
     paths:
-      - ./data/
-      
-  # Allows you to run this workflow manually from the Actions tab
+      - data/
+
+  # Allows running workflow manually from Actions tab
   workflow_dispatch:
 
 jobs:
-# Placeholder
-#   build-bmd:
-#     #if: github.actor != 'github-actions[bot]'
-#     runs-on: ubuntu-20.04
-#     environment: build
-#     steps:
-#       - name: Checkout Repo
-#         uses: actions/checkout@v3
-#       - name: Download artifacts from previous drug gen
-#         uses: actions/download-artifact@v4
-#       - name: Pull sample image
-#         run: docker pull sgosline/srp-bmd
-#       - name: Run bmd python command
-#         run: |
-#           docker run -v $PWD:/tmp sgosline/srp-bmd
-#       - name: List files cwd
-#         run: ls -la
-   build-samples:
-     #if: github.actor != 'github-actions[bot]'
-     runs-on: ubuntu-20.04
-     steps:
-       - name: Checkout Repo
-         uses: actions/checkout@v3
-       - name: Download artifacts from previous drug gen
-         uses: actions/download-artifact@v4
-       - name: Pull sample image
-         run: docker pull sgosline/srp-samplechem
-       - name: Run sample-chem python command
-         run: |
-           docker run -v $PWD:/tmp sgosline/srp-samplechem 
-       - name: List files cwd
-         run: ls -la
-       - name: move files
-         run: |
-           mkdir samp-files
-           mv *csv samp-files
-       - name: upload artifacts
-         uses: actions/upload-artifact@v4
-         with:
-           name: samp-files
-           path: samp-files
-   build-expo:
-     #if: github.actor != 'github-actions[bot]'
-     runs-on: ubuntu-20.04
-     steps:
-       - name: Checkout Repo
-         uses: actions/checkout@v3
-       - name: Download artifacts from previous drug gen
-         uses: actions/download-artifact@v4
-       - name: Pull sample image
-         run: docker pull sgosline/srp-exposome
-       - name: Run sample-chem python command
-         run: |
-           docker run -v $PWD:/tmp sgosline/srp-exposome
-       - name: List files cwd
-         run: ls -la 
-       - name: Copy files to artifact
-         run: |
-           mkdir expo-files
-           mv *.csv expo-files
-       - name: upload artifact
-         uses: actions/upload-artifact@v4
-         with:
-           name: expo-files
-           path: expo-files         
+  # Placeholder
+  build-bmd:
+    #if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    # environment: build
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Download artifacts from previous drug gen
+        uses: actions/download-artifact@v4
+      - name: Pull sample image
+        run: docker pull sgosline/srp-zfbmd
+      - name: Run bmd python command
+        run: |
+          docker run -v $PWD:/tmp sgosline/srp-zfbmd --morpho /app/zfBmd/test_files/test_morphology.csv --lpr /app/zfBmd/test_files/test_behavioral.csv --output /tmp
+      - name: List files cwd
+        run: ls -la
+      - name: Move files
+        run: |
+          mkdir bmd-files
+          mv *.csv bmd-files
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmd-files
+          path: bmd-files
 
-   build-expr:
-     #if: github.actor != 'github-actions[bot]'
-     runs-on: ubuntu-20.04
-     needs: build-samples
-     steps:
-       - name: Checkout Repo
-         uses: actions/checkout@v3
-       - name: Download artifacts from sample generation
-         uses: actions/download-artifact@v4
-         with:
-           name: samp-files
-           path: samp-files
-       - name: Pull sample image
-         run: docker pull sgosline/srp-zfexp
-       - name: move chemical list to tmp
-         run: mv samp-files/chemicals.csv .
-       - name: Run zfexp python command
-         run: |
-           docker run -v $PWD:/tmp sgosline/srp-zfexp
-       - name: List files cwd
-         run: ls -la 
-       - name: Copy files to artifact
-         run: |
-           mkdir expr-files
-           mv *csv expr-files
-       - name: upload artifact
-         uses: actions/upload-artifact@v4
-         with:
-           name: expr-files
-           path: expr-files
+  build-samples:
+    #if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Download artifacts from previous drug gen
+        uses: actions/download-artifact@v4
+      - name: Pull sample image
+        run: docker pull sgosline/srp-samplechem
+      - name: Run sample-chem python command
+        run: |
+          docker run -v $PWD:/tmp sgosline/srp-samplechem
+      - name: List files cwd
+        run: ls -la
+      - name: Move files
+        run: |
+          mkdir samp-files
+          mv *csv samp-files
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: samp-files
+          path: samp-files
 
-   artifact-test:
-     needs: [build-samples,build-expo,build-expr]
-     runs-on: ubuntu-20.04
-     steps:
-       - name: Checkout Repo
-         uses: actions/checkout@v2
-       - name: Download artifacts from expression
-         uses: actions/download-artifact@v4
-         with:
-           name: expr-files
-       - name: Downlod artifacts from exposome
-         uses: actions/download-artifact@v4
-         with:
-           name: expo-files
-       - name: Downlod artifacts from samples
-         uses: actions/download-artifact@v4
-         with:
-           name: samp-files
-       - name: List files cwd
-         run: ls -la *
-       - name: Moves files to single directory
-         run: |
-           mkdir srpAnalytics
-           mv *csv srpAnalytics
-           #gzip -cvf srpAnalytics/* srpAnalytics.gz
-       - name: Pushes to figshare
-         uses: figshare/github-upload-action@v1.1
-         with:
-           FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
-           FIGSHARE_ENDPOINT: 'https://api.figshare.com/v2'
-           FIGSHARE_ARTICLE_ID: 26240471
-#           FIGSHARE_PROJECT_ID: 177459
-           DATA_DIR: 'srpAnalytics'
+  build-expo:
+    #if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Download artifacts from previous drug gen
+        uses: actions/download-artifact@v4
+      - name: Pull sample image
+        run: docker pull sgosline/srp-exposome
+      - name: Run sample-chem python command
+        run: |
+          docker run -v $PWD:/tmp sgosline/srp-exposome
+      - name: List files cwd
+        run: ls -la
+      - name: Copy files to artifact
+        run: |
+          mkdir expo-files
+          mv *.csv expo-files
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: expo-files
+          path: expo-files
 
+  build-expr:
+    #if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    needs: build-samples
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Download artifacts from sample generation
+        uses: actions/download-artifact@v4
+        with:
+          name: samp-files
+          path: samp-files
+      - name: Pull sample image
+        run: docker pull sgosline/srp-zfexp
+      - name: move chemical list to tmp
+        run: mv samp-files/chemicals.csv .
+      - name: Run zfexp python command
+        run: |
+          docker run -v $PWD:/tmp sgosline/srp-zfexp
+      - name: List files cwd
+        run: ls -la
+      - name: Copy files to artifact
+        run: |
+          mkdir expr-files
+          mv *.csv expr-files
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: expr-files
+          path: expr-files
+
+  create-figshare-article:
+    runs-on: ubuntu-latest
+    outputs:
+      article_id: ${{ steps.create_article.outputs.article_id }}
+    steps:
+      - name: Create new private Figshare article
+        id: create_article
+        run: |
+          # Generate timestamp for unique article title
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+          COMMIT_SHA="${{ github.sha }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+          PROJECT_ID="${{ secrets.FIGSHARE_PROJECT_ID }}"
+
+          # Define article metadata
+          METADATA=$(cat <<EOF
+          {
+            "title": "SRP Analytics Database - ${TIMESTAMP}",
+            "description": "Testing automated database build from commit ${COMMIT_SHA} on branch ${BRANCH_NAME}. Generated on ${TIMESTAMP}.",
+            "categories": [26965, 26968],
+            "authors": [{"name": "SRP Analytics Pipeline"}],
+            "defined_type": "dataset"
+          }
+          EOF
+          )
+
+          # Create article
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "$METADATA" \
+            "https://api.figshare.com/v2/account/projects/$PROJECT_ID/articles")
+
+          # Extract article ID
+          ARTICLE_ID=$(echo "$RESPONSE" | jq -r '.entity_id')
+
+          if [ "$ARTICLE_ID" = "null" ] || [ -z "$ARTICLE_ID" ]; then
+            echo "Failed to create article. Response: $RESPONSE"
+            exit 1
+          fi
+
+          echo "Created Figshare article with ID: $ARTICLE_ID"
+          echo "article_id=$ARTICLE_ID" >> $GITHUB_OUTPUT
+
+  # metadata field: "tags": ["srp-analytics", "database"],
+
+  artifact-test:
+    needs:
+      [
+        build-bmd,
+        build-samples,
+        build-expo,
+        build-expr,
+        create-figshare-article,
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Download artifacts from bmd
+        uses: actions/download-artifact@v4
+        with:
+          name: bmd-files
+      - name: Download artifacts from expression
+        uses: actions/download-artifact@v4
+        with:
+          name: expr-files
+      - name: Download artifacts from exposome
+        uses: actions/download-artifact@v4
+        with:
+          name: expo-files
+      - name: Download artifacts from samples
+        uses: actions/download-artifact@v4
+        with:
+          name: samp-files
+      - name: List files cwd
+        run: ls -la *
+      - name: Moves files to single directory
+        run: |
+          mkdir srpAnalytics
+          mv *.csv srpAnalytics
+          # gzip -cvf srpAnalytics/* srpAnalytics.gz
+      - name: Pushes to figshare
+        uses: figshare/github-upload-action@v1.1
+        continue-on-error: true
+        with:
+          FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
+          FIGSHARE_ENDPOINT: "https://api.figshare.com/v2"
+          FIGSHARE_ARTICLE_ID: ${{ needs.create-figshare-article.outputs.article_id }}
+          DATA_DIR: "srpAnalytics"
 #zipfiles push to figshare
 
