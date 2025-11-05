@@ -134,11 +134,10 @@ jobs:
           FIGSHARE_PROJECT_ID="${{ secrets.FIGSHARE_PROJECT_ID }}"
 
           # Define article metadata
-          ARTICLE_DATA=$(cat <<EOF
+          METADATA=$(cat <<EOF
           {
             "title": "SRP Analytics Database - ${TIMESTAMP}",
             "description": "Testing automated database build from commit ${COMMIT_SHA} on branch ${BRANCH_NAME}. Generated on ${TIMESTAMP}.",
-            # "tags": ["srp-analytics", "database"],
             "categories": [26965, 26968],
             "authors": [{"name": "SRP Analytics Pipeline"}],
             "defined_type": "dataset"
@@ -150,7 +149,7 @@ jobs:
           RESPONSE=$(curl -s -X POST \
             -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "$ARTICLE_DATA" \
+            -d "$METADATA" \
             "https://api.figshare.com/v2/account/projects/$PROJECT_ID/articles")
 
           # Extract article ID
@@ -163,6 +162,8 @@ jobs:
 
           echo "Created Figshare article with ID: $ARTICLE_ID"
           echo "article_id=$ARTICLE_ID" >> $GITHUB_OUTPUT
+
+  # metadata field: "tags": ["srp-analytics", "database"],
 
   artifact-test:
     needs:
@@ -207,8 +208,6 @@ jobs:
           FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
           FIGSHARE_ENDPOINT: "https://api.figshare.com/v2"
           FIGSHARE_ARTICLE_ID: ${{ needs.create-figshare-article.outputs.article_id }}
-          # FIGSHARE_ARTICLE_ID: 26240471
-          # FIGSHARE_PROJECT_ID: 177459
           DATA_DIR: "srpAnalytics"
 #zipfiles push to figshare
 
