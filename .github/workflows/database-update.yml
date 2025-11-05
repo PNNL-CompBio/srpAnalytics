@@ -138,7 +138,7 @@ jobs:
             "title": "SRP Analytics Database - ${TIMESTAMP}",
             "description": "Testing automated database build from commit ${COMMIT_SHA} on branch ${BRANCH_NAME}. Generated on ${TIMESTAMP}.",
             "tags": ["srp-analytics", "database", "automated", "github-actions", "private"],
-            "categories": [1],
+            "categories": [26965, 26968],
             "authors": [{"name": "SRP Analytics Pipeline"}],
             "defined_type": "dataset"
           }
