@@ -22,7 +22,7 @@ jobs:
       - name: Download artifacts from previous drug gen
         uses: actions/download-artifact@v4
       - name: Pull sample image
-        run: docker pull sgosline/srp-bmd
+        run: docker pull sgosline/srp-zfbmd
       - name: Run bmd python command
         run: |
           docker run -v $PWD:/tmp sgosline/srp-zfbmd --morpho /app/zfBmd/test_files/test_morphology.csv --lpr /app/zfBmd/test_files/test_behavioral.csv --output /tmp
