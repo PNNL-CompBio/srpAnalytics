@@ -131,13 +131,14 @@ jobs:
           TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
           COMMIT_SHA="${{ github.sha }}"
           BRANCH_NAME="${{ github.ref_name }}"
+          FIGSHARE_PROJECT_ID="${{ secrets.FIGSHARE_PROJECT_ID }}"
 
-          # Create article metadata
+          # Define article metadata
           ARTICLE_DATA=$(cat <<EOF
           {
             "title": "SRP Analytics Database - ${TIMESTAMP}",
             "description": "Testing automated database build from commit ${COMMIT_SHA} on branch ${BRANCH_NAME}. Generated on ${TIMESTAMP}.",
-            "tags": ["srp-analytics", "database", "automated", "github-actions", "private"],
+            # "tags": ["srp-analytics", "database"],
             "categories": [26965, 26968],
             "authors": [{"name": "SRP Analytics Pipeline"}],
             "defined_type": "dataset"
@@ -145,12 +146,12 @@ jobs:
           EOF
           )
 
-          # Create the article (private by default)
+          # Create article
           RESPONSE=$(curl -s -X POST \
             -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "$ARTICLE_DATA" \
-            "https://api.figshare.com/v2/account/articles")
+            "https://api.figshare.com/v2/account/projects/$PROJECT_ID/articles")
 
           # Extract article ID
           ARTICLE_ID=$(echo "$RESPONSE" | jq -r '.entity_id')
