@@ -25,7 +25,7 @@ jobs:
         run: docker pull sgosline/srp-bmd
       - name: Run bmd python command
         run: |
-          docker run -v $PWD:/tmp sgosline/srp-bmd --morpho /app/zfBmd/test_files/test_morphology.csv --lpr /app/zfBmd/test_files/test_behavioral.csv --output /tmp
+          docker run -v $PWD:/tmp sgosline/srp-zfbmd --morpho /app/zfBmd/test_files/test_morphology.csv --lpr /app/zfBmd/test_files/test_behavioral.csv --output /tmp
       - name: List files cwd
         run: ls -la
       - name: Move files
