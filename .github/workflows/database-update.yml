@@ -120,11 +120,15 @@ jobs:
           path: expr-files
 
   artifact-test:
-    needs: [build-samples, build-expo, build-expr]
+    needs: [build-bmd, build-samples, build-expo, build-expr]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+      - name: Download artifacts from bmd
+        uses: actions/download-artifact@v4
+        with:
+          name: bmd-files
       - name: Download artifacts from expression
         uses: actions/download-artifact@v4
         with:
@@ -146,6 +150,7 @@ jobs:
           # gzip -cvf srpAnalytics/* srpAnalytics.gz
       - name: Pushes to figshare
         uses: figshare/github-upload-action@v1.1
+        continue-on-error: true
         with:
           FIGSHARE_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
           FIGSHARE_ENDPOINT: "https://api.figshare.com/v2"
