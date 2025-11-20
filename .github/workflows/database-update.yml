@@ -11,7 +11,36 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Placeholder
+  download-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Download data from Figshare
+        run: |
+          # Hardcode files for now
+          FIGSHARE_URL="https://figshare.com/account/projects/177459/articles/27742668"
+
+          # Download and extract data
+          curl -L -o 27742668.zip "$FIGSHARE_URL"
+          unzip 27742668.zip
+          rm 27742668.zip
+
+          mkdir -p bmd-data
+          mv *.csv bmd-data/ 2>/dev/null || true  # Move CSV files if any exist
+
+      - name: List downloaded files
+        run: |
+          echo "Downloaded files:"
+          ls -la bmd-data/
+
+      - name: Upload downloaded data as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmd-data
+          path: bmd-data
+
   build-bmd:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
