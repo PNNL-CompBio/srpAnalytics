@@ -194,3 +194,4 @@ def remove_sample_duplicates(data: pd.DataFrame):
     new_samp_names = pd.concat(
         [data.query("~is_dupe").drop("is_dupe", axis=1), full_rep]
     )
+    return new_samp_names

@@ -139,7 +139,18 @@ def build_sample_data(
         _description_
     """
     # Read and process all FSES files
-    data = pd.concat([process_fses(f) for f in fses_files])
+    data = pd.concat([process_fses(f) for f in fses_files]).dropna(
+        subset=[
+            "SampleNumber",
+            "SampleName",
+            "date_sampled",
+            "LocationLat",
+            "LocationLon",
+            "measurement_value",
+            "environmental_concentration",
+        ],
+        how="all",  # Remove samples with no data
+    )
 
     # Add chemical metadata and sample IDs
     chem_metadata = chem_metadata[
@@ -151,8 +162,9 @@ def build_sample_data(
     sample_ids = sample_id_master_table(data["SampleNumber"], sample_id_file)
     data = data.merge(sample_ids, on="SampleNumber", how="left").drop_duplicates()
 
+    # NOTE: Moved to end
     # Rename duplicate sample names as sample:01, :02, etc.
-    data["SampleName"] = rename_duplicates(data, col="SampleName")
+    # data["SampleName"] = rename_duplicates(data, col="SampleName")
 
     # Fill in missing concentration data
     blanks_mask = data["measurement_value_molar"] == ""
@@ -204,6 +216,9 @@ def build_sample_data(
         data = data.dropna(subset=["cas_number"])
         data = data[data["cas_number"] != "N/A"].drop_duplicates()
         data["cas_number"] = data["cas_number"].astype(str)  # force str
+
+    # Rename duplicate sample names as sample:01, :02, etc.
+    data["SampleName"] = rename_duplicates(data, col="SampleName")
 
     return data
 
@@ -461,7 +476,7 @@ def _flatten_class_df(
 
 def masv_chem_class(
     class_file: str,
-    save_to: str = "MASV_classAndSource.csv",
+    save_to: str = os.path.join(OUTPUT_DIR, "MASV_classAndSource.csv"),
     id_cols: ArrayLike = ["CASNumber", "ParameterName"],
 ) -> pd.DataFrame:
     """Reads full MASV class annotations and assigns values to chemicals.

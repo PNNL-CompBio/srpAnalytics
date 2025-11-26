@@ -1,4 +1,5 @@
 import re
+
 from pandas import DataFrame
 
 RENAME = {"casrn": "cas_number"}
@@ -91,17 +92,24 @@ def rename_duplicates(data: DataFrame, col: str = "sample_name") -> list[str]:
             for duplicate entries.
             Note: non-duplicate values are unchanged.
     """
-    is_duplicate = data[col].duplicated(keep=False)
+    samples = data[["Sample_ID", col]].drop_duplicates()
+    samples["is_duplicate"] = samples[col].duplicated(keep=False)
+    duplicates = samples[samples["is_duplicate"]]
+    print("len duplicates", len(duplicates))
 
-    new_names, counts = list(), dict()
+    if len(duplicates) == 0:
+        return data
 
     # If duplicate, rename as name:01, etc., otherwise keep name
-    for s, d in zip(data[col], is_duplicate):
-        c = counts.get(s, 0) + 1
-        counts[s] = c
-        if d:
-            new_names.append(f"{s}:{c:02d}")
-        else:
-            new_names.append(s)
+    new_names = {}
+    for sname in duplicates[col].unique():
+        sample_ids = duplicates[duplicates[col] == sname]["Sample_ID"].tolist()
+        for i, sid in enumerate(sample_ids, 1):
+            new_names[sid] = f"{sname}:{i:02d}"
 
-    return new_names
+    # Merge back into original data
+    sid2sname = {
+        sid: (new_names[sid] if sid in new_names.keys() else sname)
+        for sid, sname in zip(samples["Sample_ID"], samples[col])
+    }
+    return [sid2sname[sid] for sid in data["Sample_ID"]]
