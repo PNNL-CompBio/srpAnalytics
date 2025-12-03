@@ -85,6 +85,11 @@ def query_comptox_by_cas(
             raise (e)
 
     data = pd.DataFrame(data)
+    if "dtxcid" in data.columns:
+        data["image_link"] = [
+            f"https://comptox.epa.gov/ctx-api/chemical/file/image/search/by-dtxcid/{dtxcid}"
+            for dtxcid in data["dtxcid"]
+        ]
     return data
 
 
