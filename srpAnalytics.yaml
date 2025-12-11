@@ -187,7 +187,7 @@ classes:
         range: linkml:Any
       environmental_concentration_molar_unit:
         description:
-  zfBMDS:  # new_BMDS_BC/LPR -> seems to be same as the Chem ones? combine?
+  zfBMDs:  # new_BMDS_BC/LPR -> seems to be same as the Chem ones? combine?
     description: Benchmark dose measurements of sample extracts in zebrafish
     slots:
       - Chemical_ID
