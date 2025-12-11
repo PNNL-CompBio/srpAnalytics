@@ -34,7 +34,6 @@ from support_functions import (
 ###########################
 ## COLLECT CLI ARGUMENTS ##
 ###########################
-
 parser = argparse.ArgumentParser(
     "Run the QC and BMD analysis for the SRP analytics compendium"
 )
@@ -43,23 +42,37 @@ parser.add_argument(
     "--morpho",
     dest="morpho",
     nargs="+",
-    help="Pathway to the morphological file to be processed. \
-                            Assumed format is long and required column names are: chemical.id, conc, plate.id, well, variable, value.",
+    help=(
+        "Pathway to the morphological file to be processed. "
+        "Assumed format is long and required column names are: "
+        "chemical.id, conc, plate.id, well, variable, value."
+    ),
     default=None,
 )
 parser.add_argument(
     "--lpr",
     dest="lpr",
     nargs="+",
-    help="Pathway to the light photometer response (LPR) file to be processed. \
-                            Assumed format is long. Required columns are: chemical.id, conc, plate.id, well, variable, value.",
+    help=(
+        "Pathway to the light photometer response (LPR) file to be "
+        "processed. Assumed format is long. Required columns are: "
+        "chemical.id, conc, plate.id, well, variable, value."
+    ),
     default=None,
 )
 parser.add_argument(
-    "--output",
-    dest="output",
+    "--output_dir",
+    dest="output_dir",
     help="The output folder for files. Default is current directory.",
     default=".",
+)
+parser.add_argument(
+    "--prefix",
+    "--file_prefix",
+    "--output_prefix",
+    dest="file_prefix",
+    help="Filename prefix for saved output files.",
+    default="zebrafish",
 )
 parser.add_argument(
     "--report",
@@ -69,11 +82,10 @@ parser.add_argument(
     default=True,
 )
 
+
 ##############################
 ## DEFINE AND RUN FUNCTIONS ##
 ##############################
-
-
 def main():
     """
     Gather the input arguments and run the zfBMD pipeline which:
@@ -94,7 +106,6 @@ def main():
     lpr_paths = args.lpr
 
     ### 0. Pre-launch combination-------------------------------------------------------------
-
     if args.morpho is not None:
         print("...Concatenating morpho datasets")
         morpho_data = combine_datasets(morpho_paths)
@@ -104,7 +115,6 @@ def main():
         lpr_data = combine_datasets(lpr_paths)
 
     ### 1. Input Data Modules--------------------------------------------------------------------
-
     if args.morpho is not None:
         print("...Formatting morphology data")
         BC = BinaryClass(
@@ -134,7 +144,6 @@ def main():
         )
 
     ### 2. Pre-Processing modules-----------------------------------------------------------------
-
     if args.morpho is not None:
         print("...Pre-Processing morphology data")
         preprocess_morpho(BC)
@@ -142,7 +151,6 @@ def main():
     # LPR data has MORT and MO24 fish set to NA
 
     ### 3. Filtering Modules----------------------------------------------------------------------
-
     if args.morpho is not None:
         print("...Filtering morphology data")
         run_filters(BC)
@@ -152,7 +160,6 @@ def main():
         run_filters(LPR)
 
     ### 4. Model Fitting Modules------------------------------------------------------------------
-
     if args.morpho is not None:
         print("...Fitting models to morphology data")
         BC.fit_models(diagnostic_mode=True)
@@ -178,14 +185,14 @@ def main():
     print("...Exporting Results")
 
     if args.morpho is not None:
-        write_outputs(BC, "BC", args.output)
+        write_outputs(BC, "BC", args.output_dir, args.file_prefix)
 
     if args.lpr is not None:
-        write_outputs(LPR, "LPR", args.output)
+        write_outputs(LPR, "LPR", args.output_dir, args.file_prefix)
 
     print("...Checking output")
-    for fclass in ["BMDS", "Dose", "Fits"]:
-        output_files = glob(f"{args.output}/new_{fclass}_*.csv")
+    for fclass in ["BMDs", "Dose", "Fits"]:
+        output_files = glob(f"{args.output_dir}/{args.file_prefix}_{fclass}_*.csv")
         for of in output_files:
             cmd = f"linkml-validate --schema srpAnalytics.yaml {of} --target-class zf{fclass}"
             print(cmd)
