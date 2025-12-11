@@ -1,10 +1,11 @@
-"""
-Build script moved to python for better extendability and interoperability.
+"""build_script.py: Build SRP database from raw files.
 
+authors: @sgosline, @christinehc
 """
 
 import argparse
 import os
+import subprocess
 from typing import Optional
 
 import pandas as pd
@@ -12,14 +13,75 @@ from src.mapping import get_mapping_file, load_mapping_reference
 from tqdm import tqdm
 
 # DEFINE OUTPUT DIRECTORY
-OUTPUT_DIR = "/tmp"  # "/tmp"
+OUTPUT_DIR = "tmp"  # "./tmp"
 
 
-# TODO: Write this function
-def fitCurveFiles(morpho_behavior_tuples):
+def fitCurveFiles(
+    morpho_filename: Optional[str] = None,
+    lpr_filename: Optional[str] = None,
+    output_dir: str = OUTPUT_DIR,
+    file_prefix: str = "zebrafish",
+):
+    """Fit benchmark dose response curves.
+
+    Parameters
+    ----------
+    morpho_filename : Optional[str]
+        Path to file containing morphology data
+    lpr_filename : Optional[str]
+        Path to file containing behavioral data
+    output_dir : str, optional
+        Path to which to save output files, by default OUTPUT_DIR
+    file_prefix : str, optional
+        Prefix for output filenames, by default "zebrafish"
+
+    Raises
+    ------
+    ValueError
+        If one of `morpho_filename` and `lpr_filename` is not provided.
+    subprocess.CalledProcessError
+        If zfBmd/main.py is not executed successfully
+            (i.e. process exits with non-zero return code)
+    e
+        If an Exception is raised while executing zfBmd/main.py
     """
-    get new curve fits, list of tuples of morpho/behavior pairs
-    """
+    args = ""
+    if morpho_filename is None and lpr_filename is None:
+        raise ValueError(
+            "At least one of `morpho_filename` and `lpr_filename`"
+            " must be provided by the user."
+        )
+
+    # Construct flexible shell command from input
+    if morpho_filename:
+        args = f"{args} --morpho {morpho_filename}"
+    if lpr_filename:
+        args = f"{args} --lpr {lpr_filename}"
+    cmd = f"python -u zfBmd/main.py {args} --output_dir {output_dir} --prefix {file_prefix}"
+
+    tqdm.write(cmd)
+
+    try:
+        process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+
+        # Verify successful command execution
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(
+                returncode=process.returncode,
+                cmd=cmd,
+                output=process.stdout,
+                stderr=process.stderr,
+            )
+
+        # Show command line logging messages
+        for line in process.stdout.splitlines():
+            if line.strip():
+                tqdm.write(line)
+    except Exception as e:
+        tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
+        raise e
+
+    # TODO: Add LinkML validation
 
 
 def combineFiles(location_list: pd.DataFrame, ftype: str) -> pd.DataFrame:
@@ -120,8 +182,6 @@ def runSampMap(
             - zebrafish{Samp,Chem}DoseResponse.csv
             - zebrafish{Samp,Chem}BMDs.csv)
     """
-    import subprocess
-
     drc = ",".join(drcfiles)
     args = (
         f"--sample_id={sid} "
@@ -167,10 +227,9 @@ def runSampMap(
         os.path.join(output_dir, "samplesToChemicals.csv"),
     ]
     for ftype in ["XYCoords.csv", "DoseResponse.csv", "BMDs.csv"]:
-        dblist.append(os.path.join(output_dir, f"zebrafishChem{ftype}"))
-        dblist.append(os.path.join(output_dir, f"zebrafishSamp{ftype}"))
+        dblist.append(os.path.join(output_dir, f"zebrafishChem_{ftype}"))
+        dblist.append(os.path.join(output_dir, f"zebrafishSamp_{ftype}"))
     return dblist
-    # runSchemaCheck(dblist)
 
 
 def runExposome(
@@ -312,20 +371,20 @@ def main():
     """
     df = load_mapping_reference()
 
-    ####
-    # file parsing - collects all files we might need for the tool below
-    ####
-    ##first find the morphology and behavior pairs for chemical sources
-    chemdf = df.loc[df.sample_type == "chemical"]
-    morph = chemdf.loc[chemdf.data_type == "morphology"]
-    beh = chemdf.loc[chemdf.data_type == "behavior"]
-    tupes = []
-    for n in morph.name:
-        tupes.append(
-            [morph.loc[morph.name == n].location, beh.loc[beh.name == n].location]
-        )
+    ####################################
+    # FILE PARSING - collect all files
+    ####################################
+    # Find morphology and behavior pairs for chemical sources
+    morph_beh_df = df[
+        (df["sample_type"] == "chemical")
+        & (df["data_type"].isin(["morphology", "behavior"]))
+    ]
+    pivoted = morph_beh_df.pivot(index="name", columns="data_type", values="location")
+    morph_beh_pairs = [
+        (row["morphology"], row["behavior"]) for _, row in pivoted.iterrows()
+    ]
 
-    ##now map sample information
+    # Map sample information
     sid = get_mapping_file(df, "sampId")
     cid = get_mapping_file(df, "chemId")
     cclass = get_mapping_file(df, "class1")
@@ -377,11 +436,17 @@ def main():
 
     args = parser.parse_args()
 
-    ##call bmdrc on all morphology/behavior pairs for sample sources
+    # Run BMDRC
     if args.bmd:
-        tqdm.write("Re-running benchmark dose collection...")
-        newbmds, newfits, newdoses = [], [], []
-        fitCurveFiles()
+        tqdm.write("Fitting benchmark dose response curves...")
+
+        for i, (morph, beh) in enumerate(morph_beh_pairs):
+            fitCurveFiles(
+                morpho_filename=morph,
+                lpr_filename=beh,
+                output_dir=args.output_dir,
+                file_prefix="zebrafish",
+            )
 
     # ------------------------------------------------------------------------
     # Benchmark Dose (BMD) Calculation / Sample-Chem Mapping (SAMPS) Workflows
