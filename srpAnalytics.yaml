@@ -155,6 +155,9 @@ classes:
         description: Chemical class, from hand-curated list at OSU
       chemDescription:
         description:
+      image_link:
+        description: Link to image of molecular structure
+        range:
   samplesToChemicals: 
     description: Measurements of chemicals in samples
     slots:
