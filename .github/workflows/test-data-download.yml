@@ -1,0 +1,65 @@
+name: Test-data-download
+
+on:
+    push:
+        branches:
+            - "**"
+        paths:
+            - data/
+
+    # Allows running workflow manually from Actions tab
+    workflow_dispatch:
+
+jobs:
+    download-data:
+        runs-on: ubuntu-latest
+        outputs:
+            data-downloaded: ${{ steps.download.outputs.success }}
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+
+            - name: Download raw data from Figshare
+              id: download
+              run: |
+                  mkdir -p data
+
+                  # Morphology data
+                  echo "Downloading morphology data..."
+                  curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
+                      -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.MORPHOLOGY_FILE_ID }}/download" \
+                      -o data/morphology.csv
+
+                  # Behavioral (LPR) data  
+                  echo "Downloading behavioral data..."
+                  curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
+                      -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.BEHAVIORAL_FILE_ID }}/download" \
+                      -o data/behavioral.csv
+
+                  # Exposome data
+                  #echo "Downloading exposome data..."
+                  #curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
+                  #     -L "https://api.figshare.com/v2/articles/${{ vars.DATA_ARTICLE_ID }}/files/${{ vars.EXPOSOME_FILE_ID }}/download" \
+                  #     -o data/exposome.csv
+
+                  # Gene expression data
+                  #echo "Downloading gene expression data..."
+                  #curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
+                  #     -L "https://api.figshare.com/v2/articles/${{ vars.DATA_ARTICLE_ID }}/files/${{ vars.EXPRESSION_FILE_ID }}/download" \
+                  #     -o data/expression.csv
+
+                  # Check if all files were downloaded successfully
+                  ls -la data/
+                  if [ -f "data/morphology.csv" ] && [ -f "data/behavioral.csv" ]; then # && [ -f "data/exposome.csv" ] && [ -f "data/expression.csv" ]; then
+                    echo "success=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "success=false" >> $GITHUB_OUTPUT
+                    exit 1
+                  fi
+
+            - name: Upload raw data artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: data-files
+                  path: data/
+                  retention-days: 1
