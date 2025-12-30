@@ -3,7 +3,7 @@ name: Test-data-download
 on:
     push:
         branches:
-            - "**"
+            - "fix_duplicates"
         paths:
             - data/
 
@@ -14,7 +14,7 @@ jobs:
     download-data:
         runs-on: ubuntu-latest
         outputs:
-            raw-data-available: ${{ steps.download.outputs.success }}
+            data-downloaded: ${{ steps.download.outputs.success }}
         steps:
             - name: Checkout Repo
               uses: actions/checkout@v3
@@ -27,14 +27,14 @@ jobs:
                   # Morphology data
                   echo "Downloading morphology data..."
                   curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
-                       -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.MORPHOLOGY_FILE_ID }}/download" \
-                       -o data/morphology.csv
+                      -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.MORPHOLOGY_FILE_ID }}/download" \
+                      -o data/morphology.csv
 
                   # Behavioral (LPR) data  
                   echo "Downloading behavioral data..."
                   curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
-                       -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.BEHAVIORAL_FILE_ID }}/download" \
-                       -o data/behavioral.csv
+                      -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.BEHAVIORAL_FILE_ID }}/download" \
+                      -o data/behavioral.csv
 
                   # Exposome data
                   #echo "Downloading exposome data..."
