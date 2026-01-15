@@ -3,26 +3,49 @@
 authors: @sgosline, @christinehc
 """
 
+# =========================================================
+# Imports
+# =========================================================
 import argparse
+import itertools
 import os
 import subprocess
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Union
 
 import pandas as pd
-from src.mapping import get_mapping_file, load_mapping_reference
+from src.data import FigshareDataLoader
+from src.manifest import DataManifest
+from src.params import MANIFEST_FILEPATH
+from src.schema import (
+    ZEBRAFISH_DTYPE_TO_SUFFIX,
+    get_cols_from_schema,
+    map_zebrafish_data_to_schema,
+)
 from tqdm import tqdm
 
-# DEFINE OUTPUT DIRECTORY
+# =========================================================
+# Setup/Parameters
+# =========================================================
 OUTPUT_DIR = "tmp"  # "./tmp"
 
 
+manifest = DataManifest(MANIFEST_FILEPATH)
+loader = FigshareDataLoader(
+    Path(OUTPUT_DIR) / ".figshare_cache",  # api_token=FIGSHARE_API_TOKEN
+)
+
+
+# =========================================================
+# Functions
+# =========================================================
 def fitCurveFiles(
-    morpho_filename: Optional[str] = None,
-    lpr_filename: Optional[str] = None,
+    morpho_filename: Union[list, str, None] = None,
+    lpr_filename: Union[list, str, None] = None,
     output_dir: str = OUTPUT_DIR,
     file_prefix: str = "zebrafish",
 ):
-    """Fit benchmark dose response curves.
+    """Create benchmark dose response curve fit files.
 
     Parameters
     ----------
@@ -42,8 +65,18 @@ def fitCurveFiles(
     subprocess.CalledProcessError
         If zfBmd/main.py is not executed successfully
             (i.e. process exits with non-zero return code)
-    e
+    Exception
         If an Exception is raised while executing zfBmd/main.py
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> fitCurveFiles(
+        "/path/to/morphology.csv", "/path/to/behavioral.csv", output_dir, file_prefix
+        )
+    # Creates 3 files: "{file_prefix}_chem_{[BMDs, Dose, Fits]}.csv"
+    #   in the output directory
+
     """
     args = ""
     if morpho_filename is None and lpr_filename is None:
@@ -53,13 +86,25 @@ def fitCurveFiles(
         )
 
     # Construct flexible shell command from input
-    if morpho_filename:
-        args = f"{args} --morpho {morpho_filename}"
-    if lpr_filename:
-        args = f"{args} --lpr {lpr_filename}"
-    cmd = f"python -u zfBmd/main.py {args} --output_dir {output_dir} --prefix {file_prefix}"
+    for cli_arg, filename in zip(
+        ["--morpho", "--lpr"], [morpho_filename, lpr_filename]
+    ):
+        if filename:
+            if isinstance(filename, list):
+                figshare_id_list = [f.split("/")[-1] for f in filename]
+                for fid in figshare_id_list:
+                    _ = loader.load_data(fid)
+                figshare_files = " ".join(
+                    [loader.get_file_path(fid).as_posix() for fid in figshare_id_list]
+                )
+                args = f"{args} {cli_arg} {figshare_files}"
+            if isinstance(filename, str) or isinstance(filename, Path):
+                figshare_id = filename.split("/")[-1]
+                _ = loader.load_data(figshare_id)
+                args = f"{args} {cli_arg} {loader.get_file_path(figshare_id)}"
 
-    tqdm.write(cmd)
+    cmd = f"python -u zfBmd/main.py {args} --output_dir {output_dir} --prefix {file_prefix}"
+    # tqdm.write(cmd)
 
     try:
         process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
@@ -81,54 +126,42 @@ def fitCurveFiles(
         tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
         raise e
 
-    # TODO: Add LinkML validation
+    # When complete, clear data cache
+    loader.clear_cache()
 
 
-def combineFiles(location_list: pd.DataFrame, ftype: str) -> pd.DataFrame:
-    """Combine files and account for duplicates and desired schema.
+def combineZebrafishFiles(
+    data_files: list[str], sample_type: str, data_type: str
+) -> pd.DataFrame:
+    """Combine preprocessed zebrafish sample files.
 
     Parameters
     ----------
-    location_list : pd.DataFrame
-        _description_
-    ftype : str
-        File type, one of ["bmd", "fit", "dose"]
+    data_files : list[str]
+        List of data files to concatenate
+    sample_type : str
+        Sample type, one of ["chemical", "extract"]
+    data_type : str
+        File type, one of ["bmd", "dose", "fit"]
 
     Returns
     -------
     pd.DataFrame
         Table of concatenated files with duplicates removed
     """
-    dflist = []
-    required_cols = {
-        "bmd": [
-            "Chemical_ID",
-            "End_Point",
-            "Model",
-            "BMD10",
-            "BMD50",
-            "Min_Dose",
-            "Max_Dose",
-            "AUC_Norm",
-            "DataQC_Flag",
-            "BMD_Analysis_Flag",
-        ],  # ,"BMD10_Flag","BMD50_Flag{"),
-        "dose": ["Chemical_ID", "End_Point", "Dose", "Response", "CI_Lo", "CI_Hi"],
-        "fit": ["Chemical_ID", "End_Point", "X_vals", "Y_vals"],
-    }
+    required_cols = get_cols_from_schema(
+        map_zebrafish_data_to_schema(sample_type, data_type),
+    )
 
-    tqdm.write(f"Concatenating {ftype}...")
-    for loc in location_list.location:
-        f = pd.read_csv(loc)[required_cols[ftype]]
-        dflist.append(f)
+    tqdm.write(f"Concatenating {sample_type} {data_type}s...")
+    if len(data_files) != 0:
+        df = pd.concat([pd.read_csv(f) for f in data_files], ignore_index=True)
+        df = df[required_cols].drop_duplicates()
+        return df
 
-    # Check for empty list
-    if not dflist:
-        tqdm.write("Warning: No valid files found for concatenation")
-        return pd.DataFrame(columns=required_cols[ftype])
-
-    df = pd.concat(dflist).drop_duplicates()
-    return df
+    # If no files found, return empty df
+    tqdm.write("Warning: No valid files found for concatenation")
+    return pd.DataFrame(columns=required_cols[data_type])
 
 
 def runSampMap(
@@ -220,15 +253,12 @@ def runSampMap(
         tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
         raise e
 
-    ##now we validate the files that came out.
+    # Validate sample, chem, and mapping files
     dblist = [
         os.path.join(output_dir, "samples.csv"),
         os.path.join(output_dir, "chemicals.csv"),
         os.path.join(output_dir, "samplesToChemicals.csv"),
     ]
-    for ftype in ["XYCoords.csv", "DoseResponse.csv", "BMDs.csv"]:
-        dblist.append(os.path.join(output_dir, f"zebrafishChem_{ftype}"))
-        dblist.append(os.path.join(output_dir, f"zebrafishSamp_{ftype}"))
     return dblist
 
 
@@ -309,6 +339,9 @@ def runSchemaCheck(dbfiles: list[Optional[str]] = []):
         os.system(cmd)
 
 
+# =========================================================
+# Command Line Parser
+# =========================================================
 def main():
     """Run data processing and analytics pipeline for Superfund data.
 
@@ -357,9 +390,9 @@ def main():
         - chemicals.csv
         - samplesToChemicals.csv
     - Zebrafish assay data
-        - zebrafish{Chem,Samp}BMDs.csv
-        - zebrafish{Chem,Samp}DoseResponse.csv
-        - zebrafish{Chem,Samp}XYCoords.csv
+        - zebrafish_BMDs_{BC,LPR}_{Chem,Samp}.csv
+        - zebrafish_Dose_{BC,LPR}_{Chem,Samp}.csv
+        - zebrafish_Fits_{BC,LPR}_{Chem,Samp}XYCoords.csv
     - exposomeGeneStats.csv (exposome analysis)
     - srpDEGPathways.csv, srpDEGStats.csv, allGeneEx.csv (gene expression results)
 
@@ -369,33 +402,9 @@ def main():
     - All outputs are validated against the LinkML schema definitions
     - Progress is tracked using tqdm progress bars and informative messages
     """
-    df = load_mapping_reference()
-
-    ####################################
-    # FILE PARSING - collect all files
-    ####################################
-    # Find morphology and behavior pairs for chemical sources
-    morph_beh_df = df[
-        (df["sample_type"] == "chemical")
-        & (df["data_type"].isin(["morphology", "behavior"]))
-    ]
-    pivoted = morph_beh_df.pivot(index="name", columns="data_type", values="location")
-    morph_beh_pairs = [
-        (row["morphology"], row["behavior"]) for _, row in pivoted.iterrows()
-    ]
-
-    # Map sample information
-    sid = get_mapping_file(df, "sampId")
-    cid = get_mapping_file(df, "chemId")
-    cclass = get_mapping_file(df, "class1")
-    emap = get_mapping_file(df, "endpointMap")
-    fses = get_mapping_file(df, "sample", return_first=False)
-    descfile = get_mapping_file(df, "chemdesc")
-    smap = get_mapping_file(df, "sampMap")
-    gex1 = get_mapping_file(df, "expression", return_first=False)
-    ginfo = get_mapping_file(df, "geneInfo")
-
-    ###now we can call individiual commands
+    # ----------------------------
+    # Command Line Argument Parser
+    # ----------------------------
     parser = argparse.ArgumentParser(
         "Pull files from github list of files and call appropriate command"
     )
@@ -433,52 +442,92 @@ def main():
         default=OUTPUT_DIR,
         help="Directory to store output files (default: '/tmp')",
     )
-
     args = parser.parse_args()
 
-    # Run BMDRC
-    if args.bmd:
-        tqdm.write("Fitting benchmark dose response curves...")
-
-        for i, (morph, beh) in enumerate(morph_beh_pairs):
-            fitCurveFiles(
-                morpho_filename=morph,
-                lpr_filename=beh,
-                output_dir=args.output_dir,
-                file_prefix="zebrafish",
-            )
+    # ---------------------------
+    # File Parsing and Collection
+    # ---------------------------
+    # Map sample information
+    sid = manifest.get(name="sampId")  # get_mapping_file(df, "sampId")
+    cid = manifest.get(name="chemId")
+    cclass = manifest.get(name="class1")
+    emap = manifest.get(name="endpointMap")
+    fses = manifest.get(data_type="sample", return_first=False)
+    descfile = manifest.get(name="chemdesc")
+    smap = manifest.get(name="sampMap")
+    gex1 = manifest.get(data_type="expression", return_first=False)
+    ginfo = manifest.get(name="geneInfo")
 
     # ------------------------------------------------------------------------
     # Benchmark Dose (BMD) Calculation / Sample-Chem Mapping (SAMPS) Workflows
     # ------------------------------------------------------------------------
     if args.bmd or args.samps:  ### need to rerun samples if we have created new bmds
-        # add chemical BMDS, fits, curves to existing data
-        chem_files, sample_files = [], []
+        # Add chemical BMDS, fits, curves to existing data
+        # sample_files, chem_files = [], []
 
-        # Define files and set progress bar incrementes for concatenating each
-        sample_type = ["chemical", "extract"]
-        data_type = ["bmd", "fit", "dose"]
-        total_iterations = len(sample_type) * len(data_type)
+        # Find morphology and behavior pairs for chemical extracts
+        zebrafish_chem_files = manifest.get(
+            data_type=["morphology", "behavior"],
+            sample_type="chemical",
+            version=4,
+            return_first=False,
+        )
+
+        # Get zebrafish sample data
+        zebrafish_samp_files = manifest.get(
+            data_type=["bmd", "dose", "fit"],
+            sample_type="extract",
+            return_first=False,
+            version=4,
+        )
+
+        # Define files and set progress bar increments for concatenating each
+        total_iterations = len(zebrafish_chem_files) * len(zebrafish_samp_files)
         progress_bar = tqdm(total=total_iterations, desc="Combining files")
 
-        for st in sample_type:
-            tqdm.write(f"Processing {st} samples...")
+        # Process chemical files (using BMDRC) and collect output files
+        tqdm.write(
+            "Fitting benchmark dose response curves for zebrafish chemical extracts..."
+        )
+        # for chem_data in zebrafish_chem_files:
+        #     morph_data, beh_data = chem_data
+        fitCurveFiles(
+            morpho_filename=[f[0] for f in zebrafish_chem_files],
+            lpr_filename=[f[1] for f in zebrafish_chem_files],
+            output_dir=args.output_dir,
+            file_prefix="zebrafish",
+        )
+        fitted_chem_files = [
+            os.path.join(args.output_dir, f"zebrafish_chem_{f}_{d}.csv")
+            for f, d in itertools.product(["BMDs", "Dose", "Fits"], ["BC", "LPR"])
+        ]
 
-            for dt in data_type:
-                fdf = combineFiles(
-                    df.loc[df.sample_type == st].loc[df.data_type == dt], dt
-                )
-                fname = os.path.join(args.output_dir, f"tmp_{st}_{dt}.csv")
-                fdf.to_csv(fname, index=False)
-                if st == "chemical":
-                    chem_files.append(fname)
-                else:
-                    sample_files.append(fname)
-                progress_bar.update(1)
+        # Process sample files (using preprocessed data)
+        tqdm.write("Combining data for zebrafish sample extracts...")
+        fitted_sample_files = list()
+        for dtype, samp_data in zip(["bmd", "dose", "fit"], zip(*zebrafish_samp_files)):
+            tqdm.write("Processing extracts data...")
+            d = ZEBRAFISH_DTYPE_TO_SUFFIX[dtype]
+
+            # TODO: fix this
+            combined = combineZebrafishFiles(
+                data_files=samp_data, sample_type="extract", data_type=dtype
+            )
+            combined_filename = os.path.join(
+                args.output_dir, f"zebrafish_sample_{d}.csv"
+            )
+            combined.to_csv(combined_filename, index=False)
+            fitted_sample_files.append(combined_filename)
+            progress_bar.update(1)
 
         # Update progress bar after completion
         progress_bar.set_description("Combining files... Done!")
         progress_bar.close()
+
+        # TODO: Add LinkML validation
+        # for ftype in ["XYCoords.csv", "DoseResponse.csv", "BMDs.csv"]:
+        #     dblist.append(os.path.join(output_dir, f"zebrafish_chem_{ftype}"))
+        #     dblist.append(os.path.join(output_dir, f"zebrafish_samp_{ftype}"))
 
         # Define fixed params for sample mapping
         all_res = list()
@@ -495,8 +544,8 @@ def main():
 
         # Iterate through sampMap params
         sampmap_params = [
-            {"is_sample": True, "drcfiles": sample_files},
-            {"is_sample": False, "drcfiles": chem_files},
+            {"is_sample": True, "drcfiles": fitted_sample_files},
+            {"is_sample": False, "drcfiles": fitted_chem_files},
             {"is_sample": False, "drcfiles": []},
         ]
         progress_bar = tqdm(
@@ -507,9 +556,6 @@ def main():
         # Perform sample mapping
         for smp in sampmap_params:
             smpargs = {**smp, **sampmap_args}
-            # tqdm.write(
-            #     f"Performing sample mapping with the following parameters: {smpargs}"
-            # )
             res = runSampMap(**smpargs)
             all_res.extend(res)
             progress_bar.update(1)
@@ -520,10 +566,8 @@ def main():
 
         # Collect all unique files and remove temp files
         all_res = list(set(all_res))
-        for f in sample_files + chem_files:
-            # tqdm.write(f"Filename: {f}")
-            # os.system(f"head {f}")
-            os.system(f"rm {f}")
+        # for f in fitted_sample_files + fitted_chem_files:
+        #     os.system(f"rm {f}")
 
         # Validate schema
         runSchemaCheck(res)

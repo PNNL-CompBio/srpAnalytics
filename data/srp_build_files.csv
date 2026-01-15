@@ -39,3 +39,17 @@ compTox,mapping,chemical,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/d
 endpointMap,mapping,endpoint,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/data/SuperEndpoint%20Mapping%202021NOV04.xlsx,1
 chemdesc,classification,chemical,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/data/ChemicalDescriptions.xlsx,1
 sampMap,mapping,sample,https://github.com/PNNL-CompBio/srpAnalytics/raw/main/data/envSampCleanMapping.xlsx,1
+zfCombinedv1,morphology,chemical,https://figshare.com/ndownloader/files/60570467,4
+zfCombinedv1,behavior,chemical,https://figshare.com/ndownloader/files/60609134,4
+zfPhase4,morphology,chemical,https://figshare.com/ndownloader/files/50534328,4
+zfPhase4,behavior,chemical,https://figshare.com/ndownloader/files/50534334,4
+processed6,bmd,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/bmd_vals_2021_04_09.csv,4
+processed7,bmd,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/bmd_vals_2021_08_18.csv,4
+processed8,bmd,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/bmd_vals_all_qc.csv,4
+processed6,dose,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/dose_response_vals_2021_04_09.csv,4
+processed7,dose,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/dose_response_vals_2021_08_18.csv,4
+processed8,dose,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/dose_response_vals_all_qc.csv,4
+processed6,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_2021_04_09.csv,4
+processed7,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_2021_08_18.csv,4
+processed8,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_all_qc.csv,4
+st_helens_study,sample,air,https://figshare.com/ndownloader/files/59329547,4
