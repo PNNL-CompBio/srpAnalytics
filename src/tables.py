@@ -1,8 +1,14 @@
+"""tables.py: Handles master tables.
+
+author(s): @sgosline, @christinehc
+"""
+
 # =========================================================
 # Imports
 # =========================================================
 import pandas as pd
 from numpy.typing import ArrayLike
+
 
 # #################################
 # Master ID tables
@@ -11,8 +17,6 @@ from numpy.typing import ArrayLike
 # They are in some files but not others, so tables are
 # automatically updated below.
 # #################################
-
-
 def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
     """Generate master table for chemical ID
 
@@ -115,8 +119,6 @@ def sample_id_master_table(
 # 2. Multiple chemical ids mapping to a single CAS ID:
 #    A single chemical ID must be selected.
 # ##################################
-
-
 def remove_chem_id_duplicates(
     df: pd.DataFrame,
     chem_ids: pd.DataFrame,

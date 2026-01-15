@@ -1,3 +1,9 @@
+"""metadata.py: Functions to get or handle metadata for chemicals
+    and/or endpoints.
+
+author(s): @christinehc
+"""
+
 # =========================================================
 # Imports
 # =========================================================

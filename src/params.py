@@ -1,35 +1,49 @@
+"""params.py: Defines global parameters for SRP workflow.
+
+author(s): @christinehc, @sgosline
+"""
+
+# =========================================================
+# Imports
+# =========================================================
 from pandas import isna
+
+# =========================================================
+# Constants and Filepaths
+# =========================================================
+MANIFEST_FILEPATH = "data/srp_build_files.csv"  # "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/srp_build_files.csv"
 
 # =========================================================
 # Define Columns / Table Schemas
 # =========================================================
-REQUIRED_SAMPLE_COLUMNS = [
-    "ClientName",
-    "SampleNumber",
-    "date_sampled",
-    "sample_matrix",
-    "technology",
-    "projectName",
-    "SampleName",
-    "LocationLat",
-    "projectLink",
-    "LocationLon",
-    "LocationName",
-    "LocationAlternateDescription",
-    "AlternateName",
-    "cas_number",
-    "date_sample_start",
-    "measurement_value",
-    "measurement_value_qualifier",
-    "measurement_value_unit",
-    "measurement_value_molar",
-    "measurement_value_molar_unit",
-    "environmental_concentration",
-    "environmental_concentration_qualifier",
-    "environmental_concentration_unit",
-    "environmental_concentration_molar",
-    "environmental_concentration_molar_unit",
-]
+
+# REQUIRED_SAMPLE_COLUMNS = [
+#     "ClientName",
+#     "SampleNumber",
+#     "date_sampled",
+#     "sample_matrix",
+#     "technology",
+#     "projectName",
+#     "SampleName",
+#     "LocationLat",
+#     "projectLink",
+#     "LocationLon",
+#     "LocationName",
+#     "LocationAlternateDescription",
+#     "AlternateName",
+#     "cas_number",
+#     "date_sample_start",
+#     "measurement_value",
+#     "measurement_value_qualifier",
+#     "measurement_value_unit",
+#     "measurement_value_molar",
+#     "measurement_value_molar_unit",
+#     "environmental_concentration",
+#     "environmental_concentration_qualifier",
+#     "environmental_concentration_unit",
+#     "environmental_concentration_molar",
+#     "environmental_concentration_molar_unit",
+# ]
 
 # @TODO: need to rename the water columns
 # new_sample_columns = {
@@ -52,38 +66,38 @@ REQUIRED_COMPTOX_COLUMNS = [
     "PUBCHEM_DATA_SOURCES",
 ]
 
-SAMPLE_CHEM_COLUMNS = [
-    "Sample_ID",
-    "Chemical_ID",
-    "measurement_value",
-    "measurement_value_qualifier",
-    "measurement_value_unit",
-    "measurement_value_molar",
-    "measurement_value_molar_unit",
-    "environmental_concentration",
-    "environmental_concentration_qualifier",
-    "environmental_concentration_unit",
-    "environmental_concentration_molar",
-    "environmental_concentration_molar_unit",
-]
+# SAMPLE_CHEM_COLUMNS = [
+#     "Sample_ID",
+#     "Chemical_ID",
+#     "measurement_value",
+#     "measurement_value_qualifier",
+#     "measurement_value_unit",
+#     "measurement_value_molar",
+#     "measurement_value_molar_unit",
+#     "environmental_concentration",
+#     "environmental_concentration_qualifier",
+#     "environmental_concentration_unit",
+#     "environmental_concentration_molar",
+#     "environmental_concentration_molar_unit",
+# ]
 
-SAMPLE_COLUMNS = [
-    "Sample_ID",
-    "ClientName",
-    "SampleNumber",
-    "date_sampled",
-    "sample_matrix",
-    "technology",
-    "projectName",
-    "SampleName",
-    "LocationLat",
-    "projectLink",
-    "LocationLon",
-    "LocationName",
-    "LocationAlternateDescription",
-    "AlternateName",
-    "date_sample_start",
-]
+# SAMPLE_COLUMNS = [
+#     "Sample_ID",
+#     "ClientName",
+#     "SampleNumber",
+#     "date_sampled",
+#     "sample_matrix",
+#     "technology",
+#     "projectName",
+#     "SampleName",
+#     "LocationLat",
+#     "projectLink",
+#     "LocationLon",
+#     "LocationName",
+#     "LocationAlternateDescription",
+#     "AlternateName",
+#     "date_sample_start",
+# ]
 
 REQUIRED_CHEM_COLUMNS = [
     "Chemical_ID",
@@ -106,24 +120,24 @@ REQUIRED_MAPPING_COLUMNS = [
     "zf_lims_id",
 ]  # added these to complete mapping
 
-# required from bmd calculation
-# add in Sample_ID or Chemical_ID depending on table
-REQUIRED_BMD_COLUMNS = {
-    "bmd": [
-        "Chemical_ID",
-        "End_Point",
-        "Model",
-        "BMD10",
-        "BMD50",
-        "Min_Dose",
-        "Max_Dose",
-        "AUC_Norm",
-        "DataQC_Flag",
-        "BMD_Analysis_Flag",
-    ],
-    "doseRep": ["Chemical_ID", "End_Point", "Dose", "Response", "CI_Lo", "CI_Hi"],
-    "fitVals": ["Chemical_ID", "End_Point", "X_vals", "Y_vals"],
-}
+# # required from bmd calculation
+# # add in Sample_ID or Chemical_ID depending on table
+# REQUIRED_BMD_COLUMNS = {
+#     "bmd": [
+#         "Chemical_ID",
+#         "End_Point",
+#         "Model",
+#         "BMD10",
+#         "BMD50",
+#         "Min_Dose",
+#         "Max_Dose",
+#         "AUC_Norm",
+#         "DataQC_Flag",
+#         "BMD_Analysis_Flag",
+#     ],
+#     "doseRep": ["Chemical_ID", "End_Point", "Dose", "Response", "CI_Lo", "CI_Hi"],
+#     "fitVals": ["Chemical_ID", "End_Point", "X_vals", "Y_vals"],
+# }
 
 # Define MASV mapping params
 MASV_SOURCE = [
