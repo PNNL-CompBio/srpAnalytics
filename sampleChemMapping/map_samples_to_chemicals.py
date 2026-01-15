@@ -20,16 +20,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.format import rename_duplicates
 from src.mapping import rename_chemical_class
 from src.metadata import build_chem_metadata, get_endpoint_metadata
-from src.params import (
-    MASV_CC,
-    MASV_SOURCE,
-    QC_FLAGS,
-    REQUIRED_BMD_COLUMNS,
-    REQUIRED_SAMPLE_COLUMNS,
-    SAMPLE_CHEM_COLUMNS,
-    SAMPLE_COLUMNS,
-)
+from src.params import MASV_CC, MASV_SOURCE
+from src.schema import combine_schema_cols, get_cols_from_schema
 from src.tables import sample_id_master_table
+
+# =========================================================
+# Setup and Parameters
+# =========================================================
+SAMPLE_COLS = get_cols_from_schema("samples")
+SAMP2CHEM_COLS = get_cols_from_schema("samplesToChemicals")
+FSES_COLS = combine_schema_cols("samples", "samplesToChemicals")
 
 # These pathways refer to absolute pathways in the docker image
 # setting these three parameters, can be appended
@@ -90,11 +90,29 @@ def get_new_chemical_class(data_dir: str) -> pd.DataFrame:
     return full_class
 
 
-def process_fses(filename: str) -> pd.DataFrame:
+def load_clean_fses(filename: str) -> pd.DataFrame:
+    """Load and clean FSES input files.
+
+    Steps:
+        1. Remove invalid and null entries
+        2. Format location data and enforces negative longitudes
+        3. Remove entries with no data
+
+    Parameters
+    ----------
+    filename : str
+        Path to FSES file
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned FSES data
+    """
     # Replace invalid values with nulls for filtering
-    fses = pd.read_csv(filename)[REQUIRED_SAMPLE_COLUMNS].replace(
+    fses = pd.read_csv(filename)[FSES_COLS].replace(
         {"BLOD": "0", "NULL": "0", "nc:BDL": "0"}
     )
+    fses = fses.drop(["Chemical_ID"])  # Drop chem ID (for later merge)
 
     # Remove null and invalid entries
     fses = (
@@ -103,13 +121,25 @@ def process_fses(filename: str) -> pd.DataFrame:
         .query("measurement_value not in ['0', 'NULL', '']")
     )
 
-    # Format FSES location data
+    # Format FSES location data and require negative longitudes
+    # NOTE: Our data is already all negative, so unnecessary?
     fses["LocationLon"] = pd.to_numeric(fses["LocationLon"], errors="coerce")
-
-    # Only allow negative longitudes
-    # Note: Our data is already all negative, so unnecessary?
     fses["LocationLon"] = np.where(
         fses["LocationLon"].gt(0), -fses["LocationLon"], fses["LocationLon"]
+    )
+
+    # Drop entries with no data
+    fses = fses.dropna(
+        subset=[
+            "SampleNumber",
+            "SampleName",
+            "date_sampled",
+            "LocationLat",
+            "LocationLon",
+            "measurement_value",
+            "environmental_concentration",
+        ],
+        how="all",
     )
     return fses
 
@@ -139,23 +169,11 @@ def build_sample_data(
         _description_
     """
     # Read and process all FSES files
-    data = pd.concat([process_fses(f) for f in fses_files]).dropna(
-        subset=[
-            "SampleNumber",
-            "SampleName",
-            "date_sampled",
-            "LocationLat",
-            "LocationLon",
-            "measurement_value",
-            "environmental_concentration",
-        ],
-        how="all",  # Remove samples with no data
-    )
+    data = pd.concat([load_clean_fses(f) for f in fses_files], ignore_index=True)
 
     # Add chemical metadata and sample IDs
-    chem_metadata = chem_metadata[
-        ["Chemical_ID", "cas_number", "averageMass"]
-    ].drop_duplicates()
+    chem_metadata = chem_metadata[["Chemical_ID", "cas_number", "averageMass"]]
+    chem_metadata = chem_metadata.drop_duplicates()
     data = data.merge(chem_metadata, on="cas_number", how="left")
 
     # Get sample IDs
@@ -250,7 +268,7 @@ def combine_v2_chemical_endpoint_data(
     # tqdm.writef"Combining bmd files: {', '.join(bmd_files)}")
 
     # Read and concatenate the specified columns from all BMD files
-    cols = REQUIRED_BMD_COLUMNS["bmd"]
+    cols = get_cols_from_schema("BMDs")
     files = [pd.read_csv(file)[cols] for file in bmd_files]
     df = pd.concat(files)
 
@@ -332,7 +350,7 @@ def combine_v2_chemical_endpoint_data(
 
 def combine_chemical_data(
     bmd_files: list[str],
-    data_type: str = "fit",
+    data_type: str = "Fits",
     is_extract: bool = False,
     chem_data: Optional[pd.DataFrame] = None,
     endpoint_details: Optional[pd.DataFrame] = None,
@@ -344,7 +362,8 @@ def combine_chemical_data(
     bmd_files : list[str]
         _description_
     data_type : str, optional
-        _description_, by default "fit"
+        Type of data, by default "Fits"
+        Options are: "Dose"/"dose" or "Fits"/"fits"/"fit"
     is_extract : bool, optional
         _description_, by default False
     chem_data : Optional[pd.DataFrame], optional
@@ -363,14 +382,17 @@ def combine_chemical_data(
         _description_
     """
     # Determine columns based on data type
-    if data_type == "fit":
-        col_type = "fitVals"
-    elif data_type == "dose":
-        col_type = "doseRep"
+    if "fit" in data_type.lower():
+        data_type = "Fits"
+    if "dose" in data_type.lower():
+        data_type = "Dose"
     else:
-        raise ValueError("Invalid data_type. Must be 'fit' or 'dose'.")
+        raise ValueError(
+            f"Invalid data_type {data_type} " "(must contain 'fit' or 'dose)."
+        )
 
-    cols = REQUIRED_BMD_COLUMNS[col_type]
+    # cols = REQUIRED_BMD_COLUMNS[col_type]
+    cols = get_cols_from_schema(data_type)
 
     # Read all files into df (and throw error for invalid)
     files = list()
@@ -737,10 +759,10 @@ def main():
         chem_metadata.to_csv(
             os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"'
         )
-        chem_sample[SAMPLE_COLUMNS].drop_duplicates().to_csv(
+        chem_sample[SAMPLE_COLS].drop_duplicates().to_csv(
             os.path.join(args.output_dir, "samples.csv"), index=False, quotechar='"'
         )
-        chem_sample[SAMPLE_CHEM_COLUMNS].drop_duplicates().to_csv(
+        chem_sample[SAMP2CHEM_COLS].drop_duplicates().to_csv(
             os.path.join(args.output_dir, "samplesToChemicals.csv"),
             index=False,
             quotechar='"',
