@@ -1,4 +1,7 @@
-id: http://w3id.org/linkml/examples/srpanalyics
+# =========================================================
+# srpAnalytics : SCHEMA FOR SUPERFUND RESEARCH PORTAL
+# =========================================================
+id: http://w3id.org/linkml/examples/srpanalytics
 name: srpanalytics
 prefixes:
    linkml: https://w3id.org/linkml
@@ -9,6 +12,9 @@ imports:
 default_range: string
 default_prefix: srpanalytics
 
+# ---------------------------------------------------------
+# Slots
+# ---------------------------------------------------------
 slots:
   AUC_Norm:
     description: normalized area under the curve
@@ -36,8 +42,6 @@ slots:
     description: Name of endpoint
   End_Point:
     description: Name of endpoint
-  # endPointLink:
-  #   description: Link to endpoint description
   cas_number:
     description: CAS identifier for a specific chemical
     range: linkml:Any  # need to enforce string
@@ -47,9 +51,6 @@ slots:
   CI_Lo:
     description: Low range of confidence interval
     range: float
-  # combined:
-  #   description: (TODO) Combined significance score?
-    # range: linkml:Any  # float
   concentration:
     description: Concentration at which chemical was administered in uM
     range: float
@@ -58,8 +59,6 @@ slots:
   Dose:
     description: Dose of chemical
     range: float
-  # IncludeInPortal:
-  #   description:
   Max_Dose:
     description: Maximum dose administered
     range: linkml:Any
@@ -70,9 +69,6 @@ slots:
     description: Model with best fit to data
   Project:
     description: name of project contributing the dataset
-  # Response:
-  #   description: Response in terms of percentage of fish alive
-    # range: float
   Sample_ID:
     description: Unique identifier for every sample in the database
     range: linkml:Any
@@ -84,7 +80,20 @@ slots:
   Y_vals:
     description: Y coordinates of fitted curve, if available
     range: linkml:Any
+  # endPointLink:
+  #   description: Link to endpoint description
+  # combined:
+  #   description: (TODO) Combined significance score?
+    # range: linkml:Any  # float
+    # IncludeInPortal:
+  #   description:
+  # Response: -> Normalized_to_Vehicle
+  #   description: Response in terms of percentage of fish alive
+    # range: float
 
+# ---------------------------------------------------------
+# Data Classes
+# ---------------------------------------------------------
 classes:
   samples:
     description: List of samples collected in the Superfund study
@@ -106,8 +115,6 @@ classes:
       technology:
         description:
       projectName:
-        description:
-      sampleName:
         description:
       LocationLat:
         description:
@@ -190,8 +197,8 @@ classes:
         range: linkml:Any
       environmental_concentration_molar_unit:
         description:
-  zfBMDs:  # new_BMDS_BC/LPR -> seems to be same as the Chem ones? combine?
-    description: Benchmark dose measurements of sample extracts in zebrafish
+  BMDs:
+    description: Benchmark dose measurements
     slots:
       - Chemical_ID
       - End_Point
@@ -203,7 +210,6 @@ classes:
       - AUC_Norm
       - DataQC_Flag
       - BMD_Analysis_Flag
-      - bmdrc.Endpoint.ID
     attributes:
       AUC:
         description: Area under curve
@@ -217,13 +223,12 @@ classes:
       BMDL:
         description: Lowest dose at which fish were affected
         range: float
-  zfDose:  # new_Dose_BC/LPR
-    description: Dose response datapoints of sample extracts in zebrafish
+  Dose:
+    description: Dose response datapoints
     slots:
       - Chemical_ID
       - End_Point
       - Dose
-      - bmdrc.Endpoint.ID
       - CI_Lo
       - CI_Hi
     attributes:
@@ -233,14 +238,37 @@ classes:
       num.nonna:
         description: Number of fish measured for the given endpoint
         range: integer
-  zfFits:  # new_Fits_BC/LPR
-    description: XY Coordinates of curve fit data for sample extracts in zebrafish
+  Fits:
+    description: XY Coordinates of curve fit data
     slots:
       - Chemical_ID
       - End_Point
       - X_vals
       - Y_vals
+  zebrafishChemBMDs:
+    description: Benchmark dose measurements of chemical extracts in zebrafish
+    is_a: BMDs
+    slots:
       - bmdrc.Endpoint.ID
+  zebrafishChemDose:
+    description: Dose response datapoints of chemical extracts in zebrafish
+    is_a: Dose
+    slots:
+      - bmdrc.Endpoint.ID
+  zebrafishChemFits:
+    description: XY Coordinates of curve fit data for chemical extracts in zebrafish
+    is_a: Fits
+    slots:
+      - bmdrc.Endpoint.ID
+  zebrafishSampBMDs:
+    description: Benchmark dose measurements of sample extracts in zebrafish
+    is_a: BMDs
+  zebrafishSampDose:  # new_Dose_BC/LPR
+    description: Dose response datapoints of sample extracts in zebrafish
+    is_a: Dose
+  zebrafishSampFits:  # new_Fits_BC/LPR
+    description: XY Coordinates of curve fit data for sample extracts in zebrafish
+    is_a: Fits
   allGeneEx:
     description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
     slots:
