@@ -231,13 +231,13 @@ classes:
       - Dose
       - CI_Lo
       - CI_Hi
-    attributes:
-      num.affected:
-        description: Number of fish with the observed phenotype
-        range: integer
-      num.nonna:
-        description: Number of fish measured for the given endpoint
-        range: integer
+    # attributes:
+    #   num.affected:
+    #     description: Number of fish with the observed phenotype
+    #     range: integer
+    #   num.nonna:
+    #     description: Number of fish measured for the given endpoint
+    #     range: integer
   Fits:
     description: XY Coordinates of curve fit data
     slots:
@@ -255,6 +255,13 @@ classes:
     is_a: Dose
     slots:
       - bmdrc.Endpoint.ID
+    attributes:
+      num.affected:
+        description: Number of fish with the observed phenotype
+        range: integer
+      num.nonna:
+        description: Number of fish measured for the given endpoint
+        range: integer
   zebrafishChemFits:
     description: XY Coordinates of curve fit data for chemical extracts in zebrafish
     is_a: Fits
@@ -266,6 +273,10 @@ classes:
   zebrafishSampDose:  # new_Dose_BC/LPR
     description: Dose response datapoints of sample extracts in zebrafish
     is_a: Dose
+    attributes:
+      Response: # -> Normalized_to_Vehicle
+        description: Response in terms of percentage of fish alive
+        range: float
   zebrafishSampFits:  # new_Fits_BC/LPR
     description: XY Coordinates of curve fit data for sample extracts in zebrafish
     is_a: Fits
