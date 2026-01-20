@@ -184,14 +184,15 @@ def main():
     ### 5. Format and export outputs------------------------------------------------------------
     print("...Exporting Results")
 
+    # Export chemical data
     if args.morpho is not None:
-        write_outputs(BC, "BC", args.output_dir, args.file_prefix)
-
+        write_outputs(BC, "BC", args.output_dir, f"{args.file_prefix}_chem")
     if args.lpr is not None:
-        write_outputs(LPR, "LPR", args.output_dir, args.file_prefix)
+        write_outputs(LPR, "LPR", args.output_dir, f"{args.file_prefix}_chem")
 
+    # Export sample data
     print("...Checking output")
-    for fclass in ["BMDs", "Dose", "Fits"]:
+    for fclass in ["BMDs", "Doses", "Fits"]:
         output_files = glob(f"{args.output_dir}/{args.file_prefix}_{fclass}_*.csv")
         for of in output_files:
             cmd = f"linkml-validate --schema srpAnalytics.yaml {of} --target-class zf{fclass}"
