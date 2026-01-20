@@ -53,3 +53,6 @@ processed6,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalyti
 processed7,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_2021_08_18.csv,4
 processed8,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_all_qc.csv,4
 st_helens_study,sample,air,https://figshare.com/ndownloader/files/59329547,4
+zfCombinedLPR,bmd,chemical,https://figshare.com/ndownloader/files/61111501,4
+zfCombinedLPR,dose,chemical,https://figshare.com/ndownloader/files/61121032,4
+zfCombinedLPR,fit,chemical,https://figshare.com/ndownloader/files/61111507,4
