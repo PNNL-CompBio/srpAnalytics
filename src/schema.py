@@ -13,7 +13,7 @@ from linkml_runtime.utils.schemaview import SchemaView
 # =========================================================
 # Setup and Parameters
 # =========================================================
-SCHEMA_FILE = "../srpAnalytics.yaml"
+SCHEMA_FILE = "srpAnalytics.yaml"
 ZEBRAFISH_DTYPE_TO_SUFFIX = {"bmd": "BMDs", "dose": "Dose", "fit": "Fits"}
 
 
