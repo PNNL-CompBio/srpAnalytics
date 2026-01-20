@@ -29,7 +29,6 @@ from tqdm import tqdm
 # =========================================================
 OUTPUT_DIR = "tmp"  # "./tmp"
 
-
 manifest = DataManifest(MANIFEST_FILEPATH)
 loader = FigshareDataLoader(
     Path(OUTPUT_DIR) / ".figshare_cache",  # api_token=FIGSHARE_API_TOKEN
@@ -49,10 +48,10 @@ def fitCurveFiles(
 
     Parameters
     ----------
-    morpho_filename : Optional[str]
-        Path to file containing morphology data
+    morpho_filename : Union[list, str, None]
+        Path or list of paths to file(s) containing morphology data
     lpr_filename : Optional[str]
-        Path to file containing behavioral data
+        Path or list of paths to file(s) containing behavioral data
     output_dir : str, optional
         Path to which to save output files, by default OUTPUT_DIR
     file_prefix : str, optional
@@ -130,8 +129,12 @@ def fitCurveFiles(
     loader.clear_cache()
 
 
+# TODO: combine with code from map_samples_to_chemicals
 def combineZebrafishFiles(
-    data_files: list[str], sample_type: str, data_type: str
+    data_files: list[str],
+    sample_type: str,
+    data_type: str,
+    sample_id_map: Optional[pd.DataFrame] = None,
 ) -> pd.DataFrame:
     """Combine preprocessed zebrafish sample files.
 
@@ -143,6 +146,9 @@ def combineZebrafishFiles(
         Sample type, one of ["chemical", "extract"]
     data_type : str
         File type, one of ["bmd", "dose", "fit"]
+    sample_id_map : Optional[pd.DataFrame]
+        DataFrame containing Sample_ID and SampleNumber column
+            mappings for all samples, by default None
 
     Returns
     -------
@@ -465,13 +471,21 @@ def main():
         # Add chemical BMDS, fits, curves to existing data
         # sample_files, chem_files = [], []
 
-        # Find morphology and behavior pairs for chemical extracts
-        zebrafish_chem_files = manifest.get(
-            data_type=["morphology", "behavior"],
+        # Find morphology data for chemical extracts
+        zebrafish_chem_morpho = manifest.get(
+            data_type="morphology",  # ["morphology", "behavior"]
             sample_type="chemical",
             version=4,
             return_first=False,
         )
+
+        # Get zebrafish chemical LPR data (pre-processed)
+        zebrafish_chem_lpr = manifest.get(
+            data_type=["bmd", "dose", "fit"],
+            sample_type="chemical",
+            return_first=False,
+            version=4,
+        )[0]
 
         # Get zebrafish sample data
         zebrafish_samp_files = manifest.get(
@@ -482,25 +496,33 @@ def main():
         )
 
         # Define files and set progress bar increments for concatenating each
-        total_iterations = len(zebrafish_chem_files) * len(zebrafish_samp_files)
+        total_iterations = len(zebrafish_chem_morpho) * len(zebrafish_samp_files)
         progress_bar = tqdm(total=total_iterations, desc="Combining files")
 
         # Process chemical files (using BMDRC) and collect output files
         tqdm.write(
             "Fitting benchmark dose response curves for zebrafish chemical extracts..."
         )
-        # for chem_data in zebrafish_chem_files:
-        #     morph_data, beh_data = chem_data
-        fitCurveFiles(
-            morpho_filename=[f[0] for f in zebrafish_chem_files],
-            lpr_filename=[f[1] for f in zebrafish_chem_files],
-            output_dir=args.output_dir,
-            file_prefix="zebrafish",
-        )
         fitted_chem_files = [
             os.path.join(args.output_dir, f"zebrafish_chem_{f}_{d}.csv")
             for f, d in itertools.product(["BMDs", "Dose", "Fits"], ["BC", "LPR"])
         ]
+        if not os.path.exists(fitted_chem_files[0]):  # Skip if files exist
+            fitCurveFiles(
+                morpho_filename=zebrafish_chem_morpho,  # [f[0] for f in zebrafish_chem_files],
+                lpr_filename=None,  # [f[1] for f in zebrafish_chem_files],
+                output_dir=args.output_dir,
+                file_prefix="zebrafish",
+            )
+
+        # Process LPR and add to chem files
+        for f in zebrafish_chem_lpr:
+            fid = f.split("/")[-1]
+            _ = loader.load_data(fid)
+            fname = loader.get_file_path(fid).as_posix()
+            ftype = os.path.splitext(os.path.basename(fname))[0].split("_")[-1]
+            tmp = pd.read_csv(fname)
+            tmp.to_csv(os.path.join(args.output_dir, f"zebrafish_chem_{ftype}_LPR.csv"))
 
         # Process sample files (using preprocessed data)
         tqdm.write("Combining data for zebrafish sample extracts...")
