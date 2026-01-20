@@ -9,6 +9,7 @@ Original rewrite using generative AI; modified by @christinehc
 import os
 import sys
 from argparse import ArgumentParser
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -17,6 +18,7 @@ from numpy.typing import ArrayLike
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.data import FigshareDataLoader
 from src.format import rename_duplicates
 from src.mapping import rename_chemical_class
 from src.metadata import build_chem_metadata, get_endpoint_metadata
@@ -40,11 +42,15 @@ OUTPUT_DIR = "/tmp"
 # Set CompTox API key
 CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
 
+# Figshare file loader
+loader = FigshareDataLoader(
+    Path(OUTPUT_DIR) / ".figshare_cache",  # api_token=FIGSHARE_API_TOKEN
+)
+
+
 # =========================================================
 # Functions
 # =========================================================
-
-
 ###################################
 # Metadata Collection
 ###################################
@@ -108,18 +114,28 @@ def load_clean_fses(filename: str) -> pd.DataFrame:
     pd.DataFrame
         Cleaned FSES data
     """
-    # Replace invalid values with nulls for filtering
-    fses = pd.read_csv(filename)[FSES_COLS].replace(
-        {"BLOD": "0", "NULL": "0", "nc:BDL": "0"}
-    )
-    fses = fses.drop(["Chemical_ID"])  # Drop chem ID (for later merge)
+    # Parse CSV files and HTTPS (figshare) separately
+    if os.path.splitext(filename)[1] == ".csv":
+        # Replace invalid values with nulls for filtering
+        fses = pd.read_csv(filename, dtype={"Sample_ID": str, "Chemical_ID": str})
+    elif os.path.splitext(filename)[1] == "":
+        file_id = filename.split("/")[-1]
+        _ = loader.load_data(file_id)
+        fname = loader.get_file_path(file_id).as_posix()
+        fses = pd.read_csv(fname)
+
+    # Clean entries
+    fses = fses[FSES_COLS].replace({"BLOD": "0", "NULL": "0", "nc:BDL": "0"})
+    fses = fses.drop(columns=["Chemical_ID"])  # Drop chem ID (for later merge)
 
     # Remove null and invalid entries
-    fses = (
-        fses.query("SampleNumber != 'None' and cas_number != 'NULL'")
-        .query("measurement_value_molar not in ['0']")
-        .query("measurement_value not in ['0', 'NULL', '']")
-    )
+    fses = fses[
+        (fses["SampleNumber"].notna())
+        & (fses["SampleNumber"] != "None")
+        & (fses["cas_number"] != "NULL")
+        & (~fses["measurement_value_molar"].isin(["0"]))
+        & (~fses["measurement_value"].isin(["0", "NULL", ""]))
+    ]
 
     # Format FSES location data and require negative longitudes
     # NOTE: Our data is already all negative, so unnecessary?
@@ -178,7 +194,11 @@ def build_sample_data(
 
     # Get sample IDs
     sample_ids = sample_id_master_table(data["SampleNumber"], sample_id_file)
-    data = data.merge(sample_ids, on="SampleNumber", how="left").drop_duplicates()
+    data = (
+        data.merge(sample_ids, on="SampleNumber", how="left", suffixes=("_x", ""))
+        .drop_duplicates()
+        .drop(columns=["Sample_ID_x"])
+    )
 
     # NOTE: Moved to end
     # Rename duplicate sample names as sample:01, :02, etc.
@@ -237,11 +257,10 @@ def build_sample_data(
 
     # Rename duplicate sample names as sample:01, :02, etc.
     data["SampleName"] = rename_duplicates(data, col="SampleName")
-
     return data
 
 
-def combine_v2_chemical_endpoint_data(
+def combine_chemical_endpoint_data(
     bmd_files: list[str],
     is_extract: bool = False,
     chem_data: Optional[pd.DataFrame] = None,
@@ -265,7 +284,7 @@ def combine_v2_chemical_endpoint_data(
     pd.DataFrame
         _description_
     """
-    # tqdm.writef"Combining bmd files: {', '.join(bmd_files)}")
+    tqdm.write(f"Combining bmd files: {', '.join(bmd_files)}")
 
     # Read and concatenate the specified columns from all BMD files
     cols = get_cols_from_schema("BMDs")
@@ -279,7 +298,8 @@ def combine_v2_chemical_endpoint_data(
     if is_extract:
         # Split `sample_id` column on '-', take first two parts, and rename split cols
         sd_samp = chem_data.copy()
-        sd_samp[["tmp_id", "sub"]] = sd_samp["Sample_ID"].str.split("-", expand=True)
+        split_result = sd_samp["Sample_ID"].str.split("-", expand=True)
+        sd_samp["tmp_id"] = split_result[0]
         sd_samp = sd_samp.dropna(subset=["tmp_id"])
 
         # Prepare for join
@@ -360,12 +380,12 @@ def combine_chemical_data(
     Parameters
     ----------
     bmd_files : list[str]
-        _description_
+        List of BMD files
     data_type : str, optional
         Type of data, by default "Fits"
         Options are: "Dose"/"dose" or "Fits"/"fits"/"fit"
     is_extract : bool, optional
-        _description_, by default False
+        If True, applies to extracts (sample) data, by default False
     chem_data : Optional[pd.DataFrame], optional
         _description_, by default None
     endpoint_details : Optional[pd.DataFrame], optional
@@ -384,7 +404,7 @@ def combine_chemical_data(
     # Determine columns based on data type
     if "fit" in data_type.lower():
         data_type = "Fits"
-    if "dose" in data_type.lower():
+    elif "dose" in data_type.lower():
         data_type = "Dose"
     else:
         raise ValueError(
@@ -426,20 +446,19 @@ def combine_chemical_data(
     if is_extract:
         # Use temp (split) IDs for joining
         tmp_chem_data = chem_data.copy()
-        tmp_chem_data[["tmpId", "sub"]] = tmp_chem_data["Sample_ID"].str.split(
-            "-", expand=True
-        )
-        tmp_chem_data = tmp_chem_data[["Sample_ID", "tmpId"]].drop_duplicates()
-        df["tmpId"] = df["Chemical_ID"].astype(str)
+        split_result = tmp_chem_data["Sample_ID"].str.split("-", expand=True)
+        tmp_chem_data["tmp_id"] = split_result[0]
+        tmp_chem_data = tmp_chem_data[["Sample_ID", "tmp_id"]].drop_duplicates()
+        df["tmp_id"] = df["Chemical_ID"].astype(str)
         df = df.drop(columns=["Chemical_ID"])
-        df = df.merge(tmp_chem_data, on="tmpId", how="left")
+        df = df.merge(tmp_chem_data, on="tmp_id", how="left")
 
         # Fill missing sample IDs with temp ID
         mask = df["Sample_ID"].isna()
-        df.loc[mask, "Sample_ID"] = df.loc[mask, "tmpId"]
+        df.loc[mask, "Sample_ID"] = df.loc[mask, "tmp_id"]
 
         # Delete temp ID column
-        df = df.drop(columns=["tmpId"])
+        df = df.drop(columns=["tmp_id"])
 
     # For non-extracts, keep only chemicals that are in sample data
     elif not is_extract and chem_data is not None:
@@ -669,15 +688,15 @@ def main():
 
     if args.is_sample or args.is_chem:
         all_files = args.dose_response.split(",")
-        bmd_files = [file for file in all_files if "bmd" in file]
-        dose_files = [file for file in all_files if "dose" in file]
-        fit_files = [file for file in all_files if "fit" in file]
+        bmd_files = [file for file in all_files if "BMDs" in file]
+        dose_files = [file for file in all_files if "Dose" in file]
+        fit_files = [file for file in all_files if "Fits" in file]
 
         chem_data = chem_sample if args.is_sample else chem_metadata
 
         tqdm.write("Combining chemical endpoint data...")
         bmds = (
-            combine_v2_chemical_endpoint_data(
+            combine_chemical_endpoint_data(
                 bmd_files,
                 is_extract=args.is_sample,
                 chem_data=chem_data,
