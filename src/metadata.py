@@ -7,8 +7,8 @@ author(s): @christinehc
 # =========================================================
 # Imports
 # =========================================================
+import os
 from json import JSONDecodeError
-from os.path import join
 from time import sleep
 
 import ctxpy as ctx
@@ -16,7 +16,9 @@ import numpy as np
 import pandas as pd
 
 from .format import chunker, format_cas
+from .manifest import DataManifest
 from .mapping import get_mapping_file
+from .params import MANIFEST_FILEPATH
 from .tables import chem_id_master_table
 
 # These pathways refer to absolute pathways in the docker image
@@ -29,7 +31,9 @@ out_dir = "/tmp/"
 WAIT = 2.5
 
 # Set CompTox API key
-CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
+CTX_API_KEY = os.getenv("CTX_API_KEY")
+
+manifest = DataManifest(MANIFEST_FILEPATH)
 
 
 # =========================================================
@@ -199,7 +203,7 @@ def build_chem_metadata(
     keep_cols: list[str] = ["cas_number", "Chemical_ID", "chemical_class"],
     cas_data_cols: list[str] = ["preferredName", "smiles", "dtxsid", "dtxcid"],
     dtxsid_data_cols: list[str] = ["averageMass", "inchikey", "molFormula"],
-    save_to: str = join(out_dir, "chem_metadata.tsv"),
+    save_to: str = os.path.join(out_dir, "chem_metadata.tsv"),
 ) -> pd.DataFrame:
     """Get chemical metadata, which is stored in `data.dir`
 
