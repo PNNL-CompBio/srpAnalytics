@@ -173,6 +173,7 @@ jobs:
           path: expr-files
 
   create-figshare-article:
+    needs: [build-bmd, build-samples, build-expo, build-expr]
     runs-on: ubuntu-latest
     outputs:
       article_id: ${{ steps.create_article.outputs.article_id }}
