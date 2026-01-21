@@ -15,9 +15,10 @@ RUN mkdir data
 COPY data/srp_build_files.csv data/srp_build_files.csv
 COPY srpAnalytics.yaml .
 COPY zfBmd/requirements.txt .
-RUN mkdir ./tmp
+COPY build_script.py .
+RUN mkdir -p ./tmp/.figshare_cache
 
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
-ENTRYPOINT ["python3", "-u", "/app/zfBmd/main.py"]
+ENTRYPOINT ["python3", "-u", "/app/build_script.py", "--bmd"]
