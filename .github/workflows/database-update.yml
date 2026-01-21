@@ -77,6 +77,8 @@ jobs:
       - name: Pull sample image
         run: docker pull sgosline/srp-zfbmd
       - name: Run bmd python command
+        env:
+          FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
         run: |
           docker run -v $PWD:/tmp sgosline/srp-zfbmd
       - name: List files cwd
@@ -102,6 +104,8 @@ jobs:
       - name: Pull sample image
         run: docker pull sgosline/srp-samplechem
       - name: Run sample-chem python command
+        env:
+          FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
         run: |
           docker run -v $PWD:/tmp sgosline/srp-samplechem
       - name: List files cwd
