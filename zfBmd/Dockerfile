@@ -11,6 +11,8 @@ WORKDIR /app
 
 RUN mkdir ./zfBmd
 COPY zfBmd ./zfBmd
+RUN mkdir -p src
+COPY src/* src
 RUN mkdir data
 COPY data/srp_build_files.csv data/srp_build_files.csv
 COPY srpAnalytics.yaml .
