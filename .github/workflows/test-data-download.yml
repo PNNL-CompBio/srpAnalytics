@@ -3,7 +3,7 @@ name: Test-data-download
 on:
     push:
         branches:
-            - "fix_duplicates"
+            - "**"
         paths:
             - data/
 
@@ -27,25 +27,25 @@ jobs:
                   # Morphology data
                   echo "Downloading morphology data..."
                   curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
-                      -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.MORPHOLOGY_FILE_ID }}/download" \
+                      -L "https://ndownloader.figshare.com/files/${{ vars.MORPHOLOGY_FILE_ID }}" \
                       -o data/morphology.csv
 
                   # Behavioral (LPR) data  
                   echo "Downloading behavioral data..."
                   curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
-                      -L "https://api.figshare.com/v2/articles/${{ vars.ZEBRAFISH_ARTICLE_ID }}/files/${{ vars.BEHAVIORAL_FILE_ID }}/download" \
+                      -L "https://ndownloader.figshare.com/files/${{ vars.BEHAVIORAL_FILE_ID }}" \
                       -o data/behavioral.csv
 
                   # Exposome data
                   #echo "Downloading exposome data..."
                   #curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
-                  #     -L "https://api.figshare.com/v2/articles/${{ vars.DATA_ARTICLE_ID }}/files/${{ vars.EXPOSOME_FILE_ID }}/download" \
+                  #     -L "https://ndownloader.figshare.com/files/${{ vars.EXPOSOME_FILE_ID }}" \
                   #     -o data/exposome.csv
 
                   # Gene expression data
                   #echo "Downloading gene expression data..."
                   #curl -H "Authorization: token ${{ secrets.FIGSHARE_TOKEN }}" \
-                  #     -L "https://api.figshare.com/v2/articles/${{ vars.DATA_ARTICLE_ID }}/files/${{ vars.EXPRESSION_FILE_ID }}/download" \
+                  #     -L "https://ndownloader.figshare.com/files/${{ vars.EXPRESSION_FILE_ID }}" \
                   #     -o data/expression.csv
 
                   # Check if all files were downloaded successfully

@@ -68,6 +68,8 @@ jobs:
   build-bmd:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    env:
+      FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
     # environment: build
     steps:
       - name: Checkout Repo
@@ -76,9 +78,18 @@ jobs:
         uses: actions/download-artifact@v4
       - name: Pull sample image
         run: docker pull sgosline/srp-zfbmd
+      - name: Test Figshare token # TODO: REMOVE WHEN DONE
+        run: |
+          python -c "
+          import os
+          token = os.getenv('FIGSHARE_API_TOKEN')
+          if token:
+              print(f'Token found (length: {len(token)})')
+          else:
+              print('Token not found')
+              print('Available env vars:', [k for k in os.environ.keys() if 'FIGSHARE' in k])
+          "
       - name: Run bmd python command
-        env:
-          FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
         run: |
           docker run -v $PWD:/tmp sgosline/srp-zfbmd
       - name: List files cwd
@@ -96,6 +107,8 @@ jobs:
   build-samples:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    env:
+      FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -104,8 +117,6 @@ jobs:
       - name: Pull sample image
         run: docker pull sgosline/srp-samplechem
       - name: Run sample-chem python command
-        env:
-          FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
         run: |
           docker run -v $PWD:/tmp sgosline/srp-samplechem
       - name: List files cwd
