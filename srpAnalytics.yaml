@@ -30,6 +30,10 @@ slots:
   BMD50:
     description: Dose at which 50% of fish are affected
     range: linkml:Any
+  chemical_class:
+    description: Chemical class, from hand-curated list at OSU
+  chemDescription:
+    description: Chemical description, from PubChem or other sources
   Chemical_ID:
     description: Unique identifier for every chemical in the database
     range: linkml:Any
@@ -40,6 +44,9 @@ slots:
     range: integer
   Description:
     description: Name of endpoint
+  description_resource:
+    description: Link to resource used to source chemDescription
+    range: linkml:Any
   End_Point:
     description: Name of endpoint
   cas_number:
@@ -148,8 +155,11 @@ classes:
   chemicals:
     description: List of chemicals measured in the Superfund study
     slots:
-      - cas_number
       - Chemical_ID
+      - cas_number
+      - chemical_class
+      - chemDescription
+      - description_resource
     attributes:
       preferredName:
         description: Chemical name
@@ -171,10 +181,6 @@ classes:
         range: float
       chem_source:
         description: Source of chemical, from hand-curated list at OSU.
-      chemical_class:
-        description: Chemical class, from hand-curated list at OSU
-      chemDescription:
-        description:
       image_link:
         description: Link to image of molecular structure
         range:
@@ -384,3 +390,11 @@ classes:
       nGenes:
         description:
         range: integer
+  chemicalIdMapping:
+    description: Input file for chemical ID mapping (and descriptions)
+    slots:
+      - Chemical_ID
+      - cas_number
+      - chemical_class
+      - chemDescription
+      - description_resource
