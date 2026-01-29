@@ -131,14 +131,10 @@ classes:
         description:
       LocationLat:
         description:
-        any_of:
-          - range: float
-          - range: string
+        range: linkml:Any
       LocationLon:
         description:
-        any_of:
-          - range: float
-          - range: string
+        range: linkml:Any
       projectLink:
         description:
       LocationAlternateDescription:
@@ -189,6 +185,12 @@ classes:
       - Chemical_ID
       - cas_number
     attributes:
+      test_template:
+        description: Specifies the specific version of the test that was run
+        range: linkml:Any
+      test_method:
+        description: Specifies the overall method run (PAHs, Pesticides, MASV, etc)
+        range: linkml:Any
       measurement_value:
         description: Value measured in sampler
         range: linkml:Any
