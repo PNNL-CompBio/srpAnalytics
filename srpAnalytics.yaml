@@ -32,7 +32,7 @@ slots:
     range: linkml:Any
   Chemical_ID:
     description: Unique identifier for every chemical in the database
-    range: integer
+    range: linkml:Any
     identifier: true
     slot_uri: schema:identifier
   DataQC_Flag:
@@ -91,6 +91,19 @@ slots:
   #   description: Response in terms of percentage of fish alive
     # range: float
 
+# # ---------------------------------------------------------
+# # Custom Data Types
+# # ---------------------------------------------------------
+# types:
+#   IntegerOrNull:
+#     union_of:
+#       - integer
+#       - NullStringType
+
+#   NullStringType:
+#     base: string
+#     pattern: "^NULL$"
+
 # ---------------------------------------------------------
 # Data Classes
 # ---------------------------------------------------------
@@ -118,10 +131,14 @@ classes:
         description:
       LocationLat:
         description:
-        range: float
+        any_of:
+          - range: float
+          - range: string
       LocationLon:
         description:
-        range: float
+        any_of:
+          - range: float
+          - range: string
       projectLink:
         description:
       LocationAlternateDescription:
@@ -197,6 +214,7 @@ classes:
         range: linkml:Any
       environmental_concentration_molar_unit:
         description:
+        range: linkml:Any
   BMDs:
     description: Benchmark dose measurements
     slots:
