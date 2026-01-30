@@ -20,6 +20,9 @@ from typing import Optional, Union
 
 import pandas as pd
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # =========================================================
@@ -254,3 +257,61 @@ class FigshareDataLoader(FigshareDownloader):
                 f"Unexpected file extension: {file_type}."
                 "Valid extensions are .csv, .tsv, or .xlsx."
             )
+
+
+# =========================================================
+# Utility Functions
+# =========================================================
+def figshare_url_to_id(url: str) -> str:
+    """Get Figshare ID from download URL.
+
+    Parameters
+    ----------
+    url : str
+        Figshare download URL
+
+    Returns
+    -------
+    str
+        Figshare file ID
+    """
+    return url.split("/")[-1]
+
+
+def load_figshare_url(loader: FigshareDataLoader, url: str, **kwargs) -> pd.DataFrame:
+    """Loads figshare data from URL.
+
+    Parameters
+    ----------
+    loader : FigshareDataLoader
+        Data loader object
+    url : str
+        Figshare URL
+
+    Returns
+    -------
+    pd.DataFrame
+        Loaded dataframe
+
+    Raises
+    ------
+    ValueError
+        If file extension not one of .xlsx, .csv, or .tsv
+    """
+    file_id = figshare_url_to_id(url)
+    _ = loader.load_data(file_id)
+
+    filename = loader.get_file_path(file_id).as_posix()
+    ext = os.path.splitext(filename)[1]
+
+    if ext == ".xlsx":
+        return pd.read_excel(filename, **kwargs)
+    elif ext == ".csv":
+        return pd.read_csv(filename, **kwargs)
+    elif ext == ".tsv":
+        return pd.read_csv(filename, sep="\t", **kwargs)
+    else:
+        raise ValueError(
+            "File extension must be .xlsx, .csv, or .tsv"
+            f" (detected extension: {ext})."
+        )
