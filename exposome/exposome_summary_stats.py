@@ -14,7 +14,7 @@ import requests
 # ===============================================
 #  CONFIG
 # ===============================================
-OUTPUT_DIR = "/tmp/"
+OUTPUT_DIR = "tmp/"
 
 PROJ2NAME = {
     "ADIPO": "Human adipocyte cell lines",
@@ -308,9 +308,8 @@ if __name__ == "__main__":
     check_args()
 
     # Load all chemicals and projects
-    chems = pd.read_csv(sys.argv[1], encoding="utf-8-sig").dropna(
-        subset=["Chemical_ID"]
-    )
+    # print("sys.argv[1]", sys.argv[1])
+    chems = pd.read_excel(sys.argv[1]).dropna(subset=["Chemical_ID"])
     projects = _load_projects()
 
     genes, gos = list(), list()

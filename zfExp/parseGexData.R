@@ -17,7 +17,7 @@ schema <- data.frame(
 
 
 data.dir <- "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp"
-out.dir <- "/tmp/"
+out.dir <- "tmp/"
 
 generateGeneExamples <- function(genelist, chems) {
   library(ggplot2)
