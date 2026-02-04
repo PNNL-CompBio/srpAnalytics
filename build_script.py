@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import pandas as pd
-from src.data import FigshareDataLoader
+from src.data import FigshareDataLoader, figshare_url_to_id
 from src.manifest import DataManifest
 from src.params import MANIFEST_FILEPATH
 from src.schema import (
@@ -90,7 +90,7 @@ def fitCurveFiles(
     ):
         if filename:
             if isinstance(filename, list):
-                figshare_id_list = [f.split("/")[-1] for f in filename]
+                figshare_id_list = [figshare_url_to_id(f) for f in filename]
                 for fid in figshare_id_list:
                     _ = loader.load_data(fid)
                 figshare_files = " ".join(
@@ -172,14 +172,14 @@ def combineZebrafishFiles(
 
 def runSampMap(
     is_sample: bool = False,
-    drcfiles: list = [],
-    sid: str = "",
-    smap: str = "",
-    cid: str = "",
-    emap: str = "",
-    cclass: str = "",
-    fses: str = "",
-    descfile: str = "",
+    dose_response_files: list = [],
+    sample_id_file: str = "",
+    sample_map_file: str = "",
+    chemical_id: str = "",
+    endpoint_map: str = "",
+    chem_class_file: str = "",
+    fses_files: str = "",
+    chem_desc_file: str = "",
     output_dir: str = OUTPUT_DIR,
 ) -> list[str]:
     """Run sample-to-chemical mapping.
@@ -189,21 +189,21 @@ def runSampMap(
     is_sample : bool, optional
         If True, runs sample mapping mode; else, runs
         chemical mapping mode, by default False
-    drcfiles : list, optional
+    dose_response_files : list, optional
         List of dose-response curve files to process, by default []
-    sid : str, optional
+    sample_id_file : str, optional
         Sample ID, by default ""
-    smap : str, optional
+    sample_map_file : str, optional
         /path/to/sample_mapping_file, by default ""
-    cid : str, optional
+    chemical_id : str, optional
         Chemical ID, by default ""
-    emap : str, optional
+    endpoint_map : str, optional
         /path/to/endpoint_mapping_file, by default ""
-    cclass : str, optional
+    chem_class_file : str, optional
         /path/to/chemical_class_file, by default ""
-    fses : str, optional
+    fses_files : str, optional
         /path/to/sample_files, by default ""
-    descfile : str, optional
+    chem_desc_file : str, optional
         /path/to/chemical_description_file, by default ""
     output_dir : str, optional
         Directory to save output, by default OUTPUT_DIR (='/tmp')
@@ -221,21 +221,21 @@ def runSampMap(
             - zebrafish{Samp,Chem}DoseResponse.csv
             - zebrafish{Samp,Chem}BMDs.csv)
     """
-    drc = ",".join(drcfiles)
+    drc = ",".join(dose_response_files)
     args = (
-        f"--sample_id={sid} "
-        f"--sample_map={smap} "
-        f"--chem_id={cid} "
-        f"--ep_map={emap} "
-        f"--chem_class={cclass} "
-        f"--sample_files={fses} "
-        f"--chem_desc={descfile} "
+        f"--sample_id_file={sample_id_file} "
+        f"--sample_map={sample_map_file} "
+        f"--chem_id={chemical_id} "
+        f"--ep_map={endpoint_map} "
+        f"--chem_class={chem_class_file} "
+        f"--sample_files={fses_files} "
+        f"--chem_desc={chem_desc_file} "
         f"--output_dir={output_dir} "
     )
     if is_sample:
-        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --sample --drc_files={drc} {args}"
-    elif len(drcfiles) > 0:
-        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --chemical --drc_files={drc} {args}"
+        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --sample --dose_response_files={drc} {args}"
+    elif len(dose_response_files) > 0:
+        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --chemical --dose_response_files={drc} {args}"
     else:
         cmd = f"python sampleChemMapping/map_samples_to_chemicals.py {args}"
 
@@ -454,13 +454,15 @@ def main():
     # File Parsing and Collection
     # ---------------------------
     # Map sample information
-    sid = manifest.get(name="sampId")  # get_mapping_file(df, "sampId")
-    cid = manifest.get(name="chemId")
-    cclass = manifest.get(name="class1")
-    emap = manifest.get(name="endpointMap")
-    fses = manifest.get(data_type="sample", return_first=False)
-    descfile = manifest.get(name="chemdesc")
-    smap = manifest.get(name="sampMap")
+    sample_id_file = manifest.get(name="sampId")  # get_mapping_file(df, "sampId")
+    chemical_id = manifest.get(name="chemId", version=4)
+    chem_class_file = manifest.get(name="class1")
+    endpoint_map = manifest.get(name="endpointMap", version=4)
+    fses_files = manifest.get(
+        data_type="sample", return_first=False, version=4
+    )  # use new files
+    chem_desc_file = manifest.get(name="chemdesc")
+    sample_map_file = manifest.get(name="sampMap")
     gex1 = manifest.get(data_type="expression", return_first=False)
     ginfo = manifest.get(name="geneInfo")
 
@@ -485,7 +487,7 @@ def main():
             sample_type="chemical",
             return_first=False,
             version=4,
-        )[0]
+        )
 
         # Get zebrafish sample data
         zebrafish_samp_files = manifest.get(
@@ -516,12 +518,15 @@ def main():
             )
 
         # Process LPR and add to chem files
-        for f in zebrafish_chem_lpr:
-            fid = f.split("/")[-1]
-            _ = loader.load_data(fid)
-            fname = loader.get_file_path(fid).as_posix()
-            ftype = os.path.splitext(os.path.basename(fname))[0].split("_")[-1]
-            tmp = pd.read_csv(fname)
+        for file_set in zip(*zebrafish_chem_lpr):
+            tmp = list()
+            for f in file_set:
+                fid = f.split("/")[-1]
+                _ = loader.load_data(fid)
+                fname = loader.get_file_path(fid).as_posix()
+                ftype = os.path.splitext(os.path.basename(fname))[0].split("_")[-1]
+                tmp.append(pd.read_csv(fname))
+            tmp = pd.concat(tmp, ignore_index=True)
             tmp.to_csv(os.path.join(args.output_dir, f"zebrafish_chem_{ftype}_LPR.csv"))
 
         # Process sample files (using preprocessed data)
@@ -554,21 +559,21 @@ def main():
         # Define fixed params for sample mapping
         all_res = list()
         sampmap_args = {
-            "sid": sid,
-            "smap": smap,
-            "cid": cid,
-            "emap": emap,
-            "cclass": cclass,
-            "fses": fses,
-            "descfile": descfile,
+            "sample_id_file": sample_id_file,
+            "sample_map_file": sample_map_file,
+            "chemical_id": chemical_id,
+            "endpoint_map": endpoint_map,
+            "chem_class_file": chem_class_file,
+            "fses_files": fses_files,
+            "chem_desc_file": chem_desc_file,
             "output_dir": args.output_dir,
         }
 
         # Iterate through sampMap params
         sampmap_params = [
-            {"is_sample": True, "drcfiles": fitted_sample_files},
-            {"is_sample": False, "drcfiles": fitted_chem_files},
-            {"is_sample": False, "drcfiles": []},
+            {"is_sample": True, "dose_response_files": fitted_sample_files},
+            {"is_sample": False, "dose_response_files": fitted_chem_files},
+            {"is_sample": False, "dose_response_files": []},
         ]
         progress_bar = tqdm(
             range(len(sampmap_params)),
@@ -598,7 +603,10 @@ def main():
     # Exposome Workflow
     # -----------------
     if args.expo:
-        res = runExposome(cid, output_dir=args.output_dir)
+        figshare_id = figshare_url_to_id(chemical_id)
+        _ = loader.load_data(figshare_id)
+        chem_id_map_file = loader.get_file_path(figshare_id).as_posix()
+        res = runExposome(chem_id_map_file, output_dir=args.output_dir)
         # for f in res:
         #     tqdm.write(f"Filename: {f}")
         #     os.system(f"head {f}")
@@ -611,14 +619,14 @@ def main():
         if not os.path.exists(os.path.join(args.output_dir, "chemicals.csv")):
             runSampMap(
                 is_sample=False,
-                drcfiles=[],
-                sid=sid,
-                smap=smap,
-                cid=cid,
-                emap=emap,
-                cclass=cclass,
-                fses=fses,
-                descfile=descfile,
+                dose_response_files=[],
+                sample_id_file=sample_id_file,
+                sample_map_file=sample_map_file,
+                chemical_id=chemical_id,
+                endpoint_map=endpoint_map,
+                chem_class_file=chem_class_file,
+                fses_files=fses_files,
+                chem_desc_file=chem_desc_file,
                 output_dir=args.output_dir,
             )
 

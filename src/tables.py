@@ -38,7 +38,7 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
         Chemical ID master table
     """
     # Clean up input data and reduce # columns
-    cols = ["cas_number", "zf.cid", "Chemical_ID", "chemical_class"]
+    cols = ["Chemical_ID", "cas_number", "zf.cid", "chemical_class"]
 
     # Remove duplicates
     df = df[cols].drop_duplicates().dropna(subset=["cas_number"])
@@ -52,9 +52,9 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
         # Create table entries for missing chemical IDs
         missing_df = pd.DataFrame(
             {
+                "Chemical_ID": range(max_id, max_id + len(missing)),  # new chem IDs
                 "cas_number": list(missing),
                 "zf.cid": [""] * len(missing),
-                "Chemical_ID": range(max_id, max_id + len(missing)),  # new chem IDs
                 "chemical_class": [""] * len(missing),
             }
         )

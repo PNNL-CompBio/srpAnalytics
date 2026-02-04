@@ -9,16 +9,16 @@ author(s): @christinehc
 # =========================================================
 import os
 from json import JSONDecodeError
+from pathlib import Path
 from time import sleep
 
 import ctxpy as ctx
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
 
 from .format import chunker, format_cas
-from .manifest import DataManifest
-from .mapping import get_mapping_file
-from .params import MANIFEST_FILEPATH
+from .schema import get_cols_from_schema
 from .tables import chem_id_master_table
 
 # These pathways refer to absolute pathways in the docker image
@@ -31,9 +31,8 @@ out_dir = "/tmp/"
 WAIT = 2.5
 
 # Set CompTox API key
+load_dotenv()
 CTX_API_KEY = os.getenv("CTX_API_KEY")
-
-manifest = DataManifest(MANIFEST_FILEPATH)
 
 
 # =========================================================
@@ -41,7 +40,7 @@ manifest = DataManifest(MANIFEST_FILEPATH)
 # =========================================================
 def query_comptox_by_cas(
     df: pd.DataFrame,
-    keep_cols: list[str] = ["cas_number", "Chemical_ID", "chemical_class"],
+    keep_cols: list[str] = ["Chemical_ID", "cas_number", "chemical_class"],
     data_cols: list[str] = ["preferredName", "smiles", "dtxsid", "dtxcid"],
     wait: float = WAIT,
     tries: int = 5,
@@ -166,7 +165,7 @@ def query_comptox_by_dtxsid(
 
 def query_comptox(
     df: pd.DataFrame,
-    keep_cols: list[str] = ["cas_number", "chemical_id", "chemical_class"],
+    keep_cols: list[str] = ["Chemical_ID", "cas_number", "chemical_class"],
     cas_data_cols: list[str] = ["preferredName", "smiles", "dtxsid", "dtxcid"],
     dtxsid_data_cols: list[str] = ["averageMass", "inchikey", "molFormula"],
     wait: float = WAIT,
@@ -199,8 +198,8 @@ def query_comptox(
 
 
 def build_chem_metadata(
-    filename: str,
-    keep_cols: list[str] = ["cas_number", "Chemical_ID", "chemical_class"],
+    chem_ids: pd.DataFrame,
+    keep_cols: list[str] = get_cols_from_schema("chemicalIdMapping"),
     cas_data_cols: list[str] = ["preferredName", "smiles", "dtxsid", "dtxcid"],
     dtxsid_data_cols: list[str] = ["averageMass", "inchikey", "molFormula"],
     save_to: str = os.path.join(out_dir, "chem_metadata.tsv"),
@@ -209,9 +208,8 @@ def build_chem_metadata(
 
     Parameters
     ----------
-    filename : str
-        Path to master table of data files and types
-            (i.e. srp_build_files.csv)
+    chem_ids : pd.DataFrame
+        Chemical ID mapping table
     keep_cols : list[str], optional
         Columns to keep from chem ID mapping file,
             by default ["cas_number", "chemical_id", "chemical_class"]
@@ -225,12 +223,8 @@ def build_chem_metadata(
     Returns
     -------
     pd.DataFrame
-        _description_
+        Chemical metadata table
     """
-    # Get chem ID file
-    mappings = pd.read_csv(filename)
-    chem_ids = pd.read_csv(get_mapping_file(mappings, "chemId"))
-
     # Get chemical metadata from CompTox dashboard
     metadata = (
         query_comptox(
@@ -245,10 +239,10 @@ def build_chem_metadata(
 
     # Create table linking CAS to Chem IDs; drop duplicate entries
     chem_ids = chem_id_master_table(chem_ids, metadata["cas_number"])
-    chem_ids = chem_ids[["cas_number", "Chemical_ID"]].drop_duplicates()
+    chem_ids = chem_ids[["Chemical_ID", "cas_number"]].drop_duplicates()
 
     # Add chem metadata information to Chem ID table
-    metadata = metadata.merge(chem_ids, on=["cas_number", "Chemical_ID"], how="left")
+    metadata = metadata.merge(chem_ids, on=["Chemical_ID", "cas_number"], how="left")
 
     # Clean up metadata table
     metadata["preferredName"] = metadata["preferredName"].str.replace(
@@ -270,21 +264,21 @@ def build_chem_metadata(
     return metadata
 
 
-def get_endpoint_metadata(filename: str) -> pd.DataFrame:
-    """_summary_
+def format_endpoint_metadata(data: pd.DataFrame) -> pd.DataFrame:
+    """Load and format endpoint metadata file.
 
     Parameters
     ----------
-    filename : str
-        Path to endpoint file
+    filename : pd.DataFrame
+        Loaded endpoint mapping data
 
     Returns
     -------
     pd.DataFrame
-        _description_
+        Formatted endpoint metadata table
     """
     # Read file and rename cols to expected format
-    df = pd.read_excel(filename, sheet_name=3).rename(
+    data = data.rename(
         columns={
             "Abbreviation": "End_Point",
             "Simple name (<20char)": "End_Point_Name",
@@ -293,7 +287,7 @@ def get_endpoint_metadata(filename: str) -> pd.DataFrame:
     )
 
     # Trim whitespace from 'End_Point' column
-    df["End_Point"] = df["End_Point"].str.strip()
+    data["End_Point"] = data["End_Point"].str.strip()
 
     # Create a new row for 'No Data'
     no_data_row = pd.DataFrame(
@@ -307,6 +301,6 @@ def get_endpoint_metadata(filename: str) -> pd.DataFrame:
     )
 
     # Append the new row to the dataframe
-    df = pd.concat([df, no_data_row], ignore_index=True)
+    df = pd.concat([data, no_data_row], ignore_index=True)
 
-    return df
+    return df.drop_duplicates()

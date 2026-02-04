@@ -14,15 +14,17 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
 from numpy.typing import ArrayLike
 from tqdm import tqdm
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.data import FigshareDataLoader
+from src.data import FigshareDataLoader, load_figshare_url
 from src.format import rename_duplicates
+from src.manifest import DataManifest
 from src.mapping import rename_chemical_class
-from src.metadata import build_chem_metadata, get_endpoint_metadata
-from src.params import MASV_CC, MASV_SOURCE
+from src.metadata import build_chem_metadata, format_endpoint_metadata
+from src.params import MANIFEST_FILEPATH, MASV_CC, MASV_SOURCE
 from src.schema import combine_schema_cols, get_cols_from_schema
 from src.tables import sample_id_master_table
 
@@ -40,12 +42,15 @@ OUTPUT_DIR = "/tmp"
 # OUTPUT_DIR = "."
 
 # Set CompTox API key
-CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
+load_dotenv()
+CTX_API_KEY = os.getenv("CTX_API_KEY")
+# CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
 
 # Figshare file loader
 loader = FigshareDataLoader(
     Path(OUTPUT_DIR) / ".figshare_cache",  # api_token=FIGSHARE_API_TOKEN
 )
+manifest = DataManifest(MANIFEST_FILEPATH)
 
 
 # =========================================================
@@ -96,8 +101,8 @@ def get_new_chemical_class(data_dir: str) -> pd.DataFrame:
     return full_class
 
 
-def load_clean_fses(filename: str) -> pd.DataFrame:
-    """Load and clean FSES input files.
+def load_clean_fses(filename: str, loader: FigshareDataLoader) -> pd.DataFrame:
+    """Clean FSES input files.
 
     Steps:
         1. Remove invalid and null entries
@@ -108,6 +113,8 @@ def load_clean_fses(filename: str) -> pd.DataFrame:
     ----------
     filename : str
         Path to FSES file
+    loader : FigshareDataLoader
+        Figshare data loader object
 
     Returns
     -------
@@ -116,13 +123,9 @@ def load_clean_fses(filename: str) -> pd.DataFrame:
     """
     # Parse CSV files and HTTPS (figshare) separately
     if os.path.splitext(filename)[1] == ".csv":
-        # Replace invalid values with nulls for filtering
         fses = pd.read_csv(filename, dtype={"Sample_ID": str, "Chemical_ID": str})
     elif os.path.splitext(filename)[1] == "":
-        file_id = filename.split("/")[-1]
-        _ = loader.load_data(file_id)
-        fname = loader.get_file_path(file_id).as_posix()
-        fses = pd.read_csv(fname)
+        fses = load_figshare_url(loader, filename)
 
     # Clean entries
     fses = fses[FSES_COLS].replace({"BLOD": "0", "NULL": "0", "nc:BDL": "0"})
@@ -162,6 +165,7 @@ def load_clean_fses(filename: str) -> pd.DataFrame:
 
 def build_sample_data(
     fses_files: list[str],
+    loader: FigshareDataLoader,
     chem_metadata: pd.DataFrame,
     sample_id_file: str,
     sample_mapping: str = None,
@@ -172,6 +176,8 @@ def build_sample_data(
     ----------
     fses_files : list[str]
         List of FSES files from the Barton lab with sample info
+    loader : FigshareDataLoader
+        Figshare data loader object (for loading FSES files)
     chem_metadata : pd.DataFrame
         Chemical metadata table containing identifier mapping
     sample_id_file : str
@@ -185,7 +191,9 @@ def build_sample_data(
         _description_
     """
     # Read and process all FSES files
-    data = pd.concat([load_clean_fses(f) for f in fses_files], ignore_index=True)
+    data = pd.concat(
+        [load_clean_fses(f, loader) for f in fses_files], ignore_index=True
+    )
 
     # Add chemical metadata and sample IDs
     chem_metadata = chem_metadata[["Chemical_ID", "cas_number", "averageMass"]]
@@ -264,7 +272,7 @@ def combine_chemical_endpoint_data(
     bmd_files: list[str],
     is_extract: bool = False,
     chem_data: Optional[pd.DataFrame] = None,
-    endpoint_details: Optional[pd.DataFrame] = None,
+    endpoint_metadata: Optional[pd.DataFrame] = None,
 ) -> pd.DataFrame:
     """Combine chemical endpoint data.
 
@@ -276,13 +284,13 @@ def combine_chemical_endpoint_data(
         True if data is for extracts, by default False
     chem_data : Optional[pd.DataFrame], optional
         Tabulated chemical data, by default None
-    endpoint_details : Optional[pd.DataFrame], optional
+    endpoint_metadata : Optional[pd.DataFrame], optional
         Tabulated endpoint data, by default None
 
     Returns
     -------
     pd.DataFrame
-        _description_
+        Combined chemical endpoint data
     """
     tqdm.write(f"Combining bmd files: {', '.join(bmd_files)}")
 
@@ -336,11 +344,15 @@ def combine_chemical_endpoint_data(
         # 5. Remove duplicate rows
         # 6. Missing location name -> "None"
         full_bmd = full_bmd.fillna({"End_Point": "NoData"})
-        full_bmd = full_bmd.merge(endpoint_details, on="End_Point", how="right")
+        full_bmd = full_bmd.merge(endpoint_metadata, on="End_Point", how="right")
         full_bmd = full_bmd.drop(columns=["End_Point", "tmp_id"])
         full_bmd = full_bmd[full_bmd["Sample_ID"].notna()]
         full_bmd = full_bmd.drop_duplicates()
         full_bmd = full_bmd.fillna({"LocationName": "None"})
+
+        # Move sample ID to front
+        cols = ["Sample_ID"] + [col for col in full_bmd.columns if col != "Sample_ID"]
+        full_bmd = full_bmd[cols]
 
     # For non-extracts:
     # 1. Missing endpoint values -> "NoData"
@@ -352,7 +364,7 @@ def combine_chemical_endpoint_data(
     else:
         full_bmd = df.copy()
         full_bmd = full_bmd.fillna({"End_Point": "NoData"})
-        full_bmd = full_bmd.merge(endpoint_details, on="End_Point", how="right")
+        full_bmd = full_bmd.merge(endpoint_metadata, on="End_Point", how="right")
         full_bmd = full_bmd.drop(columns=["End_Point"])
         full_bmd = full_bmd.drop_duplicates()
         full_bmd = full_bmd.fillna({"chemical_class": "Unclassified"})
@@ -373,9 +385,9 @@ def combine_chemical_data(
     data_type: str = "Fits",
     is_extract: bool = False,
     chem_data: Optional[pd.DataFrame] = None,
-    endpoint_details: Optional[pd.DataFrame] = None,
+    endpoint_metadata: Optional[pd.DataFrame] = None,
 ):
-    """_summary_
+    """Combine chemical data with endpoint metadata.
 
     Parameters
     ----------
@@ -388,7 +400,7 @@ def combine_chemical_data(
         If True, applies to extracts (sample) data, by default False
     chem_data : Optional[pd.DataFrame], optional
         _description_, by default None
-    endpoint_details : Optional[pd.DataFrame], optional
+    endpoint_metadata : Optional[pd.DataFrame], optional
         _description_, by default None
 
     Returns
@@ -439,7 +451,7 @@ def combine_chemical_data(
     df = df.drop_duplicates(subset=["combined"], keep="last")
 
     # Combine endpoint metadata with chemical data
-    df = df.merge(endpoint_details, on="End_Point", how="right")
+    df = df.merge(endpoint_metadata, on="End_Point", how="right")
     df = df.drop(columns=["End_Point", "Description"]).drop_duplicates()
 
     # Process for extracts if needed
@@ -457,8 +469,10 @@ def combine_chemical_data(
         mask = df["Sample_ID"].isna()
         df.loc[mask, "Sample_ID"] = df.loc[mask, "tmp_id"]
 
-        # Delete temp ID column
+        # Delete temp ID column and move sample ID to front
         df = df.drop(columns=["tmp_id"])
+        cols = ["Sample_ID"] + [col for col in df.columns if col != "Sample_ID"]
+        df = df[cols]
 
     # For non-extracts, keep only chemicals that are in sample data
     elif not is_extract and chem_data is not None:
@@ -589,14 +603,15 @@ def main():
     )
     parser.add_argument(
         "-d",
-        "--drc_files",
-        dest="dose_response",
+        "--dose_response_files",
+        dest="dose_response_files",
         default="",
         help="Dose response curve file",
     )
     parser.add_argument(
         "-p",
         "--sample_id",
+        "--sample_id_file",
         dest="sample_id_file",
         default="",
         help="Sample mapping file location",
@@ -604,6 +619,7 @@ def main():
     parser.add_argument(
         "-i",
         "--chem_id",
+        "--chemical_id",
         dest="chem_id_file",
         default="",
         help="Chemical ID file location",
@@ -611,6 +627,7 @@ def main():
     parser.add_argument(
         "-e",
         "--ep_map",
+        "--endpoint_map",
         dest="endpoint_mapping_file",
         default="",
         help="Endpoint naming file location",
@@ -618,6 +635,7 @@ def main():
     parser.add_argument(
         "-l",
         "--chem_class",
+        "--chem_class_file",
         dest="chem_class_file",
         default="",
         help="Chemical class file location",
@@ -639,6 +657,7 @@ def main():
     parser.add_argument(
         "-m",
         "--sample_map",
+        "--sample_map_file",
         dest="sample_map",
         default="",
         help="File that maps sample locations",
@@ -659,12 +678,19 @@ def main():
 
     args = parser.parse_args()
 
+    # -----------------
+    # Chem Metadata
+    # -----------------
     tqdm.write("Getting chemical metadata...")
     chem_class = masv_chem_class(args.chem_class_file)
+    chem_ids = load_figshare_url(loader, args.chem_id_file)
+
     if not os.path.exists(os.path.join(args.output_dir, "chem_metadata.tsv")):
         tqdm.write("No metadata found. Building metadata...")
+
         chem_metadata = build_chem_metadata(
-            args.metadata, save_to=os.path.join(args.output_dir, "chem_metadata.tsv")
+            chem_ids,
+            save_to=os.path.join(args.output_dir, "chem_metadata.tsv"),
         )
     else:
         tqdm.write("Metadata found! Reading from previous file...")
@@ -673,21 +699,28 @@ def main():
         )
     tqdm.write("Done!")
 
+    # -----------------
+    # Sample Data
+    # -----------------
     tqdm.write("Getting sample data...")
     sample_files_list = args.sample_files.split(",")
     chem_sample = build_sample_data(
-        sample_files_list, chem_metadata, args.sample_id_file, args.sample_map
+        sample_files_list, loader, chem_metadata, args.sample_id_file, args.sample_map
     )
     tqdm.write("Done!")
 
+    # -----------------
+    # Endpoint Metadata
+    # -----------------
     tqdm.write("Getting endpoint details...")
-    endpoint_details = get_endpoint_metadata(
-        args.endpoint_mapping_file
-    ).drop_duplicates()
+    endpoint_metadata = load_figshare_url(
+        loader, args.endpoint_mapping_file, sheet_name=3
+    )
+    endpoint_metadata = format_endpoint_metadata(endpoint_metadata)
     tqdm.write("Done!")
 
     if args.is_sample or args.is_chem:
-        all_files = args.dose_response.split(",")
+        all_files = args.dose_response_files.split(",")
         bmd_files = [file for file in all_files if "BMDs" in file]
         dose_files = [file for file in all_files if "Dose" in file]
         fit_files = [file for file in all_files if "Fits" in file]
@@ -700,7 +733,7 @@ def main():
                 bmd_files,
                 is_extract=args.is_sample,
                 chem_data=chem_data,
-                endpoint_details=endpoint_details,
+                endpoint_metadata=endpoint_metadata,
             )
             .dropna(subset=["BMD_Analysis_Flag"])
             .query("BMD_Analysis_Flag != 'NA'")
@@ -713,7 +746,7 @@ def main():
             data_type="fit",
             is_extract=args.is_sample,
             chem_data=chem_data,
-            endpoint_details=endpoint_details,
+            endpoint_metadata=endpoint_metadata,
         )
         tqdm.write("Done!")
 
@@ -723,23 +756,23 @@ def main():
             data_type="dose",
             is_extract=args.is_sample,
             chem_data=chem_data,
-            endpoint_details=endpoint_details,
+            endpoint_metadata=endpoint_metadata,
         ).dropna(subset=["Dose"])
         tqdm.write("Done!")
 
         if args.is_sample:
             tqdm.write("Saving sample data to CSV...")
-            bmds.to_csv(
+            bmds.fillna("NULL").to_csv(
                 os.path.join(args.output_dir, "zebrafishSampBMDs.csv"),
                 index=False,
                 quotechar='"',
             )
-            curves.to_csv(
+            curves.fillna("NULL").to_csv(
                 os.path.join(args.output_dir, "zebrafishSampXYCoords.csv"),
                 index=False,
                 quotechar='"',
             )
-            dose_reps.to_csv(
+            dose_reps.fillna("NULL").to_csv(
                 os.path.join(args.output_dir, "zebrafishSampDoseResponse.csv"),
                 index=False,
                 quotechar='"',
@@ -756,17 +789,17 @@ def main():
             tqdm.write("Done!")
 
             tqdm.write("Saving chemical data to CSV...")
-            bmds.to_csv(
+            bmds.fillna("NULL").to_csv(
                 os.path.join(args.output_dir, "zebrafishChemBMDs.csv"),
                 index=False,
                 quotechar='"',
             )
-            curves.to_csv(
+            curves.fillna("NULL").to_csv(
                 os.path.join(args.output_dir, "zebrafishChemXYCoords.csv"),
                 index=False,
                 quotechar='"',
             )
-            dose_reps.to_csv(
+            dose_reps.fillna("NULL").to_csv(
                 os.path.join(args.output_dir, "zebrafishChemDoseResponse.csv"),
                 index=False,
                 quotechar='"',
@@ -775,13 +808,13 @@ def main():
 
     else:
         tqdm.write("Saving data...")
-        chem_metadata.to_csv(
+        chem_metadata.fillna("NULL").to_csv(
             os.path.join(args.output_dir, "chemicals.csv"), index=False, quotechar='"'
         )
-        chem_sample[SAMPLE_COLS].drop_duplicates().to_csv(
+        chem_sample[SAMPLE_COLS].drop_duplicates().fillna("NULL").to_csv(
             os.path.join(args.output_dir, "samples.csv"), index=False, quotechar='"'
         )
-        chem_sample[SAMP2CHEM_COLS].drop_duplicates().to_csv(
+        chem_sample[SAMP2CHEM_COLS].drop_duplicates().fillna("NULL").to_csv(
             os.path.join(args.output_dir, "samplesToChemicals.csv"),
             index=False,
             quotechar='"',
