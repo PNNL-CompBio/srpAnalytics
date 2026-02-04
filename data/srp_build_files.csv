@@ -52,7 +52,14 @@ processed8,dose,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalyt
 processed6,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_2021_04_09.csv,4
 processed7,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_2021_08_18.csv,4
 processed8,fit,extract,https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/refs/heads/main/data/extracts/fit_vals_all_qc.csv,4
-st_helens_study,sample,air,https://figshare.com/ndownloader/files/59329547,4
+st_helens_study,sample,air,https://figshare.com/ndownloader/files/61440616,4
 zfCombinedLPR,bmd,chemical,https://figshare.com/ndownloader/files/61111501,4
 zfCombinedLPR,dose,chemical,https://figshare.com/ndownloader/files/61121032,4
 zfCombinedLPR,fit,chemical,https://figshare.com/ndownloader/files/61111507,4
+samp1,sample,water,https://figshare.com/ndownloader/files/61300075,4
+samp2,sample,water,https://figshare.com/ndownloader/files/61440646,4
+endpointMap,mapping,endpoint,https://figshare.com/ndownloader/files/61439446,4
+chemId,mapping,chemical,https://figshare.com/ndownloader/files/61486651,4
+zfCombinedLPRPhase4,bmd,chemical,https://figshare.com/ndownloader/files/61443175,4
+zfCombinedLPRPhase4,dose,chemical,https://figshare.com/ndownloader/files/61443181,4
+zfCombinedLPRPhase4,fit,chemical,https://figshare.com/ndownloader/files/61443178,4
