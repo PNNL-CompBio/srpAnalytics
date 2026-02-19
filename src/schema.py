@@ -6,7 +6,7 @@ author(s): @christinehc
 # =========================================================
 # Imports
 # =========================================================
-from os.path import exists
+from os.path import exists, splitext
 
 from linkml_runtime.utils.schemaview import SchemaView
 
@@ -22,7 +22,11 @@ ZEBRAFISH_DTYPE_TO_SUFFIX = {"bmd": "BMDs", "dose": "Dose", "fit": "Fits"}
 # =========================================================
 def map_zebrafish_data_to_schema(sample_type: str, data_type: str):
     stype = {"chemical": "Chem", "extract": "Samp"}
-    return f"zebrafish{stype[sample_type]}{ZEBRAFISH_DTYPE_TO_SUFFIX[data_type]}"
+    if data_type in ZEBRAFISH_DTYPE_TO_SUFFIX:
+        suffix = ZEBRAFISH_DTYPE_TO_SUFFIX[data_type]
+    else:
+        suffix = splitext(data_type)[0]
+    return f"zebrafish{stype[sample_type]}{suffix}"
 
 
 def get_slots_from_schema(classname: str, filename: str = SCHEMA_FILE) -> list[str]:
