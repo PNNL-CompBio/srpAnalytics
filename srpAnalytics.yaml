@@ -257,7 +257,10 @@ classes:
       - Dose
       - CI_Lo
       - CI_Hi
-    # attributes:
+    attributes:
+      Response: # -> Normalized_to_Vehicle
+        description: Response in terms of percentage of fish alive
+        range: float
     #   num.affected:
     #     description: Number of fish with the observed phenotype
     #     range: integer
@@ -299,10 +302,6 @@ classes:
   zebrafishSampDose:  # new_Dose_BC/LPR
     description: Dose response datapoints of sample extracts in zebrafish
     is_a: Dose
-    attributes:
-      Response: # -> Normalized_to_Vehicle
-        description: Response in terms of percentage of fish alive
-        range: float
   zebrafishSampFits:  # new_Fits_BC/LPR
     description: XY Coordinates of curve fit data for sample extracts in zebrafish
     is_a: Fits
