@@ -329,17 +329,44 @@ def runExpression(
     ]
 
 
-def runSchemaCheck(dbfiles: list[Optional[str]] = []):
+def runSchemaCheck(
+    files: list[Optional[str]] = None, classes: Union[str, list[str], None] = None
+):
     """Validate database files against schema using LinkML.
 
     Parameters
     ----------
-    dbfiles : list[Optional[str]], optional
+    files : list[Optional[str]], optional
         List of database files, by default []
+    classes : Union[str, list[str], None]
+        Class name or list of class names, optional, by default None
+        If one class name is supplied, it is assumed to apply to all
+            files in the corresponding list.
+        If a list is supplied, it is assumed to correspond with the
+            files in the file list
+            (i.e. [class_a, class_b] maps to [file_a, file_b])
+        If no class name(s) is/are supplied, class is automatically
+            determined via the filename.
     """
+    if files is None:
+        files = []
+
+    # If classname = str, apply same classname to all
+    if isinstance(classes, str) or classes is None:
+        classes = [classes] * len(files)
+
+    # Ensure class list matches file list (if list supplied)
+    if isinstance(classes, list) and len(classes) != len(files):
+        raise ValueError(
+            "Classnames must correspond to filenames "
+            f"({len(files)} files supplied with {len(classes)}"
+            " classnames)."
+        )
+
     ##TODO: make this work with internal calls
-    for filename in dbfiles:
-        classname = os.path.basename(filename).split(".")[0]
+    for filename, classname in zip(files, classes):
+        if classname is None:
+            classname = os.path.basename(filename).split(".")[0]
         cmd = f"linkml-validate --schema srpAnalytics.yaml {filename} --target-class {classname}"
         tqdm.write(cmd)
         os.system(cmd)
@@ -527,7 +554,10 @@ def main():
                 ftype = os.path.splitext(os.path.basename(fname))[0].split("_")[-1]
                 tmp.append(pd.read_csv(fname))
             tmp = pd.concat(tmp, ignore_index=True)
-            tmp.to_csv(os.path.join(args.output_dir, f"zebrafish_chem_{ftype}_LPR.csv"))
+            tmp.to_csv(
+                os.path.join(args.output_dir, f"zebrafish_chem_{ftype}_LPR.csv"),
+                index=False,
+            )
 
         # Process sample files (using preprocessed data)
         tqdm.write("Combining data for zebrafish sample extracts...")
@@ -557,7 +587,7 @@ def main():
         #     dblist.append(os.path.join(output_dir, f"zebrafish_samp_{ftype}"))
 
         # Define fixed params for sample mapping
-        all_res = list()
+        all_results = list()
         sampmap_args = {
             "sample_id_file": sample_id_file,
             "sample_map_file": sample_map_file,
@@ -583,8 +613,8 @@ def main():
         # Perform sample mapping
         for smp in sampmap_params:
             smpargs = {**smp, **sampmap_args}
-            res = runSampMap(**smpargs)
-            all_res.extend(res)
+            result = runSampMap(**smpargs)
+            all_results.extend(result)
             progress_bar.update(1)
 
         # Update progress bar after completion
@@ -592,12 +622,30 @@ def main():
         progress_bar.close()
 
         # Collect all unique files and remove temp files
-        all_res = list(set(all_res))
+        all_results = list(set(all_results))
         # for f in fitted_sample_files + fitted_chem_files:
         #     os.system(f"rm {f}")
 
         # Validate schema
-        runSchemaCheck(res)
+        runSchemaCheck(all_results)
+        runSchemaCheck(
+            fitted_chem_files,
+            classes=[
+                map_zebrafish_data_to_schema(
+                    sample_type="chemical", data_type=f.split("_")[2]
+                )
+                for f in fitted_chem_files
+            ],
+        )
+        runSchemaCheck(
+            fitted_sample_files,
+            classes=[
+                map_zebrafish_data_to_schema(
+                    sample_type="extract", data_type=f.split("_")[2]
+                )
+                for f in fitted_sample_files
+            ],
+        )
 
     # -----------------
     # Exposome Workflow
@@ -606,11 +654,11 @@ def main():
         figshare_id = figshare_url_to_id(chemical_id)
         _ = loader.load_data(figshare_id)
         chem_id_map_file = loader.get_file_path(figshare_id).as_posix()
-        res = runExposome(chem_id_map_file, output_dir=args.output_dir)
+        result = runExposome(chem_id_map_file, output_dir=args.output_dir)
         # for f in res:
         #     tqdm.write(f"Filename: {f}")
         #     os.system(f"head {f}")
-        runSchemaCheck(res)
+        runSchemaCheck(result)
 
     # ------------------------
     # Gene Expression Workflow
@@ -630,7 +678,7 @@ def main():
                 output_dir=args.output_dir,
             )
 
-        res = runExpression(
+        result = runExpression(
             gex1,
             os.path.join(args.output_dir, "chemicals.csv"),
             ginfo,
@@ -639,7 +687,7 @@ def main():
         # for f in res:
         #     tqdm.write(f"Filename: {f}")
         #     os.system(f"head {f}")
-        runSchemaCheck(res)
+        runSchemaCheck(result)
 
 
 if __name__ == "__main__":
