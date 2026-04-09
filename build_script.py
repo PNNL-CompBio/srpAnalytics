@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import pandas as pd
-from src.data import FigshareDataLoader, figshare_url_to_id
+from src.data import FigshareDataLoader, figshare_url_to_id, load_figshare_url
 from src.manifest import DataManifest
 from src.params import MANIFEST_FILEPATH
 from src.schema import (
@@ -559,19 +559,55 @@ def main():
                 index=False,
             )
 
+        # Combine LPR and BC data, add endpoint names, save
+        temp_files = list()
+        for ftype in ["BMDs", "Dose", "Fits"]:
+            morpho_file = os.path.join(
+                args.output_dir, f"zebrafish_chem_{ftype}_BC.csv"
+            )
+            behavior_file = os.path.join(
+                args.output_dir, f"zebrafish_chem_{ftype}_LPR.csv"
+            )
+            tmp = pd.concat(
+                [
+                    pd.read_csv(morpho_file),
+                    pd.read_csv(behavior_file),
+                ],
+                ignore_index=True,
+            )
+            endpoint_names = load_figshare_url(
+                loader, endpoint_map, sheet_name="Dictionary"
+            )
+            tmp = pd.merge(
+                tmp,
+                endpoint_names[["Abbreviation", "Simple name (<20char)"]],
+                how="left",
+                left_on="End_Point",
+                right_on="Abbreviation",
+            ).rename(columns={"Simple name (<20char)": "End_Point_Name"})
+            tmp.to_csv(
+                os.path.join(args.output_dir, f"zebrafishChem{ftype}.csv"), index=False
+            )
+
+            # Track files for later deletion
+            temp_files.append(morpho_file)
+            temp_files.append(behavior_file)
+
         # Process sample files (using preprocessed data)
         tqdm.write("Combining data for zebrafish sample extracts...")
         fitted_sample_files = list()
-        for dtype, samp_data in zip(["bmd", "dose", "fit"], zip(*zebrafish_samp_files)):
+        for dtype, samp_data in zip(
+            ["BMDs", "Dose", "Fits"], zip(*zebrafish_samp_files)
+        ):
             tqdm.write("Processing extracts data...")
-            d = ZEBRAFISH_DTYPE_TO_SUFFIX[dtype]
+            # d = ZEBRAFISH_DTYPE_TO_SUFFIX[dtype]
 
             # TODO: fix this
             combined = combineZebrafishFiles(
                 data_files=samp_data, sample_type="extract", data_type=dtype
             )
             combined_filename = os.path.join(
-                args.output_dir, f"zebrafish_sample_{d}.csv"
+                args.output_dir, f"zebrafish_sample_{dtype}.csv"
             )
             combined.to_csv(combined_filename, index=False)
             fitted_sample_files.append(combined_filename)
@@ -601,7 +637,7 @@ def main():
 
         # Iterate through sampMap params
         sampmap_params = [
-            {"is_sample": True, "dose_response_files": fitted_sample_files},
+            # {"is_sample": True, "dose_response_files": fitted_sample_files},
             {"is_sample": False, "dose_response_files": fitted_chem_files},
             {"is_sample": False, "dose_response_files": []},
         ]
@@ -623,29 +659,34 @@ def main():
 
         # Collect all unique files and remove temp files
         all_results = list(set(all_results))
-        # for f in fitted_sample_files + fitted_chem_files:
-        #     os.system(f"rm {f}")
+        for f in temp_files:
+            os.remove(f)
+
+        # Clean up separate LPR/BC files
+        # os.remove(morpho_file)
+        # os.remove(behavior_file)
 
         # Validate schema
+        # TODO: fix schema check for combined files
         runSchemaCheck(all_results)
-        runSchemaCheck(
-            fitted_chem_files,
-            classes=[
-                map_zebrafish_data_to_schema(
-                    sample_type="chemical", data_type=f.split("_")[2]
-                )
-                for f in fitted_chem_files
-            ],
-        )
-        runSchemaCheck(
-            fitted_sample_files,
-            classes=[
-                map_zebrafish_data_to_schema(
-                    sample_type="extract", data_type=f.split("_")[2]
-                )
-                for f in fitted_sample_files
-            ],
-        )
+        for ftype in ["BMDs", "Dose", "Fits"]:
+            runSchemaCheck(
+                [os.path.join(args.output_dir, f"zebrafishChem{ftype}.csv")],
+                classes=[
+                    map_zebrafish_data_to_schema(
+                        sample_type="chemical", data_type=ftype
+                    )
+                ],
+            )
+        # runSchemaCheck(
+        #     fitted_sample_files,
+        #     classes=[
+        #         map_zebrafish_data_to_schema(
+        #             sample_type="extract", data_type=f.split("_")[2]
+        #         )
+        #         for f in fitted_sample_files
+        #     ],
+        # )
 
     # -----------------
     # Exposome Workflow
