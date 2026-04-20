@@ -329,22 +329,16 @@ def runSampMap(
             - zebrafish{Samp,Chem}DoseResponse.csv
             - zebrafish{Samp,Chem}BMDs.csv)
     """
-    # drc = ",".join(dose_response_files)
     args = (
         f"--sample_id_file={sample_id_file} "
         f"--sample_map={sample_map_file} "
-        f"--chem_id={chemical_id} "
+        f"--chemical_id={chemical_id} "
         f"--endpoint_map={endpoint_map} "
         f"--chemical_class={chem_class_file} "
         f"--sample_files={fses_files} "
         f"--chemical_description={chem_desc_file} "
         f"--output_dir={output_dir} "
     )
-    # if is_sample:
-    #     cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --sample --dose_response_files={drc} {args}"
-    # elif len(dose_response_files) > 0:
-    #     cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --chemical --dose_response_files={drc} {args}"
-    # else:
     cmd = f"python sampleChemMapping/map_samples_to_chemicals.py {args}"
 
     try:
@@ -762,24 +756,9 @@ def main():
             fitted_sample_files.append(combined_filename)
             progress_bar.update(1)
 
-            # # TODO: fix this
-            # combined = combineZebrafishSampleFiles(
-            #     bmd_files,
-            #     dose_files,
-            #     fit_files,
-            #     chem_data=samples,
-            #     endpoint_metadata,
-            #     output_dir,
-            # )
-
         # Update progress bar after completion
         progress_bar.set_description("Combining files... Done!")
         progress_bar.close()
-
-        # TODO: Add LinkML validation
-        # for ftype in ["XYCoords.csv", "DoseResponse.csv", "BMDs.csv"]:
-        #     dblist.append(os.path.join(output_dir, f"zebrafishChem{ftype}"))
-        #     dblist.append(os.path.join(output_dir, f"zebrafishSamp{ftype}"))
 
         # Define fixed params for sample mapping
         all_results = list()
@@ -811,15 +790,6 @@ def main():
                     map_zebrafish_data_to_schema(sample_type="extract", data_type=ftype)
                 ],
             )
-        # runSchemaCheck(
-        #     fitted_sample_files,
-        #     classes=[
-        #         map_zebrafish_data_to_schema(
-        #             sample_type="extract", data_type=f.split("_")[2]
-        #         )
-        #         for f in fitted_sample_files
-        #     ],
-        # )
 
     # -----------------
     # Exposome Workflow

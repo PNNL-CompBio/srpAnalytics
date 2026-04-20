@@ -372,100 +372,70 @@ def masv_chem_class(
 def main():
     parser = ArgumentParser()
     parser.add_argument(
-        "-s",
-        "--sample",
-        dest="is_sample",
-        action="store_true",
-        default=False,
-        help="Flag to indicate file is for samples",
-    )
-    parser.add_argument(
-        "-c",
-        "--chemical",
-        dest="is_chem",
-        default=False,
-        action="store_true",
-        help="Flag to indicate file is for chemicals",
-    )
-    parser.add_argument(
-        "-d",
-        "--dose_response_files",
-        dest="dose_response_files",
-        default="",
-        help="Dose response curve file",
-    )
-    parser.add_argument(
-        "-p",
-        "--sample_id",
         "--sample_id_file",
+        "--sample_id",
+        "-p",
         dest="sample_id_file",
         default="",
         help="Sample mapping file location",
     )
     parser.add_argument(
-        "-i",
-        "--chem_id",
-        "--chemical_id",
-        dest="chem_id_file",
-        default="",
-        help="Chemical ID file location",
-    )
-    parser.add_argument(
-        "-e",
-        "--ep_map",
-        "--endpoint_map",
-        dest="endpoint_mapping_file",
-        default="",
-        help="Endpoint naming file location",
-    )
-    parser.add_argument(
-        "-l",
-        "--chem_class",
-        "--chemical_class",
-        "--chem_class_file",
-        "--chemical_class_file",
-        dest="chem_class_file",
-        default="",
-        help="Chemical class file location",
-    )
-    parser.add_argument(
-        "-f",
-        "--sample_files",
-        dest="sample_files",
-        default="",
-        help="Comma delimited list of FSES files to merge",
-    )
-    parser.add_argument(
-        "-y",
-        "--chem_desc",
-        "--chemical_desc",
-        "--chemical_description",
-        dest="chem_desc",
-        default="",
-        help="Descriptions of chemicals",
-    )
-    parser.add_argument(
-        "-m",
         "--sample_map",
         "--sample_map_file",
+        "-m",
         dest="sample_map",
         default="",
         help="File that maps sample locations",
     )
     parser.add_argument(
-        "--metadata",
-        dest="metadata",
-        default="https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/srp_build_files.csv",
-        help="Metadata file location (i.e. srp_build_files.csv)",
+        "--chemical_id",
+        "--chem_id",
+        "-i",
+        dest="chem_id_file",
+        default="",
+        help="Chemical ID file location",
     )
     parser.add_argument(
-        "-o",
+        "--endpoint_map",
+        "--ep_map",
+        "-e",
+        dest="endpoint_mapping_file",
+        default="",
+        help="Endpoint naming file location",
+    )
+    parser.add_argument(
+        "--chemical_class",
+        "--chem_class",
+        "--chemical_class_file",
+        "--chem_class_file",
+        "-l",
+        dest="chem_class_file",
+        default="",
+        help="Chemical class file location",
+    )
+    parser.add_argument(
+        "--sample_files",
+        "-f",
+        dest="sample_files",
+        default="",
+        help="Comma delimited list of FSES files to merge",
+    )
+    parser.add_argument(
+        "--chemical_description",
+        "--chemical_desc",
+        "--chem_desc",
+        "-y",
+        dest="chem_desc",
+        default="",
+        help="Descriptions of chemicals",
+    )
+    parser.add_argument(
         "--output_dir",
+        "-o",
         dest="output_dir",
         default=OUTPUT_DIR,
         help="File that maps sample locations",
     )
-
     args = parser.parse_args()
 
     # -----------------
