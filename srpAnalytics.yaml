@@ -48,6 +48,8 @@ slots:
     description: Link to resource used to source chemDescription
     range: linkml:Any
   End_Point:
+    description: Endpoint identifier
+  End_Point_Name:
     description: Name of endpoint
   cas_number:
     description: CAS identifier for a specific chemical
@@ -226,8 +228,8 @@ classes:
   BMDs:
     description: Benchmark dose measurements
     slots:
-      - Chemical_ID
       - End_Point
+      - End_Point_Name
       - Model
       - BMD10
       - BMD50
@@ -252,8 +254,8 @@ classes:
   Dose:
     description: Dose response datapoints
     slots:
-      - Chemical_ID
       - End_Point
+      - End_Point_Name
       - Dose
       - CI_Lo
       - CI_Hi
@@ -270,19 +272,21 @@ classes:
   Fits:
     description: XY Coordinates of curve fit data
     slots:
-      - Chemical_ID
       - End_Point
+      - End_Point_Name
       - X_vals
       - Y_vals
   zebrafishChemBMDs:
     description: Benchmark dose measurements of chemical extracts in zebrafish
     is_a: BMDs
     slots:
+      - Chemical_ID
       - bmdrc.Endpoint.ID
   zebrafishChemDose:
     description: Dose response datapoints of chemical extracts in zebrafish
     is_a: Dose
     slots:
+      - Chemical_ID
       - bmdrc.Endpoint.ID
     attributes:
       num.affected:
@@ -295,16 +299,23 @@ classes:
     description: XY Coordinates of curve fit data for chemical extracts in zebrafish
     is_a: Fits
     slots:
+      - Chemical_ID
       - bmdrc.Endpoint.ID
   zebrafishSampBMDs:
     description: Benchmark dose measurements of sample extracts in zebrafish
     is_a: BMDs
+    slots:
+      - Sample_ID
   zebrafishSampDose:  # new_Dose_BC/LPR
     description: Dose response datapoints of sample extracts in zebrafish
     is_a: Dose
+    slots:
+      - Sample_ID
   zebrafishSampFits:  # new_Fits_BC/LPR
     description: XY Coordinates of curve fit data for sample extracts in zebrafish
     is_a: Fits
+    slots:
+      - Sample_ID
   allGeneEx:
     description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
     slots:
