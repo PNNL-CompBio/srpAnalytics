@@ -17,11 +17,8 @@ import pandas as pd
 from src.data import FigshareDataLoader, figshare_url_to_id, load_figshare_url
 from src.manifest import DataManifest
 from src.params import MANIFEST_FILEPATH
-from src.schema import (
-    ZEBRAFISH_DTYPE_TO_SUFFIX,
-    get_cols_from_schema,
-    map_zebrafish_data_to_schema,
-)
+from src.samples import combine_chemical_data, combine_chemical_endpoint_data
+from src.schema import get_cols_from_schema, map_zebrafish_data_to_schema
 from tqdm import tqdm
 
 # =========================================================
@@ -129,11 +126,12 @@ def fitCurveFiles(
     loader.clear_cache()
 
 
-# TODO: combine with code from map_samples_to_chemicals
+# Combine all zebrafish files. Includes both chem and sample data
 def combineZebrafishFiles(
     data_files: list[str],
     sample_type: str,
     data_type: str,
+    ids: pd.DataFrame,
     sample_id_map: Optional[pd.DataFrame] = None,
 ) -> pd.DataFrame:
     """Combine preprocessed zebrafish sample files.
@@ -146,9 +144,16 @@ def combineZebrafishFiles(
         Sample type, one of ["chemical", "extract"]
     data_type : str
         File type, one of ["bmd", "dose", "fit"]
+    ids : pd.DataFrame
+        Full list of IDs for data type
+            - Loaded from chemicals.csv for chemicals data
+            - Loaded from samples.csv for sample/extracts data
     sample_id_map : Optional[pd.DataFrame]
         DataFrame containing Sample_ID and SampleNumber column
             mappings for all samples, by default None
+        NOTE: This parameter will remain optional/unused until
+            the pipeline actually processes sample data
+            (currently it does not)
 
     Returns
     -------
@@ -159,20 +164,128 @@ def combineZebrafishFiles(
         map_zebrafish_data_to_schema(sample_type, data_type),
     )
 
-    tqdm.write(f"Concatenating {sample_type} {data_type}s...")
+    # Remove End_Point_Name (currently added later)
+    required_cols = [
+        c
+        for c in required_cols
+        if c not in ["Chemical_ID", "Sample_ID", "End_Point_Name"]
+    ]
+    id_col = ["Chemical_ID"] if sample_type == "extract" else None
+    required_cols = id_col + required_cols
+
+    tqdm.write(f"Concatenating {sample_type} {data_type} files...")
     if len(data_files) != 0:
         df = pd.concat([pd.read_csv(f) for f in data_files], ignore_index=True)
         df = df[required_cols].drop_duplicates()
-        return df
+
+        # Process extracts
+        if sample_type == "extract":
+            # Use temp (split) IDs for joining
+            tmp_ids = ids.copy()
+            split_ids = tmp_ids["Sample_ID"].str.split("-", expand=True)
+            tmp_ids["tmp_id"] = split_ids[0]
+            tmp_ids = tmp_ids[["Sample_ID", "tmp_id"]].drop_duplicates()
+            df["tmp_id"] = df["Chemical_ID"].astype(str)
+            df = df.drop(columns=["Chemical_ID"])
+            df = df.merge(tmp_ids, on="tmp_id", how="left")
+
+            # Fill missing sample IDs with temp ID
+            mask = df["Sample_ID"].isna()
+            df.loc[mask, "Sample_ID"] = df.loc[mask, "tmp_id"]
+
+            # Delete temp ID column and move sample ID to front
+            df = df.drop(columns=["tmp_id"])
+            cols = ["Sample_ID"] + [col for col in df.columns if col != "Sample_ID"]
+            df = df[cols]
+
+        # For non-extracts, keep only chemicals that are in sample data
+        elif sample_type != "extract" and ids is not None:
+            df = df[df["Chemical_ID"].isin(ids["Chemical_ID"])]
+
+        return df.drop_duplicates()
 
     # If no files found, return empty df
     tqdm.write("Warning: No valid files found for concatenation")
     return pd.DataFrame(columns=required_cols[data_type])
 
 
+def combineZebrafishSampleFiles(
+    bmd_files: list[str],
+    dose_files: list[str],
+    fit_files: list[str],
+    chem_data: pd.DataFrame,
+    endpoint_metadata: pd.DataFrame,
+    output_dir: str = OUTPUT_DIR,
+) -> list[str]:
+    """Combine preprocessed zebrafish sample files into final output files.
+
+    Parameters
+    ----------
+    bmd_files : list[str]
+        List of BMD files
+    dose_files : list[str]
+        List of dose response files
+    fit_files : list[str]
+        List of fit files
+    chem_data : pd.DataFrame
+        Sample data containing Sample_ID mappings
+    endpoint_metadata : pd.DataFrame
+        Endpoint metadata for merging
+    output_dir : str, optional
+        Output directory, by default OUTPUT_DIR
+
+    Returns
+    -------
+    list[str]
+        List of paths to generated output files
+    """
+    output_files = []
+
+    # BMDs
+    tqdm.write("Combining BMD data for zebrafish sample extracts...")
+    bmds = (
+        combine_chemical_endpoint_data(
+            bmd_files,
+            is_extract=True,
+            chem_data=chem_data,
+            endpoint_metadata=endpoint_metadata,
+        )
+        .dropna(subset=["BMD_Analysis_Flag"])
+        .query("BMD_Analysis_Flag != 'NA'")
+    )
+    bmd_output = os.path.join(output_dir, "zebrafishSampBMDs.csv")
+    bmds.fillna("NULL").to_csv(bmd_output, index=False, quotechar='"')
+    output_files.append(bmd_output)
+
+    # XYCoords/Fits
+    tqdm.write("Combining fits data for zebrafish sample extracts...")
+    curves = combine_chemical_data(
+        fit_files,
+        data_type="fit",
+        is_extract=True,
+        chem_data=chem_data,
+        endpoint_metadata=endpoint_metadata,
+    )
+    fits_output = os.path.join(output_dir, "zebrafishSampXYCoords.csv")
+    curves.fillna("NULL").to_csv(fits_output, index=False, quotechar='"')
+    output_files.append(fits_output)
+
+    # Dose Response
+    tqdm.write("Combining dose response data for zebrafish sample extracts...")
+    dose_reps = combine_chemical_data(
+        dose_files,
+        data_type="dose",
+        is_extract=True,
+        chem_data=chem_data,
+        endpoint_metadata=endpoint_metadata,
+    ).dropna(subset=["Dose"])
+    dose_output = os.path.join(output_dir, "zebrafishSampDoseResponse.csv")
+    dose_reps.fillna("NULL").to_csv(dose_output, index=False, quotechar='"')
+    output_files.append(dose_output)
+    return output_files
+
+
 def runSampMap(
-    is_sample: bool = False,
-    dose_response_files: list = [],
     sample_id_file: str = "",
     sample_map_file: str = "",
     chemical_id: str = "",
@@ -186,13 +299,8 @@ def runSampMap(
 
     Parameters
     ----------
-    is_sample : bool, optional
-        If True, runs sample mapping mode; else, runs
-        chemical mapping mode, by default False
-    dose_response_files : list, optional
-        List of dose-response curve files to process, by default []
     sample_id_file : str, optional
-        Sample ID, by default ""
+        File location for Sample ID mapping, by default ""
     sample_map_file : str, optional
         /path/to/sample_mapping_file, by default ""
     chemical_id : str, optional
@@ -221,23 +329,23 @@ def runSampMap(
             - zebrafish{Samp,Chem}DoseResponse.csv
             - zebrafish{Samp,Chem}BMDs.csv)
     """
-    drc = ",".join(dose_response_files)
+    # drc = ",".join(dose_response_files)
     args = (
         f"--sample_id_file={sample_id_file} "
         f"--sample_map={sample_map_file} "
         f"--chem_id={chemical_id} "
-        f"--ep_map={endpoint_map} "
-        f"--chem_class={chem_class_file} "
+        f"--endpoint_map={endpoint_map} "
+        f"--chemical_class={chem_class_file} "
         f"--sample_files={fses_files} "
-        f"--chem_desc={chem_desc_file} "
+        f"--chemical_description={chem_desc_file} "
         f"--output_dir={output_dir} "
     )
-    if is_sample:
-        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --sample --dose_response_files={drc} {args}"
-    elif len(dose_response_files) > 0:
-        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --chemical --dose_response_files={drc} {args}"
-    else:
-        cmd = f"python sampleChemMapping/map_samples_to_chemicals.py {args}"
+    # if is_sample:
+    #     cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --sample --dose_response_files={drc} {args}"
+    # elif len(dose_response_files) > 0:
+    #     cmd = f"python sampleChemMapping/map_samples_to_chemicals.py --chemical --dose_response_files={drc} {args}"
+    # else:
+    cmd = f"python sampleChemMapping/map_samples_to_chemicals.py {args}"
 
     try:
         process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
@@ -259,13 +367,15 @@ def runSampMap(
         tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
         raise e
 
-    # Validate sample, chem, and mapping files
-    dblist = [
+    # TODO: Validate sample, chem, and mapping files
+
+    # Return output files
+    output_files = (
         os.path.join(output_dir, "samples.csv"),
         os.path.join(output_dir, "chemicals.csv"),
         os.path.join(output_dir, "samplesToChemicals.csv"),
-    ]
-    return dblist
+    )
+    return output_files
 
 
 def runExposome(
@@ -481,6 +591,7 @@ def main():
     # File Parsing and Collection
     # ---------------------------
     # Map sample information
+    tqdm.write("Retrieving files from manifest...")
     sample_id_file = manifest.get(name="sampId")  # get_mapping_file(df, "sampId")
     chemical_id = manifest.get(name="chemId", version=4)
     chem_class_file = manifest.get(name="class1")
@@ -492,6 +603,20 @@ def main():
     sample_map_file = manifest.get(name="sampMap")
     gex1 = manifest.get(data_type="expression", return_first=False)
     ginfo = manifest.get(name="geneInfo")
+
+    # Run sample-to-chemical mapping
+    tqdm.write("Running sample/chemical mapping...")
+    sampmap_args = {
+        "sample_id_file": sample_id_file,
+        "sample_map_file": sample_map_file,
+        "chemical_id": chemical_id,
+        "endpoint_map": endpoint_map,
+        "chem_class_file": chem_class_file,
+        "fses_files": fses_files,
+        "chem_desc_file": chem_desc_file,
+        "output_dir": args.output_dir,
+    }
+    samples_file, chemicals_file, samples_to_chemicals_file = runSampMap(**sampmap_args)
 
     # ------------------------------------------------------------------------
     # Benchmark Dose (BMD) Calculation / Sample-Chem Mapping (SAMPS) Workflows
@@ -525,7 +650,7 @@ def main():
         )
 
         # Define files and set progress bar increments for concatenating each
-        total_iterations = len(zebrafish_chem_morpho) * len(zebrafish_samp_files)
+        total_iterations = 3
         progress_bar = tqdm(total=total_iterations, desc="Combining files")
 
         # Process chemical files (using BMDRC) and collect output files
@@ -559,6 +684,15 @@ def main():
                 index=False,
             )
 
+        # Load endpoints and strip odd trailing spaces
+        endpoint_names = load_figshare_url(
+            loader, endpoint_map, sheet_name="Dictionary"
+        )
+        for c in endpoint_names.columns:
+            endpoint_names[c] = [
+                v.strip() if isinstance(v, str) else v for v in endpoint_names[c]
+            ]
+
         # Combine LPR and BC data, add endpoint names, save
         temp_files = list()
         for ftype in ["BMDs", "Dose", "Fits"]:
@@ -575,16 +709,17 @@ def main():
                 ],
                 ignore_index=True,
             )
-            endpoint_names = load_figshare_url(
-                loader, endpoint_map, sheet_name="Dictionary"
+            tmp = (
+                pd.merge(
+                    tmp,
+                    endpoint_names[["Abbreviation", "Simple name (<20char)"]],
+                    how="left",
+                    left_on="End_Point",
+                    right_on="Abbreviation",
+                )
+                .rename(columns={"Simple name (<20char)": "End_Point_Name"})
+                .drop(columns=["Abbreviation"])
             )
-            tmp = pd.merge(
-                tmp,
-                endpoint_names[["Abbreviation", "Simple name (<20char)"]],
-                how="left",
-                left_on="End_Point",
-                right_on="Abbreviation",
-            ).rename(columns={"Simple name (<20char)": "End_Point_Name"})
             tmp.to_csv(
                 os.path.join(args.output_dir, f"zebrafishChem{ftype}.csv"), index=False
             )
@@ -596,22 +731,46 @@ def main():
         # Process sample files (using preprocessed data)
         tqdm.write("Combining data for zebrafish sample extracts...")
         fitted_sample_files = list()
-        for dtype, samp_data in zip(
+        for dtype, sample_data in zip(
             ["BMDs", "Dose", "Fits"], zip(*zebrafish_samp_files)
         ):
             tqdm.write("Processing extracts data...")
-            # d = ZEBRAFISH_DTYPE_TO_SUFFIX[dtype]
+            samples = pd.read_csv(samples_file)
 
-            # TODO: fix this
+            # Combine zebrafish files
             combined = combineZebrafishFiles(
-                data_files=samp_data, sample_type="extract", data_type=dtype
+                data_files=sample_data,
+                sample_type="extract",
+                data_type=dtype,
+                ids=samples,
+            )
+            combined = (
+                pd.merge(
+                    combined,
+                    endpoint_names[["Abbreviation", "Simple name (<20char)"]],
+                    how="left",
+                    left_on="End_Point",
+                    right_on="Abbreviation",
+                )
+                .rename(columns={"Simple name (<20char)": "End_Point_Name"})
+                .drop(columns=["Abbreviation"])
             )
             combined_filename = os.path.join(
-                args.output_dir, f"zebrafish_sample_{dtype}.csv"
+                args.output_dir, f"zebrafishSamp{dtype}.csv"
             )
             combined.to_csv(combined_filename, index=False)
             fitted_sample_files.append(combined_filename)
             progress_bar.update(1)
+
+            # # TODO: fix this
+            # combined = combineZebrafishSampleFiles(
+            #     bmd_files,
+            #     dose_files,
+            #     fit_files,
+            #     chem_data=samples,
+            #     endpoint_metadata,
+            #     output_dir,
+            # )
 
         # Update progress bar after completion
         progress_bar.set_description("Combining files... Done!")
@@ -619,43 +778,11 @@ def main():
 
         # TODO: Add LinkML validation
         # for ftype in ["XYCoords.csv", "DoseResponse.csv", "BMDs.csv"]:
-        #     dblist.append(os.path.join(output_dir, f"zebrafish_chem_{ftype}"))
-        #     dblist.append(os.path.join(output_dir, f"zebrafish_samp_{ftype}"))
+        #     dblist.append(os.path.join(output_dir, f"zebrafishChem{ftype}"))
+        #     dblist.append(os.path.join(output_dir, f"zebrafishSamp{ftype}"))
 
         # Define fixed params for sample mapping
         all_results = list()
-        sampmap_args = {
-            "sample_id_file": sample_id_file,
-            "sample_map_file": sample_map_file,
-            "chemical_id": chemical_id,
-            "endpoint_map": endpoint_map,
-            "chem_class_file": chem_class_file,
-            "fses_files": fses_files,
-            "chem_desc_file": chem_desc_file,
-            "output_dir": args.output_dir,
-        }
-
-        # Iterate through sampMap params
-        sampmap_params = [
-            # {"is_sample": True, "dose_response_files": fitted_sample_files},
-            {"is_sample": False, "dose_response_files": fitted_chem_files},
-            {"is_sample": False, "dose_response_files": []},
-        ]
-        progress_bar = tqdm(
-            range(len(sampmap_params)),
-            desc="Running sample mapping",
-        )
-
-        # Perform sample mapping
-        for smp in sampmap_params:
-            smpargs = {**smp, **sampmap_args}
-            result = runSampMap(**smpargs)
-            all_results.extend(result)
-            progress_bar.update(1)
-
-        # Update progress bar after completion
-        progress_bar.set_description("Running sample mapping... Done!")
-        progress_bar.close()
 
         # Collect all unique files and remove temp files
         all_results = list(set(all_results))
@@ -676,6 +803,12 @@ def main():
                     map_zebrafish_data_to_schema(
                         sample_type="chemical", data_type=ftype
                     )
+                ],
+            )
+            runSchemaCheck(
+                [os.path.join(args.output_dir, f"zebrafishSamp{ftype}.csv")],
+                classes=[
+                    map_zebrafish_data_to_schema(sample_type="extract", data_type=ftype)
                 ],
             )
         # runSchemaCheck(
@@ -705,19 +838,19 @@ def main():
     # Gene Expression Workflow
     # ------------------------
     if args.geneEx:
-        if not os.path.exists(os.path.join(args.output_dir, "chemicals.csv")):
-            runSampMap(
-                is_sample=False,
-                dose_response_files=[],
-                sample_id_file=sample_id_file,
-                sample_map_file=sample_map_file,
-                chemical_id=chemical_id,
-                endpoint_map=endpoint_map,
-                chem_class_file=chem_class_file,
-                fses_files=fses_files,
-                chem_desc_file=chem_desc_file,
-                output_dir=args.output_dir,
-            )
+        # if not os.path.exists(os.path.join(args.output_dir, "chemicals.csv")):
+        #     runSampMap(
+        #         is_sample=False,
+        #         dose_response_files=[],
+        #         sample_id_file=sample_id_file,
+        #         sample_map_file=sample_map_file,
+        #         chemical_id=chemical_id,
+        #         endpoint_map=endpoint_map,
+        #         chem_class_file=chem_class_file,
+        #         fses_files=fses_files,
+        #         chem_desc_file=chem_desc_file,
+        #         output_dir=args.output_dir,
+        #     )
 
         result = runExpression(
             gex1,
