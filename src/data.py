@@ -190,6 +190,7 @@ class FigshareDataLoader(FigshareDownloader):
         self,
         file_id: Union[str, int],
         force_reload: bool = False,
+        **kwargs,
     ) -> pd.DataFrame:
         """Download and load data from Figshare.
 
@@ -215,14 +216,14 @@ class FigshareDataLoader(FigshareDownloader):
 
         # If not cached, download and load data
         file_path = self.download(file_id)
-        data = self._load_file(file_path)
+        data = self._load_file(file_path, **kwargs)
 
         # Save data to cache
         self.data_cache[file_id] = data
 
         return data
 
-    def _load_file(self, file_path: str) -> pd.DataFrame:
+    def _load_file(self, file_path: str, **kwargs) -> pd.DataFrame:
         """Load data from file.
 
         Parameters
@@ -244,13 +245,13 @@ class FigshareDataLoader(FigshareDownloader):
         file_type = os.path.splitext(file_path)[1]
 
         if file_type == ".csv":
-            return pd.read_csv(file_path)
+            return pd.read_csv(file_path, **kwargs)
 
         elif file_type == ".tsv":
-            return pd.read_csv(file_path, sep="\t")
+            return pd.read_csv(file_path, sep="\t", **kwargs)
 
         elif file_type == ".xlsx":
-            return pd.read_excel(file_path)
+            return pd.read_excel(file_path, **kwargs)
 
         else:
             raise ValueError(
