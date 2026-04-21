@@ -9,11 +9,10 @@ on:
     paths:
       - build_script.py
       - .github/
+      - exposome/
+      - sampleChemMapping/
       - zfBmd/
       - zfExp/
-      - sampleChemMapping/
-      - dbSchema/
-      - exposome/
   workflow_dispatch:
 
 jobs:
@@ -24,6 +23,7 @@ jobs:
   #     docker_password: ${{ secrets.DOCKERHUB_PASSWORD }}
   #   steps:
 
+  # Sample/Chem Mapping Docker Container
   build-push-sample:
     # needs: setup
     runs-on: ubuntu-latest
@@ -47,6 +47,7 @@ jobs:
           push: true
           tags: sgosline/srp-samplechem:latest
 
+  # Exposome Docker Container
   build-push-expo:
     # needs: setup
     runs-on: ubuntu-latest
@@ -70,6 +71,7 @@ jobs:
           push: true
           tags: sgosline/srp-exposome:latest
 
+  # Gene Expression Analysis Docker Container
   # build-push-exp:
   #   # needs: setup
   #   runs-on: ubuntu-latest
@@ -93,6 +95,7 @@ jobs:
   #        push: true
   #        tags: sgosline/srp-zfexp:latest
 
+  # Benchmark Dose Response Curve Analysis Docker Container
   build-push-bmdrc:
     # needs: setup
     runs-on: ubuntu-latest
@@ -115,6 +118,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: sgosline/srp-zfbmd:latest
+
 #      - name: Build and push bmd2Samps
 #        uses: docker/build-push-action@v6
 #        with:
