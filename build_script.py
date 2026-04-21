@@ -104,7 +104,7 @@ def fitCurveFiles(
     # tqdm.write(cmd)
 
     try:
-        process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+        process = subprocess.run(cmd, text=True, shell=True)  # capture_output=True,
 
         # Verify successful command execution
         if process.returncode != 0:
