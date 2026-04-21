@@ -28,7 +28,7 @@ OUTPUT_DIR = "tmp"  # "./tmp"
 
 manifest = DataManifest(MANIFEST_FILEPATH)
 loader = FigshareDataLoader(
-    Path(OUTPUT_DIR) / ".figshare_cache",  # api_token=FIGSHARE_API_TOKEN
+    Path(OUTPUT_DIR) / ".figshare_cache", api_token=os.getenv("FIGSHARE_API_TOKEN")
 )
 
 
