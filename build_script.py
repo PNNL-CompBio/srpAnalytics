@@ -10,6 +10,7 @@ import argparse
 import itertools
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional, Union
 
@@ -107,10 +108,11 @@ def fitCurveFiles(
 
         # Verify successful command execution
         if process.returncode != 0:
-            tqdm.write("=== STDOUT ===")
-            tqdm.write(process.stdout if process.stdout else "(empty)")
-            tqdm.write("=== STDERR ===")
-            tqdm.write(process.stderr if process.stderr else "(empty)")
+            sys.stderr.write("=== SUBPROCESS STDOUT ===\n")
+            sys.stderr.write(process.stdout if process.stdout else "(empty)\n")
+            sys.stderr.write("=== SUBPROCESS STDERR ===\n")
+            sys.stderr.write(process.stderr if process.stderr else "(empty)\n")
+            sys.stderr.flush()
             raise subprocess.CalledProcessError(
                 returncode=process.returncode,
                 cmd=cmd,
