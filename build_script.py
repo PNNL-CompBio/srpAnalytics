@@ -107,12 +107,19 @@ def fitCurveFiles(
 
         # Verify successful command execution
         if process.returncode != 0:
+            tqdm.write("=== STDOUT ===")
+            tqdm.write(process.stdout if process.stdout else "(empty)")
+            tqdm.write("=== STDERR ===")
+            tqdm.write(process.stderr if process.stderr else "(empty)")
             raise subprocess.CalledProcessError(
                 returncode=process.returncode,
                 cmd=cmd,
                 output=process.stdout,
                 stderr=process.stderr,
             )
+        for line in process.stdout.splitlines():
+            if line.strip():
+                tqdm.write(line)
 
         # Show command line logging messages
         for line in process.stdout.splitlines():
