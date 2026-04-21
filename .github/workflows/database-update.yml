@@ -36,6 +36,9 @@ jobs:
               print('Token not found')
               print('Available env vars:', [k for k in os.environ.keys() if 'FIGSHARE' in k])
           "
+      - name: Verify dependencies # check for dotenv
+        run: |
+          docker run sgosline/srp-zfbmd pip list
       - name: Run bmd python command
         run: |
           docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} sgosline/srp-zfbmd
@@ -63,6 +66,9 @@ jobs:
         uses: actions/download-artifact@v4
       - name: Pull sample image
         run: docker pull sgosline/srp-samplechem
+      - name: Verify dependencies # check for dotenv
+        run: |
+          docker run sgosline/srp-samplechem pip list
       - name: Run sample-chem python command
         run: |
           docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} sgosline/srp-samplechem
