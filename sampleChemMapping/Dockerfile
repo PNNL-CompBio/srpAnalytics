@@ -17,7 +17,7 @@ RUN mkdir data
 COPY data/srp_build_files.csv data/srp_build_files.csv
 COPY build_script.py .
 COPY srpAnalytics.yaml .
-COPY requirements.txt .
+COPY requirements.txt bmd-requirements
 RUN mkdir -p tmp/.figshare_cache
 
 RUN pip3 install --upgrade pip
