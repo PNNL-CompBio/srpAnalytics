@@ -43,7 +43,6 @@ OUTPUT_DIR = "/tmp"
 # Set CompTox API key
 load_dotenv()
 CTX_API_KEY = os.getenv("CTX_API_KEY")
-# CTX_API_KEY = "5aded20c-9485-11ef-87c3-325096b39f47"
 
 # Figshare file loader
 loader = FigshareDataLoader(
