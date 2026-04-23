@@ -11,6 +11,7 @@ import itertools
 import os
 import subprocess
 import sys
+import traceback
 from pathlib import Path
 from typing import Optional, Union
 
@@ -368,6 +369,7 @@ def runSampMap(
                 tqdm.write(line)
     except Exception as e:
         tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
+        traceback.print_exception(e)
         raise e
 
     # TODO: Validate sample, chem, and mapping files
