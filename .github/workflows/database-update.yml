@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     # environment: build
     steps:
       - name: Checkout Repo
@@ -35,6 +36,7 @@ jobs:
           else:
               print('Token not found')
               print('Available env vars:', [k for k in os.environ.keys() if 'FIGSHARE' in k])
+          print(f'MANIFEST_FILEPATH={os.getenv("MANIFEST_FILEPATH")}')
           "
       - name: Run bmd python command
         run: |
@@ -56,6 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -83,6 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -111,6 +115,7 @@ jobs:
     needs: build-samples
     env:
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3

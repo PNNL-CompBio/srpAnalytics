@@ -10,7 +10,6 @@ import argparse
 import itertools
 import os
 import subprocess
-import sys
 import traceback
 from pathlib import Path
 from typing import Optional, Union
@@ -27,8 +26,12 @@ from tqdm import tqdm
 # Setup/Parameters
 # =========================================================
 OUTPUT_DIR = "tmp"  # "./tmp"
+manifest_filepath = os.getenv("MANIFEST_FILEPATH")
 
-manifest = DataManifest(MANIFEST_FILEPATH)
+manifest = DataManifest(
+    manifest_filepath if manifest_filepath is not None else MANIFEST_FILEPATH
+)
+print("MANIFEST_FILEPATH", manifest_filepath)
 loader = FigshareDataLoader(
     Path(OUTPUT_DIR) / ".figshare_cache", api_token=os.getenv("FIGSHARE_API_TOKEN")
 )
@@ -109,20 +112,18 @@ def fitCurveFiles(
 
         # Verify successful command execution
         if process.returncode != 0:
-            sys.stderr.write("=== SUBPROCESS STDOUT ===\n")
-            sys.stderr.write(process.stdout if process.stdout else "(empty)\n")
-            sys.stderr.write("=== SUBPROCESS STDERR ===\n")
-            sys.stderr.write(process.stderr if process.stderr else "(empty)\n")
-            sys.stderr.flush()
             raise subprocess.CalledProcessError(
                 returncode=process.returncode,
                 cmd=cmd,
                 output=process.stdout,
                 stderr=process.stderr,
             )
-        for line in process.stdout.splitlines():
-            if line.strip():
-                tqdm.write(line)
+
+        # Show command line logging messages
+        if process.stdout is not None:
+            for line in process.stdout.splitlines():
+                if line.strip():
+                    tqdm.write(line)
 
         # Show command line logging messages
         for line in process.stdout.splitlines():
