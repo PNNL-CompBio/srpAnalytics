@@ -36,7 +36,7 @@ jobs:
           else:
               print('Token not found')
               print('Available env vars:', [k for k in os.environ.keys() if 'FIGSHARE' in k])
-          print(f'MANIFEST_FILEPATH={os.getenv("MANIFEST_FILEPATH")}')
+          print(f'MANIFEST_FILEPATH={os.getenv(\"MANIFEST_FILEPATH\")}')
           "
       - name: Run bmd python command
         run: |
