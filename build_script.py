@@ -25,7 +25,7 @@ from tqdm import tqdm
 # =========================================================
 # Setup/Parameters
 # =========================================================
-OUTPUT_DIR = "tmp"  # "./tmp"
+output_dir = os.getenv("OUTPUT_DIR")  # "tmp"  # "./tmp"
 manifest_filepath = os.getenv("MANIFEST_FILEPATH")
 
 manifest = DataManifest(
@@ -33,7 +33,8 @@ manifest = DataManifest(
 )
 print("MANIFEST_FILEPATH", manifest_filepath)
 loader = FigshareDataLoader(
-    Path(OUTPUT_DIR) / ".figshare_cache", api_token=os.getenv("FIGSHARE_API_TOKEN")
+    Path(output_dir if output_dir is not None else "tmp") / ".figshare_cache",
+    api_token=os.getenv("FIGSHARE_API_TOKEN"),
 )
 
 
@@ -43,7 +44,7 @@ loader = FigshareDataLoader(
 def fitCurveFiles(
     morpho_filename: Union[list, str, None] = None,
     lpr_filename: Union[list, str, None] = None,
-    output_dir: str = OUTPUT_DIR,
+    output_dir: str = output_dir,
     file_prefix: str = "zebrafish",
 ):
     """Create benchmark dose response curve fit files.
@@ -55,7 +56,7 @@ def fitCurveFiles(
     lpr_filename : Optional[str]
         Path or list of paths to file(s) containing behavioral data
     output_dir : str, optional
-        Path to which to save output files, by default OUTPUT_DIR
+        Path to which to save output files, by default output_dir
     file_prefix : str, optional
         Prefix for output filenames, by default "zebrafish"
 
@@ -226,7 +227,7 @@ def combineZebrafishSampleFiles(
     fit_files: list[str],
     chem_data: pd.DataFrame,
     endpoint_metadata: pd.DataFrame,
-    output_dir: str = OUTPUT_DIR,
+    output_dir: str = output_dir,
 ) -> list[str]:
     """Combine preprocessed zebrafish sample files into final output files.
 
@@ -243,7 +244,7 @@ def combineZebrafishSampleFiles(
     endpoint_metadata : pd.DataFrame
         Endpoint metadata for merging
     output_dir : str, optional
-        Output directory, by default OUTPUT_DIR
+        Output directory, by default output_dir
 
     Returns
     -------
@@ -304,7 +305,7 @@ def runSampMap(
     chem_class_file: str = "",
     fses_files: str = "",
     chem_desc_file: str = "",
-    output_dir: str = OUTPUT_DIR,
+    output_dir: str = output_dir,
 ) -> list[str]:
     """Run sample-to-chemical mapping.
 
@@ -325,7 +326,7 @@ def runSampMap(
     chem_desc_file : str, optional
         /path/to/chemical_description_file, by default ""
     output_dir : str, optional
-        Directory to save output, by default OUTPUT_DIR (='/tmp')
+        Directory to save output, by default output_dir (='/tmp')
 
     Returns
     -------
@@ -386,7 +387,7 @@ def runSampMap(
 
 def runExposome(
     chem_id_file: str,
-    output_dir: str = OUTPUT_DIR,
+    output_dir: str = output_dir,
 ) -> list[str]:
     """Pull exposome data.
 
@@ -411,7 +412,7 @@ def runExpression(
     gex: str,
     chem: str,
     ginfo: str,
-    output_dir: str = OUTPUT_DIR,
+    output_dir: str = output_dir,
 ) -> list[str]:
     """Parse gene expression data using R.
 
@@ -428,12 +429,12 @@ def runExpression(
     -------
     list[str]
         List of these three output files:
-            - "{OUTPUT_DIR}/srpDEGPathways.csv": Enriched pathways
+            - "{output_dir}/srpDEGPathways.csv": Enriched pathways
                 in differentially expressed genes
-            - "{OUTPUT_DIR}/srpDEGStats.csv" : Summary statistics
+            - "{output_dir}/srpDEGStats.csv" : Summary statistics
                 for differentially expressed genes
-            - "{OUTPUT_DIR}/allGeneEx.csv" : All gene expression data
-        Note that OUTPUT_DIR = "/tmp" by default.
+            - "{output_dir}/allGeneEx.csv" : All gene expression data
+        Note that output_dir = "tmp" by default.
     """
     cmd = f"Rscript zfExp/parseGexData.R {gex} {chem} {ginfo}"
     tqdm.write(cmd)
@@ -533,7 +534,7 @@ def main():
 
     Outputs:
     --------
-    Various CSV files stored in OUTPUT_DIR, including:
+    Various CSV files stored in output_dir, including:
     - Core data
         - samples.csv
         - chemicals.csv
@@ -588,7 +589,7 @@ def main():
     parser.add_argument(
         "--output_dir",
         dest="output_dir",
-        default=OUTPUT_DIR,
+        default=output_dir,
         help="Directory to store output files (default: '/tmp')",
     )
     args = parser.parse_args()

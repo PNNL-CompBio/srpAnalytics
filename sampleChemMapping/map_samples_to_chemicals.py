@@ -37,7 +37,8 @@ FSES_COLS = combine_schema_cols("samples", "samplesToChemicals")
 # These pathways refer to absolute pathways in the docker image
 # setting these three parameters, can be appended
 # data_dir = 'https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data'
-OUTPUT_DIR = "/tmp"
+OUTPUT_DIR = os.getenv("OUTPUT_DIR")
+OUTPUT_DIR = OUTPUT_DIR if OUTPUT_DIR is not None else "tmp"
 # OUTPUT_DIR = "."
 
 # Set CompTox API key

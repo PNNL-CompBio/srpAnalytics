@@ -18,6 +18,7 @@ jobs:
     env:
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
       MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
+      OUTPUT_DIR: ${{ vars.OUTPUT_DIR }}
     # environment: build
     steps:
       - name: Checkout Repo
@@ -40,7 +41,7 @@ jobs:
           "
       - name: Run bmd python command
         run: |
-          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-zfbmd
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} -e OUTPUT_DIR=${{ vars.OUTPUT_DIR }} sgosline/srp-zfbmd
       - name: List files cwd
         run: ls -la
       - name: Move files
@@ -59,6 +60,7 @@ jobs:
     env:
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
       MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
+      OUTPUT_DIR: ${{ vars.OUTPUT_DIR }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -68,7 +70,7 @@ jobs:
         run: docker pull sgosline/srp-samplechem
       - name: Run sample-chem python command
         run: |
-          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-samplechem
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} -e OUTPUT_DIR=${{ vars.OUTPUT_DIR }} sgosline/srp-samplechem
       - name: List files cwd
         run: ls -la
       - name: Move files
@@ -87,6 +89,7 @@ jobs:
     env:
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
       MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
+      OUTPUT_DIR: ${{ vars.OUTPUT_DIR }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -96,7 +99,7 @@ jobs:
         run: docker pull sgosline/srp-exposome
       - name: Run exposome python command
         run: |
-          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-exposome
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} -e OUTPUT_DIR=${{ vars.OUTPUT_DIR }} sgosline/srp-exposome
       - name: List files cwd
         run: ls -la
       - name: Copy files to artifact
