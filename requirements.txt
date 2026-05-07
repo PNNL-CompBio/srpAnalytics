@@ -1,6 +1,7 @@
-pandas
 argparse
-linkml
-pydantic
 ctx-python
+linkml
+pandas
+pydantic
+python-dotenv
 tqdm

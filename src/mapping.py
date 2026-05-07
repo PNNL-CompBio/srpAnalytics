@@ -1,9 +1,19 @@
+"""mapping.py: Functions to handle mapping operations.
+
+NOTE: This may be superseded/replaced by manifest.py in future updates
+
+author(s): @christinehc
+"""
+
 # =========================================================
 # Imports
 # =========================================================
 import pandas as pd
 
 
+# =========================================================
+# Functions
+# =========================================================
 # @FIXME: Possibly delete? Seems unused
 def load_mapping_reference(
     data_dir: str = "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data",

@@ -4,28 +4,43 @@ on:
   push:
     branches:
       - "**"
+    # Trigger upon changes to manifest
     paths:
-      - data/
-
+      - "data/srp_build_files.csv"
   # Allows running workflow manually from Actions tab
   workflow_dispatch:
 
 jobs:
-  # Placeholder
+
   build-bmd:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    env:
+      FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     # environment: build
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Download artifacts from previous drug gen
         uses: actions/download-artifact@v4
-      - name: Pull sample image
+      - name: Pull bmd image
         run: docker pull sgosline/srp-zfbmd
+      - name: Test Figshare token # TODO: REMOVE WHEN DONE
+        run: |
+          python -c "
+          import os
+          token = os.getenv('FIGSHARE_API_TOKEN')
+          if token:
+              print(f'Token found (length: {len(token)})')
+          else:
+              print('Token not found')
+              print('Available env vars:', [k for k in os.environ.keys() if 'FIGSHARE' in k])
+          print(f'MANIFEST_FILEPATH={os.getenv("MANIFEST_FILEPATH")}')
+          "
       - name: Run bmd python command
         run: |
-          docker run -v $PWD:/tmp sgosline/srp-zfbmd --morpho /app/zfBmd/test_files/test_morphology.csv --lpr /app/zfBmd/test_files/test_behavioral.csv --output /tmp
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-zfbmd
       - name: List files cwd
         run: ls -la
       - name: Move files
@@ -41,6 +56,9 @@ jobs:
   build-samples:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    env:
+      FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -50,7 +68,7 @@ jobs:
         run: docker pull sgosline/srp-samplechem
       - name: Run sample-chem python command
         run: |
-          docker run -v $PWD:/tmp sgosline/srp-samplechem
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-samplechem
       - name: List files cwd
         run: ls -la
       - name: Move files
@@ -66,16 +84,19 @@ jobs:
   build-expo:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    env:
+      FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Download artifacts from previous drug gen
         uses: actions/download-artifact@v4
-      - name: Pull sample image
+      - name: Pull exposome image
         run: docker pull sgosline/srp-exposome
-      - name: Run sample-chem python command
+      - name: Run exposome python command
         run: |
-          docker run -v $PWD:/tmp sgosline/srp-exposome
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-exposome
       - name: List files cwd
         run: ls -la
       - name: Copy files to artifact
@@ -92,6 +113,9 @@ jobs:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     needs: build-samples
+    env:
+      FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
+      MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -100,13 +124,13 @@ jobs:
         with:
           name: samp-files
           path: samp-files
-      - name: Pull sample image
+      - name: Pull gene expression image
         run: docker pull sgosline/srp-zfexp
       - name: move chemical list to tmp
         run: mv samp-files/chemicals.csv .
       - name: Run zfexp python command
         run: |
-          docker run -v $PWD:/tmp sgosline/srp-zfexp
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-zfexp
       - name: List files cwd
         run: ls -la
       - name: Copy files to artifact
@@ -120,6 +144,7 @@ jobs:
           path: expr-files
 
   create-figshare-article:
+    needs: [ build-bmd, build-samples, build-expo, build-expr ]
     runs-on: ubuntu-latest
     outputs:
       article_id: ${{ steps.create_article.outputs.article_id }}
@@ -162,8 +187,6 @@ jobs:
 
           echo "Created Figshare article with ID: $ARTICLE_ID"
           echo "article_id=$ARTICLE_ID" >> $GITHUB_OUTPUT
-
-  # metadata field: "tags": ["srp-analytics", "database"],
 
   artifact-test:
     needs:
@@ -209,5 +232,3 @@ jobs:
           FIGSHARE_ENDPOINT: "https://api.figshare.com/v2"
           FIGSHARE_ARTICLE_ID: ${{ needs.create-figshare-article.outputs.article_id }}
           DATA_DIR: "srpAnalytics"
-#zipfiles push to figshare
-

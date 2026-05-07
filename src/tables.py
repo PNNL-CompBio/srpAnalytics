@@ -1,8 +1,14 @@
+"""tables.py: Handles master tables.
+
+author(s): @sgosline, @christinehc
+"""
+
 # =========================================================
 # Imports
 # =========================================================
 import pandas as pd
 from numpy.typing import ArrayLike
+
 
 # #################################
 # Master ID tables
@@ -11,8 +17,6 @@ from numpy.typing import ArrayLike
 # They are in some files but not others, so tables are
 # automatically updated below.
 # #################################
-
-
 def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
     """Generate master table for chemical ID
 
@@ -34,7 +38,7 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
         Chemical ID master table
     """
     # Clean up input data and reduce # columns
-    cols = ["cas_number", "zf.cid", "Chemical_ID", "chemical_class"]
+    cols = ["Chemical_ID", "cas_number", "zf.cid", "chemical_class"]
 
     # Remove duplicates
     df = df[cols].drop_duplicates().dropna(subset=["cas_number"])
@@ -48,9 +52,9 @@ def chem_id_master_table(df: pd.DataFrame, cas_ids: ArrayLike) -> pd.DataFrame:
         # Create table entries for missing chemical IDs
         missing_df = pd.DataFrame(
             {
+                "Chemical_ID": range(max_id, max_id + len(missing)),  # new chem IDs
                 "cas_number": list(missing),
                 "zf.cid": [""] * len(missing),
-                "Chemical_ID": range(max_id, max_id + len(missing)),  # new chem IDs
                 "chemical_class": [""] * len(missing),
             }
         )
@@ -87,22 +91,23 @@ def sample_id_master_table(
         ["Sample_ID", "SampleNumber"]
     ].drop_duplicates()
 
-    missing = set(existing_sample_numbers) - set(map_df["SampleNumber"])
+    missing = list(set(existing_sample_numbers) - set(map_df["SampleNumber"]))
     if missing:
         print(f"Missing {len(missing)} sample IDs; adding them now...")
 
-        # Get max ID, filtering for only numeric sample IDs
-        numeric_mask = map_df["Sample_ID"].str.match(r"^\d+$", na=False)
-        numeric_ids = map_df.loc[numeric_mask, "Sample_ID"].astype(float)
-        max_id = int(numeric_ids.max(skipna=True) + 1)
+        # Convert Sample_ID to numeric, drop NAs, and find max
+        numeric_ids = pd.to_numeric(map_df["Sample_ID"], errors="coerce")
+        max_id = int(numeric_ids.max()) + 1
+        new_max = max_id + len(missing) - 1
 
-        missing_df = pd.DataFrame(
-            {
-                "Sample_ID": range(max_id, max_id + len(missing)),  # new sample IDs
-                "SampleNumber": list(missing),
-            }
+        # Create new mapping for missing samples
+        new_map = pd.DataFrame(
+            {"Sample_ID": list(range(max_id, new_max + 1)), "SampleNumber": missing}
         )
-        map_df = pd.concat([map_df, missing_df])
+
+        # Combine original and new mappings
+        map_df = pd.concat([map_df, new_map], ignore_index=True)
+
     return map_df
 
 
@@ -115,8 +120,6 @@ def sample_id_master_table(
 # 2. Multiple chemical ids mapping to a single CAS ID:
 #    A single chemical ID must be selected.
 # ##################################
-
-
 def remove_chem_id_duplicates(
     df: pd.DataFrame,
     chem_ids: pd.DataFrame,
@@ -194,3 +197,4 @@ def remove_sample_duplicates(data: pd.DataFrame):
     new_samp_names = pd.concat(
         [data.query("~is_dupe").drop("is_dupe", axis=1), full_rep]
     )
+    return new_samp_names

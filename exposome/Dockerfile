@@ -19,9 +19,12 @@ RUN mkdir -p exposome
 COPY exposome/* exposome/
 RUN mkdir src
 COPY src/* src
+RUN mkdir data
+COPY data/srp_build_files.csv data/srp_build_files.csv
 COPY build_script.py ./
 COPY srpAnalytics.yaml ./
 COPY requirements.txt .
+RUN mkdir -p ./tmp/.figshare_cache
 
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt

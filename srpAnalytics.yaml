@@ -1,4 +1,7 @@
-id: http://w3id.org/linkml/examples/srpanalyics
+# =========================================================
+# srpAnalytics : SCHEMA FOR SUPERFUND RESEARCH PORTAL
+# =========================================================
+id: http://w3id.org/linkml/examples/srpanalytics
 name: srpanalytics
 prefixes:
    linkml: https://w3id.org/linkml
@@ -9,6 +12,9 @@ imports:
 default_range: string
 default_prefix: srpanalytics
 
+# ---------------------------------------------------------
+# Slots
+# ---------------------------------------------------------
 slots:
   AUC_Norm:
     description: normalized area under the curve
@@ -24,9 +30,13 @@ slots:
   BMD50:
     description: Dose at which 50% of fish are affected
     range: linkml:Any
+  chemical_class:
+    description: Chemical class, from hand-curated list at OSU
+  chemDescription:
+    description: Chemical description, from PubChem or other sources
   Chemical_ID:
     description: Unique identifier for every chemical in the database
-    range: integer
+    range: linkml:Any
     identifier: true
     slot_uri: schema:identifier
   DataQC_Flag:
@@ -34,10 +44,13 @@ slots:
     range: integer
   Description:
     description: Name of endpoint
+  description_resource:
+    description: Link to resource used to source chemDescription
+    range: linkml:Any
   End_Point:
+    description: Endpoint identifier
+  End_Point_Name:
     description: Name of endpoint
-  # endPointLink:
-  #   description: Link to endpoint description
   cas_number:
     description: CAS identifier for a specific chemical
     range: linkml:Any  # need to enforce string
@@ -47,9 +60,6 @@ slots:
   CI_Lo:
     description: Low range of confidence interval
     range: float
-  # combined:
-  #   description: (TODO) Combined significance score?
-    # range: linkml:Any  # float
   concentration:
     description: Concentration at which chemical was administered in uM
     range: float
@@ -58,8 +68,6 @@ slots:
   Dose:
     description: Dose of chemical
     range: float
-  # IncludeInPortal:
-  #   description:
   Max_Dose:
     description: Maximum dose administered
     range: linkml:Any
@@ -70,9 +78,6 @@ slots:
     description: Model with best fit to data
   Project:
     description: name of project contributing the dataset
-  # Response:
-  #   description: Response in terms of percentage of fish alive
-    # range: float
   Sample_ID:
     description: Unique identifier for every sample in the database
     range: linkml:Any
@@ -84,7 +89,33 @@ slots:
   Y_vals:
     description: Y coordinates of fitted curve, if available
     range: linkml:Any
+  # endPointLink:
+  #   description: Link to endpoint description
+  # combined:
+  #   description: (TODO) Combined significance score?
+    # range: linkml:Any  # float
+    # IncludeInPortal:
+  #   description:
+  # Response: -> Normalized_to_Vehicle
+  #   description: Response in terms of percentage of fish alive
+    # range: float
 
+# # ---------------------------------------------------------
+# # Custom Data Types
+# # ---------------------------------------------------------
+# types:
+#   IntegerOrNull:
+#     union_of:
+#       - integer
+#       - NullStringType
+
+#   NullStringType:
+#     base: string
+#     pattern: "^NULL$"
+
+# ---------------------------------------------------------
+# Data Classes
+# ---------------------------------------------------------
 classes:
   samples:
     description: List of samples collected in the Superfund study
@@ -107,14 +138,12 @@ classes:
         description:
       projectName:
         description:
-      sampleName:
-        description:
       LocationLat:
         description:
-        range: float
+        range: linkml:Any
       LocationLon:
         description:
-        range: float
+        range: linkml:Any
       projectLink:
         description:
       LocationAlternateDescription:
@@ -128,8 +157,11 @@ classes:
   chemicals:
     description: List of chemicals measured in the Superfund study
     slots:
-      - cas_number
       - Chemical_ID
+      - cas_number
+      - chemical_class
+      - chemDescription
+      - description_resource
     attributes:
       preferredName:
         description: Chemical name
@@ -151,10 +183,9 @@ classes:
         range: float
       chem_source:
         description: Source of chemical, from hand-curated list at OSU.
-      chemical_class:
-        description: Chemical class, from hand-curated list at OSU
-      chemDescription:
-        description:
+      image_link:
+        description: Link to image of molecular structure
+        range:
   samplesToChemicals: 
     description: Measurements of chemicals in samples
     slots:
@@ -162,6 +193,12 @@ classes:
       - Chemical_ID
       - cas_number
     attributes:
+      test_template:
+        description: Specifies the specific version of the test that was run
+        range: linkml:Any
+      test_method:
+        description: Specifies the overall method run (PAHs, Pesticides, MASV, etc)
+        range: linkml:Any
       measurement_value:
         description: Value measured in sampler
         range: linkml:Any
@@ -187,11 +224,12 @@ classes:
         range: linkml:Any
       environmental_concentration_molar_unit:
         description:
-  zfBMDS:  # new_BMDS_BC/LPR -> seems to be same as the Chem ones? combine?
-    description: Benchmark dose measurements of sample extracts in zebrafish
+        range: linkml:Any
+  BMDs:
+    description: Benchmark dose measurements
     slots:
-      - Chemical_ID
       - End_Point
+      - End_Point_Name
       - Model
       - BMD10
       - BMD50
@@ -200,7 +238,6 @@ classes:
       - AUC_Norm
       - DataQC_Flag
       - BMD_Analysis_Flag
-      - bmdrc.Endpoint.ID
     attributes:
       AUC:
         description: Area under curve
@@ -214,15 +251,43 @@ classes:
       BMDL:
         description: Lowest dose at which fish were affected
         range: float
-  zfDose:  # new_Dose_BC/LPR
-    description: Dose response datapoints of sample extracts in zebrafish
+  Dose:
+    description: Dose response datapoints
     slots:
-      - Chemical_ID
       - End_Point
+      - End_Point_Name
       - Dose
-      - bmdrc.Endpoint.ID
       - CI_Lo
       - CI_Hi
+    attributes:
+      Response: # -> Normalized_to_Vehicle
+        description: Response in terms of percentage of fish alive
+        range: float
+    #   num.affected:
+    #     description: Number of fish with the observed phenotype
+    #     range: integer
+    #   num.nonna:
+    #     description: Number of fish measured for the given endpoint
+    #     range: integer
+  Fits:
+    description: XY Coordinates of curve fit data
+    slots:
+      - End_Point
+      - End_Point_Name
+      - X_vals
+      - Y_vals
+  zebrafishChemBMDs:
+    description: Benchmark dose measurements of chemical extracts in zebrafish
+    is_a: BMDs
+    slots:
+      - Chemical_ID
+      - bmdrc.Endpoint.ID
+  zebrafishChemDose:
+    description: Dose response datapoints of chemical extracts in zebrafish
+    is_a: Dose
+    slots:
+      - Chemical_ID
+      - bmdrc.Endpoint.ID
     attributes:
       num.affected:
         description: Number of fish with the observed phenotype
@@ -230,14 +295,27 @@ classes:
       num.nonna:
         description: Number of fish measured for the given endpoint
         range: integer
-  zfFits:  # new_Fits_BC/LPR
-    description: XY Coordinates of curve fit data for sample extracts in zebrafish
+  zebrafishChemFits:
+    description: XY Coordinates of curve fit data for chemical extracts in zebrafish
+    is_a: Fits
     slots:
       - Chemical_ID
-      - End_Point
-      - X_vals
-      - Y_vals
       - bmdrc.Endpoint.ID
+  zebrafishSampBMDs:
+    description: Benchmark dose measurements of sample extracts in zebrafish
+    is_a: BMDs
+    slots:
+      - Sample_ID
+  zebrafishSampDose:  # new_Dose_BC/LPR
+    description: Dose response datapoints of sample extracts in zebrafish
+    is_a: Dose
+    slots:
+      - Sample_ID
+  zebrafishSampFits:  # new_Fits_BC/LPR
+    description: XY Coordinates of curve fit data for sample extracts in zebrafish
+    is_a: Fits
+    slots:
+      - Sample_ID
   allGeneEx:
     description: List of all experiments that measure gene expression changes in zebrafish upon chemical treatment changes
     slots:
@@ -322,3 +400,11 @@ classes:
       nGenes:
         description:
         range: integer
+  chemicalIdMapping:
+    description: Input file for chemical ID mapping (and descriptions)
+    slots:
+      - Chemical_ID
+      - cas_number
+      - chemical_class
+      - chemDescription
+      - description_resource
