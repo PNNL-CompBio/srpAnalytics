@@ -11,11 +11,11 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build-bmd:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     env:
+      CTX_API_KEY: ${{ secrets.CTX_API_KEY }}
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_TOKEN }}
       MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
       OUTPUT_DIR: ${{ vars.OUTPUT_DIR }}
@@ -41,7 +41,7 @@ jobs:
           "
       - name: Run bmd python command
         run: |
-          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} -e OUTPUT_DIR=${{ vars.OUTPUT_DIR }} sgosline/srp-zfbmd
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN -e CTX_API_KEY -e MANIFEST_FILEPATH -e OUTPUT_DIR sgosline/srp-zfbmd
       - name: List files cwd
         run: ls -la
       - name: Move files
@@ -58,6 +58,7 @@ jobs:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     env:
+      CTX_API_KEY: ${{ secrets.CTX_API_KEY }}
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
       MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
       OUTPUT_DIR: ${{ vars.OUTPUT_DIR }}
@@ -70,7 +71,7 @@ jobs:
         run: docker pull sgosline/srp-samplechem
       - name: Run sample-chem python command
         run: |
-          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} -e OUTPUT_DIR=${{ vars.OUTPUT_DIR }} sgosline/srp-samplechem
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN -e CTX_API_KEY -e MANIFEST_FILEPATH -e OUTPUT_DIR sgosline/srp-samplechem
       - name: List files cwd
         run: ls -la
       - name: Move files
@@ -87,6 +88,7 @@ jobs:
     #if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     env:
+      CTX_API_KEY: ${{ secrets.CTX_API_KEY }}
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
       MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
       OUTPUT_DIR: ${{ vars.OUTPUT_DIR }}
@@ -99,7 +101,7 @@ jobs:
         run: docker pull sgosline/srp-exposome
       - name: Run exposome python command
         run: |
-          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} -e OUTPUT_DIR=${{ vars.OUTPUT_DIR }} sgosline/srp-exposome
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN -e CTX_API_KEY -e MANIFEST_FILEPATH -e OUTPUT_DIR sgosline/srp-exposome
       - name: List files cwd
         run: ls -la
       - name: Copy files to artifact
@@ -117,6 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-samples
     env:
+      CTX_API_KEY: ${{ secrets.CTX_API_KEY }}
       FIGSHARE_API_TOKEN: ${{ secrets.FIGSHARE_API_TOKEN }}
       MANIFEST_FILEPATH: ${{ vars.MANIFEST_FILEPATH }}
     steps:
@@ -133,7 +136,7 @@ jobs:
         run: mv samp-files/chemicals.csv .
       - name: Run zfexp python command
         run: |
-          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN=${{ secrets.FIGSHARE_TOKEN }} -e MANIFEST_FILEPATH=${{ vars.MANIFEST_FILEPATH }} sgosline/srp-zfexp
+          docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN -e CTX_API_KEY -e MANIFEST_FILEPATH sgosline/srp-zfexp
       - name: List files cwd
         run: ls -la
       - name: Copy files to artifact
@@ -147,7 +150,7 @@ jobs:
           path: expr-files
 
   create-figshare-article:
-    needs: [ build-bmd, build-samples, build-expo, build-expr ]
+    needs: [build-bmd, build-samples, build-expo, build-expr]
     runs-on: ubuntu-latest
     outputs:
       article_id: ${{ steps.create_article.outputs.article_id }}
