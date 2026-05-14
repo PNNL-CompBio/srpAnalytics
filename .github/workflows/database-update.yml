@@ -40,6 +40,11 @@ jobs:
           print(f'len(CTX_API_TOKEN)={len(os.getenv(\"CTX_API_KEY\"))} chars')
           print(f'MANIFEST_FILEPATH={os.getenv(\"MANIFEST_FILEPATH\")}')
           "
+      - name: Test CompTox API connectivity
+        run: |
+          curl -v "https://api-ccte.epa.gov/chemical/search/equal/50-00-0" \
+            -H "x-api-key: ${{ secrets.CTX_API_KEY }}" \
+            -H "Content-Type: application/json"
       - name: Run bmd python command
         run: |
           docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN -e CTX_API_KEY -e MANIFEST_FILEPATH -e OUTPUT_DIR sgosline/srp-zfbmd
