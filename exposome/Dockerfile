@@ -17,6 +17,8 @@ WORKDIR /app
 
 RUN mkdir -p exposome
 COPY exposome/* exposome/
+RUN mkdir -p sampleChemMapping
+COPY sampleChemMapping/*.py sampleChemMapping/
 RUN mkdir src
 COPY src/* src
 RUN mkdir data

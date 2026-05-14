@@ -16,6 +16,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /app
 RUN mkdir -p zfExp
 COPY zfExp/* zfExp/
+RUN mkdir -p sampleChemMapping
+COPY sampleChemMapping/*.py sampleChemMapping/
 RUN mkdir data
 COPY data/srp_build_files.csv data/srp_build_files.csv
 COPY build_script.py ./

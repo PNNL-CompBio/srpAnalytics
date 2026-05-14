@@ -11,6 +11,8 @@ WORKDIR /app
 
 RUN mkdir ./zfBmd
 COPY zfBmd ./zfBmd
+RUN mkdir -p sampleChemMapping
+COPY sampleChemMapping/*.py sampleChemMapping/
 RUN mkdir -p src
 COPY src/* src
 RUN mkdir data
