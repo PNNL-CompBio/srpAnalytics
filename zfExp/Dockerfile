@@ -28,6 +28,7 @@ RUN mkdir -p sampleChemMapping
 COPY sampleChemMapping/* sampleChemMapping/
 RUN mkdir src
 COPY src/* src
+RUN mkdir -p ./tmp/.figshare_cache
 
 RUN Rscript -e "install.packages('readxl',dependencies=TRUE, repos='http://cran.rstudio.com')"
 RUN Rscript -e "install.packages('dplyr',dependencies=TRUE, repos='http://cran.rstudio.com')"
