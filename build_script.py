@@ -109,7 +109,13 @@ def fitCurveFiles(
     # tqdm.write(cmd)
 
     try:
-        process = subprocess.run(cmd, text=True, shell=True)  # capture_output=True,
+        process = subprocess.run(cmd, text=True, shell=True, capture_output=True)
+
+        # Always show logging messages
+        if process.stdout:
+            for line in process.stdout.splitlines():
+                if line.strip():
+                    tqdm.write(line)
 
         # Verify successful command execution
         if process.returncode != 0:
@@ -120,18 +126,12 @@ def fitCurveFiles(
                 stderr=process.stderr,
             )
 
-        # Show command line logging messages
-        if process.stdout is not None:
-            for line in process.stdout.splitlines():
-                if line.strip():
-                    tqdm.write(line)
-
-        # Show command line logging messages
-        for line in process.stdout.splitlines():
-            if line.strip():
-                tqdm.write(line)
     except Exception as e:
         tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
+        if e.stdout:
+            tqdm.write(e.stdout)
+        if e.stderr:
+            tqdm.write(e.stderr)
         raise e
 
     # When complete, clear data cache
@@ -356,6 +356,12 @@ def runSampMap(
     try:
         process = subprocess.run(cmd, capture_output=True, text=True, shell=True)
 
+        # Always show logging messages
+        if process.stdout:
+            for line in process.stdout.splitlines():
+                if line.strip():
+                    tqdm.write(line)
+
         # Verify successful command execution
         if process.returncode != 0:
             raise subprocess.CalledProcessError(
@@ -365,13 +371,12 @@ def runSampMap(
                 stderr=process.stderr,
             )
 
-        # Show command line logging messages
-        for line in process.stdout.splitlines():
-            if line.strip():
-                tqdm.write(line)
     except Exception as e:
         tqdm.write(f"An error occurred while trying to run the command: {str(e)}")
-        traceback.print_exception(e)
+        if e.stdout:
+            tqdm.write(e.stdout)
+        if e.stderr:
+            tqdm.write(e.stderr)
         raise e
 
     # TODO: Validate sample, chem, and mapping files
