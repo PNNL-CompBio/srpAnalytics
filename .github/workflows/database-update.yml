@@ -27,7 +27,7 @@ jobs:
         uses: actions/download-artifact@v4
       - name: Pull bmd image
         run: docker pull sgosline/srp-zfbmd
-      - name: Test Figshare token # TODO: REMOVE WHEN DONE
+      - name: Test secret tokens # TODO: REMOVE WHEN DONE
         run: |
           python -c "
           import os
@@ -37,6 +37,7 @@ jobs:
           else:
               print('Token not found')
               print('Available env vars:', [k for k in os.environ.keys() if 'FIGSHARE' in k])
+          print(f'len(CTX_API_TOKEN)={len(os.getenv(\"CTX_API_KEY\"))} chars')
           print(f'MANIFEST_FILEPATH={os.getenv(\"MANIFEST_FILEPATH\")}')
           "
       - name: Run bmd python command
