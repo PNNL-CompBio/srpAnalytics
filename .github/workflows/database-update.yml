@@ -42,9 +42,9 @@ jobs:
           "
       - name: Test CompTox API connectivity
         run: |
-          curl -v "https://api-ccte.epa.gov/chemical/search/equal/50-00-0" \
-            -H "x-api-key: ${{ secrets.CTX_API_KEY }}" \
-            -H "Content-Type: application/json"
+          curl -X GET "https://comptox.epa.gov/ctx-api/chemical/detail/search/by-dtxsid/DTXSID7020182" \
+            -H 'accept: application/json'\
+            -H 'x-api-key: ${{ secrets.CTX_API_KEY }}'
       - name: Run bmd python command
         run: |
           docker run -v $PWD:/tmp -e FIGSHARE_API_TOKEN -e CTX_API_KEY -e MANIFEST_FILEPATH -e OUTPUT_DIR sgosline/srp-zfbmd
