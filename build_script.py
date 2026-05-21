@@ -26,6 +26,7 @@ from tqdm import tqdm
 # =========================================================
 output_dir = os.getenv("OUTPUT_DIR")  # "tmp"  # "./tmp"
 output_dir = output_dir if output_dir is not None else "tmp"
+print("output_dir", output_dir)
 manifest_filepath = os.getenv("MANIFEST_FILEPATH")
 
 manifest = DataManifest(
@@ -33,7 +34,7 @@ manifest = DataManifest(
 )
 print("MANIFEST_FILEPATH", manifest_filepath)
 loader = FigshareDataLoader(
-    Path(output_dir if output_dir is not None else "tmp") / ".figshare_cache",
+    Path(output_dir) / ".figshare_cache",
     api_token=os.getenv("FIGSHARE_API_TOKEN"),
 )
 
