@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import requests
 from dotenv import load_dotenv
 from numpy.typing import ArrayLike
 from tqdm import tqdm
@@ -448,10 +449,16 @@ def main():
     if not os.path.exists(os.path.join(args.output_dir, "chem_metadata.tsv")):
         tqdm.write("No metadata found. Building metadata...")
 
-        chem_metadata = build_chem_metadata(
-            chem_ids,
-            save_to=os.path.join(args.output_dir, "chem_metadata.tsv"),
-        )
+        try:
+            chem_metadata = build_chem_metadata(
+                chem_ids,
+                save_to=os.path.join(args.output_dir, "chem_metadata.tsv"),
+            )
+        except requests.exceptions.ConnectionError as e:
+            # Get pre-built chemical metadata
+            chem_metadata_file = manifest.get(name="metadata_2026-01")
+            chem_metadata = load_figshare_url(loader, chem_metadata_file)
+
     else:
         tqdm.write("Metadata found! Reading from previous file...")
         chem_metadata = pd.read_csv(
