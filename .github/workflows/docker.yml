@@ -8,6 +8,7 @@ on:
       - "**"
     paths:
       - build_script.py
+      - requirements.txt
       - .github/
       - exposome/
       - sampleChemMapping/
