@@ -335,10 +335,6 @@ def runSampMap(
             - samples.csv
             - chemicals.csv
             - samplesToChemicals.csv
-        - Zebrafish files for both chemical and sample measurements
-            - zebrafish{Samp,Chem}XYCoords.csv
-            - zebrafish{Samp,Chem}DoseResponse.csv
-            - zebrafish{Samp,Chem}BMDs.csv)
     """
     args = (
         f"--sample_id_file={sample_id_file} "
@@ -627,12 +623,21 @@ def main():
         "chem_desc_file": chem_desc_file,
         "output_dir": args.output_dir,
     }
-    samples_file, chemicals_file, samples_to_chemicals_file = runSampMap(**sampmap_args)
+    # samples_file, chemicals_file, samples_to_chemicals_file = runSampMap(**sampmap_args)
 
     # ------------------------------------------------------------------------
-    # Benchmark Dose (BMD) Calculation / Sample-Chem Mapping (SAMPS) Workflows
+    # Sample-Chem Mapping (SAMPS) Workflow
     # ------------------------------------------------------------------------
-    if args.bmd or args.samps:  ### need to rerun samples if we have created new bmds
+    if args.bmd or args.samps:
+        samples_file, chemicals_file, samples_to_chemicals_file = runSampMap(
+            **sampmap_args
+        )
+
+    # ------------------------------------------------------------------------
+    # Benchmark Dose (BMD) Response Curve Generation
+    # ------------------------------------------------------------------------
+    if args.bmd:
+        ### old note: need to rerun samples if we have created new bmds -> ?? still true?
         # Add chemical BMDS, fits, curves to existing data
         # sample_files, chem_files = [], []
 
