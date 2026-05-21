@@ -15,10 +15,6 @@ schema <- data.frame(
   Chemical_ID = c()
 )
 
-
-data.dir <- "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp"
-out.dir <- "tmp/"
-
 generateGeneExamples <- function(genelist, chems) {
   library(ggplot2)
   library(ggrepel)
@@ -136,15 +132,18 @@ doEnrich <- function(genelist) {
 
 ## main function to do all the things
 main <- function(args = c()) {
-  if (length(args) != 3) {
+  if (length(args) != 5) {
     args <- commandArgs(trailingOnly = TRUE)
   }
-  # print(args)
+
   if (length(args) < 3) {
-    print("Need to call script with path to GEX files (comma delimited) and chemicals.csv and gene info file")
+    print("Need to call script with path to GEX files (comma delimited), chemicals.csv, gene info file, and optionally data.dir and out.dir")
     quit()
   }
 
+  # Set data.dir and out.dir from args if provided, otherwise use defaults
+  data.dir <<- ifelse(length(args) >= 4, args[4], "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp")
+  out.dir <<- ifelse(length(args) >= 5, args[5], "tmp/")
 
   tab <- rio::import(args[1], which = 1, skip = 1) ### so far only equipped to handle one gene expression file
 

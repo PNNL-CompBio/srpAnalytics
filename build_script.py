@@ -25,6 +25,7 @@ from tqdm import tqdm
 # Setup/Parameters
 # =========================================================
 output_dir = os.getenv("OUTPUT_DIR")  # "tmp"  # "./tmp"
+output_dir = output_dir if output_dir is not None else "tmp"
 manifest_filepath = os.getenv("MANIFEST_FILEPATH")
 
 manifest = DataManifest(
@@ -412,6 +413,7 @@ def runExpression(
     gex: str,
     chem: str,
     ginfo: str,
+    data_dir: str = "https://raw.githubusercontent.com/PNNL-CompBio/srpAnalytics/main/data/zfExp",
     output_dir: str = output_dir,
 ) -> list[str]:
     """Parse gene expression data using R.
@@ -436,7 +438,7 @@ def runExpression(
             - "{output_dir}/allGeneEx.csv" : All gene expression data
         Note that output_dir = "tmp" by default.
     """
-    cmd = f"Rscript zfExp/parseGexData.R {gex} {chem} {ginfo}"
+    cmd = f"Rscript zfExp/parseGexData.R {gex} {chem} {ginfo} {data_dir} {output_dir}"
     tqdm.write(cmd)
     os.system(cmd)
     return [
@@ -843,7 +845,7 @@ def main():
         #         chem_desc_file=chem_desc_file,
         #         output_dir=args.output_dir,
         #     )
-
+        print(args.output_dir)
         result = runExpression(
             gex1,
             os.path.join(args.output_dir, "chemicals.csv"),
