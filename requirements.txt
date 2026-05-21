@@ -1,6 +1,7 @@
 argparse
 ctx-python
 linkml
+openpyxl
 pandas
 pydantic
 python-dotenv
