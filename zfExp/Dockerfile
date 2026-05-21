@@ -8,26 +8,22 @@ RUN apt-get install -y --allow-unauthenticated --fix-missing  python3-pip python
 RUN apt-get install -y libmariadb-dev-compat libmariadb-dev
 
 RUN python3 -m venv /opt/venv
-
 ENV PATH="/opt/venv/bin:$PATH"
 # ENV PYTHONPATH="${PYTHONPATH}:/tmp"
 # ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 WORKDIR /app
 RUN mkdir -p zfExp
-COPY zfExp/* zfExp/
+COPY zfExp/* zfExp
 RUN mkdir -p sampleChemMapping
-COPY sampleChemMapping/*.py sampleChemMapping/
+COPY sampleChemMapping/* sampleChemMapping
+RUN mkdir -p src
+COPY src/* src
 RUN mkdir data
 COPY data/srp_build_files.csv data/srp_build_files.csv
-COPY build_script.py ./
-COPY srpAnalytics.yaml ./
-COPY requirements.txt ./
-
-RUN mkdir -p sampleChemMapping
-COPY sampleChemMapping/* sampleChemMapping/
-RUN mkdir src
-COPY src/* src
+COPY build_script.py .
+COPY srpAnalytics.yaml .
+COPY requirements.txt .
 RUN mkdir -p ./tmp/.figshare_cache
 
 RUN Rscript -e "install.packages('readxl',dependencies=TRUE, repos='http://cran.rstudio.com')"
@@ -41,7 +37,6 @@ RUN Rscript -e "install.packages('argparse',dependencies=TRUE,repos='http://cran
 
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
-
 
 ENTRYPOINT ["python", "/app/build_script.py", "--geneEx"]
 
