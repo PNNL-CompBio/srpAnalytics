@@ -454,7 +454,10 @@ def main():
                 chem_ids,
                 save_to=os.path.join(args.output_dir, "chem_metadata.tsv"),
             )
-        except requests.exceptions.ConnectionError as e:
+        except (
+            requests.exceptions.ReadTimeout,
+            requests.exceptions.ConnectionError,
+        ) as e:
             # Get pre-built chemical metadata
             chem_metadata_file = manifest.get(name="metadata_2026-01")
             chem_metadata = load_figshare_url(loader, chem_metadata_file)
