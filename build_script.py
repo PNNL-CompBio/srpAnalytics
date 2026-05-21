@@ -10,7 +10,6 @@ import argparse
 import itertools
 import os
 import subprocess
-import traceback
 from pathlib import Path
 from typing import Optional, Union
 

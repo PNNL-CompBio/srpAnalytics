@@ -280,7 +280,7 @@ def figshare_url_to_id(url: str) -> str:
 
 
 def load_figshare_url(loader: FigshareDataLoader, url: str, **kwargs) -> pd.DataFrame:
-    """Loads figshare data from URL.
+    """Load figshare data from URL.
 
     Parameters
     ----------
