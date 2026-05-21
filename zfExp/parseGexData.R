@@ -248,9 +248,9 @@ main <- function(args = c()) {
 
   res #<-res|>left_join(enrich)
   ## need to get mapping to drug name
-  readr::write_csv(enrich, file = paste0(out.dir, "srpDEGPathways.csv"))
-  readr::write_csv(res, file = paste0(out.dir, "srpDEGStats.csv"))
-  readr::write_csv(allgenes, file = paste0(out.dir, "allGeneEx.csv"))
+  readr::write_csv(enrich, file = file.path(out.dir, "srpDEGPathways.csv"))
+  readr::write_csv(res, file = file.path(out.dir, "srpDEGStats.csv"))
+  readr::write_csv(allgenes, file = file.path(out.dir, "allGeneEx.csv"))
   return(list(deg = res, genes = allgenes))
 }
 
