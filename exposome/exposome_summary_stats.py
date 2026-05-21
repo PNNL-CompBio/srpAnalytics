@@ -308,8 +308,8 @@ if __name__ == "__main__":
     check_args()
 
     # Load all chemicals and projects
-    # print("sys.argv[1]", sys.argv[1])
-    chems = pd.read_excel(sys.argv[1]).dropna(subset=["Chemical_ID"])
+    # print("sys.argv[1]", sys.argv[1])  # chemical_id_mapping_with_descriptions.tsv
+    chems = pd.read_csv(sys.argv[1], sep="\t").dropna(subset=["Chemical_ID"])
     projects = _load_projects()
 
     genes, gos = list(), list()
