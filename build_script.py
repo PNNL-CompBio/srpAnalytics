@@ -26,7 +26,6 @@ from tqdm import tqdm
 # =========================================================
 output_dir = os.getenv("OUTPUT_DIR")  # "tmp"  # "./tmp"
 output_dir = output_dir if output_dir is not None else "tmp"
-print("output_dir", output_dir)
 manifest_filepath = os.getenv("MANIFEST_FILEPATH")
 
 manifest = DataManifest(
@@ -640,8 +639,9 @@ def main():
     # ------------------------------------------------------------------------
     if args.bmd:
         ### old note: need to rerun samples if we have created new bmds -> ?? still true?
-        # Add chemical BMDS, fits, curves to existing data
-        # sample_files, chem_files = [], []
+        samples_file = os.path.join(args.output_dir, "samples.csv")
+        if not os.path.exists(samples_file):
+            raise FileNotFoundError(f"Samples file {samples_file} not found.")
 
         # Find morphology data for chemical extracts
         zebrafish_chem_morpho = manifest.get(
