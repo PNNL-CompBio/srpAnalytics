@@ -32,7 +32,6 @@ manifest_filepath = os.getenv("MANIFEST_FILEPATH")
 manifest = DataManifest(
     manifest_filepath if manifest_filepath is not None else MANIFEST_FILEPATH
 )
-print("MANIFEST_FILEPATH", manifest_filepath)
 loader = FigshareDataLoader(
     Path(output_dir) / ".figshare_cache",
     api_token=os.getenv("FIGSHARE_API_TOKEN"),
