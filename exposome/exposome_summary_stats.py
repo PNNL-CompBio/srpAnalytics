@@ -4,6 +4,7 @@
 #  IMPORTS
 # ===============================================
 import json
+import os
 import re
 import sys
 from os.path import join
@@ -57,14 +58,32 @@ def _load_projects(
     HTTPError
         If invalid URL, terminates.
     """
-    res = requests.get(url)
-    res.raise_for_status()  # Raises HTTPError for invalid
-    projects = json.loads(res.json()[0])
+    try:
+        res = requests.get(url)
+        res.raise_for_status()  # Raises HTTPError for invalid
+        projects = json.loads(res.json()[0])
 
-    if verbose:
-        print(f"Data from {len(projects)} projects found.")
+        if verbose:
+            print(f"Data from {len(projects)} projects found.")
 
-    return projects
+        return projects
+
+    # Written with Claude Sonnet 4.6
+    except (requests.exceptions.RequestException, requests.exceptions.SSLError) as e:
+        # GitHub Actions warning annotation
+        print(
+            f"::warning title=Xposome-API Unavailable::"
+            f"Falling back to cached data. URL={url} Error={e}",
+            flush=True,
+        )
+        summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary:
+            with open(summary, "a") as f:
+                f.write("## ⚠️ API Fallback Triggered\n")
+                f.write(f"- **URL:** `{url}`\n")
+                f.write(f"- **Error:** `{e}`\n")
+        # Signal fallback to the parent process via exit code
+        sys.exit(42)
 
 
 def _load_chemicals(project: str) -> pd.DataFrame:

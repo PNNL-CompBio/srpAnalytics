@@ -10,6 +10,7 @@ import argparse
 import itertools
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional, Union
 
@@ -27,6 +28,7 @@ from tqdm import tqdm
 output_dir = os.getenv("OUTPUT_DIR")  # "tmp"  # "./tmp"
 output_dir = output_dir if output_dir is not None else "tmp"
 manifest_filepath = os.getenv("MANIFEST_FILEPATH")
+exposome_output_file_id = os.getenv("EXPOSOME_OUTPUT_FILE_ID")
 
 manifest = DataManifest(
     manifest_filepath if manifest_filepath is not None else MANIFEST_FILEPATH
@@ -388,7 +390,7 @@ def runSampMap(
 def runExposome(
     chem_id_file: str,
     output_dir: str = output_dir,
-) -> list[str]:
+) -> tuple[list[str], bool]:
     """Pull exposome data.
 
     Parameters
@@ -399,13 +401,26 @@ def runExposome(
 
     Returns
     -------
-    list[str]
-        List containing path to output exposomeGeneStats.csv file
+    tuple[list[str], bool]
+        (List containing path to output exposomeGeneStats.csv file, API fallback)
     """
-    cmd = f"python exposome/exposome_summary_stats.py {chem_id_file}"
-    tqdm.write(cmd)
-    os.system(cmd)
-    return [os.path.join(output_dir, "exposomeGeneStats.csv")]
+    cmd = ["python", "exposome/exposome_summary_stats.py", chem_id_file]
+    tqdm.write(" ".join(cmd))
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    # Flush output
+    sys.stdout.write(result.stdout)
+    sys.stderr.write(result.stderr)
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+    if result.returncode == 42:
+        return [os.path.join(output_dir, "exposomeGeneStats.csv")], True
+    elif result.returncode != 0:
+        raise RuntimeError(
+            f"exposome_summary_stats.py failed (exit {result.returncode})"
+        )
+    return [os.path.join(output_dir, "exposomeGeneStats.csv")], False
 
 
 def runExpression(
@@ -650,6 +665,7 @@ def main():
             version=4,
             return_first=False,
         )
+        zebrafish_chem_morpho = zebrafish_chem_morpho.split(",")  # force str->list
 
         # Get zebrafish chemical LPR data (pre-processed)
         zebrafish_chem_lpr = manifest.get(
@@ -666,6 +682,10 @@ def main():
             return_first=False,
             version=4,
         )
+
+        # print("morpho files", zebrafish_chem_morpho)
+        # print("lpr files", zebrafish_chem_lpr)
+        # print("sample files", zebrafish_samp_files)
 
         # Define files and set progress bar increments for concatenating each
         total_iterations = 3
@@ -822,7 +842,17 @@ def main():
         figshare_id = figshare_url_to_id(chemical_id)
         _ = loader.load_data(figshare_id)
         chem_id_map_file = loader.get_file_path(figshare_id).as_posix()
-        result = runExposome(chem_id_map_file, output_dir=args.output_dir)
+
+        result, api_fallback = runExposome(chem_id_map_file, output_dir=args.output_dir)
+
+        # If API fails, load pre-existing results and save those
+        if api_fallback:
+            _ = loader.load_data(str(exposome_output_file_id))
+            result_file = loader.get_file_path(exposome_output_file_id).as_posix()
+            result_file = pd.read_csv(result_file)
+
+            result_file.to_csv(result[0], index=False)
+
         # for f in res:
         #     tqdm.write(f"Filename: {f}")
         #     os.system(f"head {f}")
