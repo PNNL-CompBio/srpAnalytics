@@ -6,11 +6,14 @@
 import json
 import os
 import re
+import requests
 import sys
+import time
 from os.path import join
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 import pandas as pd
-import requests
 
 # ===============================================
 #  CONFIG
@@ -23,6 +26,30 @@ PROJ2NAME = {
     "MCF10A": "Human MCF10A cell lines",
     "TG-GATEs": "Human TG-GATEs",
 }
+
+
+def _make_session() -> requests.Session:
+    """Build a requests Session with automatic retries on transient errors.
+
+    Written using Claude Opus 4.7
+    """
+    session = requests.Session()
+    retry = Retry(
+        total=5,  # up to 5 retries total
+        connect=5,  # retries on connection errors (incl. RemoteDisconnected)
+        read=5,  # retries on read errors
+        backoff_factor=1.0,  # waits 1s, 2s, 4s, 8s, 16s between attempts
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET", "HEAD", "OPTIONS"],
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+
+SESSION = _make_session()
 
 
 # ===============================================
@@ -59,7 +86,7 @@ def _load_projects(
         If invalid URL, terminates.
     """
     try:
-        res = requests.get(url)
+        res = SESSION.get(url, timeout=30)
         res.raise_for_status()  # Raises HTTPError for invalid
         projects = json.loads(res.json()[0])
 
@@ -76,12 +103,6 @@ def _load_projects(
             f"Falling back to cached data. URL={url} Error={e}",
             flush=True,
         )
-        summary = os.environ.get("GITHUB_STEP_SUMMARY")
-        if summary:
-            with open(summary, "a") as f:
-                f.write("## ⚠️ API Fallback Triggered\n")
-                f.write(f"- **URL:** `{url}`\n")
-                f.write(f"- **Error:** `{e}`\n")
         # Signal fallback to the parent process via exit code
         sys.exit(42)
 
@@ -104,12 +125,15 @@ def _load_chemicals(project: str) -> pd.DataFrame:
             CAS: str
     """
     url = f"https://montilab.bu.edu/Xposome-API/chemicals?projects={project}&chemical_ids=all"
-    res = requests.get(url)
-    if res.status_code == 200:
-        data = pd.DataFrame(json.loads(res.json()[0]))
-        data = data.rename(columns={"Chemical_Id": "Chemical_ID"})
-        return data.dropna(subset=["Chemical_ID"])
-    return
+    try:
+        res = SESSION.get(url, timeout=30)
+        res.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error loading chemicals for {project}: {e}")
+        return None
+    data = pd.DataFrame(json.loads(res.json()[0]))
+    data = data.rename(columns={"Chemical_Id": "Chemical_ID"})
+    return data.dropna(subset=["Chemical_ID"])
 
 
 def format_concentration(
@@ -231,8 +255,11 @@ def getGoTerms(chemical_id: str, project: str) -> pd.DataFrame:
         Dataframe containing GO summarized info
     """
     url = f"https://montilab.bu.edu/Xposome-API/gs_enrichment?project={project}&chemical_id={chemical_id}"
-    res = requests.get(url)
-    if res.status_code != 200:
+    try:
+        res = SESSION.get(url, timeout=30)
+        res.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error loading GO terms for {chemical_id} in {project}: {e}")
         return pd.DataFrame()
 
     # Load GO terms enrichment summary statistics data
@@ -283,7 +310,8 @@ def getGenes(chemical_id, project):
     url = f"https://montilab.bu.edu/Xposome-API/gene_expression?project={project}&chemical_id={chemical_id}&landmark=FALSE&do.scorecutoff=FALSE"
 
     try:
-        res = requests.get(url)
+        res = SESSION.get(url, timeout=30)
+        res.raise_for_status()
 
         # Load gene expression summary statistics data
         summary = pd.DataFrame(json.loads(res.json()[0]))
@@ -343,7 +371,12 @@ if __name__ == "__main__":
         overlap = set(chems["cas_number"]).intersection(set(c["CAS"]))
         print(f"Found {len(overlap)} CAS ids in common in project {proj}")
 
-        gg = pd.concat([getGenes(chem, proj) for chem in overlap], ignore_index=True)
+        gg = []
+        for chem in overlap:
+            tmp = getGenes(chem, proj)
+            gg.append(tmp)
+            time.sleep(0.5)  # add sleep
+        gg = pd.concat(gg, ignore_index=True)
         # gt = pd.concat([getGoTerms(chem, proj) for chem in overlap], ignore_index=True)
         genes.append(gg)  # gos.append(gt)
 
