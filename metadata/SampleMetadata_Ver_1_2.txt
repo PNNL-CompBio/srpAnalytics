@@ -1,0 +1,365 @@
+Sample_ID	ClientName	SampleNumber	date_sampled	sample_matrix	technology	projectName	SampleName	LocationLat	LocationLon	LocationName	projectLink	AlternateName
+3490	FSES Laboratory	A222110	9/22/22 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3501	FSES Laboratory	A222111	11/18/22 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3458	FSES Laboratory	A222112	12/12/22 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3536	FSES Laboratory	A233647	1/19/23 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3520	FSES Laboratory	A233648	2/17/23 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3575	FSES Laboratory	A233649	3/17/23 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3479	FSES Laboratory	A233650	4/14/23 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3513	FSES Laboratory	A233651	5/19/23 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3493	FSES Laboratory	A233652	6/16/23 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	PT_AVG_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3559	FSES Laboratory	A211265	10/5/21 10:40	PSD-Air	LDPE	St. Helens Air 2021-2023	SE100	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3487	FSES Laboratory	A211269	10/5/21 10:28	PSD-Air	LDPE	St. Helens Air 2021-2023	SE200	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3414	FSES Laboratory	A211270	10/5/21 10:15	PSD-Air	LDPE	St. Helens Air 2021-2023	SW200	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3568	FSES Laboratory	A211272	10/5/21 10:05	PSD-Air	LDPE	St. Helens Air 2021-2023	SW400	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3516	FSES Laboratory	A211256	10/5/21 12:07	PSD-Air	LDPE	St. Helens Air 2021-2023	Center	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3562	FSES Laboratory	A211257	10/5/21 12:10	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3434	FSES Laboratory	A211258	10/5/21 12:14	PSD-Air	LDPE	St. Helens Air 2021-2023	NE10	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3522	FSES Laboratory	A211259	10/5/21 12:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SE10	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3524	FSES Laboratory	A211260	10/5/21 12:03	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3494	FSES Laboratory	A211261	10/5/21 12:40	PSD-Air	LDPE	St. Helens Air 2021-2023	NW100(1)	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3526	FSES Laboratory	A211262	10/5/21 12:40	PSD-Air	LDPE	St. Helens Air 2021-2023	NW100(2)	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3415	FSES Laboratory	A211263	10/5/21 12:40	PSD-Air	LDPE	St. Helens Air 2021-2023	NW100(3)	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3511	FSES Laboratory	A211264	10/5/21 12:19	PSD-Air	LDPE	St. Helens Air 2021-2023	NE100	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3431	FSES Laboratory	A211266	10/5/21 12:26	PSD-Air	LDPE	St. Helens Air 2021-2023	SW100	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3435	FSES Laboratory	A211267	10/5/21 12:47	PSD-Air	LDPE	St. Helens Air 2021-2023	NW200	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3548	FSES Laboratory	A211268	10/5/21 12:56	PSD-Air	LDPE	St. Helens Air 2021-2023	NE200	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3552	FSES Laboratory	A211271	10/5/21 13:03	PSD-Air	LDPE	St. Helens Air 2021-2023	NE400	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3500	FSES Laboratory	A221515	9/22/22 10:47	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3534	FSES Laboratory	A221516	9/22/22 10:07	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_I_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3436	FSES Laboratory	A221517	9/22/22 11:06	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3541	FSES Laboratory	A221518	9/22/22 9:27	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3521	FSES Laboratory	A221519	9/22/22 9:45	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3489	FSES Laboratory	A221520	9/22/22 10:13	PSD-Air	LDPE	St. Helens Air 2021-2023	L_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3432	FSES Laboratory	A221521	9/22/22 8:36	PSD-Air	LDPE	St. Helens Air 2021-2023	C_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3454	FSES Laboratory	A221523	9/22/22 8:51	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3483	FSES Laboratory	A221525	9/22/22 8:46	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3464	FSES Laboratory	A221522	9/22/22 8:57	PSD-Air	LDPE	St. Helens Air 2021-2023	SE10_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3410	FSES Laboratory	A221524	9/22/22 8:40	PSD-Air	LDPE	St. Helens Air 2021-2023	NE10_01	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3474	FSES Laboratory	A221718	11/18/22 8:53	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3564	FSES Laboratory	A221719	11/18/22 8:30	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3579	FSES Laboratory	A221720	11/18/22 9:02	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3423	FSES Laboratory	A221721	11/18/22 8:20	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3572	FSES Laboratory	A221722	11/18/22 8:00	PSD-Air	LDPE	St. Helens Air 2021-2023	C_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3429	FSES Laboratory	A221723	11/18/22 8:05	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3507	FSES Laboratory	A221725	11/18/22 7:55	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3459	FSES Laboratory	A221727	11/18/22 10:00	PSD-Air	LDPE	St. Helens Air 2021-2023	L_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3566	FSES Laboratory	A221728	11/18/22 9:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_I_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3527	FSES Laboratory	A221785	11/17/22 7:45	PSD-Air	LDPE	St. Helens Air 2021-2023	SH001_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3433	FSES Laboratory	A221787	11/17/22 11:52	PSD-Air	LDPE	St. Helens Air 2021-2023	SH002_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3461	FSES Laboratory	A221789	11/17/22 8:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH003_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3512	FSES Laboratory	A221791	11/17/22 8:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH004_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3448	FSES Laboratory	A221793	11/17/22 14:05	PSD-Air	LDPE	St. Helens Air 2021-2023	SH005_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3556	FSES Laboratory	A221795	11/17/22 9:40	PSD-Air	LDPE	St. Helens Air 2021-2023	SH006_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3416	FSES Laboratory	A221797	11/17/22 12:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH008_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3582	FSES Laboratory	A221799	11/17/22 22:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH009_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3478	FSES Laboratory	A221815	11/17/22 18:40	PSD-Air	LDPE	St. Helens Air 2021-2023	SH010_A_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3470	FSES Laboratory	A221880	11/17/22 18:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SHS_O_02	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3560	FSES Laboratory	A221898	12/12/22 10:05	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_I_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3547	FSES Laboratory	A221899	12/12/22 10:01	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3408	FSES Laboratory	A221900	12/12/22 9:34	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3472	FSES Laboratory	A221902	12/12/22 11:28	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3555	FSES Laboratory	A221904	12/12/22 11:10	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3576	FSES Laboratory	A221905	12/12/22 11:25	PSD-Air	LDPE	St. Helens Air 2021-2023	C_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3427	FSES Laboratory	A221906	12/12/22 10:15	PSD-Air	LDPE	St. Helens Air 2021-2023	L_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3450	FSES Laboratory	A221907	12/12/22 10:33	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3549	FSES Laboratory	A221908	12/12/22 10:48	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3484	FSES Laboratory	A230088	12/12/22 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SHS_O_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3466	FSES Laboratory	A230089	12/12/22 16:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH019_A_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3456	FSES Laboratory	A230091	12/12/22 7:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH020_A_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3498	FSES Laboratory	A230093	12/12/22 16:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH021_A_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3588	FSES Laboratory	A230095	12/12/22 11:10	PSD-Air	LDPE	St. Helens Air 2021-2023	SH024_A_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3425	FSES Laboratory	A230097	12/12/22 8:10	PSD-Air	LDPE	St. Helens Air 2021-2023	SH025_A_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3469	FSES Laboratory	A230099	12/12/22 13:56	PSD-Air	LDPE	St. Helens Air 2021-2023	SH026_A_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3528	FSES Laboratory	A230101	12/12/22 19:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH027_A_03	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3590	FSES Laboratory	A230158	1/18/23 11:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH007_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3419	FSES Laboratory	A230121	1/19/23 9:43	PSD-Air	LDPE	St. Helens Air 2021-2023	C_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3445	FSES Laboratory	A230122	1/19/23 9:46	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3529	FSES Laboratory	A230124	1/19/23 9:39	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3539	FSES Laboratory	A230126	1/19/23 10:09	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3451	FSES Laboratory	A230127	1/19/23 10:19	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3578	FSES Laboratory	A230128	1/19/23 10:56	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3530	FSES Laboratory	A230129	1/19/23 10:47	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3424	FSES Laboratory	A230130	1/19/23 10:34	PSD-Air	LDPE	St. Helens Air 2021-2023	L_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3571	FSES Laboratory	A230146	1/19/23 11:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH001_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3497	FSES Laboratory	A230148	1/19/23 17:24	PSD-Air	LDPE	St. Helens Air 2021-2023	SH002_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3422	FSES Laboratory	A230150	1/19/23 8:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH003_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3557	FSES Laboratory	A230152	1/19/23 8:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH004_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3457	FSES Laboratory	A230154	1/19/23 14:25	PSD-Air	LDPE	St. Helens Air 2021-2023	SH005_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3492	FSES Laboratory	A230156	1/19/23 17:17	PSD-Air	LDPE	St. Helens Air 2021-2023	SH006_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3587	FSES Laboratory	A230160	1/19/23 10:15	PSD-Air	LDPE	St. Helens Air 2021-2023	SH008_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3496	FSES Laboratory	A230162	1/19/23 11:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH009_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3491	FSES Laboratory	A230183	1/19/23 22:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH010_A_04	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3462	FSES Laboratory	A230324	2/17/23 9:46	PSD-Air	LDPE	St. Helens Air 2021-2023	C_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3509	FSES Laboratory	A230325	2/17/23 9:55	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3465	FSES Laboratory	A230328	2/17/23 9:41	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3502	FSES Laboratory	A230329	2/17/23 11:04	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3561	FSES Laboratory	A230330	2/17/23 10:54	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3428	FSES Laboratory	A230331	2/17/23 10:17	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3418	FSES Laboratory	A230332	2/17/23 10:25	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3473	FSES Laboratory	A230333	2/17/23 10:39	PSD-Air	LDPE	St. Helens Air 2021-2023	L_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3531	FSES Laboratory	A230334	2/17/23 9:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_I_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3482	FSES Laboratory	A230436	2/17/23 7:28	PSD-Air	LDPE	St. Helens Air 2021-2023	SH021_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3510	FSES Laboratory	A230438	2/17/23 8:23	PSD-Air	LDPE	St. Helens Air 2021-2023	SH025_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3417	FSES Laboratory	A230440	2/17/23 14:20	PSD-Air	LDPE	St. Helens Air 2021-2023	SH026_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3567	FSES Laboratory	A230442	2/17/23 14:32	PSD-Air	LDPE	St. Helens Air 2021-2023	SH035_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3486	FSES Laboratory	A230492	2/17/23 16:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH019_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3438	FSES Laboratory	A230496	2/17/23 10:36	PSD-Air	LDPE	St. Helens Air 2021-2023	SH024_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3475	FSES Laboratory	A230498	2/17/23 20:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH027_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3485	FSES Laboratory	A230552	2/17/23 9:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SHS_O_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3463	FSES Laboratory	A230494	2/17/23 16:45	PSD-Air	LDPE	St. Helens Air 2021-2023	SH020_A_05	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3523	FSES Laboratory	A230699	3/17/23 9:22	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3584	FSES Laboratory	A230700	3/17/23 9:27	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3481	FSES Laboratory	A230701	3/17/23 9:31	PSD-Air	LDPE	St. Helens Air 2021-2023	C_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3514	FSES Laboratory	A230704	3/17/23 10:25	PSD-Air	LDPE	St. Helens Air 2021-2023	L_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3430	FSES Laboratory	A230705	3/17/23 10:48	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3535	FSES Laboratory	A230706	3/17/23 10:12	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3570	FSES Laboratory	A230707	3/17/23 10:38	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3581	FSES Laboratory	A230708	3/17/23 9:58	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3569	FSES Laboratory	A230802	3/17/23 18:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH001_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3505	FSES Laboratory	A230804	3/17/23 12:36	PSD-Air	LDPE	St. Helens Air 2021-2023	SH002_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3553	FSES Laboratory	A230806	3/17/23 10:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH003_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3550	FSES Laboratory	A230808	3/17/23 10:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH004_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3488	FSES Laboratory	A230810	3/17/23 9:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH005_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3554	FSES Laboratory	A230812	3/17/23 19:22	PSD-Air	LDPE	St. Helens Air 2021-2023	SH006_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3452	FSES Laboratory	A230814	3/14/23 0:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH007_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3580	FSES Laboratory	A230815	3/17/23 10:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH008_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3533	FSES Laboratory	A230817	3/17/23 17:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH009_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3543	FSES Laboratory	A230819	3/17/23 16:40	PSD-Air	LDPE	St. Helens Air 2021-2023	SH010_A_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3420	FSES Laboratory	A230834	3/17/23 17:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SHS_O_06	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3537	FSES Laboratory	A231032	4/14/23 9:45	PSD-Air	LDPE	St. Helens Air 2021-2023	C_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3476	FSES Laboratory	A231033	4/14/23 9:48	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3585	FSES Laboratory	A231035	4/14/23 9:43	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3589	FSES Laboratory	A231037	4/14/23 10:27	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3446	FSES Laboratory	A231038	4/14/23 10:14	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3444	FSES Laboratory	A231039	4/14/23 11:06	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3542	FSES Laboratory	A231040	4/14/23 10:40	PSD-Air	LDPE	St. Helens Air 2021-2023	L_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3439	FSES Laboratory	A231041	4/14/23 10:55	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3468	FSES Laboratory	A231042	4/13/23 16:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_I_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3583	FSES Laboratory	A231105	4/14/23 17:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SHS_O_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3443	FSES Laboratory	A231106	4/14/23 20:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH019_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3437	FSES Laboratory	A231108	4/14/23 15:15	PSD-Air	LDPE	St. Helens Air 2021-2023	SH020_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3421	FSES Laboratory	A231110	4/14/23 12:27	PSD-Air	LDPE	St. Helens Air 2021-2023	SH021_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3519	FSES Laboratory	A231112	4/14/23 14:05	PSD-Air	LDPE	St. Helens Air 2021-2023	SH024_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3532	FSES Laboratory	A231114	4/14/23 5:45	PSD-Air	LDPE	St. Helens Air 2021-2023	SH025_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3546	FSES Laboratory	A231116	4/14/23 17:20	PSD-Air	LDPE	St. Helens Air 2021-2023	SH026_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3518	FSES Laboratory	A231118	4/14/23 21:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH027_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3565	FSES Laboratory	A231128	4/14/23 14:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH035_A_07	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3467	FSES Laboratory	A231286	5/19/23 9:47	PSD-Air	LDPE	St. Helens Air 2021-2023	C_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3503	FSES Laboratory	A231287	5/19/23 9:40	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3477	FSES Laboratory	A231288	5/19/23 9:57	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3545	FSES Laboratory	A231289	5/19/23 10:22	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3413	FSES Laboratory	A231290	5/19/23 10:35	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3551	FSES Laboratory	A231291	5/19/23 10:50	PSD-Air	LDPE	St. Helens Air 2021-2023	L_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3506	FSES Laboratory	A231292	5/19/23 11:15	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3495	FSES Laboratory	A231293	5/19/23 11:24	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3538	FSES Laboratory	A231492	5/19/23 7:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH001_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3517	FSES Laboratory	A231494	5/19/23 9:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH003_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3573	FSES Laboratory	A231496	5/19/23 7:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH004_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3586	FSES Laboratory	A231498	5/20/23 19:25	PSD-Air	LDPE	St. Helens Air 2021-2023	SH005_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3453	FSES Laboratory	A231500	5/19/23 6:30	PSD-Air	LDPE	St. Helens Air 2021-2023	SH006_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3577	FSES Laboratory	A231502	5/19/23 14:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH007_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3411	FSES Laboratory	A231504	5/19/23 7:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH008_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3574	FSES Laboratory	A231506	5/19/23 8:45	PSD-Air	LDPE	St. Helens Air 2021-2023	SH009_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3455	FSES Laboratory	A231508	5/19/23 9:45	PSD-Air	LDPE	St. Helens Air 2021-2023	SH010_A_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3525	FSES Laboratory	A231523	5/19/23 8:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SHS_O_08	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3499	FSES Laboratory	A231631	6/16/23 8:32	PSD-Air	LDPE	St. Helens Air 2021-2023	C_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3508	FSES Laboratory	A231632	6/16/23 8:28	PSD-Air	LDPE	St. Helens Air 2021-2023	NW10_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3426	FSES Laboratory	A231634	6/16/23 8:24	PSD-Air	LDPE	St. Helens Air 2021-2023	SW10_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3563	FSES Laboratory	A231636	6/16/23 10:51	PSD-Air	LDPE	St. Helens Air 2021-2023	L_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3540	FSES Laboratory	A231637	6/16/23 9:07	PSD-Air	LDPE	St. Helens Air 2021-2023	RC_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3471	FSES Laboratory	A231638	6/16/23 9:20	PSD-Air	LDPE	St. Helens Air 2021-2023	MP_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3449	FSES Laboratory	A231639	6/16/23 10:11	PSD-Air	LDPE	St. Helens Air 2021-2023	EO_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3515	FSES Laboratory	A231640	6/16/23 10:01	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_O_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3480	FSES Laboratory	A231641	6/16/23 9:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SHS_O_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3440	FSES Laboratory	A231642	6/16/23 8:10	PSD-Air	LDPE	St. Helens Air 2021-2023	SMS_I_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3441	FSES Laboratory	A231643	6/16/23 8:36	PSD-Air	LDPE	St. Helens Air 2021-2023	SH002_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3409	FSES Laboratory	A231646	6/16/23 7:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH019_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3412	FSES Laboratory	A231648	6/16/23 6:45	PSD-Air	LDPE	St. Helens Air 2021-2023	SH020_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3447	FSES Laboratory	A231650	6/16/23 7:16	PSD-Air	LDPE	St. Helens Air 2021-2023	SH021_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3504	FSES Laboratory	A231652	6/16/23 9:14	PSD-Air	LDPE	St. Helens Air 2021-2023	SH024_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3460	FSES Laboratory	A231654	6/16/23 5:40	PSD-Air	LDPE	St. Helens Air 2021-2023	SH025_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3442	FSES Laboratory	A231656	6/16/23 8:56	PSD-Air	LDPE	St. Helens Air 2021-2023	SH026_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3558	FSES Laboratory	A231658	6/16/23 22:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH027_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3544	FSES Laboratory	A231663	6/16/23 11:00	PSD-Air	LDPE	St. Helens Air 2021-2023	SH035_A_09	45.8599558	-122.8209145	St. Helens, OR	https://superfund.oregonstate.edu/community-topics/st-helens-air-quality	NULL
+3332	FSES Laboratory	A181010	9/29/18 13:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	La Pine, OR Outdoor:01	43.6704	-121.5036	La Pine, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	La Pine, OR
+3334	FSES Laboratory	A181011	9/29/18 13:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	La Pine, OR Indoor:01	43.6704	-121.5036	La Pine, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	La Pine, OR
+3335	FSES Laboratory	A181014	9/30/18 11:32	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Newport, OR Indoor:01	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3336	FSES Laboratory	A181015	9/30/18 11:38	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Newport, OR Outdoor 1:01	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3337	FSES Laboratory	A181016	9/30/18 11:39	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Newport, OR Outdoor 2:01	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3333	FSES Laboratory	A181017	9/30/18 11:43	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Newport, OR Outdoor 3:01	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3338	FSES Laboratory	A181036	9/27/18 17:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Alturas, CA Indoor:01	41.4871	-120.5425	Alturas, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Alturas, CA
+3340	FSES Laboratory	A181037	9/27/18 17:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Alturas, CA Outdoor:01	41.4871	-120.5425	Alturas, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Alturas, CA
+3339	FSES Laboratory	A181038	9/28/18 8:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Cobb, CA Indoor:01	38.8335	-122.721	Cobb, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cobb, CA
+3342	FSES Laboratory	A181039	9/28/18 8:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Cobb, CA Outdoor:01	38.8335	-122.721	Cobb, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cobb, CA
+3341	FSES Laboratory	A181043	9/30/18 22:50	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Seattle, WA Indoor:01	47.6062	-122.3321	Seattle, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Seattle, WA
+3343	FSES Laboratory	A181044	9/30/18 23:05	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Seattle, WA Outdoor:01	47.6062	-122.3321	Seattle, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Seattle, WA
+3344	FSES Laboratory	A181045	9/25/18 11:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	McCall, ID Indoor	44.9062	-116.1171	McCall, ID	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	McCall, ID
+3346	FSES Laboratory	A181046	9/25/18 11:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	McCall, ID Outdoor	44.9062	-116.1171	McCall, ID	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	McCall, ID
+3345	FSES Laboratory	A181055	10/11/18 17:59	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Cascade Locks, OR Indoor	45.6698	-121.8906	Cascade Locks, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cascade Locks, OR
+3348	FSES Laboratory	A181056	10/11/18 17:50	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Cascade Locks, OR Outdoor	45.6698	-121.8906	Cascade Locks, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cascade Locks, OR
+3347	FSES Laboratory	A181058	10/13/18 15:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Prineville, OR Indoor:01	44.2998	-120.8345	Prineville, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Prineville, OR
+3349	FSES Laboratory	A181059	10/13/18 15:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Prineville, OR Outdoor:01	44.2998	-120.8345	Prineville, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Prineville, OR
+3351	FSES Laboratory	A181063	9/29/18 9:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Richland, WA Indoor:01	46.2804	-119.2752	Richland, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Richland, WA
+3350	FSES Laboratory	A181064	9/29/18 9:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Richland, WA Outdoor:01	46.2804	-119.2752	Richland, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Richland, WA
+3352	FSES Laboratory	A181219	10/23/18 14:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Corvallis, OR Indoor:01	44.5646	-123.262	Corvallis, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Corvallis, OR
+3353	FSES Laboratory	A181220	10/23/18 14:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Corvallis, OR Outdoor:01	44.5646	-123.262	Corvallis, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Corvallis, OR
+3354	FSES Laboratory	A181232	10/1/18 17:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Sandpoint, ID Outdoor:01	48.2766	-116.5535	Sandpoint, ID	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Sandpoint, ID
+3355	FSES Laboratory	A181233	10/1/18 17:00	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Sandpoint, ID Indoor:01	48.2766	-116.5535	Sandpoint, ID	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Sandpoint, ID
+3356	FSES Laboratory	A181284	10/20/18 8:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Portland, OR Indoor:01	45.5152	-122.6784	Portland, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Portland, OR
+3357	FSES Laboratory	A181285	10/20/18 8:30	PSD-Air	LDPE	Forest Fire Citizen Science 2018 (Pilot)	Portland, OR Outdoor:01	45.5152	-122.6784	Portland, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Portland, OR
+3358	FSES Laboratory	A191582	9/26/19 21:40	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Seattle, WA Outdoor:02	47.6062	-122.3321	Seattle, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Seattle, WA
+3360	FSES Laboratory	A191583	9/26/19 21:30	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Seattle, WA Indoor:02	47.6062	-122.3321	Seattle, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Seattle, WA
+3359	FSES Laboratory	A191584	9/6/19 13:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Houston, TX Indoor	29.7604	-95.3698	Houston, TX	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Houston, TX
+3362	FSES Laboratory	A191585	9/6/19 13:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Houston, TX Outdoor	29.7604	-95.3698	Houston, TX	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Houston, TX
+3361	FSES Laboratory	A191586	9/7/19 12:30	PSD-Air	LDPE	Indoor Outdoor Air Quality	Canton, OH Indoor	40.7989	-81.3784	Canton, OH	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Canton, OH
+3363	FSES Laboratory	A191587	9/7/19 12:30	PSD-Air	LDPE	Indoor Outdoor Air Quality	Canton, OH Outdoor	40.7989	-81.3784	Canton, OH	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Canton, OH
+3365	FSES Laboratory	A191588	9/7/19 9:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Rapid City, SD Indoor	44.0805	-103.231	Rapid City, SD	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Rapid City, SD
+3364	FSES Laboratory	A191589	9/7/19 9:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Rapid City, SD Outdoor	44.0805	-103.231	Rapid City, SD	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Rapid City, SD
+3367	FSES Laboratory	A191590	9/7/19 19:05	PSD-Air	LDPE	Indoor Outdoor Air Quality	Lincoln, NE Indoor	40.8136	-96.7026	Lincoln, NE	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Lincoln, NE
+3366	FSES Laboratory	A191591	9/7/19 19:05	PSD-Air	LDPE	Indoor Outdoor Air Quality	Lincoln, NE Outdoor	40.8136	-96.7026	Lincoln, NE	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Lincoln, NE
+3368	FSES Laboratory	A191592	9/6/19 16:02	PSD-Air	LDPE	Indoor Outdoor Air Quality	Las Vegas, NV Indoor	36.1699	-115.1398	Las Vegas, NV	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Las Vegas, NV
+3370	FSES Laboratory	A191593	9/6/19 16:02	PSD-Air	LDPE	Indoor Outdoor Air Quality	Las Vegas, NV Outdoor	36.1699	-115.1398	Las Vegas, NV	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Las Vegas, NV
+3369	FSES Laboratory	A191594	10/2/19 19:30	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Cobb, CA Indoor:02	38.8335	-122.721	Cobb, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cobb, CA
+3371	FSES Laboratory	A191595	10/2/19 19:10	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Cobb, CA Outdoor:02	38.8335	-122.721	Cobb, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cobb, CA
+3373	FSES Laboratory	A191597	10/2/19 9:35	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	La Pine, OR Indoor:02	43.6704	-121.5036	La Pine, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	La Pine, OR
+3372	FSES Laboratory	A191598	10/2/19 9:45	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	La Pine, OR Outdoor:02	43.6704	-121.5036	La Pine, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	La Pine, OR
+3375	FSES Laboratory	A191599	9/26/19 7:58	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Carson, WA Indoor	45.7256	-121.8188	Carson, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Carson, WA
+3374	FSES Laboratory	A191600	9/26/19 7:58	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Carson, WA Outdoor	45.7256	-121.8188	Carson, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Carson, WA
+3376	FSES Laboratory	A191619	9/10/19 14:15	PSD-Air	LDPE	Indoor Outdoor Air Quality	Boulder, CO Indoor	40.015	-105.2705	Boulder, CO	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Boulder, CO
+3378	FSES Laboratory	A191620	9/10/19 14:15	PSD-Air	LDPE	Indoor Outdoor Air Quality	Boulder, CO Outdoor	40.015	-105.2705	Boulder, CO	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Boulder, CO
+3377	FSES Laboratory	A191621	9/10/19 8:14	PSD-Air	LDPE	Indoor Outdoor Air Quality	Macungie, PA Indoor	40.5159	-75.5552	Macungie, PA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Macungie, PA
+3379	FSES Laboratory	A191622	9/10/19 8:14	PSD-Air	LDPE	Indoor Outdoor Air Quality	Macungie, PA Outdoor	40.5159	-75.5552	Macungie, PA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Macungie, PA
+3381	FSES Laboratory	A191623	10/3/19 19:56	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Newport, OR Indoor:02	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3380	FSES Laboratory	A191624	10/3/19 19:45	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Newport, OR Outdoor 1:02	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3383	FSES Laboratory	A191625	10/3/19 19:49	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Newport, OR Outdoor 2:02	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3382	FSES Laboratory	A191626	10/3/19 19:18	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Newport, OR Outdoor 3:02	44.6368	-124.0535	Newport, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Newport, OR
+3385	FSES Laboratory	A191628	10/10/19 17:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Corvallis, OR Indoor:02	44.5646	-123.262	Corvallis, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Corvallis, OR
+3384	FSES Laboratory	A191629	10/10/19 17:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Corvallis, OR Outdoor:02	44.5646	-123.262	Corvallis, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Corvallis, OR
+3387	FSES Laboratory	A191631	9/16/19 19:51	PSD-Air	LDPE	Indoor Outdoor Air Quality	Augusta, GA Indoor	33.4735	-82.0105	Augusta, GA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Augusta, GA
+3386	FSES Laboratory	A191632	9/16/19 19:20	PSD-Air	LDPE	Indoor Outdoor Air Quality	Augusta, GA Outdoor	33.4735	-82.0105	Augusta, GA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Augusta, GA
+3388	FSES Laboratory	A191633	9/7/19 21:30	PSD-Air	LDPE	Indoor Outdoor Air Quality	Anchorage, AK Indoor	61.2181	-149.9003	Anchorage, AK	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Anchorage, AK
+3390	FSES Laboratory	A191634	9/7/19 21:45	PSD-Air	LDPE	Indoor Outdoor Air Quality	Anchorage, AK Outdoor	61.2181	-149.9003	Anchorage, AK	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Anchorage, AK
+3389	FSES Laboratory	A191635	9/16/19 14:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Chapel Hill, NC Indoor	35.9132	-79.0558	Chapel Hill, NC	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Chapel Hill, NC
+3392	FSES Laboratory	A191636	9/16/19 14:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Chapel Hill, NC Outdoor	35.9132	-79.0558	Chapel Hill, NC	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Chapel Hill, NC
+3391	FSES Laboratory	A191639	10/6/19 9:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Richland, WA Indoor:02	46.2804	-119.2752	Richland, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Richland, WA
+3394	FSES Laboratory	A191640	10/6/19 9:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Richland, WA Outdoor:02	46.2804	-119.2752	Richland, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Richland, WA
+3393	FSES Laboratory	A191646	10/15/19 17:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Sandpoint, ID Indoor:02	48.2766	-116.5535	Sandpoint, ID	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Sandpoint, ID
+3396	FSES Laboratory	A191647	10/15/19 17:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Sandpoint, ID Outdoor:02	48.2766	-116.5535	Sandpoint, ID	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Sandpoint, ID
+3395	FSES Laboratory	A191648	10/25/19 18:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Prineville, OR Outdoor:02	44.2998	-120.8345	Prineville, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Prineville, OR
+3398	FSES Laboratory	A191649	10/25/19 18:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Prineville, OR Indoor:02	44.2998	-120.8345	Prineville, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Prineville, OR
+3397	FSES Laboratory	A191770	9/22/19 16:30	PSD-Air	LDPE	Indoor Outdoor Air Quality	The Bronx, NY Indoor	40.8448	-73.8648	The Bronx, NY	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	The Bronx, NY
+3400	FSES Laboratory	A191771	9/22/19 16:20	PSD-Air	LDPE	Indoor Outdoor Air Quality	The Bronx, NY Outdoor	40.8448	-73.8648	The Bronx, NY	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	The Bronx, NY
+3399	FSES Laboratory	A191781	10/31/19 11:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Portland, OR Indoor:02	45.5152	-122.6784	Portland, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Portland, OR
+3402	FSES Laboratory	A191782	10/31/19 11:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Portland, OR Outdoor:02	45.5152	-122.6784	Portland, OR	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Portland, OR
+3401	FSES Laboratory	A191792	10/14/19 20:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Cudahy, WI Outdoor	42.9597	-87.8615	Cudahy, WI	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cudahy, WI
+3404	FSES Laboratory	A191793	10/14/19 20:00	PSD-Air	LDPE	Indoor Outdoor Air Quality	Cudahy, WI Indoor	42.9597	-87.8615	Cudahy, WI	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Cudahy, WI
+3403	FSES Laboratory	A191802	11/4/19 15:30	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Alturas, CA Indoor:02	41.4871	-120.5425	Alturas, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Alturas, CA
+3405	FSES Laboratory	A191803	11/4/19 15:30	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Alturas, CA Outdoor:02	41.4871	-120.5425	Alturas, CA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Alturas, CA
+3407	FSES Laboratory	A201189	9/25/20 14:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Seattle, WA Indoor 1	47.6062	-122.3321	Seattle, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Seattle, WA
+3406	FSES Laboratory	A201190	9/25/20 14:00	PSD-Air	LDPE	Forest Fires Citizen Science 2019-2020	Seattle, WA Outdoor 1	47.6062	-122.3321	Seattle, WA	http://fses.oregonstate.edu/research/indoor-outdoor-air-quality	Seattle, WA
+2066-1	NULL	10JUL11-01-007	7/7/10 8:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	LA-LFT-W-SPK	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+719	NULL	10JUL29-01-006	7/29/10 11:30	PSD-Water	LFT - Spiked	NULL	NULL	45.58058	-122.74583	Portland Harbor	NULL	RM 7E
+723	NULL	10JUL29-01-007	7/29/10 11:00	PSD-Water	LFT - Spiked	NULL	NULL	45.57387	-122.74574	Portland Harbor	NULL	RM 7W
+744	NULL	10JUL29-01-012	7/29/10 10:15	PSD-Water	LFT - Spiked	NULL	NULL	45.57036	-122.74039	Portland Harbor	NULL	RM 8W
+177	NULL	10JUL29-01-013	7/29/10 9:25	PSD-Water	LFT - Spiked	NULL	NULL	45.52679	-122.66641	Portland Harbor	NULL	RM 12E
+2235-3	NULL	10JUN13-01-005	6/11/10 8:45	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	MS-LFT-W-SPK 2	30.35931	-89.08617	Gulfport, Mississippi	NULL	Gulfport, MS
+132	NULL	10MAY17-01-001	5/13/10 0:00	PSD-Water	LFT - Spiked	NULL	NULL	30.32082	-87.25599	Gulf Shores, Alabama	NULL	Fort Pickens, FL
+1004-3	NULL	10MAY17-01-003	5/13/10 0:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	AL-LFT-W-SPK 3	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+2235-4	NULL	10MAY17-01-005	5/13/10 0:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	MS-LFT-W-SPK 3	30.35931	-89.08617	Gulfport, Mississippi	NULL	Gulfport, MS
+2066-3	NULL	10MAY17-01-007	5/13/10 0:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	LA-LFT-W-SPK 2	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+135	NULL	10OCT18-03-001	10/14/10 0:00	PSD-Water	LFT - Spiked	NULL	NULL	30.32082	-87.25599	Gulfport, Mississippi	NULL	Fort Pickens, FL
+2072-2	NULL	10OCT18-03-004	10/13/10 0:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	LA-W-S	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+1431-2	NULL	10SEP02-01-001	9/2/10 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	Col-Down-LFT-W-SPK 1	45.06512	-122.77161	Columbia River Downstream	NULL	Col River DS
+1431-3	NULL	10SEP02-01-002	9/2/10 0:00	PSD-Air	LFT - Spiked	Portland Harbor Cleanup	Col-Up-LFT-W-SPK 1	45.62108	-122.68788	Columbia River Upstream	NULL	Col River US
+2798-2	NULL	10SEP02-01-003	9/2/10 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM3E-LFT-W-SPK 1	45.61403	-122.7855	Portland Harbor: Sauvie East	NULL	RM 3E
+2796-2	NULL	10SEP02-01-004	9/2/10 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM3.5W-LFT-W-SPK 1	45.59791	-122.78128	Portland Harbor: Sauvie West	NULL	RM 3.5W
+2804-2	NULL	10SEP02-01-005	9/2/10 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7E-LFT-W-SPK 1	45.58058	-122.74583	McCormick and Baxter	NULL	RM 7E
+2807-2	NULL	10SEP02-01-006	9/2/10 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-LFT-W-SPK 1	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2810-2	NULL	10SEP02-01-013	9/2/10 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM8W-LFT-W-SPK 1	45.57036	-122.74039	Portland Harbor: RM Eight West	NULL	RM 8W
+2792-2	NULL	10SEP02-01-014	9/2/10 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM12E-LFT-W-SPK 1	45.52679	-122.66641	Portland Harbor: Steel Pipe	NULL	RM 12E
+136	NULL	10SEP11-01-001	9/9/10 8:15	PSD-Water	LFT - Spiked	NULL	NULL	30.32082	-87.25599	Gulfport, Mississippi	NULL	Fort Pickens, FL
+2066-4	NULL	10SEP11-01-007	9/8/10 9:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	LA-LFT-W-SPK 3	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+1427	NULL	A090001	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.06512	-122.77161	Portland Harbor	NULL	Col River DS
+1429	NULL	A090003	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.62108	-122.68788	Portland Harbor	NULL	Col River US
+2797	NULL	A090005	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.61403	-122.7855	Portland Harbor	NULL	RM 3E
+2795	NULL	A090007	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+2799	NULL	A090009	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.57781	-122.75232	Portland Harbor	NULL	RM 6.5W
+2809	NULL	A090011	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.57036	-122.74039	Portland Harbor	NULL	RM 8W
+2803	NULL	A090013	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.58058	-122.74583	Portland Harbor	NULL	RM 7E
+2806-3	NULL	A090017	9/30/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-LFT-W-S FDUP2	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2806-1	NULL	A090018	9/30/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-LFT-W-S FDUP3	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2806-2	NULL	A090019	9/30/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-LFT-W-S FDUP4	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2793	NULL	A090025	9/30/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.52679	-122.66641	St. Helens, OR	NULL	RM 12E
+1456	NULL	A090057	10/21/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.06512	-122.77161	St. Helens, OR	NULL	Col River DS
+1458	NULL	A090059	10/21/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.62108	-122.68788	St. Helens, OR	NULL	Col River US
+2805-1	NULL	A090061	10/21/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM3E-LFT-S	45.61403	-122.7855	Portland Harbor: Sauvie East	NULL	RM 3E
+2794	NULL	A090063	10/21/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+2800	NULL	A090065	10/21/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.57781	-122.75232	Portland Harbor	NULL	RM 6.5W
+2808	NULL	A090067	10/21/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.57036	-122.74039	Portland Harbor	NULL	RM 8W
+2802	NULL	A090069	10/21/09 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.58058	-122.74583	Portland Harbor	NULL	RM 7E
+2805-2	NULL	A090071	10/21/09 0:00	PSD-Water	LFT - Blank	Portland Harbor Cleanup	RM7W-1-LFT-S	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2805-3	NULL	A090072	10/21/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-2-LFT-S	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2805-4	NULL	A090073	10/21/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-3-LFT-S	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2805-5	NULL	A090074	10/21/09 0:00	PSD-Water	LFT - Blank	Portland Harbor Cleanup	RM7W-4-LFT-S	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2805-6	NULL	A090075	10/21/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-5-LFT-S	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2805-7	NULL	A090081	10/21/09 0:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM12E-LFT-S	45.52679	-122.66641	Portland Harbor: Steel Pipe	NULL	RM 12E
+2071-1	NULL	A110067	3/15/11 10:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	LA-Water-Spiked	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+1008-1	NULL	A110069	3/16/11 10:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	AL-Water-Spiked	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+1864-1	NULL	A110070	3/16/11 10:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	FL-Water-Spiked	30.32082	-87.25599	Pensacola, Florida	NULL	Fort Pickens, FL
+2071-2	NULL	A110286	6/7/11 0:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	LA-Water-Spiked 1	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+2236	NULL	A110287	6/7/11 0:00	PSD-Water	LFT - Spiked	NULL	NULL	30.35931	-89.08617	Gulfport, Mississippi	NULL	Gulfport, MS
+1008-2	NULL	A110288	6/8/11 0:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	AL-Water-Spiked 1	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+1864-2	NULL	A110289	6/8/11 0:01	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	FL-Water-Spiked 1	30.32082	-87.25599	Pensacola, Florida	NULL	Fort Pickens, FL
+792	NULL	A130475	10/17/13 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.43695	-122.6466833	Portland Harbor	NULL	RM 18.5
+793	NULL	A130485	10/17/13 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.52679	-122.66641	Portland Harbor	NULL	RM 12E
+794	NULL	A130502	10/17/13 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.57781	-122.75232	Portland Harbor	NULL	RM 6.5W
+795	NULL	A130512	10/17/13 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.6419	-122.7796667	Portland Harbor	NULL	RM1NW
+797	NULL	A140383	9/17/14 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.6419	-122.7796667	Portland Harbor	NULL	RM1NW
+798	NULL	A140384	9/17/14 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+799	NULL	A140385	9/17/14 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.536533	-122.67715	Portland Harbor	NULL	RM11E
+800	NULL	A140386	9/17/14 0:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.43695	-122.6466833	Portland Harbor	NULL	RM 18.5
+839	NULL	A150260	7/10/15 0:00	PSD-Water	Fraction	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+858	NULL	A150396	8/13/15 0:00	PSD-Water	Fraction	NULL	NULL	45.536533	-122.67715	Portland Harbor	NULL	RM11E
+127	NULL	10AUG09-01-003	8/5/10 19:30	PSD-Water	LFT - Spiked	NULL	NULL	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+2235-1	NULL	10AUG09-01-005	8/5/10 14:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	MS-LFT-W-SPK	30.35931	-89.08617	Gulfport, Mississippi	NULL	Gulfport, MS
+130	NULL	10JUL11-01-001	7/8/10 16:00	PSD-Water	LFT - Spiked	NULL	NULL	30.32082	-87.25599	Gulf Shores, Alabama	NULL	Fort Pickens, FL
+1004-1	NULL	10JUL11-01-003	7/7/10 18:30	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	AL-LFT-W-SPK 1	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+2235-2	NULL	10JUL11-01-005	7/7/10 14:00	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	MS-LFT-W-SPK 1	30.35931	-89.08617	Gulfport, Mississippi	NULL	Gulfport, MS
+1426	NULL	10JUL29-01-001	7/29/10 14:10	PSD-Water	LFT - Spiked	NULL	NULL	45.06512	-122.77161	Portland Harbor	NULL	Col River DS
+1428	NULL	10JUL29-01-002	7/29/10 14:50	PSD-Water	LFT - Spiked	NULL	NULL	45.62108	-122.68788	Portland Harbor	NULL	Col River US
+495	NULL	10JUL29-01-003	7/29/10 13:45	PSD-Water	LFT - Spiked	NULL	NULL	45.61403	-122.7855	Portland Harbor	NULL	RM 3E
+452	NULL	10JUL29-01-004	7/29/10 12:50	PSD-Water	LFT - Spiked	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+669	NULL	10JUL29-01-005	7/29/10 12:30	PSD-Water	LFT - Spiked	NULL	NULL	45.57781	-122.75232	Portland Harbor	NULL	RM 6.5W
+131	NULL	10JUN13-01-001	6/11/10 14:32	PSD-Water	LFT - Spiked	NULL	NULL	30.32082	-87.25599	Gulf Shores, Alabama	NULL	Fort Pickens, FL
+1004-2	NULL	10JUN13-01-003	6/11/10 12:15	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	AL-LFT-W-SPK 2	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+2066-2	NULL	10JUN13-01-007	6/11/10 12:30	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	LA-LFT-W-SPK 1	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+1431-1	NULL	10OCT28-01-001	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	Col-Down-LFT-W-SPK	45.06512	-122.77161	Columbia River Downstream	NULL	Col River DS
+1432-5	NULL	10OCT28-01-002	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	Col-Up-LFT-W-SPK	45.62108	-122.68788	Columbia River Upstream	NULL	Col River US
+2798-1	NULL	10OCT28-01-003	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM3E-LFT-W-SPK	45.61403	-122.7855	Portland Harbor: Sauvie East	NULL	RM 3E
+2796-1	NULL	10OCT28-01-004	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM3.5W-LFT-W-SPK	45.59791	-122.78128	Portland Harbor: Sauvie West	NULL	RM 3.5W
+2804-1	NULL	10OCT28-01-005	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7E-LFT-W-SPK	45.58058	-122.74583	McCormick and Baxter	NULL	RM 7E
+2807-1	NULL	10OCT28-01-006	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7W-LFT-W-SPK	45.57387	-122.74574	Portland Harbor: Railroad Bridge	NULL	RM 7W
+2810-1	NULL	10OCT28-01-013	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM8W-LFT-W-SPK	45.57036	-122.74039	Portland Harbor: RM Eight West	NULL	RM 8W
+2792-1	NULL	10OCT28-01-014	11/29/10 15:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM12E-LFT-W-SPK	45.52679	-122.66641	Portland Harbor: Steel Pipe	NULL	RM 12E
+1004-4	NULL	10SEP11-01-003	9/8/10 19:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	AL-LFT-W-SPK 4	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+2235-5	NULL	10SEP11-01-005	9/8/10 14:45	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	MS-LFT-W-SPK 4	30.35931	-89.08617	Gulfport, Mississippi	NULL	Gulfport, MS
+1431-4	NULL	10SEP30-01-001	9/30/10 16:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	Col-Down-LFT-W-SPK 2	45.06512	-122.77161	Columbia River Downstream	NULL	Col River DS
+1432-6	NULL	10SEP30-01-002	9/30/10 16:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM6.5-LFT-W-SPK 2	45.57781	-122.75232	Portland Harbor: St. John's Bridge	NULL	RM 6.5W
+2798-3	NULL	10SEP30-01-003	9/30/10 16:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM3E-LFT-W-SPK 2	45.61403	-122.7855	Portland Harbor: Sauvie East	NULL	RM 3E
+2796-3	NULL	10SEP30-01-004	9/30/10 16:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM3.5W-LFT-W-SPK 2	45.59791	-122.78128	Portland Harbor: Sauvie West	NULL	RM 3.5W
+2804-3	NULL	10SEP30-01-005	9/30/10 16:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM7E-LFT-W-SPK 2	45.58058	-122.74583	McCormick and Baxter	NULL	RM 7E
+2810-3	NULL	10SEP30-01-013	9/30/10 16:16	PSD-Water	LFT - Spiked	Portland Harbor Cleanup	RM8W-LFT-W-SPK 2	45.57036	-122.74039	Portland Harbor: RM Eight West	NULL	RM 8W
+2072-1	NULL	A110141	4/29/11 14:00	PSD-Water	LFT - Spiked	Deepwater Horizon Cleanup	LA-W-S 1	29.2611	-89.2611	Grand Isle, Louisiana	NULL	Grand Isle, LA
+1009	NULL	A110143	4/28/11 14:00	PSD-Water	LFT - Spiked	NULL	NULL	30.25469	-87.81307	Gulf Shores, Alabama	NULL	Bon Secour, AL
+796	NULL	A130527	11/7/13 12:00	PSD-Water	LFT - Unfortified	NULL	NULL	45.536533	-122.67715	Portland Harbor	NULL	RM11E
+2801	NULL	10SEP30-01-039	7/7/11 0:00	PSD-Water	LFT - Spiked	NULL	NULL	45.57781	-122.75232	Portland Harbor	NULL	RM 6.5W
+889	FSES Laboratory	A160139	NULL	NULL	NULL	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+890	FSES Laboratory	A160140	NULL	NULL	NULL	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+891	FSES Laboratory	A160141	NULL	NULL	NULL	NULL	NULL	45.59791	-122.78128	Portland Harbor	NULL	RM 3.5W
+3324	NULL	C106563	NULL	NULL	NULL	NULL	NULL	47.617601	-122.500357	Portland Harbor	NULL	NULL
+3325	NULL	C189231	NULL	NULL	NULL	NULL	NULL	47.617601	-122.500357	Portland Harbor	NULL	NULL
+3326	NULL	C20559	NULL	NULL	NULL	NULL	NULL	47.617601	-122.500357	Portland Harbor	NULL	NULL
+3330	NULL	C302146	NULL	NULL	NULL	NULL	NULL	47.617601	-122.500357	Portland Harbor	NULL	NULL
+3322	NULL	C415033	NULL	NULL	NULL	NULL	NULL	47.617601	-122.500357	Portland Harbor	NULL	NULL
+3331	NULL	C564451	NULL	NULL	NULL	NULL	NULL	47.617601	-122.500357	Portland Harbor	NULL	NULL

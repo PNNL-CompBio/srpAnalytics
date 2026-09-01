@@ -123,12 +123,19 @@ get_chem_info <- function(cas, verbose = TRUE) {
 }
 
 
-for (cas in data$cas) {
-  get_chem_info(cas) %>%
-    enframe() %>%
-    unnest(cols = value) %>% 
-    pivot_wider() %>%
-    fwrite(file.path("~/Downloads/metadata_hunt", paste0(cas, ".txt")), quote = F, row.names = F, sep = "\t")
+for (entry in 1898:nrow(data)) {
+  
+  cas = data$cas[entry]
+  message(entry, "...", cas)
+  
+  tryCatch({
+    get_chem_info(cas, verbose = FALSE) %>%
+      enframe() %>%
+      unnest(cols = value) %>% 
+      pivot_wider() %>%
+      fwrite(file.path("~/Downloads/metadata_hunt", paste0(cas, ".txt")), quote = F, row.names = F, sep = "\t")
+  }, error = function(e) {message("...not found!")})
+
 }
 
 
