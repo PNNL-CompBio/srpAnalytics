@@ -9,11 +9,11 @@ library(xlsx)
 # USE VERSION 4 SAMPLE DATA-----------------------------------------------------
 
 ## SAMPLES METADATA ##
-samples_final = fread("~/Downloads/all_srp_data/31197685/samples.csv") %>%
+samples_final = fread("~/Downloads/samples_mlb.csv") %>%
   select(Sample_ID, ClientName, SampleNumber, date_sampled, sample_matrix,
          technology, projectName, SampleName, LocationLat, LocationLon,
          LocationName, projectLink, AlternateName) %>%
-  filter(!LocationName == "NULL") 
+  filter(projectName != "NULL") 
 
 samples_final %>%
   fwrite("~/Downloads/all_srp_data/srpCompendiumV5/samples.txt", quote = F, row.names = F, sep = "\t")
@@ -21,7 +21,7 @@ samples_final %>%
 ## SAMPLE MEASUREMENTS: SAMPLES TO CHEMICALS ## 
 
 # Read chemical metadata
-chemical_metadata = read.xlsx("ChemicalMetadata_Ver_1_1.xlsx", 1) %>%
+chemical_metadata = read.xlsx("ChemicalMetadata_Ver_1_2_DD.xlsx", 1) %>%
   mutate(cas = gsub("`", "", cas))
 
 # Load the accounted for 
@@ -66,7 +66,11 @@ samplesToChemicals_unaccounted = fread("~/Downloads/all_srp_data/31197685/sample
          test_template, test_method)
 
 # Bind the two
-samplesToChemicals_final = rbind(samplesToChemicals_accounted, samplesToChemicals_unaccounted)
+samplesToChemicals_final = rbind(samplesToChemicals_accounted, samplesToChemicals_unaccounted) %>%
+  filter(Sample_ID %in% samples_final$Sample_ID)
+
+# Check chemicals
+all(unique(samplesToChemicals_final$Chemical_ID) %in% chemical_metadata$chemical_id)
 
 samplesToChemicals_final %>%
   fwrite("~/Downloads/all_srp_data/srpCompendiumV5/samplesToChemicals.txt", quote = F, row.names = F, sep = "\t")
@@ -74,6 +78,28 @@ samplesToChemicals_final %>%
 ########################
 ## CHEMICALS PIPELINE ##
 ########################
+
+# Extract chemicals
+chemical_metadata %>%
+  select(-chemical_class) %>%
+  rename(
+    Chemical_ID = chemical_id, cas_number = cas, DTXCID = dtxcid, 
+    PREFERRED_NAME = preferredName, INCHIKEY = inchikey, 
+    SMILES = smiles, MOLECULAR_FORMULA = molFormula,
+    AVERAGE_MASS = averageMass, chemical_class = chem_class_WEB
+  ) %>%
+  select(Chemical_ID, cas_number, DTXCID, PREFERRED_NAME, INCHIKEY,
+         SMILES, MOLECULAR_FORMULA, AVERAGE_MASS, chemical_class, chemDescription) %>%
+  fwrite("~/Downloads/all_srp_data/srpCompendiumV5/chemicals.txt", quote = F, row.names = F, sep = "\t")
+
+#############################
+## BENCHMARK DOSE PIPELINE ##
+#############################
+
+# Chemicals---------------------------------------------------------------------
+
+# Samples-----------------------------------------------------------------------
+
 
 
 

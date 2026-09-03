@@ -6,11 +6,11 @@ A **lpr class** object was created. The following column names were set:
 
 |Parameter|Column Name|
 |---------|-----------|
-|Chemical|chemical.id|
-|Plate|plate.id|
+|Chemical|sample_id|
+|Plate|plate_id|
 |Well|well|
-|Concentration|conc|
-|Time|variable|
+|Concentration|concentration|
+|Time|time|
 |Value|value|
 |Cycle Length|20.0|
 |Cycle Cooldown|10.0|
@@ -19,13 +19,9 @@ A **lpr class** object was created. The following column names were set:
 ## Pre-Processing
 
 #### **Combine & Make New Endpoints**
-New endpoints were made using existing endpoints using 'or', which means that if there is any endpoints with a '1', this new endpoint will also have a '1', regardless of how many zeroes there are in the other endpoints. See a summary table of added endpoints below:
-
 This step was not conducted.
 
 #### **Set Invalid Wells to NA**
-
-In some cases, like when a sample fish dies, many affected endpoints need to be set to NA. Here, the 'Endpoint Name' column denotes the specific endpoint that sets this rule. In this example, it could be MORT for mortality. Then, the endpoint value needs to be set, which in this case would be a 1 to indicate sample fish that did die. All endpoints would then be set to NA except for cases where the endpoint should not be affected, which are referred to as 'Endpoint Exceptions.'
 
 This step was not conducted.
 
@@ -37,20 +33,19 @@ This step was not conducted.
 
 #### **Negative Control Filter**
 
-Plates with unusually high responses in negative control samples were filtered. The response threshold was set to **50.0**. See a summary below:
+Plates with unusually high responses in negative control samples were filtered. The response threshold was set to **50**. See a summary below:
 
 |Response|Number of Plates|Filter|
 |---|---|---|
-|0.0|142|Keep|
-|8.3333|220|Keep|
-|16.6667|205|Keep|
-|25.0|135|Keep|
-|33.3333|113|Keep|
-|41.6667|42|Keep|
-|50.0|25|Remove|
-|58.3333|22|Remove|
-|66.6667|3|Remove|
-|75.0|5|Remove|
+|0.0|2|Keep|
+|6.25|7|Keep|
+|12.5|4|Keep|
+|18.75|5|Keep|
+|25.0|1|Keep|
+|31.25|5|Keep|
+|50.0|2|Remove|
+|56.25|1|Remove|
+|68.75|1|Remove|
 
 And here is the plot:
 ![Filter Negative Control](./filter_negative_control.png)
@@ -61,7 +56,7 @@ Endpoints with too few concentration measurements (non-NA) to model are removed.
 
 |Number of Concentrations|Number of Endpoints|Filter|
 |---|---|---|
-|12|822|Keep|
+|5|12|Keep|
 
 And here is the plot:
 ![Filter Minimum Concentration](./filter_minimum_concentration.png)
@@ -72,16 +67,16 @@ Endpoints with little to no positive correlation with dose are unexpected and sh
 
 |Correlation Score Bin|Number of Endpoints|
 |---|---|
-|-1.0|7.0|
-|-0.8|24.0|
-|-0.6|37.0|
-|-0.4|68.0|
-|-0.2|79.0|
-|0.0|466.0|
-|0.2|84.0|
-|0.4|44.0|
-|0.6|12.0|
-|0.8|1.0|
+|-1.0|0.0|
+|-0.8|6.0|
+|-0.6|0.0|
+|-0.4|0.0|
+|-0.2|1.0|
+|0.0|1.0|
+|0.2|3.0|
+|0.4|1.0|
+|0.6|0.0|
+|0.8|0.0|
 
 And here is the plot:
 ![Filter Correlation Score](./filter_correlation_score.png)
@@ -90,7 +85,7 @@ And here is the plot:
 
 #### **Filter Summary**
 
-Overall, 208 endpoint and chemical combinations were considered. 35 were deemed eligible for modeling, and 173 were not based on filtering selections explained in the previous section.  Of the 35 deened eligible for modeling, 0 did not pass modeling checks.
+Overall, 4 endpoint and chemical combinations were considered. 1 were deemed eligible for modeling, and 3 were not based on filtering selections explained in the previous section. Of the 1 deemed eligible for modeling, 0 did not pass modeling checks.
 
 #### **Model Fitting Selections**
 
@@ -99,17 +94,30 @@ The following model fitting parameters were selected.
 |Parameter|Value|Parameter Description|
 |---|---|---|
 |Goodness of Fit Threshold|0.1|Minimum p-value for fitting a model. Default is 0.1|
-|Akaike Information Criterion (AIC) Threshold|2.0|Any models with an AIC within this value are considered an equitable fit. Default is 2.
+|Akaike Information Criterion (AIC) Threshold|2|Any models with an AIC within this value are considered an equitable fit. Default is 2.
 |Model Selection|lowest BMDL|Either return one model with the lowest BMDL, or combine equivalent fits|
 
 #### **Model Quality Summary**
 
-Below is a summary table of the number of endpoints with a high quality fit (a flag of 1, meaning that the BMD10 value is within the range of measured doses) and those that are not high quality (a flag of 0).
+Below is a summary table of the number of endpoints with a high quality fit and those with poor fit, as defined by each label below.
 
-|Flag|Count|
-|---|---|
-|0|0|
-|1|35|
+| Modeled Flag                    |   Count |
+|:--------------------------------|--------:|
+| Fail - correlation score filter |       3 |
+| Pass                            |       1 |
+
+And here is a summary delineating the good and moderate fits,based off of the following properties.
+
+| Flag | Number of Non-Control Concentrations | Spearman Correlation | Goodness of Fit | BMD50 | Model Convergence |
+| -- | -- | -- | -- | -- | -- |
+| Not Fit | < 3 | < 0.2 | < 0.1 | Not within concentration range | No Models Converged |
+| Moderate | >= 3 | 0.2 - 0.7 | >= 0.1 | Not within concentration range | At least 1 model converged |
+| Good | >= 5 | > 0.7 | >= 0.1 | Within concentration range | At least 1 model converged |
+
+| DataQC Flag   |   Count |
+|:--------------|--------:|
+| Not Fit       |       3 |
+| Moderate      |       1 |
 
 #### **Output Modules**
 

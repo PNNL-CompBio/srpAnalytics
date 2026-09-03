@@ -1,0 +1,5 @@
+Chemical_ID,End_Point,Model,BMD10,BMDL,BMD50,AUC,Min_Dose,Max_Dose,AUC_Norm,Modeled_Flag,DataQC_Flag,BMD10_Flag,BMD50_Flag,NumConc,Spearman_Correlation,bmdrc.Endpoint.ID
+2915,MOV,Quantal Linear,537.6187790584067,67.8783084936658,3536.893670211779,9.375,0.0,100.0,0.09375,Pass,Moderate,Fail,Fail,5.0,0.3530939318018998,2915 MOV
+2509,AUC,,,,,0.00013125000000000002,0.0,0.005,0.026250000000000002,Fail - correlation score filter,Not Fit,Fail,Fail,,,2509 AUC
+2509,MOV,,,,,0.00010625000000000001,0.0,0.005,0.02125,Fail - correlation score filter,Not Fit,Fail,Fail,,,2509 MOV
+2915,AUC,,,,,26.171875,0.0,100.0,0.26171875,Fail - correlation score filter,Not Fit,Fail,Fail,,,2915 AUC

@@ -1,4 +1,4 @@
-# Benchmark Dose Response Curves
+# Benchmark Dose Curves
 
 ## Input Data
 
@@ -6,10 +6,10 @@ A **binary class** object was created using data in **long** format. The followi
 
 |Parameter|Column Name|
 |---------|-----------|
-|Chemical|chemical.id|
-|Plate|plate.id|
+|Chemical|sample_id|
+|Plate|plate_id|
 |Well|well|
-|Concentration|conc|
+|Concentration|concentration|
 |Endpoint|endpoint|
 |Value|value|
 
@@ -44,79 +44,28 @@ In some cases, like when a sample fish dies, many affected endpoints need to be 
 
 #### **Remove Invalid Endpoints**
 
-The following endpoints were removed: DNC_
+The following endpoints were removed: DNC_, PIG_, TR__, BRAI, CFIN, CIRC, DP24, EYE_, JAW_, MORT, MUSC, NC__, PE__, SKIN, SM24, TCHR, YSE_, OTIC, PFIN, PIG_, SNOU, SOMI, SWIM, TR__, TRUN
 
 ## Filtering
 
 #### **Negative Control Filter**
 
-Plates with unusually high responses in negative control samples were filtered. The response threshold was set to **50.0**. See a summary below:
+Plates with unusually high responses in negative control samples were filtered. The response threshold was set to **50**. See a summary below:
 
 |Response|Number of Plates|Filter|
 |---|---|---|
-|0.0|35341|Keep|
-|2.0833|3|Keep|
-|2.1277|1|Keep|
-|2.1739|4|Keep|
-|3.125|99|Keep|
-|3.2258|32|Keep|
-|3.3333|34|Keep|
-|3.4483|7|Keep|
-|3.5714|16|Keep|
-|3.7037|5|Keep|
-|4.1667|156|Keep|
-|4.2553|1|Keep|
-|6.25|3655|Keep|
-|6.4516|1|Keep|
-|6.6667|875|Keep|
-|6.9767|1|Keep|
-|7.1429|645|Keep|
-|7.6923|363|Keep|
-|8.3333|828|Keep|
-|9.0909|150|Keep|
-|9.375|20|Keep|
-|9.6774|4|Keep|
-|10.0|64|Keep|
-|10.4167|2|Keep|
-|10.7143|1|Keep|
-|11.1111|22|Keep|
-|11.6279|1|Keep|
-|12.5|1519|Keep|
-|13.3333|137|Keep|
-|14.2857|103|Keep|
-|15.3846|45|Keep|
-|15.625|10|Keep|
-|16.6667|181|Keep|
-|18.1818|32|Keep|
-|18.75|619|Keep|
-|20.0|37|Keep|
-|20.8333|19|Keep|
-|21.4286|18|Keep|
-|21.875|1|Keep|
-|22.2222|1|Keep|
-|23.0769|6|Keep|
-|25.0|347|Keep|
-|26.6667|6|Keep|
-|27.2727|2|Keep|
-|28.5714|7|Keep|
-|29.1667|1|Keep|
-|30.7692|3|Keep|
-|31.25|149|Keep|
-|33.3333|17|Keep|
-|36.3636|2|Keep|
-|37.5|101|Keep|
-|38.4615|1|Keep|
-|40.0|1|Keep|
-|41.6667|3|Keep|
-|41.9355|1|Keep|
-|42.8571|1|Keep|
-|43.75|41|Keep|
-|50.0|21|Remove|
-|56.25|9|Remove|
-|62.5|3|Remove|
-|68.75|6|Remove|
-|75.0|1|Remove|
-|100.0|8|Remove|
+|0.0|900|Keep|
+|6.25|141|Keep|
+|6.6667|2|Keep|
+|7.1429|3|Keep|
+|10.0|1|Keep|
+|12.5|142|Keep|
+|14.2857|1|Keep|
+|18.75|17|Keep|
+|25.0|25|Keep|
+|31.25|1|Keep|
+|37.5|9|Keep|
+|43.75|1|Keep|
 
 And here is the plot:
 ![Filter Negative Control](./filter_negative_control.png)
@@ -127,13 +76,10 @@ Endpoints with too few concentration measurements (non-NA) to model are removed.
 
 |Number of Concentrations|Number of Endpoints|Filter|
 |---|---|---|
-|18|23|Keep|
-|11|33|Keep|
-|9|297|Keep|
-|7|693|Keep|
-|5|18245|Keep|
-|2|1320|Remove|
-|1|66|Remove|
+|9|132|Keep|
+|7|22|Keep|
+|5|220|Keep|
+|4|110|Keep|
 
 And here is the plot:
 ![Filter Minimum Concentration](./filter_minimum_concentration.png)
@@ -144,16 +90,16 @@ Endpoints with little to no positive correlation with dose are unexpected and sh
 
 |Correlation Score Bin|Number of Endpoints|
 |---|---|
-|-1.0|274.0|
-|-0.8|914.0|
-|-0.6|745.0|
-|-0.4|1391.0|
-|-0.2|1507.0|
-|0.0|6762.0|
-|0.2|1958.0|
-|0.4|1416.0|
-|0.6|2198.0|
-|0.8|2136.0|
+|-1.0|3.0|
+|-0.8|9.0|
+|-0.6|22.0|
+|-0.4|50.0|
+|-0.2|31.0|
+|0.0|96.0|
+|0.2|71.0|
+|0.4|56.0|
+|0.6|80.0|
+|0.8|66.0|
 
 And here is the plot:
 ![Filter Correlation Score](./filter_correlation_score.png)
@@ -162,7 +108,7 @@ And here is the plot:
 
 #### **Filter Summary**
 
-Overall, 20658 endpoint and chemical combinations were considered. 7707 were deemed eligible for modeling, and 12951 were not based on filtering selections explained in the previous section. Of the 7707 deemed eligible for modeling, 902 did not pass modeling checks.
+Overall, 484 endpoint and chemical combinations were considered. 273 were deemed eligible for modeling, and 211 were not based on filtering selections explained in the previous section. Of the 273 deemed eligible for modeling, 66 did not pass modeling checks.
 
 #### **Model Fitting Selections**
 
@@ -171,17 +117,32 @@ The following model fitting parameters were selected.
 |Parameter|Value|Parameter Description|
 |---|---|---|
 |Goodness of Fit Threshold|0.1|Minimum p-value for fitting a model. Default is 0.1|
-|Akaike Information Criterion (AIC) Threshold|2.0|Any models with an AIC within this value are considered an equitable fit. Default is 2.
+|Akaike Information Criterion (AIC) Threshold|2|Any models with an AIC within this value are considered an equitable fit. Default is 2.
 |Model Selection|lowest BMDL|Either return one model with the lowest BMDL, or combine equivalent fits|
 
 #### **Model Quality Summary**
 
-Below is a summary table of the number of endpoints with a high quality fit (a flag of 1, meaning that the BMD10 value is within the range of measured doses) and those that are not high quality (a flag of 0).
+Below is a summary table of the number of endpoints with a high quality fit and those with poor fit, as defined by each label below.
 
-|Flag|Count|
-|---|---|
-|0|0|
-|1|6806|
+| Modeled Flag                    |   Count |
+|:--------------------------------|--------:|
+| Fail - correlation score filter |     211 |
+| Pass                            |     207 |
+| Fail - GOF check                |      66 |
+
+And here is a summary delineating the good and moderate fits,based off of the following properties.
+
+| Flag | Number of Non-Control Concentrations | Spearman Correlation | Goodness of Fit | BMD50 | Model Convergence |
+| -- | -- | -- | -- | -- | -- |
+| Not Fit | < 3 | < 0.2 | < 0.1 | Not within concentration range | No Models Converged |
+| Moderate | >= 3 | 0.2 - 0.7 | >= 0.1 | Not within concentration range | At least 1 model converged |
+| Good | >= 5 | > 0.7 | >= 0.1 | Within concentration range | At least 1 model converged |
+
+| DataQC Flag   |   Count |
+|:--------------|--------:|
+| Not Fit       |     277 |
+| Moderate      |     159 |
+| Good          |      48 |
 
 #### **Output Modules**
 

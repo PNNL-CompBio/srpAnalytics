@@ -10,6 +10,7 @@ import sys
 from glob import glob
 
 import pandas as pd
+import numpy as np
 from bmdrc.BinaryClass import BinaryClass
 from bmdrc.LPRClass import LPRClass
 
@@ -45,7 +46,7 @@ parser.add_argument(
     help=(
         "Pathway to the morphological file to be processed. "
         "Assumed format is long and required column names are: "
-        "chemical.id, conc, plate.id, well, variable, value."
+        "chemical_id (or sample_id), concentration, plate_id, well, endpoint, value."
     ),
     default=None,
 )
@@ -56,7 +57,7 @@ parser.add_argument(
     help=(
         "Pathway to the light photometer response (LPR) file to be "
         "processed. Assumed format is long. Required columns are: "
-        "chemical.id, conc, plate.id, well, variable, value."
+        "chemical_id (or sample_id), concentration, plate_id, well, time, value."
     ),
     default=None,
 )
@@ -117,11 +118,14 @@ def main():
     ### 1. Input Data Modules--------------------------------------------------------------------
     if args.morpho is not None:
         print("...Formatting morphology data")
+        morpho_chem_col = (
+            "chemical_id" if "chemical_id" in morpho_data.columns else "sample_id"
+        )
         BC = BinaryClass(
             df=morpho_data,
-            chemical="chemical.id",
-            concentration="conc",
-            plate="plate.id",
+            chemical=morpho_chem_col,
+            concentration="concentration",
+            plate="plate_id",
             well="well",
             endpoint="endpoint",
             value="value",
@@ -130,13 +134,16 @@ def main():
 
     if args.lpr is not None:
         print("...Formatting LPR data")
+        lpr_chem_col = (
+            "chemical_id" if "chemical_id" in lpr_data.columns else "sample_id"
+        )
         LPR = LPRClass(
             df=lpr_data,
-            chemical="chemical.id",
-            concentration="conc",
-            plate="plate.id",
+            chemical=lpr_chem_col,
+            concentration="concentration",
+            plate="plate_id",
             well="well",
-            time="variable",
+            time="time",
             value="value",
             cycle_length=20.0,
             cycle_cooldown=10.0,
@@ -149,6 +156,23 @@ def main():
         preprocess_morpho(BC)
 
     # LPR data has MORT and MO24 fish set to NA
+    if args.lpr is not None and args.morpho is not None:
+
+        print("...removing LPR wells where there was mortality at 24h or 5dpf in the morpho data")
+
+        # Identify wells where mortality occurred at 24h or 5dpf
+        dead_wells = BC.df[
+            (BC.df[BC.endpoint].isin(["MORT", "MO24"])) & 
+            (BC.df[BC.value] == 1)
+        ][[BC.plate, BC.well]].drop_duplicates()
+
+        # Set those plate/well combinations to NA in LPR
+        for _, row in dead_wells.iterrows():
+            LPR.df.loc[
+                (LPR.df[LPR.plate] == row[BC.plate]) & 
+                (LPR.df[LPR.well] == row[BC.well]), 
+                LPR.value
+            ] = np.nan
 
     ### 3. Filtering Modules----------------------------------------------------------------------
     if args.morpho is not None:

@@ -136,3 +136,28 @@ ENDPOINT_DICT = {
         "TCHR",
     ],
 }
+
+ENDPOINTS_TO_REMOVE = [
+    "BRAI", 
+    "CFIN", 
+    "CIRC", 
+    "DP24", 
+    "EYE_", 
+    "JAW_", 
+    "MORT", 
+    "MUSC", 
+    "NC__", 
+    "PE__", 
+    "SKIN", 
+    "SM24", 
+    "TCHR", 
+    "YSE_", 
+    "OTIC", 
+    "PFIN", 
+    "PIG_", 
+    "SNOU", 
+    "SOMI", 
+    "SWIM", 
+    "TR__", 
+    "TRUN"
+]

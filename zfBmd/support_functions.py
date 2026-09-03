@@ -14,6 +14,7 @@ from params import (
     CALC_ENDPOINTS,
     ENDPOINT_DICT,
     ENDPOINTS,
+    ENDPOINTS_TO_REMOVE
 )
 
 # Define type for data classes
@@ -34,14 +35,35 @@ def combine_datasets(thePaths):
 
     # Read all files
     for thePath in thePaths:
-        theData.append(pd.read_csv(thePath))
+        theData.append(pd.read_table(thePath, delimiter = "\t"))
 
     # Combine dataframes
     theData = pd.concat(theData)
 
+    # Determine ID column (chemical_id or sample_id)
+    if "chemical_id" in theData.columns:
+        id_col = "chemical_id"
+    elif "sample_id" in theData.columns:
+        id_col = "sample_id"
+    else:
+        raise KeyError("Neither 'chemical_id' nor 'sample_id' was found in the dataset.")
+
+    # Remove missing IDs before string conversion so NaN does not become "nan"
+    theData = theData[theData[id_col].notna()]
+
     # Replace spaces
-    theData["chemical.id"] = theData["chemical.id"].astype(str)
-    theData["chemical.id"] = theData["chemical.id"].str.replace(" ", "_")
+    theData[id_col] = theData[id_col].astype(str)
+    theData[id_col] = theData[id_col].str.replace(" ", "_")
+
+    # Remove blank IDs and literal "nan" strings
+    theData = theData[theData[id_col].str.strip().ne("")]
+    theData = theData[theData[id_col].str.lower().ne("nan")]
+
+    # Update ID column to be a string
+    theData[id_col] = theData[id_col].astype(str)
+
+    # And remove any duplication that can be found across files - it happens!
+    theData = theData.drop_duplicates()
 
     return theData
 
@@ -114,12 +136,15 @@ def preprocess_morpho(BC: BinaryClass):
         BC.combine_and_create_new_endpoints(endpoint_dict)
 
         # Remove renamed endpoints
-        # BC.remove_endpoints(["PIG_", "TR__"])
+        BC.remove_endpoints(["PIG_", "TR__"])
 
     else:
         # Define new endpoints to be added
         endpoint_dict = ENDPOINT_DICT
         BC.combine_and_create_new_endpoints(endpoint_dict)
+
+    # Remove all endpoints that are not relevant
+    BC.remove_endpoints(ENDPOINTS_TO_REMOVE)
 
 
 #################################
