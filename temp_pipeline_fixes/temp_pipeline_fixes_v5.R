@@ -96,10 +96,86 @@ chemical_metadata %>%
 ## BENCHMARK DOSE PIPELINE ##
 #############################
 
+EM = read.xlsx("EndpointMetadata_Ver_1_1.xlsx", 1) %>% 
+  select(2:4) %>%
+  setNames(c("End_Point", "End_Point_Type", "End_Point_Name"))
+
+chemical_fix_bmd = function(data) {
+  data %>%
+    left_join(EM) %>%
+    select(Chemical_ID, Model, BMD10, BMD10_Flag, BMD50, BMD50_Flag, Min_Dose,
+           Max_Dose, AUC_Norm, End_Point_Name, End_Point_Type, DataQC_Flag)
+}
+chemical_fix_dose = function(data)  {
+  data %>% 
+    left_join(EM) %>% 
+    select(-End_Point) %>%
+    mutate(Chemical_ID = as.numeric(Chemical_ID))
+}
+
 # Chemicals---------------------------------------------------------------------
+
+# BMDs
+zebrafishChemBMDs = bind_rows(
+  fread("../zfBmd/outputs/continuous/continuous_BenchmarkDose.csv") %>%
+    rename(cas = Chemical_ID) %>%
+    left_join(chemical_metadata %>% select(cas, chemical_id) %>% rename(Chemical_ID = chemical_id)) %>%
+    chemical_fix_bmd(),
+  fread("../zfBmd/outputs/zebrafish/zebrafish_chem_BMDs_BC.csv") %>%
+    chemical_fix_bmd(),
+  fread("../zfBmd/outputs/zebrafish/zebrafish_chem_BMDs_LPR.csv") %>%
+    chemical_fix_bmd()
+)
+fwrite(zebrafishChemBMDs, "~/Downloads/all_srp_data/srpCompendiumV5/zebrafishChemBMDs.txt",
+       quote = F, row.names = F, sep = "\t")
+
+# Dose
+zebrafishChemDoseResponse = bind_rows(
+  fread("../zfBmd/outputs/continuous/continuous_Dose.csv") %>% 
+    rename(cas = Chemical_ID) %>%
+    left_join(chemical_metadata %>% select(cas, chemical_id) %>% rename(Chemical_ID = chemical_id)) %>%
+    chemical_fix_dose(),
+  fread("../zfBmd/outputs/zebrafish/zebrafish_chem_Dose_BC.csv") %>% chemical_fix_dose(),
+  fread("../zfBmd/outputs/zebrafish/zebrafish_chem_Dose_LPR.csv") %>% chemical_fix_dose()
+) %>%
+  select(Chemical_ID, Dose, Response, CI_Lo, CI_Hi, End_Point_Name, End_Point_Type)
+fwrite(zebrafishChemDoseResponse, "~/Downloads/all_srp_data/srpCompendiumV5/zebrafishChemDoseResponse.txt",
+       quote = F, row.names = F, sep = "\t")
+
+# Coords
+zebrafishChemXYCoords = bind_rows(
+  fread("../zfBmd/outputs/continuous/continuous_Fits.csv") %>%
+    rename(cas = Chemical_ID) %>%
+    left_join(chemical_metadata %>% select(cas, chemical_id) %>% rename(Chemical_ID = chemical_id)) %>%
+    chemical_fix_dose(),
+  fread("../zfBmd/outputs/zebrafish/zebrafish_chem_Fits_BC.csv") %>% chemical_fix_dose(),
+  fread("../zfBmd/outputs/zebrafish/zebrafish_chem_Fits_LPR.csv") %>% chemical_fix_dose()
+) %>%
+  select(Chemical_ID, X_vals, Y_vals, End_Point_Name, End_Point_Type) %>%
+  filter(!is.na(X_vals) & !is.na(Y_vals))
+fwrite(zebrafishChemXYCoords, "~/Downloads/all_srp_data/srpCompendiumV5/zebrafishChemXYCoords.txt",
+       quote = F, row.names = F, sep = "\t")
 
 # Samples-----------------------------------------------------------------------
 
+# Convert sample identifiers
+id_converter = fread("~/Downloads/all_srp_data/metadata/SampleMetadata_Ver_1_1.csv") %>%
+  rename(Wrong_ID = Sample_ID) %>%
+  full_join(samples_final %>% select(Sample_ID, SampleNumber), by = "SampleNumber")
+  
+# BMDs
+zebrafishSampBMDs = rbind(
+  fread("../zfBmd/outputs/sample/sample_chem_BMDs_BC.csv"),
+  fread("../zfBmd/outputs/sample/sample_chem_BMDs_LPR.csv")
+) %>%
+  rename(Wrong_ID = Chemical_ID) %>%
+  left_join(id_converter, by = "Wrong_ID") %>%
+  filter(!is.na(Sample_ID)) %>%
+  left_join(EM) %>%
+  select(Sample_ID, Model, BMD10, BMD10_Flag, BMD50, BMD50_Flag, Min_Dose,
+         Max_Dose, AUC_Norm, End_Point_Name, End_Point_Type, DataQC_Flag)
+fwrite(zebrafishSampBMDs, "~/Downloads/all_srp_data/srpCompendiumV5/zebrafishSampBMDs.txt",
+       quote = F, row.names = F, sep = "\t")
 
 
 
