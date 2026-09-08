@@ -21,7 +21,7 @@ samples_final %>%
 ## SAMPLE MEASUREMENTS: SAMPLES TO CHEMICALS ## 
 
 # Read chemical metadata
-chemical_metadata = read.xlsx("ChemicalMetadata_Ver_1_2_DD.xlsx", 1) %>%
+chemical_metadata = read.xlsx("~/Downloads/ChemicalMetadata_Ver_1_2_DD_for_Ava (1).xlsx", 1) %>%
   mutate(cas = gsub("`", "", cas))
 
 # Load the accounted for 
@@ -86,10 +86,13 @@ chemical_metadata %>%
     Chemical_ID = chemical_id, cas_number = cas, DTXCID = dtxcid, 
     PREFERRED_NAME = preferredName, INCHIKEY = inchikey, 
     SMILES = smiles, MOLECULAR_FORMULA = molFormula,
-    AVERAGE_MASS = averageMass, chemical_class = chem_class_WEB
+    AVERAGE_MASS = averageMass, chemical_class = chem_class_WEB,
+    PUBCHEM_CID = cid
   ) %>%
-  select(Chemical_ID, cas_number, DTXCID, PREFERRED_NAME, INCHIKEY,
+  select(Chemical_ID, cas_number, DTXCID, PUBCHEM_CID, PREFERRED_NAME, INCHIKEY,
          SMILES, MOLECULAR_FORMULA, AVERAGE_MASS, chemical_class, chemDescription) %>%
+  mutate(chemical_class = ifelse(is.na(chemical_class), "Unknown", chemical_class)) %>%
+  mutate(across(everything(), ~ replace_na(.x, "NULL"))) %>%
   fwrite("~/Downloads/all_srp_data/srpCompendiumV5/chemicals.txt", quote = F, row.names = F, sep = "\t")
 
 #############################
@@ -177,5 +180,29 @@ zebrafishSampBMDs = rbind(
 fwrite(zebrafishSampBMDs, "~/Downloads/all_srp_data/srpCompendiumV5/zebrafishSampBMDs.txt",
        quote = F, row.names = F, sep = "\t")
 
+# Dose
+zebrafishSampDoseResponse = rbind(
+  fread("../zfBmd/outputs/sample/sample_chem_Dose_BC.csv"),
+  fread("../zfBmd/outputs/sample/sample_chem_Dose_LPR.csv")
+) %>%
+  rename(Wrong_ID = Chemical_ID) %>%
+  left_join(id_converter, by = "Wrong_ID") %>%
+  filter(!is.na(Sample_ID)) %>%
+  left_join(EM) %>%
+  select(Sample_ID, Dose, Response, CI_Lo, CI_Hi, End_Point_Name, End_Point_Type)
+fwrite(zebrafishSampDoseResponse, "~/Downloads/all_srp_data/srpCompendiumV5/zebrafishSampDoseResponse.txt",
+         quote = F, row.names = F, sep = "\t")
 
-
+# Coords
+zebrafishSampXYCoords = rbind(
+  fread("../zfBmd/outputs/sample/sample_chem_Fits_BC.csv"),
+  fread("../zfBmd/outputs/sample/sample_chem_Fits_LPR.csv")
+) %>%
+  rename(Wrong_ID = Chemical_ID) %>%
+  left_join(id_converter, by = "Wrong_ID") %>%
+  filter(!is.na(Sample_ID)) %>%
+  left_join(EM) %>%
+  select(Sample_ID, X_vals, Y_vals, End_Point_Name, End_Point_Type) %>%
+  filter(!is.na(X_vals) & !is.na(Y_vals))
+fwrite(zebrafishSampXYCoords, "~/Downloads/all_srp_data/srpCompendiumV5/zebrafishSampXYCoords.txt",
+       quote = F, row.names = F, sep = "\t")
